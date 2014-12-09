@@ -1,0 +1,73 @@
+attribute vec3 a_VertexPosition;
+attribute vec3 a_VertexNormal;
+
+uniform mat4 u_Matrix_Projection;
+uniform mat4 u_Matrix_Camera;
+uniform mat4 u_Matrix_Model;
+uniform mat3 u_Matrix_Normal;
+
+uniform vec3 u_Diffuse_Color;
+uniform vec3 u_Specular_Color;
+uniform float u_Specular_Intensity;
+//uniform float u_Specular_Hardness;
+//uniform vec3 u_Mirror_Color;
+//uniform float u_Mirror_Distance;
+//uniform float u_Mirror_Reflectivity;
+//uniform float u_Shading_Ambient;
+//uniform float u_Shading_Emit;
+//uniform float u_Shading_Translucency;
+//uniform float u_Darkness;
+
+uniform float u_Light_Ambient_Brightness;
+uniform float u_Light_Directional_Brightness;
+uniform vec3 u_Light_Directional_Direction;
+uniform float u_Light_Point_Brightness;
+uniform vec3 u_Light_Point_Position;
+
+varying vec3 v_LightWeighting;
+
+void main()
+{
+	vec4 modelPosition = u_Matrix_Model * vec4(a_VertexPosition, 1.0);
+	gl_Position = u_Matrix_Projection * u_Matrix_Camera * modelPosition;
+
+	float directional_Weighting = 0.0;
+	float point_Weighting = 0.0;
+
+	vec3 specularColorWeighting = vec3(0.0, 0.0, 0.0);
+	float specularBrightness = 0.0;
+
+	vec3 ambientColor = u_Diffuse_Color * u_Light_Ambient_Brightness;
+	vec3 directionalColor = vec3(0.0, 0.0, 0.0);
+	vec3 pointColor = vec3(0.0, 0.0, 0.0);
+
+	vec3 eyeDirection = normalize(-modelPosition.xyz);
+	vec3 reflectionDirection = vec3(0.0, 0.0, 0.0);
+	vec3 transformedNormal = u_Matrix_Normal * a_VertexNormal;
+
+	if(u_Light_Directional_Brightness > 0.0)
+	{
+        reflectionDirection = reflect(-u_Light_Directional_Direction, transformedNormal);
+		specularBrightness = pow(max(dot(reflectionDirection, eyeDirection), 0.0), u_Specular_Intensity);
+        specularColorWeighting = u_Specular_Color * specularBrightness;
+
+		directional_Weighting = max(dot(transformedNormal, u_Light_Directional_Direction), 0.0) * u_Light_Directional_Brightness;
+
+		directionalColor = (u_Diffuse_Color * directional_Weighting) +
+						   (specularColorWeighting * directional_Weighting);
+	}
+	if(u_Light_Point_Brightness > 0.0)
+	{
+		vec3 light_Point_Direction = normalize(u_Light_Point_Position - modelPosition.xyz);
+		reflectionDirection = reflect(-light_Point_Direction, transformedNormal);
+		specularBrightness = pow(max(dot(reflectionDirection, eyeDirection), 0.0), u_Specular_Intensity);
+        specularColorWeighting = u_Specular_Color * specularBrightness;
+
+		point_Weighting = max(dot(transformedNormal, light_Point_Direction), 0.0) * u_Light_Point_Brightness;
+
+		pointColor = (u_Diffuse_Color * point_Weighting) +
+					 (specularColorWeighting * point_Weighting);
+	}
+
+	v_LightWeighting = ambientColor + directionalColor + pointColor;
+}

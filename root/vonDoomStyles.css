@@ -1,0 +1,13 @@
+﻿body {
+    background-color: lightgray;
+}
+canvas {
+    display: block;
+    margin: 0 auto;
+    margin-top: 50px;
+    border: 1px solid black;
+    background-color: white;
+}
+#textureCanvas {
+   /* display: none;*/
+}

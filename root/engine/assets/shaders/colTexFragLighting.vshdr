@@ -1,0 +1,24 @@
+attribute vec3 a_VertexPosition;
+attribute vec3 a_VertexNormal;
+attribute vec3 a_VertexColor;
+attribute vec2 a_TextureCoord;
+
+uniform mat4 u_Matrix_Projection;
+uniform mat4 u_Matrix_Camera;
+uniform mat4 u_Matrix_Model;
+uniform mat3 u_Matrix_Normal;
+
+varying vec4 v_Position;
+varying vec3 v_TransformedNormal;
+varying vec3 v_Color;
+varying vec2 v_TextureCoord;
+
+void main()
+{
+	gl_PointSize = 4.0;
+	v_Position = u_Matrix_Model * vec4(a_VertexPosition, 1.0);
+	gl_Position = u_Matrix_Projection * u_Matrix_Camera * v_Position;
+	v_TransformedNormal = u_Matrix_Normal * a_VertexNormal;
+	v_Color = a_VertexColor;
+	v_TextureCoord = a_TextureCoord;
+}

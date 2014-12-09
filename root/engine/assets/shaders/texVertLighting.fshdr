@@ -1,0 +1,17 @@
+precision mediump float;
+
+varying vec2 v_TextureCoord;
+varying vec3 v_LightWeighting;
+
+uniform vec3 u_ColourTint;
+uniform sampler2D u_Sampler;
+uniform float u_Alpha;
+
+void main()
+{
+	vec4 textureColor = texture2D(u_Sampler, vec2(v_TextureCoord.s, v_TextureCoord.t));
+
+	if (textureColor.a == 0.0)
+		textureColor.rgb = vec3(1.0, 1.0, 1.0);
+	gl_FragColor = vec4((textureColor.rgb * v_LightWeighting) + u_ColourTint, u_Alpha);
+}

@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Tornadoom</title>
+    <link rel="stylesheet" type="text/css" href="vonDoomStyles.css" />
+    <!---------- Engine scripts  ---------->
+    <script type="text/javascript" src="engine/scripts/math/mathUtils.js"></script>
+    <script type="text/javascript" src="engine/scripts/math/vectors.js"></script>
+    <script type="text/javascript" src="engine/scripts/math/quaternion.js"></script>
+    <script type="text/javascript" src="engine/scripts/math/matrices.js"></script>
+    <script type="text/javascript" src="engine/scripts/math/geometry.js"></script>
+    <script type="text/javascript" src="engine/scripts/structsEnumsConsts.js"></script>
+    <script type="text/javascript" src="engine/scripts/transform.js"></script>
+    <script type="text/javascript" src="engine/scripts/utility.js"></script>
+    <script type="text/javascript" src="engine/scripts/primitiveShapes.js"></script>
+    <script type="text/javascript" src="engine/scripts/engineAssetLoader.js"></script>
+    <script type="text/javascript" src="engine/scripts/camera.js"></script>
+    <script type="text/javascript" src="engine/scripts/gameObject.js"></script>
+    <script type="text/javascript" src="engine/scripts/inGameGUI.js"></script>
+    <script type="text/javascript" src="engine/scripts/gameManager.js"></script>
+    <script type="text/javascript" src="engine/scripts/glControl.js"></script>
+    <script type="text/javascript" src="engine/scripts/tdControl.js"></script>
+    <script type="text/javascript" src="engine/scripts/modelControl.js"></script>
+    <script type="text/javascript" src="engine/scripts/physicsControl.js"></script>
+    <script type="text/javascript" src="engine/scripts/collisionControl.js"></script>
+    <script type="text/javascript" src="engine/scripts/input.js"></script>
+    <!---------- Game scripts  ---------->
+    <script type="text/javascript" src="game/scripts/screens.js"></script>
+</head>
+<body onload="PreStartup()">
+    <canvas id="canvasWebGL" width="1500" height="800"></canvas>
+    <canvas id="canvas2D" width="1500" height="800"></canvas>
+    <script id="main">
+        function PreStartup() {
+            // Ensure external assets fully load before startup
+            EngineAssets.LoadExternal(InitializeEngine);
+        }
+        
+        function InitializeEngine() {
+            // Initialize the Game Manager, passing the canvas to do much of the startup
+            GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
+
+            // use webGL context to create shader programs, loaded into EngineAssets.shaderPrograms
+            GL.CreateShaderPrograms(EngineAssets.shaderStrings, EngineAssets.shaderPrograms);
+
+            InitializeGame();
+        }
+        function InitializeGame() {
+            var activeScreen;
+            function SetScreen(newScreen) {
+                activeScreen = newScreen;
+            }
+            /* Pass in SetScreen as a callback so the screen can be changed
+            as much as needed in the screens script. */
+            activeScreen = new Screen_Title(SetScreen)
+
+            var time_LastFrame;
+            function LoopGame() {
+                requestAnimationFrame(LoopGame);
+                var time_ThisFrame = new Date().getTime();
+                var time_Delta = time_ThisFrame - (time_LastFrame || time_ThisFrame);
+                time_LastFrame = time_ThisFrame;
+                Time.delta_Milli = time_Delta / 1000;
+                Time.fps = 1000 / time_Delta;
+                activeScreen.Update(Time.delta_Milli);
+                // Updating Game World and Draw Calls
+                GM.Update();
+                GL.RenderScene();
+            }
+            LoopGame();
+        }
+    </script>
+</body>
+</html>

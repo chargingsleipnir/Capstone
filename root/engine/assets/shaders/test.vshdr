@@ -1,0 +1,14 @@
+attribute vec3 a_VertexPosition;
+attribute vec3 a_VertexColor;
+
+varying vec3 v_Color;
+
+uniform mat4 u_Matrix_Projection;
+uniform mat4 u_Matrix_Camera;
+uniform mat4 u_Matrix_Model;
+
+void main()
+{
+	gl_Position = u_Matrix_Projection * u_Matrix_Camera * u_Matrix_Model * vec4(a_VertexPosition, 1.0);
+	v_Color = a_VertexColor;
+}
