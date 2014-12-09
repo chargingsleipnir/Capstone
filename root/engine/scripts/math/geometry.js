@@ -356,9 +356,12 @@ function AABB(pos, radii, scale) {
     ///  <summary>Defined by position and radii, which constructs at 0.5 each</summary>
     ///  <returns type="AABB" />
     /// </signature>
-    this.pos = pos.GetCopy() || new Vector3();
-    this.radii = radii.GetCopy() || new Vector3(0.5, 0.5, 0.5);
-    this.scale = scale.GetCopy() || new Vector3(1.0, 1.0, 1.0);
+    this.pos = new Vector3();
+    this.radii = new Vector3(0.5, 0.5, 0.5);
+    this.scale = new Vector3(1.0, 1.0, 1.0);
+    this.pos.SetCopy(pos || this.pos);
+    this.radii.SetCopy(radii || this.radii);
+    this.scale.SetCopy(scale || this.scale);
 }
 AABB.prototype = {
     SetCopy: function(box) {

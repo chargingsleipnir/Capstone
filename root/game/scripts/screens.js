@@ -216,8 +216,8 @@ function Screen_Title(ScreenChangeCallback) {
     heart.trfmLocal.SetPosVec3(new Vector3(0.5, 0.5, -1.0));
     heart.trfmLocal.SetScaleAxes(3.0, 0.25, 1.0);
     arrow.trfmLocal.Rotate(new Vector3(1.0, 0.0, 0.0), 45.0);
-    //skyBox.trfmLocal.SetPosAxes(0.0, 2.0, 0.0);
-    skyBox.trfmLocal.SetScaleAxes(50.0, 50.0, 50.0);
+    grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
+    skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
     testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.0, -1.0));
 
     arrow.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
@@ -230,19 +230,6 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(grid);
     GM.rootObj.AddChild(skyBox);
     GM.rootObj.AddChild(testCube);
-
-    // Balls for physics implementation
-    var balls = [];
-    for(var i = 0; i < 4; i++) {
-        balls[i] = new GameObject('physics test ball', Labels.testObject);
-        balls[i].SetModel(new Primitives.IcoSphere(2));
-        balls[i].AddComponent(Components.modelHandler);
-        balls[i].mdlHdlr.MakeWireFrame();
-        balls[i].mdlHdlr.colourTint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
-        balls[i].trfmLocal.SetPosAxes(-4.5 + (3*i), 0.0, -6.0);
-        GM.rootObj.AddChild(balls[i]);
-        //ball[i].mdlHdlr.
-    }
 
     // Other
     var arrowAxis = new Vector3(1.0, 0.0, 0.0);
@@ -265,14 +252,87 @@ function Screen_Title(ScreenChangeCallback) {
     camCtrl.pitchUp = Input.CreateInputController(camRegName, KeyMap.ArrowUp);
 
 
+    /******************************** PHYSICS IMPLEMENTATION *************************************************/
+    var balls = [];
+    var startPositions = [
+        new Vector3(-5.0, 1.0, -4.0),
+        new Vector3(-5.75, 1.0, -12.0),
+        new Vector3(1.5, 1.0, -14.0),
+        new Vector3(-11.0, 1.0, -19.0)
+    ];
+    for(var i = 0; i < 4; i++) {
+        balls[i] = new GameObject('physics test ball', Labels.testObject);
+        balls[i].SetModel(new Primitives.IcoSphere(2));
+        balls[i].AddComponent(Components.modelHandler);
+        balls[i].mdlHdlr.MakeWireFrame();
+        balls[i].mdlHdlr.colourTint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
+        balls[i].trfmLocal.SetPosVec3(startPositions[i]);
+
+        balls[i].AddComponent(Components.collisionBody);
+
+        balls[i].AddComponent(Components.physicsBody);
+        balls[i].rigidBody.mass = 0.5;
+        balls[i].rigidBody.SetInertiaTensor(balls[i].collider.sphere.radius);
+        GM.rootObj.AddChild(balls[i]);
+    }
+    var COEF_OF_REST = 1.0;
+    var DRAG = 0.1;
+    var WIND = new Vector3(0.25, 0.0, 0.0);
+    var physicsTestName = "PhysicsTest";
+    Input.RegisterObject(physicsTestName, true);
+    var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
+
     this.Update = function() {
+
+        if(launch.pressed){
+            balls[0].rigidBody.velInitial.z = balls[0].rigidBody.velFinal.z = -7.5;
+            launch.Release();
+            //console.log(balls[0].rigidBody.velInitial);
+        }
+        //console.log(balls[0].trfmLocal.pos);
+
+        // Physics updating, needs to be in physics class
+        for(var i = 0; i < 4; i++) {
+            balls[i].rigidBody.axisOfRotation = GBL_UP.GetCross(balls[i].rigidBody.velFinal);
+            balls[i].rigidBody.axisOfRotation.SetNormalized();
+            var mag = balls[i].rigidBody.velFinal.GetMag() / balls[i].collider.sphere.radius;
+            balls[i].rigidBody.velAngular = balls[i].rigidBody.axisOfRotation.SetScaleByNum(mag);
+
+            // Update rotation
+
+            balls[i].rigidBody.acc.SetCopy(balls[i].rigidBody.velFinal.GetScaleByNum(-DRAG)).SetDivide(balls[i].rigidBody.mass);
+            balls[i].rigidBody.acc.SetAdd(WIND);
+            balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAddScaled(balls[i].rigidBody.acc, Time.delta_Milli));
+        }
+        // Collision detection and response
+        for(var i = 0; i < 4; i++) {
+            for(var j = i+1; j < 4; j++) {
+                var collisionDist = CollisionDetect.SphereVSphere(balls[i], balls[j]);
+                if(collisionDist) {
+                    var contactPt = balls[i].trfmGlobal.pos.GetAddScaled(collisionDist, 0.5);
+                    balls[i].rigidBody.radiusToPt.SetCopy(contactPt.GetSubtract(balls[i].trfmGlobal.pos));
+                    balls[j].rigidBody.radiusToPt.SetCopy(contactPt.GetSubtract(balls[j].trfmGlobal.pos));
+
+                    collisionDist.SetNormalized();
+                    var relative = collisionDist.GetDot(balls[i].rigidBody.velInitial.GetSubtract(balls[j].rigidBody.velInitial));
+                    // Calculate impulse
+                    var numerator = -relative * (COEF_OF_REST + 1.0);
+                    var denomObj0 = collisionDist.GetDot((balls[i].rigidBody.inertiaTensorInv.MultiplyVec3(balls[i].rigidBody.radiusToPt.GetCross(collisionDist))).GetCross(balls[i].rigidBody.radiusToPt));
+                    var denomObj1 = collisionDist.GetDot((balls[j].rigidBody.inertiaTensorInv.MultiplyVec3(balls[j].rigidBody.radiusToPt.GetCross(collisionDist))).GetCross(balls[j].rigidBody.radiusToPt));
+                    var denominator = (1.0 / balls[i].rigidBody.mass) + (1.0 / balls[j].rigidBody.mass) + denomObj0 + denomObj1;
+                    var impulse = numerator / denominator;
+                    // Apply impulse as collision response
+                    balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(impulse).SetDivide(balls[i].rigidBody.mass)));
+                    balls[j].rigidBody.velFinal.SetCopy(balls[j].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(-impulse).SetDivide(balls[j].rigidBody.mass)));
+                }
+            }
+        }
+
+
+
+
         angle += 0.005;
 
-        //arrow.trfmLocal.TranslateVec3(new Vector3(0.001, 0.0, 0.0));
-        //heart.trfmLocal.TranslateAxes(0.0, -0.001, 0.0);
-        //arrow.trfmLocal.ScaleVec3(new Vector3(0.001, -0.001, 0.0));
-        //arrow.trfmLocal.Rotate(arrowAxis, angle);
-        //heart.trfmLocal.Rotate(heartAxis, angle);
         skyBox.trfmLocal.Rotate(GBL_FWD, angle);
 
         if(camCtrl.moveLeft.pressed) {

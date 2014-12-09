@@ -513,10 +513,9 @@ Vector3.prototype = {
         /// </signature>
         var mag = this.GetMag();
         
-        if (mag < INFINITESIMAL) {
-            alert("Vec3 Normalize divide by zero");
+        if (mag < INFINITESIMAL)
             return;
-        }
+
         mag = 1.0 / mag;
         this.x *= mag;
         this.y *= mag;

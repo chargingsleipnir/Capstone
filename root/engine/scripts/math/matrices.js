@@ -150,9 +150,9 @@ Matrix3.prototype = {
         this.data[2] = this.data[6];
         this.data[5] = this.data[7];
 
-        this.data[3] = temp2[0];
-        this.data[6] = temp3[1];
-        this.data[7] = temp6[2];
+        this.data[3] = temp[0];
+        this.data[6] = temp[1];
+        this.data[7] = temp[2];
 
         return this;
     },
@@ -310,6 +310,14 @@ Matrix3.prototype = {
                     this.data[(i * 3) + j] *= scale;
         }
         return this;
+    },
+    SetInertiaTensorSphere: function(mass, radius) {
+        var tensorVal = (2.0/5.0) * mass * (radius*radius);
+        return new Matrix3(
+            tensorVal, 0.0, 0.0,
+            0.0, tensorVal, 0.0,
+            0.0, 0.0, tensorVal
+        );
     }
 }
 

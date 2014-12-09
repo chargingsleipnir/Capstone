@@ -45,7 +45,7 @@ ModelHandler.prototype = {
         this.bufferData.numVerts = newIndices.length;
     },
     MakePointSet: function() {
-        //this.drawMethod = GL.GetDrawMethod(DrawMethods.points);
+        this.drawMethod = GL.GetDrawMethod(DrawMethods.points);
     },
     UpdateModelViewControl: function(trfm) {
         //this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, Space.local);

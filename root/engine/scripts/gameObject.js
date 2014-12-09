@@ -48,11 +48,11 @@ GameObject.prototype = {
             this.mdlHdlr = new ModelHandler(this.model);
         }
         else if (component == Components.physicsBody) {
-            this.rigidBody = new PhysicsBody(this.transform);
+            this.rigidBody = new PhysicsBody(this.trfmLocal);
             this.components.push(this.rigidBody);
         }
         else if (component == Components.collisionBody) {
-            this.collider = new CollisionBody(this.model, this.transform);
+            this.collider = new CollisionBody(this.model, this.trfmLocal);
             this.components.push(this.collider);
         }
         else if (component == Components.inputHandler) {

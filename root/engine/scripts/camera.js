@@ -87,7 +87,7 @@ function Camera(pos, dirFwd, dirUp, wndWidth, wndHeight) {
     this.mtxCam.SetOrientation(pos, dirFwd, dirUp, Space.global);
     // Make proj matrix with frustum
     this.mtxProj = new Matrix4();
-    this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 100.0, pos, dirFwd, dirUp);
+    this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
 
     this.gui = null;
 }
