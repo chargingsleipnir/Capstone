@@ -139,6 +139,11 @@ var GL = {
 
         return bufferData;
     },
+    RewriteIndexBuffer: function(EABO, indices) {
+        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, EABO);
+        //this.ctx.bufferSubData(this.ctx.ELEMENT_ARRAY_BUFFER, 0, new Uint16Array(indices));
+        this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.ctx.STATIC_DRAW);
+    },
     CreateTextureObject: function(texture) {
         var texID = this.ctx.createTexture();
         this.ctx.bindTexture(this.ctx.TEXTURE_2D, texID);
@@ -223,11 +228,13 @@ var GL = {
                         // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
                     }
                     else {
+                        /*
                         this.ctx.disableVertexAttribArray(shdr.a_TexCoord);
                         var whiteTexture = this.ctx.createTexture();
                         this.ctx.bindTexture(this.TEXTURE_2D, whiteTexture);
                         var whitePixel = new Uint8Array([255, 255, 255, 255]);
                         this.ctx.texImage2D(this.ctx.TEXTURE_2D, 0, this.ctx.RGBA, 1, 1, 0, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, whitePixel);
+                        */
                     }
                 }
                 if (shdr.a_Norm != -1) {
@@ -253,7 +260,7 @@ var GL = {
                 // Unbind buffers after use
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
         //console.log(frustumTestCount);

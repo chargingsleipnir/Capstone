@@ -23,7 +23,7 @@ function Screen_Test(ScreenChangeCallback)
 
     // GAME WORLD ---------------------------------------------------------------------------------
     var skyBox = new GameObject('night sky', Labels.testObject);
-    skyBox.AddComponent(new MeshRenderer(game.gl, new Primitives.icoSphere(2), [Assets.textureImages['starfield']]));
+    skyBox.AddComponent(new MeshRenderer(game.gl, new Primitives.IcoSphere(2), [Assets.textureImages['starfield']]));
     skyBox.AddComponent(new Behaviour_SkyBox(skyBox));
     camera_Main.Shoot(skyBox);
 
@@ -113,7 +113,7 @@ function Screen_Test(ScreenChangeCallback)
     var collisionBallsBoxed = [];
     for (var i = 0; i < 10; i++) {
         collisionBallsBoxed[i] = new GameObject('collisionBallBoxed ' + i, Labels.testObject);
-        collisionBallsBoxed[i].AddComponent(new MeshRenderer(game.gl, new Primitives.icoSphere(2), [Assets.textureImages['lava']]));
+        collisionBallsBoxed[i].AddComponent(new MeshRenderer(game.gl, new Primitives.IcoSphere(2), [Assets.textureImages['lava']]));
         collisionBallsBoxed[i].AddComponent(new ParticlePhysics(collisionBallsBoxed[i]));
         collisionBallsBoxed[i].AddComponent(new CollisionBody(collisionBallsBoxed[i], CollisionBodies.aabb));
         collisionBallsBoxed[i].components[Components.collisionBody].CreateWireFrame(game.gl);
@@ -142,7 +142,7 @@ function Screen_Test(ScreenChangeCallback)
     var collisionBallsSphered = [];
     for (var i = 0; i < 10; i++) {
         collisionBallsSphered[i] = new GameObject('collisionBallSphered ' + i, Labels.testObject);
-        collisionBallsSphered[i].AddComponent(new MeshRenderer(game.gl, new Primitives.icoSphere(2), [Assets.textureImages['ice']]));
+        collisionBallsSphered[i].AddComponent(new MeshRenderer(game.gl, new Primitives.IcoSphere(2), [Assets.textureImages['ice']]));
         collisionBallsSphered[i].AddComponent(new ParticlePhysics(collisionBallsSphered[i]));
         collisionBallsSphered[i].AddComponent(new CollisionBody(collisionBallsSphered[i], CollisionBodies.sphere));
         collisionBallsSphered[i].components[Components.collisionBody].CreateWireFrame(game.gl);
@@ -197,7 +197,7 @@ function Screen_Title(ScreenChangeCallback) {
     heart.SetModel(Primitives.heart);
     zeroPointAxes.SetModel(Primitives.axesZeroPoints);
     grid.SetModel(Primitives.grid);
-    skyBox.SetModel(new Primitives.icoSphere(2));
+    skyBox.SetModel(new Primitives.IcoSphere(2));
     testCube.SetModel(EngineAssets.modelObjects['dimensionBox']);
 
     // Add rendering components
@@ -231,10 +231,23 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(skyBox);
     GM.rootObj.AddChild(testCube);
 
+    // Balls for physics implementation
+    var balls = [];
+    for(var i = 0; i < 4; i++) {
+        balls[i] = new GameObject('physics test ball', Labels.testObject);
+        balls[i].SetModel(new Primitives.IcoSphere(2));
+        balls[i].AddComponent(Components.modelHandler);
+        balls[i].mdlHdlr.MakeWireFrame();
+        balls[i].mdlHdlr.colourTint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
+        balls[i].trfmLocal.SetPosAxes(-4.5 + (3*i), 0.0, -6.0);
+        GM.rootObj.AddChild(balls[i]);
+        //ball[i].mdlHdlr.
+    }
+
     // Other
     var arrowAxis = new Vector3(1.0, 0.0, 0.0);
     var heartAxis = new Vector3(0.0, 1.0, 0.0);
-    var angle = 0.0
+    var angle = 0.0;
 
     // Control camera
     var camRegName = "main camera";
@@ -250,6 +263,7 @@ function Screen_Title(ScreenChangeCallback) {
     camCtrl.yawRight = Input.CreateInputController(camRegName, KeyMap.ArrowRight);
     camCtrl.pitchDown = Input.CreateInputController(camRegName, KeyMap.ArrowDown);
     camCtrl.pitchUp = Input.CreateInputController(camRegName, KeyMap.ArrowUp);
+
 
     this.Update = function() {
         angle += 0.005;

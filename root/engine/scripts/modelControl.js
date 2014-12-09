@@ -10,9 +10,6 @@ function ModelHandler(model) {
     else
         this.drawMethod = GL.GetDrawMethod(DrawMethods.triangles);
 
-    //this.materials = model.materials;
-    //console.log(model.materials);
-
     this.active = true;
     this.mtxModel = new Matrix4();
     this.colourTint = new Vector3();
@@ -20,12 +17,35 @@ function ModelHandler(model) {
     // This is specifically set this way for frustum culling. No need to be more dynamic
     this.drawSphere = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new Sphere());
 
+    // Hold just indices for now, so as to rewrite if necessary, to create wire frames
+    this.indices = model.vertices.byFaces.indices;
+
     // Add controller to draw call;
     GM.models.push(this);
 }
 ModelHandler.prototype = {
     SetTexture: function(texture) {
         this.bufferData.texID = GL.CreateTextureObject(texture);
+    },
+    MakeWireFrame: function() {
+        // Change draw type
+        this.drawMethod = GL.GetDrawMethod(DrawMethods.lines);
+        // provide new list of indices that are essentially just duplicated
+        var newIndices = [];
+        for(var i = 0; i < this.indices.length; i+=3) {
+            newIndices.push(this.indices[i]);
+            newIndices.push(this.indices[i+1]);
+            newIndices.push(this.indices[i+1]);
+            newIndices.push(this.indices[i+2]);
+            newIndices.push(this.indices[i+2]);
+            newIndices.push(this.indices[i]);
+        }
+        // Change buffer to reflect new set
+        GL.RewriteIndexBuffer(this.bufferData.EABO, newIndices);
+        this.bufferData.numVerts = newIndices.length;
+    },
+    MakePointSet: function() {
+        //this.drawMethod = GL.GetDrawMethod(DrawMethods.points);
     },
     UpdateModelViewControl: function(trfm) {
         //this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, Space.local);

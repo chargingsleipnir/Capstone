@@ -12,7 +12,7 @@ Primitives.axesPositive = {
                 0.0, 0.0, 0.0,
                 100.0, 0.0, 0.0,
                 0.0, 100.0, 0.0,
-                0.0, 0.0, 100.0,
+                0.0, 0.0, 100.0
             ],
             colElems: [],
             texCoords: [],
@@ -26,7 +26,7 @@ Primitives.axesPositive = {
                 0.0, 0.0, 0.0,
                 0.0, 100.0, 0.0,
                 0.0, 0.0, 0.0,
-                0.0, 0.0, 100.0,
+                0.0, 0.0, 100.0
             ],
             colElems: [
                 1.0, 0.0, 0.0,
@@ -520,20 +520,20 @@ Primitives.bolt = {
     drawMethod: DrawMethods.triangleStrip
 };
 
-Primitives.icoSphere = function(recursionLevel)
+Primitives.IcoSphere = function(recursionLevel)
 {
     var posCoords = [
-        // z rect, y tall
+        // zy plane, 1:2 size
         -0.25, 0.5, 0.0,
         -0.25, -0.5, 0.0,
         0.25, -0.5, 0.0,
         0.25, 0.5, 0.0,
-        // x rect, z long
+        // yz plane,  1:2 size
         0.0, 0.25, 0.5,
         0.0, 0.25, -0.5,
         0.0, -0.25, -0.5,
         0.0, -0.25, 0.5,
-        // y rect, x wide
+        // xz plane, 2:1 size
         0.5, 0.0, -0.25,
         -0.5, 0.0, -0.25,
         -0.5, 0.0, 0.25,
@@ -595,13 +595,16 @@ Primitives.icoSphere = function(recursionLevel)
         this.push([vec3Data[0] * magInv, vec3Data[1] * magInv, vec3Data[2] * magInv]);
         indexRecord[index] = [index, index];
         return index++;
-    }
+    };
     for (var x = 0; x < posCoords.length; x += 3)
         vertPositions.add([posCoords[x], posCoords[x + 1], posCoords[x + 2]]);
+
+
 
     var faces = [];
     for (var i = 0; i < indices.length; i += 3)
         faces.push([indices[i], indices[i + 1], indices[i + 2]]);
+
 
     for (var i = 0; i < recursionLevel; i++) {
         var faces2 = [];
@@ -666,19 +669,19 @@ Primitives.icoSphere = function(recursionLevel)
             byMesh: {
                 count: posCoords.length / 3,
                 posCoords: posCoords,
-                colElems: [],
-                texCoords: [],
+                colElems: colors,
+                texCoords: texCoords,
                 normAxes: posCoords
             },
             byFaces: {
                 count: indices.length,
                 posCoords: [],
                 colElems: [],
-                texCoords: texCoords,
+                texCoords: [],
                 normAxes: [],
                 indices: indices
             }
-        },
+        }
     };
 };
 
