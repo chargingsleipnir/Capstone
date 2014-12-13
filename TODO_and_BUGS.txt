@@ -1,12 +1,12 @@
 TODO
 
-1. Materials - Use other exported properties
+1. Materials - Use other exported properties (mirror, darkness, etc...)
 2. Animations - Investigate how much of a nightmare they may be to export and implement.
 3. Mouse input
 4. Performance info/control - Build temporary html display fields outside of canvas to display pertinant performance info and provide
    toggle controls for per-fragment lighting, shadow casting, etc.
 5. Provide simple control for offsetting an object's centre of mass/rotation.
-	Set up scene graph - better management of matrices... pertinent to my setup? I think I more-or-;ess have this now?
+	Set up scene graph - better management of matrices... pertinent to my setup? I think I more-or-less have this now?
 6. Shadow casting
 7. Get some tasks on alternate threads - Look up Web Workers (one page bookmarked in JS reference folder)
 8. Get this thing online, and test all browsers
@@ -15,11 +15,11 @@ TODO
 	x = tcos(t)
 	y = t
 	z = tsin(t)
+11. Add rays to each object, pointing in their local positive axes
 
 BUGS
 
 1. Multiple light sources of the same type - Build this in. This might be finite, as individual lights may require hard-coding.
 2. Objects with many textures - Test how to ensure the right textures end up in the right place.
-3. Fix rotation matrices and camera. (Learn quaternions)
 4. Continue Fireworks sample
 5. Unless a very good reason for not doing this approaches, make the Particle Force Generators/Registration a part of the ParticlePhysics prototype for each particle

@@ -2,6 +2,10 @@
 var GM = {
     wndWidth: 0,
     wndHeight: 0,
+    assets: {
+        textures: {},
+        models: {}
+    },
     activeCam: null,
     rootObj: new GameObject("Root", Labels.none),
     models: [],
@@ -24,6 +28,13 @@ var GM = {
         this.activeCam.gui = new GUI(canvas2D);
 
         GL.ReshapeWindow(this.wndWidth, this.wndHeight);
+    },
+    LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, Callback) {
+        var that = this;
+        function LoadModels() {
+            Utility.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
+        }
+        Utility.LoadTextures(textureNamesFilepaths, this.assets.textures, LoadModels);
     },
     Update: function() {
         this.rootObj.Update(this.rootObj.trfmLocal);

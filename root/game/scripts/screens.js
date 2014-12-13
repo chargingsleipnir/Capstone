@@ -198,7 +198,7 @@ function Screen_Title(ScreenChangeCallback) {
     zeroPointAxes.SetModel(Primitives.axesZeroPoints);
     grid.SetModel(Primitives.grid);
     skyBox.SetModel(new Primitives.IcoSphere(2));
-    testCube.SetModel(EngineAssets.modelObjects['dimensionBox']);
+    testCube.SetModel(EM.assets.models['dimensionBox']);
 
     // Add rendering components
     arrow.AddComponent(Components.modelHandler);
@@ -206,9 +206,9 @@ function Screen_Title(ScreenChangeCallback) {
     zeroPointAxes.AddComponent(Components.modelHandler);
     grid.AddComponent(Components.modelHandler);
     skyBox.AddComponent(Components.modelHandler);
-    skyBox.mdlHdlr.SetTexture(EngineAssets.imageTextures['starfield']);
+    skyBox.mdlHdlr.SetTexture(EM.assets.textures['starfield']);
     testCube.AddComponent(Components.modelHandler);
-    testCube.mdlHdlr.SetTexture(EngineAssets.imageTextures['logo']);
+    testCube.mdlHdlr.SetTexture(EM.assets.textures['logo']);
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
@@ -301,7 +301,7 @@ function Screen_Title(ScreenChangeCallback) {
             // Update rotation
 
             balls[i].rigidBody.acc.SetCopy(balls[i].rigidBody.velFinal.GetScaleByNum(-DRAG)).SetDivide(balls[i].rigidBody.mass);
-            balls[i].rigidBody.acc.SetAdd(WIND);
+            //balls[i].rigidBody.acc.SetAdd(WIND);
             balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAddScaled(balls[i].rigidBody.acc, Time.delta_Milli));
         }
         // Collision detection and response
@@ -326,6 +326,8 @@ function Screen_Title(ScreenChangeCallback) {
                     balls[j].rigidBody.velFinal.SetCopy(balls[j].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(-impulse).SetDivide(balls[j].rigidBody.mass)));
                 }
             }
+            if(balls[i].rigidBody.velFinal.GetMagSqr() < INFINITESIMAL)
+                balls[i].rigidBody.velFinal.SetZero();
         }
 
 

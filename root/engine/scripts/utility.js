@@ -169,11 +169,11 @@ var Utility = {
         var matches = [];
         // Find best match - eliminate those shaders that DO have attributes we DON'T want
         console.log("Shaders appropriate for model \"" + model.name + "\":");
-        for (var shdr in EngineAssets.shaderPrograms) {
-            if (!colour && EngineAssets.shaderPrograms[shdr].a_Col != -1) continue;
-            if (!texture && EngineAssets.shaderPrograms[shdr].a_TexCoord != -1) continue;
-            if (!light && EngineAssets.shaderPrograms[shdr].a_Norm != -1) continue;
-            matches.push(EngineAssets.shaderPrograms[shdr]);
+        for (var shdr in EM.assets.shaderPrograms) {
+            if (!colour && EM.assets.shaderPrograms[shdr].a_Col != -1) continue;
+            if (!texture && EM.assets.shaderPrograms[shdr].a_TexCoord != -1) continue;
+            if (!light && EM.assets.shaderPrograms[shdr].a_Norm != -1) continue;
+            matches.push(EM.assets.shaderPrograms[shdr]);
             console.log(shdr);
         }
         // Return the last match, for now.

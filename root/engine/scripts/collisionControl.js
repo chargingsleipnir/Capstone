@@ -6,14 +6,25 @@ function CollisionBody(model, trfm) {
     ///  <param name="trfm" type="Transform">Transform of GameObject</param>
     ///  <returns type="CollisionBody" />
     /// </signature>
-    this.aabb = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new AABB());
-    this.sphere = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new Sphere());
-    this.active = true;
 
-    this.Update = function() {
-        this.aabb.pos = this.sphere.pos = trfm.pos;
-    }
+    this.trfm = trfm;
+    // Sphere set as standard
+    this.sphere = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new Sphere());
+    this.aabb = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new AABB());
+    this.activeBody = this.sphere;
+    this.active = true;
 }
+CollisionBody.prototype = {
+    SetBoundingShape: function(shape) {
+        if (shape == BoundingShapes.aabb)
+            this.activeBody = this.aabb;
+        else
+            this.activeBody = this.sphere;
+    },
+    Update: function() {
+        this.activeBody = this.trfm.pos;
+    }
+};
 
 var CollisionDetect = {
     SphereVSphere: function(s1, s2) {
@@ -26,3 +37,29 @@ var CollisionDetect = {
         return false;
     }
 };
+
+var CollisionNetwork = (function() {
+
+    function Partitioning() {
+
+    }
+    function BroadPhase() {
+
+    }
+    function MidPhase() {
+
+    }
+    function NarrowPhase() {
+
+    }
+
+    return {
+        AddBody: function() {
+
+        },
+        RemoveBody: function() {
+
+        }
+    }
+}
+)();

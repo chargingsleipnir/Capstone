@@ -1,9 +1,27 @@
-﻿var EngineAssets = {
-    shaderStrings: [],
-    shaderPrograms: {},
-    imageTextures: {},
-    modelObjects: {},
-    LoadExternal : function(Callback)
+
+var EM = {
+    assets: {
+        shaderStrings: [],
+        shaderPrograms: {},
+        textures: {},
+        models: {}
+    },
+    PreLoad: function (Callback) {
+
+        var that = this;
+        function Initialize() {
+            // Initialize the Game Manager, passing the canvas to do much of the startup
+            GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
+            // use webGL context to create shader programs, loaded into EngineAssets.shaderPrograms
+            GL.CreateShaderPrograms(that.assets.shaderStrings, that.assets.shaderPrograms);
+            // Run main function passed by game creator
+            Callback();
+        }
+
+        // Ensure external assets fully load before startup
+        this.LoadExternal(Initialize);
+    },
+    LoadExternal: function(Callback)
     {
         // SHADERS
         var shaderNamesFilepaths = [
@@ -31,19 +49,16 @@
         // JSON ASSETS
         // This MUST be run in localhost for now to avoid cross-origin issues
         var modelNamesFilepaths = [
-            ['donut', 'engine/assets/models/BasicObjectsModel_Donut.json'],
-            ['marble', 'engine/assets/models/BasicObjectsModel_Marble.json'],
-            ['spike', 'engine/assets/models/BasicObjectsModel_Spike.json'],
             ['dimensionBox', 'engine/assets/models/DimensionTest_PositiveCube.json']
         ];
 
         var that = this;
         function LoadModels() {
-            Utility.LoadModels(modelNamesFilepaths, that.modelObjects, Callback);
-        };
+            Utility.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
+        }
         function LoadTextures() {
-            Utility.LoadTextures(textureNamesFilepaths, that.imageTextures, LoadModels);
-        };
-        Utility.LoadShaders(shaderNamesFilepaths, this.shaderStrings, LoadTextures);
+            Utility.LoadTextures(textureNamesFilepaths, that.assets.textures, LoadModels);
+        }
+        Utility.LoadShaders(shaderNamesFilepaths, this.assets.shaderStrings, LoadTextures);
     }
 };
