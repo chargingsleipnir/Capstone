@@ -436,7 +436,7 @@ Primitives.cube = {
             ]
         }
     },    
-    drawMethod: DrawMethods.lines
+    drawMethod: DrawMethods.triangles
 };
 
 Primitives.heart = {
@@ -520,7 +520,7 @@ Primitives.bolt = {
     drawMethod: DrawMethods.triangleStrip
 };
 
-Primitives.IcoSphere = function(recursionLevel)
+Primitives.IcoSphere = function(recursionLevel, radius)
 {
     var posCoords = [
         // zy plane, 1:2 size
@@ -590,9 +590,12 @@ Primitives.IcoSphere = function(recursionLevel)
 
     var index = 0;
     var vertPositions = [];
+    if(!radius)
+        radius = 1.0;
     vertPositions.add = function(vec3Data) {
         var magInv = 1.0 / Math.sqrt((vec3Data[0] * vec3Data[0]) + (vec3Data[1] * vec3Data[1]) + (vec3Data[2] * vec3Data[2]));
-        this.push([vec3Data[0] * magInv, vec3Data[1] * magInv, vec3Data[2] * magInv]);
+        var scalar = magInv * radius;
+        this.push([vec3Data[0] * scalar, vec3Data[1] * scalar, vec3Data[2] * scalar]);
         indexRecord[index] = [index, index];
         return index++;
     };

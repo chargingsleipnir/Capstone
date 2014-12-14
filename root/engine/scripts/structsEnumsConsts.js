@@ -73,12 +73,11 @@ function ControlScheme() {
 var Time = {
     delta_Milli: 0.0,
     fps: 0.0
-}
+};
 
 /***** ENUMS *****/
-var Screens = { test: 0, title: 1, inGame: 2, gameOver: 3 };
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
-var Components = { modelHandler: 1, collisionBody: 2, physicsBody: 3, inputHandler: 4 };
+var Components = { modelHandler: 1, collisionBody: 2, physicsBody: 3 };
 var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3 };
 var Space = { local: 0, global: 1 };
 var BoundingShapes = { sphere: 0, aabb: 1 };

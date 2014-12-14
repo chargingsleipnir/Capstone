@@ -65,7 +65,7 @@ Frustum.prototype = {
     },
     IntersectsSphere: function(sphere) {
         for (var i = 0; i < 6; i++)
-            if (this.planes[i].DistanceTo(sphere.pos) + sphere.GetScaledRadius() <= 0)
+            if (this.planes[i].DistanceTo(sphere.pos) + sphere.radius <= 0)
                 return false;
         return true;
     }

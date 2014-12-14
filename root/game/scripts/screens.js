@@ -1,4 +1,5 @@
-﻿
+﻿var Screens = { test: 0, title: 1, inGame: 2, gameOver: 3 };
+
 function Screen_Test(ScreenChangeCallback)
 {
     // Might not be necessary?
@@ -190,6 +191,7 @@ function Screen_Title(ScreenChangeCallback) {
     var grid = new GameObject('grid', Labels.productionEnvironment);
     var skyBox = new GameObject('skybox', Labels.testObject);
     var testCube = new GameObject('test cube', Labels.testObject);
+    var disc = new GameObject('disc', Labels.none);
 
     // Assign models
     // Possibly with the texture addition in AddModel?
@@ -197,8 +199,9 @@ function Screen_Title(ScreenChangeCallback) {
     heart.SetModel(Primitives.heart);
     zeroPointAxes.SetModel(Primitives.axesZeroPoints);
     grid.SetModel(Primitives.grid);
-    skyBox.SetModel(new Primitives.IcoSphere(2));
+    skyBox.SetModel(new Primitives.IcoSphere(2, 1));
     testCube.SetModel(EM.assets.models['dimensionBox']);
+    disc.SetModel(GM.assets.models['disc']);
 
     // Add rendering components
     arrow.AddComponent(Components.modelHandler);
@@ -209,6 +212,9 @@ function Screen_Title(ScreenChangeCallback) {
     skyBox.mdlHdlr.SetTexture(EM.assets.textures['starfield']);
     testCube.AddComponent(Components.modelHandler);
     testCube.mdlHdlr.SetTexture(EM.assets.textures['logo']);
+    disc.AddComponent(Components.modelHandler);
+    disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface']);
+    disc.AddComponent(Components.collisionBody);
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
@@ -219,6 +225,7 @@ function Screen_Title(ScreenChangeCallback) {
     grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
     testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.0, -1.0));
+    disc.trfmLocal.SetPosAxes(0.0, 1.0, -5.0);
 
     arrow.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
     heart.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
@@ -230,6 +237,7 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(grid);
     GM.rootObj.AddChild(skyBox);
     GM.rootObj.AddChild(testCube);
+    GM.rootObj.AddChild(disc);
 
     // Other
     var arrowAxis = new Vector3(1.0, 0.0, 0.0);
@@ -262,7 +270,7 @@ function Screen_Title(ScreenChangeCallback) {
     ];
     for(var i = 0; i < 4; i++) {
         balls[i] = new GameObject('physics test ball', Labels.testObject);
-        balls[i].SetModel(new Primitives.IcoSphere(2));
+        balls[i].SetModel(new Primitives.IcoSphere(2, 1));
         balls[i].AddComponent(Components.modelHandler);
         balls[i].mdlHdlr.MakeWireFrame();
         balls[i].mdlHdlr.colourTint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
@@ -331,8 +339,6 @@ function Screen_Title(ScreenChangeCallback) {
         }
 
 
-
-
         angle += 0.005;
 
         skyBox.trfmLocal.Rotate(GBL_FWD, angle);
@@ -363,7 +369,8 @@ function Screen_Title(ScreenChangeCallback) {
         }
 
         // if button pressed
-        //ScreenChangeCallback(new Screen_InGame(ScreenChangeCallback));
+        // var nextScreen = new Screen_InGame();
+        // GM.SetLoopCallback(nextScreen.Update);
     }
 }
 

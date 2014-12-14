@@ -1,4 +1,29 @@
 ﻿
+function AAShapeData3D(centre, min, max, radii, radius) {
+    this.centre = new Vector3();
+    this.min = new Vector3();
+    this.max = new Vector3();
+    this.radii = new Vector3(1.0, 1.0, 1.0);
+    this.radius = radius || 1.0;
+
+    this.centre.SetCopy(centre || this.centre);
+    this.min.SetCopy(min || this.min);
+    this.max.SetCopy(max || this.max);
+    this.radii.SetCopy(radii || this.radii);
+}
+AAShapeData3D.prototype = {
+  // Provide something for rotation, to reset centre, min, and max
+    RecalculateExtents: function() {
+        this.min.SetCopy(this.centre.GetSubtract(this.radii));
+        this.max.SetCopy(this.centre.GetAdd(this.radii));
+    },
+    RecalculateDimensions: function() {
+        this.centre.SetValues((this.max.x + this.min.x) / 2, (this.max.y + this.min.y) / 2, (this.max.z + this.min.z) / 2);
+        this.radii.SetValues(this.max.x - this.centre.x, this.max.y - this.centre.y, this.max.z - this.centre.z);
+        this.radius = Math.sqrt(Math.pow(this.radii.x, 2), Math.pow(this.radii.y, 2), Math.pow(this.radii.z, 2));
+    }
+};
+
 var GeomUtils = {
     /*
     TriangleArea: function(x1, y1, x2, y2, x3, y3) {
@@ -107,43 +132,36 @@ var GeomUtils = {
         return Vector3.DotProduct(acd, acb) < 0.0;
     },
     */
-    GetFromVertCoords: function(coords, shapeObj) {
+    GetFromVertCoords: function(coords) {
         /// <signature>
         ///  <summary>Returns the object provided, sized to wrap around the vertices provided</summary>
         ///  <param name="allPosCoords" type="[]">entire list of vertex positions, as decimals, in x, y, z order</param>
-        ///  <param name="shapeObj" type="Object">Can be Sphere or AABB</param>
         ///  <returns type="Object" />
         /// </signature>
-        var min = new Vector3(coords[0], coords[1], coords[2]);
-        var max = min.GetCopy();
-        var squaredLength = min.GetMagSqr();
+        var shape = new AAShapeData3D();
+        shape.min.SetValues(coords[0], coords[1], coords[2]);
+        shape.max.SetCopy(shape.min);
+        var squaredLength = shape.min.GetMagSqr();
         for (var i = 0; i < coords.length; i += 3) {
-            max.x = (coords[i] > max.x) ? coords[i] : max.x;
-            min.x = (coords[i] < min.x) ? coords[i] : min.x;
-            max.y = (coords[i + 1] > max.y) ? coords[i + 1] : max.y;
-            min.y = (coords[i + 1] < min.y) ? coords[i + 1] : min.y;
-            max.z = (coords[i + 2] > max.z) ? coords[i + 2] : max.z;
-            min.z = (coords[i + 2] < min.z) ? coords[i + 2] : min.z;
+            shape.max.x = (coords[i] > shape.max.x) ? coords[i] : shape.max.x;
+            shape.min.x = (coords[i] < shape.min.x) ? coords[i] : shape.min.x;
+            shape.max.y = (coords[i + 1] > shape.max.y) ? coords[i + 1] : shape.max.y;
+            shape.min.y = (coords[i + 1] < shape.min.y) ? coords[i + 1] : shape.min.y;
+            shape.max.z = (coords[i + 2] > shape.max.z) ? coords[i + 2] : shape.max.z;
+            shape.min.z = (coords[i + 2] < shape.min.z) ? coords[i + 2] : shape.min.z;
         }
-        var centre = new Vector3((max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2);
+        shape.RecalculateDimensions();
 
-        // For Sphere
-        if(shapeObj.hasOwnProperty('radius')) {
-            for (var i = 0; i < coords.length; i += 3) {
-                var tempLength = (new Vector3(coords[i] - centre.x, coords[i + 1] - centre.y, coords[i + 2] - centre.z)).GetMagSqr();
-                squaredLength = (tempLength > squaredLength) ? tempLength : squaredLength;
-            }
-            shapeObj.radius = Math.sqrt(squaredLength);
+        // Go over all vertices again to get most accurate radius
+        for (var i = 0; i < coords.length; i += 3) {
+            var tempLength = (new Vector3(coords[i] - shape.centre.x, coords[i + 1] - shape.centre.y, coords[i + 2] - shape.centre.z)).GetMagSqr();
+            squaredLength = (tempLength > squaredLength) ? tempLength : squaredLength;
         }
-        // For AABB
-        else if (shapeObj.hasOwnProperty('radii')) {
-            shapeObj.radii.SetValues(max.x - centre.x, max.y - centre.y, max.z - centre.z);
-        }
+        shape.radius = Math.sqrt(squaredLength);
 
-        shapeObj.pos.SetCopy(centre);
-        return shapeObj;
+        return shape;
     }
-}
+};
 
 function BoundingShape() {
     this.isTrigger = false;
@@ -203,7 +221,7 @@ Ray.prototype = {
         /// </signature>
         return this.pos.GetAdd(this.dir.GetScale(dist));
     }
-}
+};
 
 function Plane(norm, dist) {
     /// <signature>
@@ -281,14 +299,13 @@ Plane.prototype = {
         /// </signature>
         return this.norm.GetDot(point) + this.dist;
     }
-}
+};
 
-function Sphere(pos, radius, scale) {
+function Sphere(pos, radius) {
     /// <signature>
     ///  <summary>Defined by position and radius</summary>
     ///  <param name="position" type="Vector3"></param>
     ///  <param name="radius" type="decimal"></param>
-    ///  <param name="scale" type="decimal">Kept distinct from radius to maintain baseline radius</param>
     ///  <returns type="Sphere" />
     /// </signature>
     /// <signature>
@@ -297,8 +314,7 @@ function Sphere(pos, radius, scale) {
     /// </signature>
     this.pos = new Vector3();
     this.pos.SetCopy(pos || this.pos);
-    this.radius = radius || 0.5;
-    this.scale = scale || 1.0;
+    this.radius = radius || 1.0;
 }
 Sphere.prototype = {
     SetCopy: function(sphere) {
@@ -309,7 +325,6 @@ Sphere.prototype = {
         /// </signature>
         this.pos = sphere.pos.GetCopy();
         this.radius = sphere.radius;
-        this.scale = sphere.scale;
         return this;
     },
     GetCopy: function() {
@@ -317,32 +332,30 @@ Sphere.prototype = {
         ///  <summary>Get copy of this</summary>
         ///  <returns type="Sphere" />
         /// </signature>
-        return new Sphere(this.pos, this.radius, this.scale);
+        return new Sphere(this.pos, this.radius);
     },
-    SetValues: function(pos, radius, scale) {
+    SetValues: function(pos, radius) {
         /// <signature>
         ///  <summary>Set with given values</summary>
         ///  <param name="position" type="Vector3"></param>
         ///  <param name="radius" type="decimal"></param>
-        ///  <param name="scale" type="decimal">Kept distinct from radius to maintain baseline radius</param>
         ///  <returns type="Sphere" />
         /// </signature>
         this.pos = pos.GetCopy();
         this.radius = radius;
-        this.scale = scale;
         return this;
     },
-    SetScale: function(scale) {
-        this.scale = scale;
+    Scale: function(scalar) {
+        this.radius *= scalar;
     },
-    GetScaledRadius: function() {
-        return this.radius * this.scale;
+    GetScaled: function(scalar) {
+        return this.radius * scalar;
     },
     IntersectsSphere: function(sphere) {
         var dist = (sphere.pos.GetSubtract(this.pos)).GetMagSqr();
         return dist <= Math.pow(this.radius + sphere.radius, 2);
     }
-}
+};
 
 function AABB(pos, radii, scale) {
     /// <signature>

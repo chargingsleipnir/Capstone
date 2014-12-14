@@ -1,28 +1,48 @@
 ﻿
-function CollisionBody(model, trfm) {
+function CollisionBody(shapeData, trfm) {
     /// <signature>
     ///  <summary>Add collision body to gameobject</summary>
-    ///  <param name="model" type="object">JSON import or Primitive model</param>
+    ///  <param name="shapeData" type="object">Data container describing the object's relative shape</param>
     ///  <param name="trfm" type="Transform">Transform of GameObject</param>
     ///  <returns type="CollisionBody" />
     /// </signature>
 
     this.trfm = trfm;
+    this.shapeData = shapeData;
+
+    this.sphere = new Sphere(shapeData.centre, shapeData.radius);
+    this.aabb = new AABB(this.shapeData.centre, this.shapeData.radii);
+
     // Sphere set as standard
-    this.sphere = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new Sphere());
-    this.aabb = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new AABB());
     this.activeBody = this.sphere;
+
+    this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, shapeData.radius), shapeData);
+    this.activeFrame.MakeWireFrame();
+    this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
+
+    // Make a new transform for this??
+
     this.active = true;
+
+    CollisionNetwork.AddBody(this);
 }
 CollisionBody.prototype = {
     SetBoundingShape: function(shape) {
-        if (shape == BoundingShapes.aabb)
+        if (shape == BoundingShapes.aabb) {
             this.activeBody = this.aabb;
-        else
+            this.activeFrame = new ModelHandler(Primitives.cube);
+        }
+        else {
             this.activeBody = this.sphere;
+            this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius));
+        }
     },
     Update: function() {
-        this.activeBody = this.trfm.pos;
+        this.sphere.pos = this.aabb.pos = this.trfm.pos;
+        this.sphere.radius = this.shapeData.radius * this.trfm.GetLargestScaleValue();
+        this.aabb.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
+
+        this.activeFrame.UpdateModelViewControl(this.trfm);
     }
 };
 
@@ -40,6 +60,8 @@ var CollisionDetect = {
 
 var CollisionNetwork = (function() {
 
+    var colliders = [];
+
     function Partitioning() {
 
     }
@@ -54,11 +76,10 @@ var CollisionNetwork = (function() {
     }
 
     return {
-        AddBody: function() {
-
+        AddBody: function(collisionBody) {
+            colliders.push(collisionBody);
         },
         RemoveBody: function() {
-
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿
-function ModelHandler(model) {
+function ModelHandler(model, shapeData) {
     // Get the appropriate shader for the model given
     this.shaderData = Utility.AssignShaderProgram(model);
     // Create Buffer
@@ -15,7 +15,8 @@ function ModelHandler(model) {
     this.colourTint = new Vector3();
 
     // This is specifically set this way for frustum culling. No need to be more dynamic
-    this.drawSphere = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords, new Sphere());
+    this.shapeData = shapeData;
+    this.drawSphere = new Sphere(shapeData.centre, shapeData.radius);
 
     // Hold just indices for now, so as to rewrite if necessary, to create wire frames
     this.indices = model.vertices.byFaces.indices;
@@ -56,6 +57,6 @@ ModelHandler.prototype = {
 
         // Keep bounding sphere updated for accurate frustum culling
         this.drawSphere.pos.SetCopy(trfm.pos);
-        this.drawSphere.scale = trfm.GetLargestScaleValue();
+        this.drawSphere.radius = this.shapeData.radius * trfm.GetLargestScaleValue();
     }
-}
+};

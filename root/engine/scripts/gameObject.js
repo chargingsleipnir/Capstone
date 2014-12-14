@@ -9,6 +9,8 @@ function GameObject(name, label) {
 
     this.trfmLocal = new Transform();
     this.trfmGlobal = new Transform();
+
+    this.shape = new AAShapeData3D();
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -45,18 +47,15 @@ GameObject.prototype = {
         ///  <returns type="void" />
         /// </signature>
         if (component == Components.modelHandler) {
-            this.mdlHdlr = new ModelHandler(this.model);
+            this.mdlHdlr = new ModelHandler(this.model, this.shape);
         }
         else if (component == Components.physicsBody) {
             this.rigidBody = new PhysicsBody(this.trfmLocal);
             this.components.push(this.rigidBody);
         }
         else if (component == Components.collisionBody) {
-            this.collider = new CollisionBody(this.model, this.trfmLocal);
+            this.collider = new CollisionBody(this.shape, this.trfmLocal);
             this.components.push(this.collider);
-        }
-        else if (component == Components.inputHandler) {
-            //this.input = new RenderController();
         }
     },
     RemoveComponent: function(name) {
@@ -82,6 +81,7 @@ GameObject.prototype = {
         ///  <returns type="void" />
         /// </signature>
         this.model = model;
+        this.shape = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords);
     },
     Update: function(trfmParent) {
         /// <signature>

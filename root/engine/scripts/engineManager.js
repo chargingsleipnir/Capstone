@@ -7,22 +7,8 @@ var EM = {
         models: {}
     },
     PreLoad: function (Callback) {
+        console.log("ENGINE STARTUP");
 
-        var that = this;
-        function Initialize() {
-            // Initialize the Game Manager, passing the canvas to do much of the startup
-            GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
-            // use webGL context to create shader programs, loaded into EngineAssets.shaderPrograms
-            GL.CreateShaderPrograms(that.assets.shaderStrings, that.assets.shaderPrograms);
-            // Run main function passed by game creator
-            Callback();
-        }
-
-        // Ensure external assets fully load before startup
-        this.LoadExternal(Initialize);
-    },
-    LoadExternal: function(Callback)
-    {
         // SHADERS
         var shaderNamesFilepaths = [
             ['test', 'engine/assets/shaders/test.vshdr', 'engine/assets/shaders/test.fshdr'],
@@ -47,10 +33,10 @@ var EM = {
             ['ice', 'engine/assets/images/iceTexture.jpg']
         ];
         // JSON ASSETS
-        // This MUST be run in localhost for now to avoid cross-origin issues
         var modelNamesFilepaths = [
             ['dimensionBox', 'engine/assets/models/DimensionTest_PositiveCube.json']
         ];
+
 
         var that = this;
         function LoadModels() {
@@ -59,6 +45,8 @@ var EM = {
         function LoadTextures() {
             Utility.LoadTextures(textureNamesFilepaths, that.assets.textures, LoadModels);
         }
+
+        // Load up everything first
         Utility.LoadShaders(shaderNamesFilepaths, this.assets.shaderStrings, LoadTextures);
     }
 };

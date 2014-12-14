@@ -27,7 +27,7 @@
     <!---------- Game scripts  ---------->
     <script type="text/javascript" src="game/scripts/screens.js"></script>
 </head>
-<body onload="EM.PreLoad(main)">
+<body onload="EM.PreLoad(Initialize)">
     <canvas id="canvasWebGL" width="1500" height="800"></canvas>
     <canvas id="canvas2D" width="1500" height="800"></canvas>
     <script id="main">
@@ -35,56 +35,27 @@
         * This function must be called by
         * the body's onload function within
         * EM.PreLoad(). */
-        function main() {
+        function Initialize() {
+            var textureNamesFilepaths = [
+                ['discSurface', 'game/assets/images/discSurface.png']
+            ];
+            var modelNamesFilepaths = [
+                ['disc', 'game/assets/models/GameObjects_Disc.json']
+            ];
 
-            function Initialize() {
-                var textureNamesFilepaths = [
-                    ['discSurface', 'game/assets/images/discSurface.png']
-                ];
+            // Initialize the Game Manager, passing the canvas to do much of the startup
+            GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
+            GM.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, Run);
+        }
 
-                var modelNamesFilepaths = [
-                    ['disc', 'game/assets/models/GameObjects_Disc.json']
-                ];
+        function Run() {
+            /* From here, user defines whatever codebase they want, and just
+            have to tell the Game Manager what function to loop. */
+            var titleScreen = new Screen_Title();
+            GM.SetLoopCallback(titleScreen.Update);
 
-                GM.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, Run);
-            }
-
-            function Run() {
-                var activeScreen;
-                function SetScreen(newScreen) {
-                    activeScreen = newScreen;
-                }
-                /* Pass in SetScreen as a callback so the screen can be changed
-                 as much as needed in the screens script. */
-                activeScreen = new Screen_Title(SetScreen)
-
-                var time_LastFrame;
-                function LoopGame() {
-                    requestAnimationFrame(LoopGame);
-                    var time_ThisFrame = new Date().getTime();
-                    var time_Delta = time_ThisFrame - (time_LastFrame || time_ThisFrame);
-                    time_LastFrame = time_ThisFrame;
-                    Time.delta_Milli = time_Delta / 1000;
-                    Time.fps = 1000 / time_Delta;
-                    activeScreen.Update(Time.delta_Milli);
-                    // Updating Game World and Draw Calls
-                    GM.Update();
-                    GL.RenderScene();
-                }
-                LoopGame();
-            }
-
-            Initialize();
-
-            /*
-            var tornadoom = new Game();
-            tornadoom.LoadAssets(textureNamesFilepaths, modelNamesFilepaths);
-            tornadoom.AddScreen('title', Screen_Title);
-            tornadoom.AddScreen('in game', Screen_InGame);
-            tornadoom.AddScreen('game over', Screen_GameOver);
-            tornadoom.SetScreen('title');
-            tornadoom.Run();
-            */
+            /* Begins perpetual loop only, initialized as empty function */
+            GM.BeginLoop();
         }
     </script>
 </body>

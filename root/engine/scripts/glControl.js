@@ -265,4 +265,4 @@ var GL = {
         }
         //console.log(frustumTestCount);
     }
-}
+};
