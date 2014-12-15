@@ -317,9 +317,9 @@ function Screen_Title(ScreenChangeCallback) {
 
             // Update rotation
 
-            balls[i].rigidBody.acc.SetCopy(balls[i].rigidBody.velFinal.GetScaleByNum(-DRAG)).SetDivide(balls[i].rigidBody.mass);
+            //balls[i].rigidBody.acc.SetCopy(balls[i].rigidBody.velFinal.GetScaleByNum(-DRAG)).SetDivide(balls[i].rigidBody.mass);
             //balls[i].rigidBody.acc.SetAdd(WIND);
-            balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAddScaled(balls[i].rigidBody.acc, Time.delta_Milli));
+            //balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAddScaled(balls[i].rigidBody.acc, Time.delta_Milli));
         }
         // Collision detection and response
         for(var i = 0; i < 4; i++) {
