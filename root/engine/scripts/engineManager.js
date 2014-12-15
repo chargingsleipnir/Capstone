@@ -40,13 +40,13 @@ var EM = {
 
         var that = this;
         function LoadModels() {
-            Utility.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
+            FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
         }
         function LoadTextures() {
-            Utility.LoadTextures(textureNamesFilepaths, that.assets.textures, LoadModels);
+            FileUtils.LoadTextures(textureNamesFilepaths, that.assets.textures, LoadModels);
         }
 
         // Load up everything first
-        Utility.LoadShaders(shaderNamesFilepaths, this.assets.shaderStrings, LoadTextures);
+        FileUtils.LoadShaders(shaderNamesFilepaths, this.assets.shaderStrings, LoadTextures);
     }
 };

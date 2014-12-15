@@ -48,6 +48,8 @@ GameObject.prototype = {
         /// </signature>
         if (component == Components.modelHandler) {
             this.mdlHdlr = new ModelHandler(this.model, this.shape);
+            // Add controller to draw call;
+            GM.models.push(this.mdlHdlr);
         }
         else if (component == Components.physicsBody) {
             this.rigidBody = new PhysicsBody(this.trfmLocal);

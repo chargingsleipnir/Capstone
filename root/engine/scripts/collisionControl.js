@@ -16,26 +16,30 @@ function CollisionBody(shapeData, trfm) {
     // Sphere set as standard
     this.activeBody = this.sphere;
 
-    this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, shapeData.radius), shapeData);
-    this.activeFrame.MakeWireFrame();
-    this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
-
-    // Make a new transform for this??
+    this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
+    GM.models.push(this.activeFrame);
+    // Intentionally left this blank to bypass condition checks
+    this.SetBoundingShape();
 
     this.active = true;
 
-    CollisionNetwork.AddBody(this);
+    CollisionNetwork.AddBody(this);  // ?? Not sure how this will work just yet
 }
 CollisionBody.prototype = {
     SetBoundingShape: function(shape) {
+
+        var index = GM.models.indexOf(this.activeFrame);
+
         if (shape == BoundingShapes.aabb) {
             this.activeBody = this.aabb;
-            this.activeFrame = new ModelHandler(Primitives.cube);
+            GM.models[index] = this.activeFrame = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
         }
-        else {
+        else if (shape == BoundingShapes.sphere) {
             this.activeBody = this.sphere;
-            this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius));
+            GM.models[index] = this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
         }
+        this.activeFrame.MakeWireFrame();
+        this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
     },
     Update: function() {
         this.sphere.pos = this.aabb.pos = this.trfm.pos;

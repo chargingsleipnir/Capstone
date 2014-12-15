@@ -95,31 +95,28 @@ var GL = {
         for (var i = 0; i < shaderStrings.length; i++)
             container[shaderStrings[i].name] = CreateProgram(shaderStrings[i].vert, shaderStrings[i].frag);
     },
-    CreateBufferObjects: function(model, programData) {
+    CreateBufferObjects: function(vertData, bufferData) {
         /// <signature>
         ///  <summary>Creates appropriate buffers from given model data</summary>
         ///  <param name="model" type="object">May be primitive, or imported</param>
         /// </signature>
 
-        // Struct that holds buffers and other draw data
-        var bufferData = new BufferData();
         // Get appropriate set of verts based on whether or not indices can/will be used
-        var verts;
-        if (model.vertices.byFaces.posCoords.length > 0) {
-            verts = model.vertices.byFaces;
-        }
-        else {
-            verts = model.vertices.byMesh;
-            // Only in this case, create element array buffer
+        bufferData.numVerts = vertData.posCoords.length / 3;
+        if (vertData.indices) {
+            // Create and populate EABO
             bufferData.EABO = this.ctx.createBuffer();
             this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, bufferData.EABO);
-            this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.vertices.byFaces.indices), this.ctx.STATIC_DRAW);
+            this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertData.indices), this.ctx.STATIC_DRAW);
+            // Get total vertex count
+            bufferData.numVerts = vertData.indices.length;
         }
+
         // Create one long vert array, so only one buffer needs to be created and used
-        var vertArray = verts.posCoords;
-        vertArray = vertArray.concat(verts.colElems);
-        vertArray = vertArray.concat(verts.texCoords);
-        vertArray = vertArray.concat(verts.normAxes);
+        var vertArray = vertData.posCoords;
+        vertArray = vertArray.concat(vertData.colElems);
+        vertArray = vertArray.concat(vertData.texCoords);
+        vertArray = vertArray.concat(vertData.normAxes);
         var VAO = new Float32Array(vertArray);
 
         // Create VBO
@@ -128,18 +125,17 @@ var GL = {
         this.ctx.bufferData(this.ctx.ARRAY_BUFFER, VAO, this.ctx.STATIC_DRAW);
 
         bufferData.VAOBytes = VAO.BYTES_PER_ELEMENT;
-        bufferData.numVerts = model.vertices.byFaces.count;
-        bufferData.lenPosCoords = verts.posCoords.length;
-        bufferData.lenColElems = verts.colElems.length;
-        bufferData.lenTexCoords = verts.texCoords.length;
-        bufferData.lenNormAxes = verts.normAxes.length;
+        bufferData.lenPosCoords = vertData.posCoords.length;
+        bufferData.lenColElems = vertData.colElems.length;
+        bufferData.lenTexCoords = vertData.texCoords.length;
+        bufferData.lenNormAxes = vertData.normAxes.length;
 
         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
         this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-
-        return bufferData;
     },
     RewriteIndexBuffer: function(EABO, indices) {
+        if(!EABO)
+            EABO = this.ctx.createBuffer();
         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, EABO);
         //this.ctx.bufferSubData(this.ctx.ELEMENT_ARRAY_BUFFER, 0, new Uint16Array(indices));
         this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.ctx.STATIC_DRAW);
@@ -152,6 +148,7 @@ var GL = {
         // Might want to parameterize these to adjust quality.
         this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.NEAREST);
         this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.NEAREST);
+        this.ctx.generateMipmap(this.ctx.TEXTURE_2D);
         this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
         return texID;
         /* Consider loading from an array of textures images

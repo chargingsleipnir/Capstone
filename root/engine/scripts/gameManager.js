@@ -35,9 +35,9 @@ var GM = {
     LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, Callback) {
         var that = this;
         function LoadModels() {
-            Utility.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
+            FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
         }
-        Utility.LoadTextures(textureNamesFilepaths, this.assets.textures, LoadModels);
+        FileUtils.LoadTextures(textureNamesFilepaths, this.assets.textures, LoadModels);
     },
     Update: function() {
         this.rootObj.Update(this.rootObj.trfmLocal);

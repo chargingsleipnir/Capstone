@@ -1,9 +1,15 @@
 ﻿
 function ModelHandler(model, shapeData) {
-    // Get the appropriate shader for the model given
-    this.shaderData = Utility.AssignShaderProgram(model);
+    // Decide whether to draw with Elements or not
+    this.vertData = ModelUtils.SelectVAOData(model.vertices);
+    this.shapeData = shapeData;
+
     // Create Buffer
-    this.bufferData = GL.CreateBufferObjects(model, this.shaderData);
+    this.bufferData = new BufferData();
+    GL.CreateBufferObjects(this.vertData, this.bufferData);
+    // Get the appropriate shader for the model given
+    this.shaderData = ModelUtils.AssignShaderProgram(this.vertData, model.materials);
+
     // Get draw method.
     if(model.hasOwnProperty('drawMethod'))
         this.drawMethod = GL.GetDrawMethod(model.drawMethod);
@@ -15,14 +21,10 @@ function ModelHandler(model, shapeData) {
     this.colourTint = new Vector3();
 
     // This is specifically set this way for frustum culling. No need to be more dynamic
-    this.shapeData = shapeData;
     this.drawSphere = new Sphere(shapeData.centre, shapeData.radius);
 
     // Hold just indices for now, so as to rewrite if necessary, to create wire frames
-    this.indices = model.vertices.byFaces.indices;
-
-    // Add controller to draw call;
-    GM.models.push(this);
+    this.indices = model.vertices.byMesh.indices;
 }
 ModelHandler.prototype = {
     SetTexture: function(texture) {

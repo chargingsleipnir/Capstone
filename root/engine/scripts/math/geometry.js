@@ -24,145 +24,6 @@ AAShapeData3D.prototype = {
     }
 };
 
-var GeomUtils = {
-    /*
-    TriangleArea: function(x1, y1, x2, y2, x3, y3) {
-        return (x1 - x2) * (y2 - y3) - (x2 - x3) * (y1 - y2);
-    },
-    GetBarycenter: function(triPtA, triPtB, triPtC, ptP) {
-        /// <signature>
-        ///  <summary>Returns Vector3 with u, v, w barycentric coordinates</summary>
-        ///  <param name="triPtA" type="Vector3">Represents the barycentric origin</param>
-        ///  <param name="triPtB" type="Vector3">Another triangle corner</param>
-        ///  <param name="triPtC" type="Vector3">Another triangle corner</param>
-        ///  <param name="ptP" type="Vector3">The point to get the coordinates from, relative to the triangle</param>
-        ///  <returns type="Vector3" />
-        /// </signature>
-        var out = [0.0, 0.0, 0.0];
-
-        var vecAB = Vector3.Subtract(triPtB, triPtA);
-        var vecAC = Vector3.Subtract(triPtC, triPtA);
-        var vecAP = Vector3.Subtract(ptP, triPtA);
-
-        var d00 = Vector3.DotProduct(vecAB, vecAB);
-        var d01 = Vector3.DotProduct(vecAB, vecAC);
-        var d11 = Vector3.DotProduct(vecAC, vecAC);
-        var d20 = Vector3.DotProduct(vecAP, vecAB);
-        var d21 = Vector3.DotProduct(vecAP, vecAC);
-
-        var denominator = (d00 * d11) - (d01 * d01);
-
-        out[0] = ((d11 * d20) - (d01 * d21)) / denominator;
-        out[1] = ((d00 * d21) - (d01 * d20)) / denominator;
-        out[2] = 1.0 - out[0] - out[1];
-
-        return out;
-    },
-    GetBarycenter2: function(triPtA, triPtB, triPtC, ptP) {
-        /// <signature>
-        ///  <summary>Returns Vector3 with u, v, w barycentric coordinates</summary>
-        ///  <param name="triPtA" type="Vector3">Represents the barycentric origin</param>
-        ///  <param name="triPtB" type="Vector3">Another triangle corner</param>
-        ///  <param name="triPtC" type="Vector3">Another triangle corner</param>
-        ///  <param name="ptP" type="Vector3">The point to get the coordinates from, relative to the triangle</param>
-        ///  <returns type="Vector3" />
-        /// </signature>
-        var out = [0.0, 0.0, 0.0];
-
-        // unnormalized triangle normal
-        var m = Vector3.CrossProduct(Vector3.Subtract(triPtB, triPtA), Vector3.Subtract(triPtC, triPtA));
-        // numerators and one-over-denominator for u and v ratios
-        var numeU, numeV, oneOverDenom;
-        // Absolute components for determining projection plane
-        var x = Math.abs(m[0]),
-            y = Math.abs(m[1]),
-            z = Math.abs(m[2]);
-
-        // Compute areas in plane of largest projection
-        if (x >= y && x >= z) {
-            // x is largest, project in yz plane
-            numeU = Geometry.TriangleArea(ptP[1], ptP[2], triPtB[1], triPtB[2], triPtC[1], triPtC[2]);
-            numeV = Geometry.TriangleArea(ptP[1], ptP[2], triPtC[1], triPtC[2], triPtA[1], triPtA[2]);
-            oneOverDenom = 1.0 / m[0];
-        }
-        else if (y >= x && y >= z) {
-            // y is largest, project in xz plane
-            numeU = Geometry.TriangleArea(ptP[0], ptP[2], triPtB[0], triPtB[2], triPtC[0], triPtC[2]);
-            numeV = Geometry.TriangleArea(ptP[0], ptP[2], triPtC[0], triPtC[2], triPtA[0], triPtA[2]);
-            oneOverDenom = 1.0 / -m[1];
-        }
-        else {
-            // z is largest, project in xy plane
-            numeU = Geometry.TriangleArea(ptP[0], ptP[1], triPtB[0], triPtB[1], triPtC[0], triPtC[1]);
-            numeV = Geometry.TriangleArea(ptP[0], ptP[1], triPtC[0], triPtC[1], triPtA[0], triPtA[1]);
-            oneOverDenom = 1.0 / m[2];
-        }
-        out[0] = numeU * oneOverDenom;
-        out[1] = numeV * oneOverDenom;
-        out[2] = 1.0 - out[0] - out[1];
-        return out;
-    },
-    TestPointInTriangle: function(triPtA, triPtB, triPtC, ptP) {
-        /// <signature>
-        ///  <summary>Returns true if point is inside triangle</summary>
-        ///  <param name="triPtA" type="Vector3">Represents the barycentric origin</param>
-        ///  <param name="triPtB" type="Vector3">Another triangle corner</param>
-        ///  <param name="triPtC" type="Vector3">Another triangle corner</param>
-        ///  <param name="ptP" type="Vector3">The point to get the coordinates from, relative to the triangle</param>
-        ///  <returns type="bool" />
-        /// </signature>
-        var baryCoords = Geometry.GetBarycenter2(triPtA, triPtB, triPtC, ptP);
-        return baryCoords[1] >= 0.0 && baryCoords[2] >= 0.0 && (baryCoords[1] + baryCoords[2]) <= 1.0;
-    },
-    IsConvexQuad: function(quadPtA, quadPtB, quadPtC, quadPtD) {
-        /// <signature>
-        ///  <summary>Returns true is quad is convex</summary>
-        ///  <returns type="bool" />
-        /// </signature>
-
-        var bda = Vector3.CrossProduct(Vector3.Subtract(quadPtD, quadPtB), Vector3.Subtract(quadPtA, quadPtB));
-        var bdc = Vector3.CrossProduct(Vector3.Subtract(quadPtD, quadPtB), Vector3.Subtract(quadPtC, quadPtB));
-
-        if (Vector3.DotProduct(bda, bdc) >= 0.0)
-            return 0;
-
-        var acd = Vector3.CrossProduct(Vector3.Subtract(quadPtC, quadPtA), Vector3.Subtract(quadPtD, quadPtA));
-        var acb = Vector3.CrossProduct(Vector3.Subtract(quadPtC, quadPtA), Vector3.Subtract(quadPtB, quadPtA));
-
-        return Vector3.DotProduct(acd, acb) < 0.0;
-    },
-    */
-    GetFromVertCoords: function(coords) {
-        /// <signature>
-        ///  <summary>Returns the object provided, sized to wrap around the vertices provided</summary>
-        ///  <param name="allPosCoords" type="[]">entire list of vertex positions, as decimals, in x, y, z order</param>
-        ///  <returns type="Object" />
-        /// </signature>
-        var shape = new AAShapeData3D();
-        shape.min.SetValues(coords[0], coords[1], coords[2]);
-        shape.max.SetCopy(shape.min);
-        var squaredLength = shape.min.GetMagSqr();
-        for (var i = 0; i < coords.length; i += 3) {
-            shape.max.x = (coords[i] > shape.max.x) ? coords[i] : shape.max.x;
-            shape.min.x = (coords[i] < shape.min.x) ? coords[i] : shape.min.x;
-            shape.max.y = (coords[i + 1] > shape.max.y) ? coords[i + 1] : shape.max.y;
-            shape.min.y = (coords[i + 1] < shape.min.y) ? coords[i + 1] : shape.min.y;
-            shape.max.z = (coords[i + 2] > shape.max.z) ? coords[i + 2] : shape.max.z;
-            shape.min.z = (coords[i + 2] < shape.min.z) ? coords[i + 2] : shape.min.z;
-        }
-        shape.RecalculateDimensions();
-
-        // Go over all vertices again to get most accurate radius
-        for (var i = 0; i < coords.length; i += 3) {
-            var tempLength = (new Vector3(coords[i] - shape.centre.x, coords[i + 1] - shape.centre.y, coords[i + 2] - shape.centre.z)).GetMagSqr();
-            squaredLength = (tempLength > squaredLength) ? tempLength : squaredLength;
-        }
-        shape.radius = Math.sqrt(squaredLength);
-
-        return shape;
-    }
-};
-
 function BoundingShape() {
     this.isTrigger = false;
     this.isCollider = false;
@@ -300,6 +161,103 @@ Plane.prototype = {
         return this.norm.GetDot(point) + this.dist;
     }
 };
+
+function Tri() {
+    /*
+    TriangleArea: function(x1, y1, x2, y2, x3, y3) {
+    return (x1 - x2) * (y2 - y3) - (x2 - x3) * (y1 - y2);
+    },
+    GetBarycenter: function(triPtA, triPtB, triPtC, ptP) {
+    /// <signature>
+    ///  <summary>Returns Vector3 with u, v, w barycentric coordinates</summary>
+    ///  <param name="triPtA" type="Vector3">Represents the barycentric origin</param>
+    ///  <param name="triPtB" type="Vector3">Another triangle corner</param>
+    ///  <param name="triPtC" type="Vector3">Another triangle corner</param>
+    ///  <param name="ptP" type="Vector3">The point to get the coordinates from, relative to the triangle</param>
+    ///  <returns type="Vector3" />
+    /// </signature>
+    var out = [0.0, 0.0, 0.0];
+
+    var vecAB = Vector3.Subtract(triPtB, triPtA);
+    var vecAC = Vector3.Subtract(triPtC, triPtA);
+    var vecAP = Vector3.Subtract(ptP, triPtA);
+
+    var d00 = Vector3.DotProduct(vecAB, vecAB);
+    var d01 = Vector3.DotProduct(vecAB, vecAC);
+    var d11 = Vector3.DotProduct(vecAC, vecAC);
+    var d20 = Vector3.DotProduct(vecAP, vecAB);
+    var d21 = Vector3.DotProduct(vecAP, vecAC);
+
+    var denominator = (d00 * d11) - (d01 * d01);
+
+    out[0] = ((d11 * d20) - (d01 * d21)) / denominator;
+    out[1] = ((d00 * d21) - (d01 * d20)) / denominator;
+    out[2] = 1.0 - out[0] - out[1];
+
+    return out;
+    },
+    GetBarycenter2: function(triPtA, triPtB, triPtC, ptP) {
+    /// <signature>
+    ///  <summary>Returns Vector3 with u, v, w barycentric coordinates</summary>
+    ///  <param name="triPtA" type="Vector3">Represents the barycentric origin</param>
+    ///  <param name="triPtB" type="Vector3">Another triangle corner</param>
+    ///  <param name="triPtC" type="Vector3">Another triangle corner</param>
+    ///  <param name="ptP" type="Vector3">The point to get the coordinates from, relative to the triangle</param>
+    ///  <returns type="Vector3" />
+    /// </signature>
+    var out = [0.0, 0.0, 0.0];
+
+    // unnormalized triangle normal
+    var m = Vector3.CrossProduct(Vector3.Subtract(triPtB, triPtA), Vector3.Subtract(triPtC, triPtA));
+    // numerators and one-over-denominator for u and v ratios
+    var numeU, numeV, oneOverDenom;
+    // Absolute components for determining projection plane
+    var x = Math.abs(m[0]),
+    y = Math.abs(m[1]),
+    z = Math.abs(m[2]);
+
+    // Compute areas in plane of largest projection
+    if (x >= y && x >= z) {
+    // x is largest, project in yz plane
+    numeU = Geometry.TriangleArea(ptP[1], ptP[2], triPtB[1], triPtB[2], triPtC[1], triPtC[2]);
+    numeV = Geometry.TriangleArea(ptP[1], ptP[2], triPtC[1], triPtC[2], triPtA[1], triPtA[2]);
+    oneOverDenom = 1.0 / m[0];
+    }
+    else if (y >= x && y >= z) {
+    // y is largest, project in xz plane
+    numeU = Geometry.TriangleArea(ptP[0], ptP[2], triPtB[0], triPtB[2], triPtC[0], triPtC[2]);
+    numeV = Geometry.TriangleArea(ptP[0], ptP[2], triPtC[0], triPtC[2], triPtA[0], triPtA[2]);
+    oneOverDenom = 1.0 / -m[1];
+    }
+    else {
+    // z is largest, project in xy plane
+    numeU = Geometry.TriangleArea(ptP[0], ptP[1], triPtB[0], triPtB[1], triPtC[0], triPtC[1]);
+    numeV = Geometry.TriangleArea(ptP[0], ptP[1], triPtC[0], triPtC[1], triPtA[0], triPtA[1]);
+    oneOverDenom = 1.0 / m[2];
+    }
+    out[0] = numeU * oneOverDenom;
+    out[1] = numeV * oneOverDenom;
+    out[2] = 1.0 - out[0] - out[1];
+    return out;
+    },
+    TestPointInTriangle: function(triPtA, triPtB, triPtC, ptP) {
+    /// <signature>
+    ///  <summary>Returns true if point is inside triangle</summary>
+    ///  <param name="triPtA" type="Vector3">Represents the barycentric origin</param>
+    ///  <param name="triPtB" type="Vector3">Another triangle corner</param>
+    ///  <param name="triPtC" type="Vector3">Another triangle corner</param>
+    ///  <param name="ptP" type="Vector3">The point to get the coordinates from, relative to the triangle</param>
+    ///  <returns type="bool" />
+    /// </signature>
+    var baryCoords = Geometry.GetBarycenter2(triPtA, triPtB, triPtC, ptP);
+    return baryCoords[1] >= 0.0 && baryCoords[2] >= 0.0 && (baryCoords[1] + baryCoords[2]) <= 1.0;
+    },
+    */
+}
+
+function Rect() {
+
+}
 
 function Sphere(pos, radius) {
     /// <signature>

@@ -192,6 +192,7 @@ function Screen_Title(ScreenChangeCallback) {
     var skyBox = new GameObject('skybox', Labels.testObject);
     var testCube = new GameObject('test cube', Labels.testObject);
     var disc = new GameObject('disc', Labels.none);
+    var cube = new GameObject('primitive cube', Labels.testObject);
 
     // Assign models
     // Possibly with the texture addition in AddModel?
@@ -202,6 +203,7 @@ function Screen_Title(ScreenChangeCallback) {
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));
     testCube.SetModel(EM.assets.models['dimensionBox']);
     disc.SetModel(GM.assets.models['disc']);
+    cube.SetModel(new Primitives.Cube(new Vector3(1.5, 3.0, 4.5), true));
 
     // Add rendering components
     arrow.AddComponent(Components.modelHandler);
@@ -215,6 +217,9 @@ function Screen_Title(ScreenChangeCallback) {
     disc.AddComponent(Components.modelHandler);
     disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface']);
     disc.AddComponent(Components.collisionBody);
+    disc.collider.SetBoundingShape(BoundingShapes.aabb);
+    cube.AddComponent(Components.modelHandler);
+    cube.mdlHdlr.SetTexture(EM.assets.textures['questionBlock']);
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
@@ -226,9 +231,11 @@ function Screen_Title(ScreenChangeCallback) {
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
     testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.0, -1.0));
     disc.trfmLocal.SetPosAxes(0.0, 1.0, -5.0);
+    cube.trfmLocal.SetPosVec3(new Vector3(-3.5, 0.0, -20.0));
 
     arrow.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
     heart.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
+    cube.mdlHdlr.colourTint.SetValues(0.0, 0.5, 0.5);
 
     // Add to Capstone node
     GM.rootObj.AddChild(arrow);
@@ -238,6 +245,7 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(skyBox);
     GM.rootObj.AddChild(testCube);
     GM.rootObj.AddChild(disc);
+    GM.rootObj.AddChild(cube);
 
     // Other
     var arrowAxis = new Vector3(1.0, 0.0, 0.0);
@@ -277,6 +285,7 @@ function Screen_Title(ScreenChangeCallback) {
         balls[i].trfmLocal.SetPosVec3(startPositions[i]);
 
         balls[i].AddComponent(Components.collisionBody);
+        balls[i].collider.SetBoundingShape(BoundingShapes.aabb);
 
         balls[i].AddComponent(Components.physicsBody);
         balls[i].rigidBody.mass = 0.5;

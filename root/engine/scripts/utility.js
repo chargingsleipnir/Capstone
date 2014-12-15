@@ -4,7 +4,7 @@ window.onerror = function(msg, url, lineno) {
     console.log(url + '\n(' + lineno + '): ' + msg);
 };
 
-var Utility = {
+var FileUtils = {
     // Load external assets
     LoadFile: function(file, Callback, noCache, isJSON) {
         var request = new XMLHttpRequest();
@@ -73,7 +73,7 @@ var Utility = {
             }
             shaderIndex++;
             if (shaderIndex < nameFilePathSets.length)
-                Utility.LoadFile(nameFilePathSets[shaderIndex][fileIndex], LoadRecursion, true, false);
+                FileUtils.LoadFile(nameFilePathSets[shaderIndex][fileIndex], LoadRecursion, true, false);
             else {
                 console.log(msg_LoadFinished);
                 Callback();
@@ -140,7 +140,7 @@ var Utility = {
 
             modelIndex++;
             if (modelIndex < nameFilePathPairs.length) {
-                Utility.LoadFile(nameFilePathPairs[modelIndex][FILEPATH], LoadRecursion, true, true);
+                FileUtils.LoadFile(nameFilePathPairs[modelIndex][FILEPATH], LoadRecursion, true, true);
             }
             else {
                 console.log(msg_LoadFinished);
@@ -148,8 +148,81 @@ var Utility = {
             }
         }
         LoadRecursion('Loading Models Complete');
+    }
+};
+
+var MathUtils = {
+    GetCofactor: function(tl, br, bl, tr) {
+        return (tl * br) - (bl * tr);
     },
-    AssignShaderProgram: function(model) {
+    GetGreatestDouble: function(value, startNum) {
+        var out = startNum || 1;
+        while (out < value) {
+            out *= 2;
+        }
+        return out;
+    }
+};
+
+var GeomUtils = {
+     /*
+     IsConvexQuad: function(quadPtA, quadPtB, quadPtC, quadPtD) {
+     /// <signature>
+     ///  <summary>Returns true is quad is convex</summary>
+     ///  <returns type="bool" />
+     /// </signature>
+
+     var bda = Vector3.CrossProduct(Vector3.Subtract(quadPtD, quadPtB), Vector3.Subtract(quadPtA, quadPtB));
+     var bdc = Vector3.CrossProduct(Vector3.Subtract(quadPtD, quadPtB), Vector3.Subtract(quadPtC, quadPtB));
+
+     if (Vector3.DotProduct(bda, bdc) >= 0.0)
+     return 0;
+
+     var acd = Vector3.CrossProduct(Vector3.Subtract(quadPtC, quadPtA), Vector3.Subtract(quadPtD, quadPtA));
+     var acb = Vector3.CrossProduct(Vector3.Subtract(quadPtC, quadPtA), Vector3.Subtract(quadPtB, quadPtA));
+
+     return Vector3.DotProduct(acd, acb) < 0.0;
+     },
+     */
+    GetFromVertCoords: function (coords) {
+        /// <signature>
+        ///  <summary>Returns the object provided, sized to wrap around the vertices provided</summary>
+        ///  <param name="allPosCoords" type="[]">entire list of vertex positions, as decimals, in x, y, z order</param>
+        ///  <returns type="Object" />
+        /// </signature>
+        var shape = new AAShapeData3D();
+        shape.min.SetValues(coords[0], coords[1], coords[2]);
+        shape.max.SetCopy(shape.min);
+        var squaredLength = shape.min.GetMagSqr();
+        for (var i = 0; i < coords.length; i += 3) {
+            shape.max.x = (coords[i] > shape.max.x) ? coords[i] : shape.max.x;
+            shape.min.x = (coords[i] < shape.min.x) ? coords[i] : shape.min.x;
+            shape.max.y = (coords[i + 1] > shape.max.y) ? coords[i + 1] : shape.max.y;
+            shape.min.y = (coords[i + 1] < shape.min.y) ? coords[i + 1] : shape.min.y;
+            shape.max.z = (coords[i + 2] > shape.max.z) ? coords[i + 2] : shape.max.z;
+            shape.min.z = (coords[i + 2] < shape.min.z) ? coords[i + 2] : shape.min.z;
+        }
+        shape.RecalculateDimensions();
+
+        // Go over all vertices again to get most accurate radius
+        for (var i = 0; i < coords.length; i += 3) {
+            var tempLength = (new Vector3(coords[i] - shape.centre.x, coords[i + 1] - shape.centre.y, coords[i + 2] - shape.centre.z)).GetMagSqr();
+            squaredLength = (tempLength > squaredLength) ? tempLength : squaredLength;
+        }
+        shape.radius = Math.sqrt(squaredLength);
+
+        return shape;
+    }
+};
+
+var ModelUtils = {
+    SelectVAOData: function(vertSets) {
+        if (vertSets.byFaces.colElems.length > 0 || vertSets.byFaces.texCoords.length > 0) {
+            return vertSets.byFaces;
+        }
+        return vertSets.byMesh;
+    },
+    AssignShaderProgram: function(vertData, materials) {
         /// <signature>
         ///  <summary>Examines the model's data and returns the last appropriate shader found</summary>
         ///  <param name="model" type="object"></param>
@@ -162,21 +235,19 @@ var Utility = {
             light = false;
 
         // Determine which attributes can even be supported
-        if (model.vertices.byMesh.colElems.length > 0 || model.vertices.byFaces.colElems.length > 0) colour = true;
-        if (model.vertices.byMesh.texCoords.length > 0 || model.vertices.byFaces.texCoords.length > 0) texture = true;
-        if (model.materials.length > 0) light = true;
+        if (vertData.colElems.length > 0) colour = true;
+        if (vertData.texCoords.length > 0) texture = true;
+        if (materials.length > 0) light = true;
 
         var matches = [];
         // Find best match - eliminate those shaders that DO have attributes we DON'T want
-        console.log("Shaders appropriate for model \"" + model.name + "\":");
         for (var shdr in EM.assets.shaderPrograms) {
             if (!colour && EM.assets.shaderPrograms[shdr].a_Col != -1) continue;
             if (!texture && EM.assets.shaderPrograms[shdr].a_TexCoord != -1) continue;
             if (!light && EM.assets.shaderPrograms[shdr].a_Norm != -1) continue;
             matches.push(EM.assets.shaderPrograms[shdr]);
-            console.log(shdr);
         }
         // Return the last match, for now.
         return matches[matches.length - 1];
     }
-}
+};

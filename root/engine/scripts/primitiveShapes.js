@@ -16,7 +16,8 @@ Primitives.axesPositive = {
             ],
             colElems: [],
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: []
         },
         byFaces: {
             count: 6,
@@ -37,8 +38,7 @@ Primitives.axesPositive = {
                 0.0, 0.0, 1.0
             ],
             texCoords: [],            
-            normAxes: [],            
-            indices: []
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.lines
@@ -54,7 +54,8 @@ Primitives.axesNegative = {
             posCoords: [],
             colElems: [],
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: []
         },
         byFaces: {
             count: 300,
@@ -79,8 +80,7 @@ Primitives.axesNegative = {
                 return colors;
             })(),
             texCoords: [],
-            normAxes: [],            
-            indices: []
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.points
@@ -105,7 +105,8 @@ Primitives.axesZeroPoints = {
             })(),
             colElems: [],
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: []
         },
         byFaces: {
             count: 600,
@@ -130,8 +131,7 @@ Primitives.axesZeroPoints = {
                 return colors;
             })(),
             texCoords: [],
-            normAxes: [],
-            indices: []
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.points
@@ -166,7 +166,8 @@ Primitives.grid = {
                 return colors;
             })(),
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: []
         },
         byFaces: {
             count: 2400,
@@ -202,8 +203,7 @@ Primitives.grid = {
                 return colors;
             })(),
             texCoords: [],
-            normAxes: [],
-            indices: []
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.triangles
@@ -219,7 +219,8 @@ Primitives.axesGrid = {
             posCoords: [],
             colElems: [],
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: []
         },
         byFaces: {
             count: 600,
@@ -262,8 +263,7 @@ Primitives.axesGrid = {
                 return colors;
             })(),
             texCoords: [],
-            normAxes: [],
-            indices: []
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.lines
@@ -299,13 +299,6 @@ Primitives.arrow = {
             })(),
             texCoords: [],
             normAxes: [],
-        },
-        byFaces: {
-            count: 30,
-            posCoords: [],
-            colElems: [],
-            texCoords: [],
-            normAxes: [],
             indices: [
                 0, 1, 2,
                 0, 2, 3,
@@ -320,123 +313,149 @@ Primitives.arrow = {
                 7, 8, 9,
                 8, 5, 9
             ]
+        },
+        byFaces: {
+            count: 30,
+            posCoords: [],
+            colElems: [],
+            texCoords: [],
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.triangles
 };
 
-Primitives.cube = {
-    name: "Cube",
-    numTris: 10,
-    materials: [],
-    vertices: {
-        byMesh: {
-            count: 8,
-            posCoords: [
-                -1.0, 1.0, 1.0,
-                -1.0, -1.0, 1.0,
-                1.0, -1.0, 1.0,
-                1.0, 1.0, 1.0,
+Primitives.Cube = function(radii, canTexture) {
 
-                -1.0, 1.0, -1.0,
-                -1.0, -1.0, -1.0,
-                1.0, -1.0, -1.0,
-                1.0, 1.0, -1.0,
-            ],
-            colElems: [],
-            texCoords: [],
-            normAxes: []
+    var w = radii.x || 1.0,
+        h = radii.y || 1.0,
+        d = radii.z || 1.0;
+
+    var posCoords = [
+        -w, h, -d,
+        -w, -h, -d,
+        w, -h, -d,
+        w, h, -d,
+
+        -w, h, d,
+        -w, -h, d,
+        w, -h, d,
+        w, h, d
+    ];
+    var normals = [];
+    var colours = [];
+    for(var i = 0; i < posCoords.length; i+=3) {
+        var magInv = 1.0 / (new Vector3(posCoords[i], posCoords[i+1], posCoords[i+2])).GetMag();
+        normals = normals.concat([posCoords[i] * magInv, posCoords[i+1] * magInv, posCoords[i+2] * magInv]);
+        colours = colours.concat([0.0, 0.0, 0.0]);
+    }
+    var texCoords = [];
+    if(canTexture)
+        texCoords = [
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
+
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            0.0, 1.0, 1.0, 0.0, 1.0, 1.0
+        ];
+
+    return {
+        name: "Cube",
+        numTris: 12,
+        materials: [],
+        vertices: {
+            byMesh: {
+                count: 8,
+                posCoords: posCoords,
+                colElems: colours,
+                texCoords: [],
+                normAxes: normals,
+                indices: [
+                    // back
+                    3, 2, 1,
+                    3, 1, 0,
+                    // left
+                    0, 1, 5,
+                    0, 5, 4,
+                    // front
+                    4, 5, 6,
+                    4, 6, 7,
+                    // right
+                    7, 6, 2,
+                    7, 2, 3,
+                    // top
+                    4, 0, 7,
+                    7, 0, 3,
+                    // bottom
+                    1, 5, 2,
+                    2, 5, 6
+                ]
+            },
+            byFaces: {
+                count: 36,
+                posCoords: [
+                    // back
+                    w, h, -d,
+                    w, -h, -d,
+                    -w, -h, -d,
+                    w, h, -d,
+                    -w, -h, -d,
+                    -w, h, -d,
+                    // left
+                    -w, h, -d,
+                    -w, -h, -d,
+                    -w, -h, d,
+                    -w, h, -d,
+                    -w, -h, d,
+                    -w, h, d,
+                    // front
+                    -w, h, d,
+                    -w, -h, d,
+                    w, -h, d,
+                    -w, h, d,
+                    w, -h, d,
+                    w, h, d,
+                    // right
+                    w, h, d,
+                    w, -h, d,
+                    w, -h, -d,
+                    w, h, d,
+                    w, -h, -d,
+                    w, h, -d,
+                    // top
+                    -w, h, -d,
+                    -w, h, d,
+                    w, h, d,
+                    -w, h, -d,
+                    w, h, d,
+                    w, h, -d,
+                    // bottom
+                    -w, -h, d,
+                    -w, -h, -d,
+                    w, -h, -d,
+                    -w, -h, d,
+                    w, -h, -d,
+                    w, -h, d
+                ],
+                colElems: [],
+                texCoords: texCoords,
+                normAxes: []
+            }
         },
-        byFaces: {
-            count: 36,
-            posCoords: [
-                // front
-                -1.0, 1.0, 1.0,
-                -1.0, -1.0, 1.0,
-                1.0, -1.0, 1.0,
-                -1.0, 1.0, 1.0,
-                1.0, -1.0, 1.0,
-                1.0, 1.0, 1.0,
-                // right
-                1.0, 1.0, 1.0,
-                1.0, -1.0, 1.0,
-                1.0, -1.0, -1.0,
-                1.0, 1.0, 1.0,
-                1.0, -1.0, -1.0,
-                1.0, 1.0, -1.0,
-                // back
-                1.0, 1.0, -1.0,
-                1.0, -1.0, -1.0,
-                -1.0, -1.0, -1.0,
-                1.0, 1.0, -1.0,
-                -1.0, -1.0, -1.0,
-                -1.0, 1.0, -1.0,
-                // left
-                -1.0, 1.0, -1.0,
-                -1.0, -1.0, -1.0,
-                -1.0, -1.0, 1.0,
-                -1.0, 1.0, -1.0,
-                -1.0, -1.0, 1.0,
-                -1.0, 1.0, 1.0,
-                // top
-                -1.0, 1.0, -1.0,
-                -1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0,
-                -1.0, 1.0, -1.0,
-                1.0, 1.0, 1.0,
-                1.0, 1.0, -1.0,
-                // bottom
-                -1.0, -1.0, 1.0,
-                -1.0, -1.0, -1.0,
-                1.0, -1.0, -1.0,
-                -1.0, -1.0, 1.0,
-                1.0, -1.0, -1.0,
-                1.0, -1.0, 1.0
-            ],
-            colElems: [],
-            texCoords: [
-                0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-                0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-
-                0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-                0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-
-                0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-                0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-
-                0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-                0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-
-                0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-                0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-
-                0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-                0.0, 1.0, 1.0, 0.0, 1.0, 1.0
-            ],
-            normAxes: [],
-            indices: [
-                // front
-                0, 1, 3,
-                3, 1, 2,
-                // right
-                3, 2, 7,
-                7, 2, 6,
-                // back
-                7, 6, 5,
-                7, 5, 4,
-                // left
-                4, 5, 0,
-                0, 5, 1,
-                // top
-                4, 0, 7,
-                7, 0, 3,
-                // bottom
-                1, 5, 2,
-                2, 5, 6
-            ]
-        }
-    },    
-    drawMethod: DrawMethods.triangles
+        drawMethod: DrawMethods.triangles
+    };
 };
 
 Primitives.heart = {
@@ -467,15 +486,15 @@ Primitives.heart = {
                 1.0, 0.0, 0.0
             ],
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: [0, 1, 2, 3, 4, 5, 6, 7]
         },
         byFaces: {
             count: 8,
             posCoords: [],
             colElems: [],
             texCoords: [],
-            normAxes: [],
-            indices: [0, 1, 2, 3, 4, 5, 6, 7]
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.triangleFan
@@ -506,15 +525,15 @@ Primitives.bolt = {
                 0.8, 0.8, 0.0
             ],
             texCoords: [],
-            normAxes: []
+            normAxes: [],
+            indices: [0, 1, 2, 3, 4, 5]
         },
         byFaces: {
             count: 6,
             posCoords: [],
             colElems: [],
             texCoords: [],
-            normAxes: [],
-            indices: [0, 1, 2, 3, 4, 5]
+            normAxes: []
         }
     },    
     drawMethod: DrawMethods.triangleStrip
@@ -674,15 +693,15 @@ Primitives.IcoSphere = function(recursionLevel, radius)
                 posCoords: posCoords,
                 colElems: colors,
                 texCoords: texCoords,
-                normAxes: posCoords
+                normAxes: posCoords,
+                indices: indices
             },
             byFaces: {
                 count: indices.length,
                 posCoords: [],
                 colElems: [],
                 texCoords: [],
-                normAxes: [],
-                indices: indices
+                normAxes: []
             }
         }
     };
