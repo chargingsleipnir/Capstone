@@ -1,11 +1,12 @@
 ﻿
-function PhysicsBody(trfm) {
+function RigidBody(trfm, modelRadius) {
     /// <signature>
     ///  <summary>Add physics motion to gameobject</summary>
     ///  <param name="trfm" type="Transform">Transform of GameObject</param>
-    ///  <returns type="PhysicsBody" />
+    ///  <returns type="RigidBody" />
     /// </signature>
     this.trfm = trfm;
+    this.modelRadius = modelRadius;
 
     this.active = true;
     this.velAngular = new Vector3();
@@ -14,6 +15,7 @@ function PhysicsBody(trfm) {
     this.acc = new Vector3();
     this.torque = new Vector3();
     this.forceAccum = new Vector3();
+    this.impulseAccum = 0.0;
     this.massInv = 0.0;
     this.dampening = 1.0;
 
@@ -21,7 +23,7 @@ function PhysicsBody(trfm) {
     this.inertiaTensorInv = new Matrix3();
     this.radiusToPt = new Vector3();
 }
-PhysicsBody.prototype = {
+RigidBody.prototype = {
     SetMass: function(mass) {
         if (mass > INFINITESIMAL)
             this.massInv = 1.0 / mass;
@@ -45,10 +47,42 @@ PhysicsBody.prototype = {
         this.inertiaTensorInv.SetInertiaTensorSphere(this.GetMass(), radius);
         this.inertiaTensorInv.Invert();
     },
+    GetNetVelocity: function(rigidBody) {
+        return this.velFinal.GetSubtract(rigidBody.velFinal);
+    },
+    CalculateImpulse: function(rigidBody, collisionDist, coefOfRest) {
+        collisionDist.SetNormalized();
+        var relative = collisionDist.GetDot(this.velInitial.GetSubtract(rigidBody.velInitial));
+        // Calculate impulse
+        var numerator = -relative * (coefOfRest + 1.0);
+        var denomObj0 = collisionDist.GetDot((this.inertiaTensorInv.MultiplyVec3(this.radiusToPt.GetCross(collisionDist))).GetCross(this.radiusToPt));
+        var denomObj1 = collisionDist.GetDot((rigidBody.inertiaTensorInv.MultiplyVec3(rigidBody.radiusToPt.GetCross(collisionDist))).GetCross(rigidBody.radiusToPt));
+        var denominator = this.massInv + rigidBody.massInv + denomObj0 + denomObj1;
+        var impulse = numerator / denominator;
+        // Apply impulse
+        this.AddForce(collisionDist.GetScaleByNum(impulse));
+        rigidBody.AddForce(collisionDist.GetScaleByNum(-impulse));
+        //this.velFinal.SetCopy(this.velInitial.GetAdd(collisionDist.GetScaleByNum(impulse).SetDivide(this.mass)));
+        //rigidBody.velFinal.SetCopy(rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(-impulse).SetDivide(rigidBody.mass)));
+    },
     Update: function() {
+        // ROTATIONAL UPDATE
+        /*
+        this.axisOfRotation = this.trfm.dirUp.GetCross(this.velFinal);
+        this.axisOfRotation.SetNormalized();
+        var mag = this.velFinal.GetMag() / this.modelRadius;
+        this.velAngular = this.axisOfRotation.SetScaleByNum(mag);
+        */
+
+        // LINEAR UPDATE
         this.acc.SetAddScaled(this.forceAccum, this.massInv);
-        this.velFinal.SetCopy(this.velInitial.GetAddScaled(this.acc, Time.delta_Milli));
+        this.velFinal.SetCopy(this.velInitial.GetAdd(this.acc, Time.delta_Milli));
         this.velFinal.SetScaleByNum(Math.pow(this.dampening, Time.delta_Milli));
+
+        if(this.velFinal.GetMagSqr() < INFINITESIMAL)
+            this.velFinal.SetZero();
+
+        this.forceAccum.SetZero();
 
         // Collision detection needs to happen in here? To adjust final velocity...
         // Maybe this is where the force accum can come into play

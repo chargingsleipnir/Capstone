@@ -217,7 +217,7 @@ function Screen_Title(ScreenChangeCallback) {
     disc.AddComponent(Components.modelHandler);
     disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface']);
     disc.AddComponent(Components.collisionBody);
-    disc.collider.SetBoundingShape(BoundingShapes.aabb);
+    //disc.collider.SetBoundingShape(BoundingShapes.aabb);
     cube.AddComponent(Components.modelHandler);
     cube.mdlHdlr.SetTexture(EM.assets.textures['questionBlock']);
 
@@ -276,6 +276,7 @@ function Screen_Title(ScreenChangeCallback) {
         new Vector3(1.5, 1.0, -14.0),
         new Vector3(-11.0, 1.0, -19.0)
     ];
+
     for(var i = 0; i < 4; i++) {
         balls[i] = new GameObject('physics test ball', Labels.testObject);
         balls[i].SetModel(new Primitives.IcoSphere(2, 1));
@@ -285,13 +286,14 @@ function Screen_Title(ScreenChangeCallback) {
         balls[i].trfmLocal.SetPosVec3(startPositions[i]);
 
         balls[i].AddComponent(Components.collisionBody);
-        balls[i].collider.SetBoundingShape(BoundingShapes.aabb);
+        //balls[i].collider.SetBoundingShape(BoundingShapes.aabb);
 
-        balls[i].AddComponent(Components.physicsBody);
-        balls[i].rigidBody.mass = 0.5;
-        balls[i].rigidBody.SetInertiaTensor(balls[i].collider.sphere.radius);
+        balls[i].AddComponent(Components.rigidBody);
+        balls[i].AddScript(new ImpulseBalls());
+
         GM.rootObj.AddChild(balls[i]);
     }
+
     var COEF_OF_REST = 1.0;
     var DRAG = 0.1;
     var WIND = new Vector3(0.25, 0.0, 0.0);
@@ -310,10 +312,12 @@ function Screen_Title(ScreenChangeCallback) {
 
         // Physics updating, needs to be in physics class
         for(var i = 0; i < 4; i++) {
+            /*
             balls[i].rigidBody.axisOfRotation = GBL_UP.GetCross(balls[i].rigidBody.velFinal);
             balls[i].rigidBody.axisOfRotation.SetNormalized();
             var mag = balls[i].rigidBody.velFinal.GetMag() / balls[i].collider.sphere.radius;
             balls[i].rigidBody.velAngular = balls[i].rigidBody.axisOfRotation.SetScaleByNum(mag);
+            */
 
             // Update rotation
 
@@ -322,6 +326,7 @@ function Screen_Title(ScreenChangeCallback) {
             //balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAddScaled(balls[i].rigidBody.acc, Time.delta_Milli));
         }
         // Collision detection and response
+
         for(var i = 0; i < 4; i++) {
             for(var j = i+1; j < 4; j++) {
                 var collisionDist = CollisionDetect.SphereVSphere(balls[i], balls[j]);
@@ -336,17 +341,14 @@ function Screen_Title(ScreenChangeCallback) {
                     var numerator = -relative * (COEF_OF_REST + 1.0);
                     var denomObj0 = collisionDist.GetDot((balls[i].rigidBody.inertiaTensorInv.MultiplyVec3(balls[i].rigidBody.radiusToPt.GetCross(collisionDist))).GetCross(balls[i].rigidBody.radiusToPt));
                     var denomObj1 = collisionDist.GetDot((balls[j].rigidBody.inertiaTensorInv.MultiplyVec3(balls[j].rigidBody.radiusToPt.GetCross(collisionDist))).GetCross(balls[j].rigidBody.radiusToPt));
-                    var denominator = (1.0 / balls[i].rigidBody.mass) + (1.0 / balls[j].rigidBody.mass) + denomObj0 + denomObj1;
+                    var denominator = (1.0 / balls[i].rigidBody.GetMass()) + (1.0 / balls[j].rigidBody.GetMass()) + denomObj0 + denomObj1;
                     var impulse = numerator / denominator;
                     // Apply impulse as collision response
-                    balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(impulse).SetDivide(balls[i].rigidBody.mass)));
-                    balls[j].rigidBody.velFinal.SetCopy(balls[j].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(-impulse).SetDivide(balls[j].rigidBody.mass)));
+                    balls[i].rigidBody.velFinal.SetCopy(balls[i].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(impulse).SetDivide(balls[i].rigidBody.GetMass())));
+                    balls[j].rigidBody.velFinal.SetCopy(balls[j].rigidBody.velInitial.GetAdd(collisionDist.GetScaleByNum(-impulse).SetDivide(balls[j].rigidBody.GetMass())));
                 }
             }
-            if(balls[i].rigidBody.velFinal.GetMagSqr() < INFINITESIMAL)
-                balls[i].rigidBody.velFinal.SetZero();
         }
-
 
         angle += 0.005;
 

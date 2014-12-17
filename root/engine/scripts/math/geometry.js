@@ -24,11 +24,6 @@ AAShapeData3D.prototype = {
     }
 };
 
-function BoundingShape() {
-    this.isTrigger = false;
-    this.isCollider = false;
-}
-
 function Ray(position, direction) {
     /// <signature>
     ///  <summary>Defined by position and direction</summary>
@@ -317,12 +312,11 @@ Sphere.prototype = {
     }
 };
 
-function AABB(pos, radii, scale) {
+function AABB(pos, radii) {
     /// <signature>
     ///  <summary>Defined by position, radii, and scale</summary>
     ///  <param name="position" type="Vector3"></param>
     ///  <param name="radii" type="Vector3"></param>
-    ///  <param name="scale" type="Vector3">Kept distinct from radii to maintain dimensions</param>
     ///  <returns type="AABB" />
     /// </signature>
     /// <signature>
@@ -331,10 +325,8 @@ function AABB(pos, radii, scale) {
     /// </signature>
     this.pos = new Vector3();
     this.radii = new Vector3(0.5, 0.5, 0.5);
-    this.scale = new Vector3(1.0, 1.0, 1.0);
     this.pos.SetCopy(pos || this.pos);
     this.radii.SetCopy(radii || this.radii);
-    this.scale.SetCopy(scale || this.scale);
 }
 AABB.prototype = {
     SetCopy: function(box) {
@@ -345,56 +337,53 @@ AABB.prototype = {
         /// </signature>
         this.pos.SetCopy(box.pos);
         this.radii.SetCopy(box.radii);
-        this.scale.SetCopy(box.scale);
     },
     GetCopy: function() {
         /// <signature>
         ///  <summary>Create new copy of this</summary>
         ///  <returns type="AABB" />
         /// </signature>
-        return new AABB(this.pos, this.radii, this.scale);
+        return new AABB(this.pos, this.radii);
     },
-    SetValues: function(pos, radii, scale) {
+    SetValues: function(pos, radii) {
         /// <signature>
         ///  <summary>Defined by position, radii, and scale</summary>
         ///  <param name="position" type="Vector3"></param>
         ///  <param name="radii" type="Vector3"></param>
-        ///  <param name="scale" type="Vector3">Kept distinct from radii to maintain dimensions</param>
         ///  <returns type="AABB" />
         /// </signature>
         this.pos.SetCopy(pos);
         this.radii.SetCopy(radii);
-        this.scale.SetCopy(scale);
     },
-    SetScale: function(scale) {
+    Scale: function(scalar) {
         /// <signature>
         ///  <summary>Modify scale value</summary>
-        ///  <param name="scale" type="Vector3"></param>
-        ///  <returns type="AABB" />
+        ///  <param name="scalar" type="Vector3"></param>
+        ///  <returns type="void" />
         /// </signature>
-        this.scale.SetCopy(scale);
-        return this;
+        this.radii.SetScaleByVec(scalar);
     },
-    GetScaledRadii: function() {
+    GetScaled: function(scalar) {
         /// <signature>
         ///  <summary>Get radii components times scale factors</summary>
+        ///  <param name="scalar" type="Vector3"></param>
         ///  <returns type="Vector3" />
         /// </signature>
-        return this.radii.GetScaleByVec3(this.scale);
+        return this.radii.GetScaleByVec(scalar);
     },
     GetMinCorner: function() {
         /// <signature>
         ///  <summary>Get the vector representing the lowest valued corner</summary>
         ///  <returns type="Vector3" />
         /// </signature>
-        return this.pos.GetSubtract(this.GetScaledRadii());
+        return this.pos.GetSubtract(this.radii);
     },
     GetMaxCorner: function() {
         /// <signature>
         ///  <summary>Get the vector representing the highest valued corner</summary>
         ///  <returns type="Vector3" />
         /// </signature>
-        return this.pos.GetAdd(this.GetScaledRadii());
+        return this.pos.GetAdd(this.radii);
     },
     GetCornerFurthestAlong: function(norm) {
         /// <signature>
@@ -467,7 +456,7 @@ AABB.prototype = {
         ///  <param name="box" type="AABB"></param>
         ///  <returns type="false or Vector3" />
         /// </signature>
-        var radiiSqr = box.GetScaledRadii().GetDot(box.GetScaledRadii()); // Use Dot to get squared components
+        var radiiSqr = box.radii.GetDot(box.radii); // Use Dot to get squared components
         var out = new Vector3(0.0, 0.0, 0.0);
         var min = this.GetMinCorner();
         var max = this.GetMaxCorner();
@@ -502,4 +491,4 @@ AABB.prototype = {
 
         return false;
     }
-}
+};

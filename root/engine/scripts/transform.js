@@ -7,8 +7,6 @@ function Transform() {
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
 
-
-
     //this.offsetPos = Vector3.CreateZero();
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();

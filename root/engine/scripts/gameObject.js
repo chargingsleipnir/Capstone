@@ -6,6 +6,7 @@ function GameObject(name, label) {
     this.parent = null;
     this.children = [];
     this.components = [];
+    this.scripts = [];
 
     this.trfmLocal = new Transform();
     this.trfmGlobal = new Transform();
@@ -51,12 +52,16 @@ GameObject.prototype = {
             // Add controller to draw call;
             GM.models.push(this.mdlHdlr);
         }
-        else if (component == Components.physicsBody) {
-            this.rigidBody = new PhysicsBody(this.trfmLocal);
+        else if (component == Components.rigidBody) {
+            this.rigidBody = new RigidBody(this.trfmLocal, this.shape.radius);
+            if(this.collider)
+                this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.rigidBody);
         }
         else if (component == Components.collisionBody) {
             this.collider = new CollisionBody(this.shape, this.trfmLocal);
+            if(this.rigidBody)
+                this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.collider);
         }
     },
@@ -75,6 +80,15 @@ GameObject.prototype = {
         ///  <returns type="void" />
         /// </signature>
         this.components = [];
+    },
+    AddScript: function(scriptObj) {
+        /// <signature>
+        ///  <summary>Script must have Initialize(gameObject) and Update() functions</summary>
+        ///  <param name="scriptObj" type="new Object"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        scriptObj.Initialize(this);
+        this.scripts.push(scriptObj);
     },
     SetModel: function(model) {
         /// <signature>
@@ -106,6 +120,10 @@ GameObject.prototype = {
             if (this.mdlHdlr)
                 this.mdlHdlr.UpdateModelViewControl(this.trfmGlobal);
         }
+
+        // Scripts first?? Sure...
+        for (var i in this.scripts)
+            this.scripts[i].Update();
 
         for (var i in this.components)
             this.components[i].Update();
