@@ -423,6 +423,7 @@ Vector3.prototype = {
         this.x *= scalar;
         this.y *= scalar;
         this.z *= scalar;
+        return this;
     },
     GetScaleByNum: function(scalar) {
         /// <signature>
