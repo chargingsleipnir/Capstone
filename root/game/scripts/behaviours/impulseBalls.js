@@ -6,15 +6,18 @@ ImpulseBalls.prototype = {
     Initialize: function(gameObject) {
         this.obj = gameObject;
 
-        this.obj.collider.SetResponseCall(this.CollResponse);
+        var that = this;
+        var Cr = 1.0;
+        function CollResponse(c) {
+            var collisionDist = that.obj.collider.sphere.IntersectsSphere(c.sphere);
+            that.obj.rigidBody.CalculateImpulse(c.rigidBody, collisionDist, Cr);
+        }
+
+        this.obj.collider.SetResponseCall(CollResponse);
 
         this.obj.rigidBody.SetMass(0.5);
         this.obj.rigidBody.SetInertiaTensor(this.obj.collider.sphere.radius);
         this.obj.rigidBody.dampening = 0.9;
-    },
-    CollResponse: function(c) {
-        // This registers undefined... maybe because it's in a callback? Works fine in Update
-        //console.log(this.obj);
     },
     Update: function() {
     }

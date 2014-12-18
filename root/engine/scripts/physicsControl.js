@@ -45,6 +45,11 @@ RigidBody.prototype = {
     GetNetVelocity: function(rigidBody) {
         return this.velFinal.GetSubtract(rigidBody.velFinal);
     },
+    GetRestitution: function(velPreColl, velPostColl) {
+        var netPreColl = this.velInitial.GetSubtract(velPreColl);
+        var netPostColl = this.velFinal.GetSubtract(velPostColl);
+        return -netPostColl.SetScaleByVec(netPreColl.SetInverse()).GetMag();
+    },
     CalculateImpulse: function(rigidBody, collisionDist, coefOfRest) {
         collisionDist.SetNormalized();
         var relative = collisionDist.GetDot(this.velInitial.GetSubtract(rigidBody.velInitial));
@@ -69,17 +74,21 @@ RigidBody.prototype = {
         var mag = this.velFinal.GetMag() / this.modelRadius;
         this.velAngular = this.axisOfRotation.SetScaleByNum(mag);
         */
-        this.velInitial.SetCopy(this.velFinal);
-        this.trfm.TranslateVec3((this.velInitial.GetScaleByNum(Time.delta_Milli)).SetAddScaled(this.acc, 0.5 * (Time.delta_Milli * Time.delta_Milli)));
+
 
         // LINEAR UPDATE
+        this.velInitial.SetCopy(this.velFinal);
+        //this.trfm.TranslateVec3(this.velFinal.GetScaleByNum(Time.delta_Milli));
+        this.trfm.TranslateVec3((this.velInitial.GetScaleByNum(Time.delta_Milli)).SetAddScaled(this.acc, 0.5 * (Time.delta_Milli * Time.delta_Milli)));
+        
+        this.acc.SetZero();
         this.acc.SetAddScaled(this.forceAccum, this.massInv);
+        this.forceAccum.SetZero();
+
         this.velFinal.SetCopy(this.velInitial.GetAddScaled(this.acc, Time.delta_Milli));
         this.velFinal.SetScaleByNum(Math.pow(this.dampening, Time.delta_Milli));
 
         if(this.velFinal.GetMagSqr() < INFINITESIMAL)
             this.velFinal.SetZero();
-
-        this.forceAccum.SetZero();
     }
 };

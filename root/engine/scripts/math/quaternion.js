@@ -168,14 +168,14 @@ Quaternion.prototype = {
         ///  <summary>Set to inversed values</summary>
         ///  <returns type="Quaternion" />
         /// </signature>
-        this.v.SetInverse();
+        this.v.SetNegative();
     },
     SetInverse: function() {
         /// <signature>
         ///  <summary>Get the inversed quaternion</summary>
         ///  <returns type="Quaternion" />
         /// </signature>
-        var vInv = this.v.GetInverse();
+        var vInv = this.v.GetNegative();
         return new Quaternion(vInv.x, vInv.y, vInv.z, this.w);
     },
     GetAxis: function() {

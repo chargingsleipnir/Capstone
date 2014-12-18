@@ -133,10 +133,10 @@ var CollisionNetwork = (function() {
                                     colls[i].DetectionCallback(colls[j]);
                                     colls[j].DetectionCallback(colls[i]);
                                 }
+                                // If they are set to have response, they both must have rigidbodies
                                 else {
                                     var netVel = colls[i].rigidBody.GetNetVelocity(colls[j].rigidBody);
                                     if(netVel.GetDot(collisionDist) < 0) {
-                                        colls[i].rigidBody.CalculateImpulse(colls[j].rigidBody, collisionDist, 1.0);
                                         colls[i].ResponseCallback(colls[j]);
                                         colls[j].ResponseCallback(colls[i]);
                                     }

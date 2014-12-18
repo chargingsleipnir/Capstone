@@ -340,7 +340,7 @@ Vector3.prototype = {
         this.x = this.y = this.z = 1.0;
         return this;
     },
-    SetInverse: function() {
+    SetNegative: function() {
         /// <signature>
         ///  <summary>Change the component's signs</summary>
         ///  <returns type="Vector3" />
@@ -350,7 +350,7 @@ Vector3.prototype = {
         this.z = -this.z;
         return this;
     },
-    GetInverse: function() {
+    GetNegative: function() {
         /// <signature>
         ///  <summary>Get a vec3 with the component's signs reversed</summary>
         ///  <returns type="Vector3" />
@@ -473,23 +473,54 @@ Vector3.prototype = {
             (this.x * vec3.y) - (this.y * vec3.x)
         );
     },
-    SetDivide: function(scalar) {
+    SetInverse: function() {
+        /// <signature>
+        ///  <summary>Divides the vector's values by 1</summary>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        if(this.x > INFINITESIMAL || this.x < -INFINITESIMAL)
+            this.x = 1.0 / this.x;
+        if(this.y > INFINITESIMAL || this.y < -INFINITESIMAL)
+            this.y = 1.0 / this.y;
+        if(this.z > INFINITESIMAL || this.z < -INFINITESIMAL)
+            this.z = 1.0 / this.z;
+        return this;
+    },
+    GetInverse: function() {
+        /// <signature>
+        ///  <summary>Divides the vector's values by 1</summary>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        var xInv = 0.0, yInv = 0.0, zInv = 0.0;
+        if(this.x > INFINITESIMAL || this.x < -INFINITESIMAL)
+            xInv = 1.0 / this.x;
+        if(this.y > INFINITESIMAL || this.y < -INFINITESIMAL)
+            yInv = 1.0 / this.y;
+        if(this.z > INFINITESIMAL || this.z < -INFINITESIMAL)
+            zInv = 1.0 / this.z;
+        return new Vector3(xInv, yInv, zInv);
+    },
+    SetDivideByNum: function(scalar) {
         /// <signature>
         ///  <summary>Divides the vector's values by the scalar</summary>
         ///  <param name="scalar" type="number"></param>
         ///  <returns type="Vector3" />
         /// </signature>
+        if(scalar < INFINITESIMAL)
+            return;
         this.x /= scalar;
         this.y /= scalar;
         this.z /= scalar;
         return this;
     },
-    GetDivide: function(scalar) {
+    GetDivideByNum: function(scalar) {
         /// <signature>
         ///  <summary>Divides the vector's values by the scalar</summary>
         ///  <param name="scalar" type="number"></param>
         ///  <returns type="Vector3" />
         /// </signature>
+        if(scalar < INFINITESIMAL)
+            return;
         return new Vector3(this.x / scalar, this.y / scalar, this.z / scalar);
     },
     GetMagSqr: function() {

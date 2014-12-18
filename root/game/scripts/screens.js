@@ -294,15 +294,15 @@ function Screen_Title(ScreenChangeCallback) {
         GM.rootObj.AddChild(balls[i]);
     }
 
-    var COEF_OF_REST = 1.0;
     var physicsTestName = "PhysicsTest";
     Input.RegisterObject(physicsTestName, true);
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
+    var launchForce = new Vector3(0.0, 0.0, -250.0);
 
     this.Update = function() {
 
         if(launch.pressed){
-            balls[0].rigidBody.velInitial.z = balls[0].rigidBody.velFinal.z = -7.5;
+            balls[0].rigidBody.AddForce(launchForce);
             launch.Release();
         }
 
