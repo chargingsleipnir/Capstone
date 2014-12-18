@@ -247,15 +247,13 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(disc);
     GM.rootObj.AddChild(cube);
 
-    // Other
-    var arrowAxis = new Vector3(1.0, 0.0, 0.0);
-    var heartAxis = new Vector3(0.0, 1.0, 0.0);
+
     var angle = 0.0;
 
     // Control camera
     var camRegName = "main camera";
     Input.RegisterObject(camRegName, true);
-    camCtrl = new ControlScheme();
+    var camCtrl = new ControlScheme();
     camCtrl.moveLeft = Input.CreateInputController(camRegName, KeyMap.A);
     camCtrl.moveRight = Input.CreateInputController(camRegName, KeyMap.D);
     camCtrl.moveDown = Input.CreateInputController(camRegName, KeyMap.Q);

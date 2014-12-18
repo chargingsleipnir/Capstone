@@ -141,10 +141,10 @@ Quaternion.prototype = {
         ///  <returns type="Quaternion" />
         /// </signature>
         var magSqr = this.w * this.w + this.v.GetMagSqr();
-        if (magSqr < INFINTESIMAL) {
-            alert("Quat Normalize divide by zero");
-            return 0;
-        }
+        if (magSqr < INFINTESIMAL)
+            return;
+        else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
+            return this;
         var magInv = 1.0 / Math.sqrt(magSqr);
         this.w *= magInv;
         this.v.SetScaleByNum(magInv);
@@ -156,10 +156,10 @@ Quaternion.prototype = {
         ///  <returns type="Quaternion" />
         /// </signature>
         var magSqr = this.w * this.w + this.v.GetMagSqr();
-        if (magSqr < INFINTESIMAL) {
-            alert("Quat Normalize divide by zero");
-            return 0;
-        }
+        if (magSqr < INFINTESIMAL)
+            return;
+        else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
+            return this;
         var magInv = 1.0 / Math.sqrt(magSqr);
         return new Quaternion(this.v.x * magInv, this.v.y * magInv, this.v.z * magInv, this.w * magInv);
     },
@@ -170,7 +170,7 @@ Quaternion.prototype = {
         /// </signature>
         this.v.SetNegative();
     },
-    SetInverse: function() {
+    GetInverse: function() {
         /// <signature>
         ///  <summary>Get the inversed quaternion</summary>
         ///  <returns type="Quaternion" />

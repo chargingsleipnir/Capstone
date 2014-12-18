@@ -240,6 +240,7 @@ var GL = {
                 }
 
                 // SEND UP UNIFORMS
+                //this.ctx.uniformMatrix4fv(shdr.u_MtxProj, false, GM.activeCam.mtxProjView.data);
                 this.ctx.uniformMatrix4fv(shdr.u_MtxProj, false, GM.activeCam.mtxProj.data);
                 this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxCam.data);
                 this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, GM.models[i].mtxModel.data);

@@ -69,7 +69,7 @@ Frustum.prototype = {
                 return false;
         return true;
     }
-}
+};
 
 function Camera(pos, dirFwd, dirUp, wndWidth, wndHeight) {
     this.trfm = new Transform();
@@ -88,6 +88,7 @@ function Camera(pos, dirFwd, dirUp, wndWidth, wndHeight) {
     // Make proj matrix with frustum
     this.mtxProj = new Matrix4();
     this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
+    this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
 
     this.gui = null;
 }

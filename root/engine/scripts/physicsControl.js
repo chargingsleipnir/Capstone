@@ -67,12 +67,11 @@ RigidBody.prototype = {
     },
     Update: function() {
         // ROTATIONAL UPDATE
-        this.axisOfRotation = this.trfm.dirUp.GetCross(this.velFinal);
-        this.axisOfRotation.SetNormalized();
-        this.velAngularMag = this.velFinal.GetMag() / this.modelRadius;
-        this.velAngularDir = this.axisOfRotation.SetScaleByNum(this.velAngularMag);
-        this.trfm.Rotate(this.velAngularDir, this.velAngularMag);
-
+        //this.axisOfRotation = this.trfm.dirUp.GetCross(this.velFinal);
+        //this.axisOfRotation.SetNormalized();
+        //this.velAngularMag = this.velFinal.GetMag() / this.modelRadius;
+        //this.velAngularDir = this.axisOfRotation.SetScaleByNum(this.velAngularMag);
+        //this.trfm.Rotate(this.velAngularDir, this.velAngularMag);
         //dynObjs[i].qOrientation += (dynObjs[i].vAngularVelocity * dynObjs[i].qOrientation) * qTimeStep;
 
         // LINEAR UPDATE
