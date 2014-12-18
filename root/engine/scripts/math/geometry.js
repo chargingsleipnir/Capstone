@@ -305,7 +305,7 @@ Sphere.prototype = {
         return this.radius * scalar;
     },
     IntersectsSphere: function(sphere) {
-        var collisionDist = sphere.pos.GetSubtract(this.pos);
+        var collisionDist = this.pos.GetSubtract(sphere.pos);
         if(collisionDist.GetMagSqr() < Math.pow(this.radius, 2) + Math.pow(sphere.radius, 2))
             return collisionDist;
         return false;

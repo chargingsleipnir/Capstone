@@ -136,7 +136,7 @@ var CollisionNetwork = (function() {
                                 else {
                                     var netVel = colls[i].rigidBody.GetNetVelocity(colls[j].rigidBody);
                                     if(netVel.GetDot(collisionDist) < 0) {
-                                        //colls[i].rigidBody.CalculateImpulse(colls[j].rigidBody, collisionDist, 1.0);
+                                        colls[i].rigidBody.CalculateImpulse(colls[j].rigidBody, collisionDist, 1.0);
                                         colls[i].ResponseCallback(colls[j]);
                                         colls[j].ResponseCallback(colls[i]);
                                     }

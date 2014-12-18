@@ -59,7 +59,7 @@ GameObject.prototype = {
             this.components.push(this.rigidBody);
         }
         else if (component == Components.collisionBody) {
-            this.collider = new CollisionBody(this.shape, this.trfmLocal);
+            this.collider = new CollisionBody(this.shape, this.trfmGlobal);
             if(this.rigidBody)
                 this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.collider);
