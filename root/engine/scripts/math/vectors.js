@@ -267,7 +267,7 @@ Vector2.prototype = {
         /// </signature>
         return (this.GetDistAsVec(point)).SetNormalized();
     }
-}
+};
 
 var Vector3 = function(x, y, z) {
     /// <signature>
@@ -284,7 +284,7 @@ var Vector3 = function(x, y, z) {
     this.x = x || 0.0;
     this.y = y || 0.0;
     this.z = z || 0.0;
-}
+};
 Vector3.prototype = {
     GetData: function() {
         /// <signature>
@@ -594,7 +594,7 @@ Vector3.prototype = {
     },
     SetRotated: function(thetaDeg, axis) {
         /// <signature>
-        ///  <summary>Rotate around the given axis by degree specified</summary>
+        ///  <summary>SetRotation around the given axis by degree specified</summary>
         ///  <param name="thetaDeg" type="decimal"></param>
         ///  <param name="axis" type="Vector3"></param>
         ///  <returns type="Vector3" />

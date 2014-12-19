@@ -47,7 +47,7 @@ RigidBody.prototype = {
     GetRestitution: function(velPreColl, velPostColl) {
         var netPreColl = this.velInitial.GetSubtract(velPreColl);
         var netPostColl = this.velFinal.GetSubtract(velPostColl);
-        return -netPostColl.SetScaleByVec(netPreColl.SetInverse()).GetMag();
+        return -netPostColl.SetScaleByVec(netPreColl.SetConjugate()).GetMag();
     },
     CalculateImpulse: function(rigidBody, collisionDist, coefOfRest) {
         collisionDist.SetNormalized();
@@ -71,7 +71,7 @@ RigidBody.prototype = {
         //this.axisOfRotation.SetNormalized();
         //this.velAngularMag = this.velFinal.GetMag() / this.modelRadius;
         //this.velAngularDir = this.axisOfRotation.SetScaleByNum(this.velAngularMag);
-        //this.trfm.Rotate(this.velAngularDir, this.velAngularMag);
+        //this.trfm.SetRotation(this.velAngularDir, this.velAngularMag);
         //dynObjs[i].qOrientation += (dynObjs[i].vAngularVelocity * dynObjs[i].qOrientation) * qTimeStep;
 
         // LINEAR UPDATE

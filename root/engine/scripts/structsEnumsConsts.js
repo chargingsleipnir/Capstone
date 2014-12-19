@@ -64,10 +64,10 @@ function ControlScheme() {
     this.moveUp;
     this.moveBack;
     this.moveForth;
+    this.pitchDown;
+    this.pitchUp;
     this.yawLeft;
     this.yawRight;
-    this.pitchLeft;
-    this.pitchRight;
 }
 
 var Time = {
@@ -78,7 +78,7 @@ var Time = {
 /***** ENUMS *****/
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
 var Components = { modelHandler: 1, collisionBody: 2, rigidBody: 3 };
-var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3 };
+var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4 };
 var Space = { local: 0, global: 1 };
 var BoundingShapes = { sphere: 0, aabb: 1 };
 var Planes = { left: 0, right: 1, bottom: 2, top: 3, far: 4, near: 5 };

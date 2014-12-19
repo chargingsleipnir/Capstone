@@ -12,7 +12,7 @@ function Quaternion(x, y, z, w) {
     ///  <summary>Container for rotation axis and angle</summary>
     ///  <returns type="Quaternion" />
     /// </signature>
-    this.v = new Vector3(x, y, z) || new Vector3();
+    this.v = new Vector3(x || 0.0, y || 0.0, z || 0.0);
     this.w = w || 1.0;
 }
 Quaternion.prototype = {
@@ -34,6 +34,18 @@ Quaternion.prototype = {
         /// </signature>
         return new Quaternion(this.v.x, this.v.y, this.v.z, this.w);
     },
+    SetValues: function(x, y, z, w) {
+        /// <signature>
+        ///  <summary>Set values directly - not axis and angle!</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <param name="w" type="decimal"></param>
+        ///  <returns type="Quaternion" />
+        /// </signature>
+        this.v.SetValues(x, y, z);
+        this.w = w;
+    },
     SetEuler: function(pitch, yaw, roll) {
         /// <signature>
         ///  <summary>Container for rotation axis and angle, from Euler angles</summary>
@@ -42,9 +54,9 @@ Quaternion.prototype = {
         ///  <param name="roll" type="decimal">in degrees</param>
         ///  <returns type="Quaternion" />
         /// </signature>
-        var p = arg0 * DEG_TO_RAD,
-            y = arg1 * DEG_TO_RAD,
-            r = arg2 * DEG_TO_RAD;
+        var p = pitch * DEG_TO_RAD,
+            y = yaw * DEG_TO_RAD,
+            r = roll * DEG_TO_RAD;
         var sinP = Math.sin(p),
             sinY = Math.sin(y),
             sinR = Math.sin(r),
@@ -62,7 +74,7 @@ Quaternion.prototype = {
 
         // This is still effed
         this.w = (sinP * sinY * sinR + cosP * cosY * cosR) / 2.0;
-        this.v.SetAxes(
+        this.v.SetValues(
             sinP * cosY * cosR + sinY * sinR * cosP,
 			sinY * cosR * cosP - sinR * sinP * cosY,
 			sinR * cosP * cosY - sinP * sinY * cosR
@@ -70,7 +82,7 @@ Quaternion.prototype = {
 
         return this;
     },
-    SetAxisAngle: function(vec3, thetaDeg) {
+    SetFromAxisAngle: function(vec3, thetaDeg) {
         /// <signature>
         ///  <summary>Container for rotation axis and angle</summary>
         ///  <param name="axis" type="Vector3"></param>
@@ -124,7 +136,7 @@ Quaternion.prototype = {
         var last = (this.v.GetCross(temp)).SetScaleByNum(2.0);
         return vec3.GetAdd(temp.SetScaleByNum(2.0 * this.w)).SetAdd(last);
     },
-    SetUnit: function() {
+    SetIdentity: function() {
         /// <signature>
         ///  <summary>Set axis to 0 and w to 1</summary>
         ///  <returns type="Quaternion" />
@@ -135,12 +147,21 @@ Quaternion.prototype = {
         this.w = 1.0;
         return this;
     },
+    GetMagSqr: function() {
+        return this.w * this.w + this.v.GetMagSqr();
+    },
+    GetMag: function() {
+        var magSqr = this.GetMagSqr();
+        if (magSqr < INFINTESIMAL)
+            return 0;
+        return Math.sqrt(magSqr);
+    },
     SetNormalized: function() {
         /// <signature>
         ///  <summary>Set to normalized values</summary>
         ///  <returns type="Quaternion" />
         /// </signature>
-        var magSqr = this.w * this.w + this.v.GetMagSqr();
+        var magSqr = this.GetMagSqr();
         if (magSqr < INFINTESIMAL)
             return;
         else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
@@ -155,7 +176,7 @@ Quaternion.prototype = {
         ///  <summary>Get normalized values</summary>
         ///  <returns type="Quaternion" />
         /// </signature>
-        var magSqr = this.w * this.w + this.v.GetMagSqr();
+        var magSqr = this.GetMagSqr();
         if (magSqr < INFINTESIMAL)
             return;
         else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
@@ -163,20 +184,31 @@ Quaternion.prototype = {
         var magInv = 1.0 / Math.sqrt(magSqr);
         return new Quaternion(this.v.x * magInv, this.v.y * magInv, this.v.z * magInv, this.w * magInv);
     },
-    SetInverse: function() {
+    SetConjugate: function() {
         /// <signature>
         ///  <summary>Set to inversed values</summary>
         ///  <returns type="Quaternion" />
         /// </signature>
         this.v.SetNegative();
     },
-    GetInverse: function() {
+    GetConjugate: function() {
         /// <signature>
         ///  <summary>Get the inversed quaternion</summary>
         ///  <returns type="Quaternion" />
         /// </signature>
-        var vInv = this.v.GetNegative();
-        return new Quaternion(vInv.x, vInv.y, vInv.z, this.w);
+        var vNeg = this.v.GetNegative();
+        return new Quaternion(vNeg.x, vNeg.y, vNeg.z, this.w);
+    },
+    SetInverse: function() {
+        var mag = this.GetMag();
+        var conj = this.GetConjugate();
+        this.SetValues(conj.v.x / mag, conj.v.y / mag, conj.v.z / mag, conj.w / mag);
+        return this;
+    },
+    GetInverse: function() {
+        var mag = this.GetMag();
+        var conj = this.GetConjugate();
+        return new Quaternion(conj.v.x / mag, conj.v.y / mag, conj.v.z / mag, conj.w / mag)
     },
     GetAxis: function() {
         /// <signature>

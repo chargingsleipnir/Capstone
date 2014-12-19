@@ -226,7 +226,7 @@ function Screen_Title(ScreenChangeCallback) {
     arrow.trfmLocal.SetScaleVec3(new Vector3(0.5, 2.0, 1.0));
     heart.trfmLocal.SetPosVec3(new Vector3(0.5, 0.5, -1.0));
     heart.trfmLocal.SetScaleAxes(3.0, 0.25, 1.0);
-    arrow.trfmLocal.Rotate(new Vector3(1.0, 0.0, 0.0), 45.0);
+    arrow.trfmLocal.SetRotation(new Vector3(1.0, 0.0, 0.0), 45.0);
     grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
     testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.0, -1.0));
@@ -246,25 +246,6 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(testCube);
     GM.rootObj.AddChild(disc);
     GM.rootObj.AddChild(cube);
-
-
-    var angle = 0.0;
-
-    // Control camera
-    var camRegName = "main camera";
-    Input.RegisterObject(camRegName, true);
-    var camCtrl = new ControlScheme();
-    camCtrl.moveLeft = Input.CreateInputController(camRegName, KeyMap.A);
-    camCtrl.moveRight = Input.CreateInputController(camRegName, KeyMap.D);
-    camCtrl.moveDown = Input.CreateInputController(camRegName, KeyMap.Q);
-    camCtrl.moveUp = Input.CreateInputController(camRegName, KeyMap.E);
-    camCtrl.moveBack = Input.CreateInputController(camRegName, KeyMap.S);
-    camCtrl.moveForth = Input.CreateInputController(camRegName, KeyMap.W);
-    camCtrl.yawLeft = Input.CreateInputController(camRegName, KeyMap.ArrowLeft);
-    camCtrl.yawRight = Input.CreateInputController(camRegName, KeyMap.ArrowRight);
-    camCtrl.pitchDown = Input.CreateInputController(camRegName, KeyMap.ArrowDown);
-    camCtrl.pitchUp = Input.CreateInputController(camRegName, KeyMap.ArrowUp);
-
 
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];
@@ -297,6 +278,7 @@ function Screen_Title(ScreenChangeCallback) {
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var launchForce = new Vector3(0.0, 0.0, -250.0);
 
+    var angle = 0.0;
     this.Update = function() {
 
         if(launch.pressed){
@@ -306,32 +288,7 @@ function Screen_Title(ScreenChangeCallback) {
 
         angle += 0.005;
 
-        skyBox.trfmLocal.Rotate(GBL_FWD, angle);
-
-        if(camCtrl.moveLeft.pressed) {
-            GM.activeCam.trfm.TranslateAxes(-GM.activeCam.moveSpeed, 0.0, 0.0);
-        }
-        else if(camCtrl.moveRight.pressed) {
-            GM.activeCam.trfm.TranslateAxes(GM.activeCam.moveSpeed, 0.0, 0.0);
-        }
-        if(camCtrl.moveUp.pressed) {
-            GM.activeCam.trfm.TranslateAxes(0.0, GM.activeCam.moveSpeed, 0.0);
-        }
-        else if(camCtrl.moveDown.pressed) {
-            GM.activeCam.trfm.TranslateAxes(0.0, -GM.activeCam.moveSpeed, 0.0);
-        }
-        if(camCtrl.moveForth.pressed) {
-            GM.activeCam.trfm.TranslateAxes(0.0, 0.0, -GM.activeCam.moveSpeed);
-        }
-        else if(camCtrl.moveBack.pressed) {
-            GM.activeCam.trfm.TranslateAxes(0.0, 0.0, GM.activeCam.moveSpeed);
-        }
-        if(camCtrl.yawLeft.pressed) {
-            GM.activeCam.trfm.RotateView(GM.activeCam.turnSpeed, GM.activeCam.trfm.dirUp);
-        }
-        else if(camCtrl.yawRight.pressed) {
-            GM.activeCam.trfm.RotateView(-GM.activeCam.turnSpeed, GM.activeCam.trfm.dirUp);
-        }
+        skyBox.trfmLocal.SetRotation(GBL_FWD, angle);
 
         // if button pressed
         // var nextScreen = new Screen_InGame();

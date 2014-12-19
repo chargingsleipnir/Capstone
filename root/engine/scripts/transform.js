@@ -4,6 +4,7 @@ function Transform() {
     this.pos = new Vector3(0.0, 0.0, 0.0);
     this.dirFwd = (new Vector3()).SetCopy(GBL_FWD);
     this.dirUp = (new Vector3()).SetCopy(GBL_UP);
+    this.dirRight = (new Vector3()).SetCopy(GBL_RIGHT);
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
 
@@ -73,7 +74,7 @@ Transform.prototype = {
     //},
     RotateView: function(thetaDeg, axis) {
         /// <signature>
-        ///  <summary>Rotate around the given axis by degree specified</summary>
+        ///  <summary>SetRotation around the given axis by degree specified</summary>
         ///  <param name="thetaDeg" type="decimal"></param>
         ///  <param name="axis" type="Vector3"></param>
         ///  <returns type="void" />
@@ -82,14 +83,25 @@ Transform.prototype = {
         this.dirUp.SetRotated(thetaDeg, axis.GetCopy());
         this.active = true;
     },
-    Rotate: function(axis, thetaDeg) {
+    SetRotation: function(axis, thetaDeg) {
         /// <signature>
-        ///  <summary>Rotate around given axis by given angle</summary>
+        ///  <summary>Set Rotation around given axis by given angle</summary>
         ///  <param name="axis" type="Vector3">Axis around which to rotate</param>
         ///  <param name="thetaDeg" type="decimal">Angle in degrees</param>
         ///  <returns type="void" />
         /// </signature>
-        this.orient.SetAxisAngle(axis, thetaDeg);
+        this.orient.SetFromAxisAngle(axis, thetaDeg);
+        this.active = true;
+    },
+    Rotate: function(axis, thetaDeg) {
+        /// <signature>
+        ///  <summary>Apply Rotation around given axis by given angle</summary>
+        ///  <param name="axis" type="Vector3">Axis around which to rotate</param>
+        ///  <param name="thetaDeg" type="decimal">Angle in degrees</param>
+        ///  <returns type="void" />
+        /// </signature>
+        var rotation = new Quaternion();
+        this.orient.SetMultiplyQuat(rotation.SetFromAxisAngle(axis, thetaDeg));
         this.active = true;
     },
     SetScaleAxes: function(x, y, z) {

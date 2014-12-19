@@ -71,28 +71,21 @@ Frustum.prototype = {
     }
 };
 
-function Camera(pos, dirFwd, dirUp, wndWidth, wndHeight) {
-    this.trfm = new Transform();
-    this.trfm.pos.SetCopy(pos);
-    this.trfm.dirFwd.SetCopy(dirFwd);
-    this.trfm.dirFwd.SetNormalized();
-    this.trfm.dirUp.SetCopy(dirUp);
-    this.trfm.dirUp.SetNormalized();
+function Camera(gameObject, wndWidth, wndHeight) {
 
-    this.ctrl = new ControlScheme();
-    this.moveSpeed = 0.01;
-    this.turnSpeed = 0.5;
+    this.obj = gameObject;
 
     this.mtxCam = new Matrix4();
-    this.mtxCam.SetOrientation(pos, dirFwd, dirUp, Space.global);
     // Make proj matrix with frustum
     this.mtxProj = new Matrix4();
-    this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
+    this.mtxProj.SetPerspective(45.0, wndWidth / wndHeight, 0.1, 200.0);
+    //this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
     this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
 
     this.gui = null;
 }
 Camera.prototype = {
+    /*
     SetCopy: function(camera) {
         this.pos.SetCopy(camera.pos);
         this.dirFwd.SetCopy(camera.dirFwd);
@@ -103,10 +96,18 @@ Camera.prototype = {
     GetCopy: function() {
         return new Camera(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
     },
+    */
     Update: function() {
-        if (this.trfm.IsChanging()) {
-            this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, Space.global);
-            this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
+        //if (this.trfm.IsChanging()) {
+            //this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, Space.global);
+            //this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
+        //}
+        this.obj.Update(this.obj.trfmLocal);
+        if (this.obj.trfmLocal.IsChanging()) {
+            this.mtxCam.SetIdentity();
+            this.mtxCam.SetTranslateVec3(this.obj.trfmLocal.pos);
+            this.mtxCam.SetRotateAbout(this.obj.trfmLocal.orient.GetAxis(), this.obj.trfmLocal.orient.GetAngle());
+            this.mtxCam.SetScaleVec3(this.obj.trfmLocal.scale);
         }
     }
     /*
@@ -116,4 +117,4 @@ Camera.prototype = {
         }
     }
     */
-}
+};

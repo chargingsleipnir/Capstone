@@ -195,7 +195,7 @@ var GL = {
         //var frustumTestCount = 0;
         for (var i = 0; i < GM.models.length; i++)
         {
-            if (GM.models[i].active && GM.activeCam.frustum.IntersectsSphere(GM.models[i].drawSphere)) {
+            //if (GM.models[i].active && GM.activeCam.frustum.IntersectsSphere(GM.models[i].drawSphere)) {
                 //frustumTestCount++;
                 //var dist = ((GM.models[i].drawSphere.pos).GetSubtract(GM.activeCam.trfm.pos)).GetMag();
                 //console.log(dist);
@@ -259,7 +259,7 @@ var GL = {
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-            }
+            //}
         }
         //console.log(frustumTestCount);
     }
