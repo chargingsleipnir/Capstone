@@ -56,13 +56,40 @@ Transform.prototype = {
         this.pos.z += z;
         this.active = true;
     },
-    TranslateVec3: function(translation) {
+    TranslateVec: function(translation) {
         /// <signature>
         ///  <summary>Move position by amount given</summary>
         ///  <param name="translation" type="Vector3"></param>
         ///  <returns type="void" />
         /// </signature>
         this.pos.SetAdd(translation);
+        this.active = true;
+    },
+    TranslateFwd: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.dirFwd.GetScaleByNum(speed));
+        this.active = true;
+    },
+    TranslateUp: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.dirUp.GetScaleByNum(speed));
+        this.active = true;
+    },
+    TranslateRight: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.dirRight.GetScaleByNum(speed));
         this.active = true;
     },
     //SetOrientation: function(dirFwd, dirUp) {
@@ -81,6 +108,7 @@ Transform.prototype = {
         /// </signature>
         this.dirFwd.SetRotated(thetaDeg, axis.GetCopy());
         this.dirUp.SetRotated(thetaDeg, axis.GetCopy());
+        this.dirRight.SetRotated(thetaDeg, axis.GetCopy());
         this.active = true;
     },
     SetRotation: function(axis, thetaDeg) {

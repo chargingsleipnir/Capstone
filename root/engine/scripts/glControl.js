@@ -241,6 +241,12 @@ var GL = {
 
                 // SEND UP UNIFORMS
                 //this.ctx.uniformMatrix4fv(shdr.u_MtxProj, false, GM.activeCam.mtxProjView.data);
+                /* No definition for matrix 4 inverse yet!
+                var camInv = GM.activeCam.mtxCam.GetInverse();
+                GM.activeCam.mtxCam.SetMultiply(GM.activeCam.mtxProj);
+                GM.activeCam.mtxCam.SetMultiply(camInv);
+                GM.activeCam.mtxProj.SetIdentity();
+                */
                 this.ctx.uniformMatrix4fv(shdr.u_MtxProj, false, GM.activeCam.mtxProj.data);
                 this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxCam.data);
                 this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, GM.models[i].mtxModel.data);

@@ -629,7 +629,7 @@ Vector3.prototype = {
 
         return this.GetCopy(first.SetAdd(middle.SetAdd(last)));
     }
-}
+};
 /*
     FacingDirection: function(radRotation) {
         /// <signature>

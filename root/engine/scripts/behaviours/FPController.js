@@ -3,8 +3,8 @@ function FPController() {
     this.obj;
 
     this.ctrl = new ControlScheme();
-    this.moveSpeed = 0.01;
-    this.turnSpeed = 0.5;
+    this.moveSpeed = 10;
+    this.turnSpeed = 1.0;
 
     this.pitchAngle = 0.0;
     this.yawAngle = 0.0;
@@ -32,39 +32,38 @@ FPController.prototype = {
     Update: function() {
 
         if(this.ctrl.moveLeft.pressed) {
-            this.obj.trfmLocal.TranslateAxes(this.moveSpeed, 0.0, 0.0);
+            this.obj.trfmLocal.TranslateRight(this.moveSpeed * Time.delta_Milli);
         }
         else if(this.ctrl.moveRight.pressed) {
-            this.obj.trfmLocal.TranslateAxes(-this.moveSpeed, 0.0, 0.0);
+            this.obj.trfmLocal.TranslateRight(-this.moveSpeed * Time.delta_Milli);
         }
         if(this.ctrl.moveUp.pressed) {
-            this.obj.trfmLocal.TranslateAxes(0.0, -this.moveSpeed, 0.0);
+            this.obj.trfmLocal.TranslateUp(-this.moveSpeed * Time.delta_Milli);
         }
         else if(this.ctrl.moveDown.pressed) {
-            this.obj.trfmLocal.TranslateAxes(0.0, this.moveSpeed, 0.0);
+            this.obj.trfmLocal.TranslateUp(this.moveSpeed * Time.delta_Milli);
         }
         if(this.ctrl.moveForth.pressed) {
-            this.obj.trfmLocal.TranslateAxes(0.0, 0.0, this.moveSpeed);
+            this.obj.trfmLocal.TranslateFwd(-this.moveSpeed * Time.delta_Milli);
         }
         else if(this.ctrl.moveBack.pressed) {
-            this.obj.trfmLocal.TranslateAxes(0.0, 0.0, -this.moveSpeed);
+            this.obj.trfmLocal.TranslateFwd(this.moveSpeed * Time.delta_Milli);
         }
         if(this.ctrl.pitchUp.pressed) {
-            this.pitchAngle -= this.turnSpeed;
-            this.obj.trfmLocal.SetRotation(this.obj.trfmLocal.dirRight, this.pitchAngle);
+            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, -this.turnSpeed);
         }
         else if(this.ctrl.pitchDown.pressed) {
-            this.pitchAngle += this.turnSpeed;
-            this.obj.trfmLocal.SetRotation(this.obj.trfmLocal.dirRight, this.pitchAngle);
+            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, this.turnSpeed);
         }
         if(this.ctrl.yawLeft.pressed) {
-            this.yawAngle -= this.turnSpeed;
-            this.obj.trfmLocal.SetRotation(this.obj.trfmLocal.dirUp, this.yawAngle);
+            this.obj.trfmLocal.dirFwd.SetRotated(this.turnSpeed, GBL_UP);
+            this.obj.trfmLocal.dirRight.SetRotated(this.turnSpeed, GBL_UP);
+            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, -this.turnSpeed);
         }
         else if(this.ctrl.yawRight.pressed) {
-            this.yawAngle += this.turnSpeed;
-            this.obj.trfmLocal.SetRotation(this.obj.trfmLocal.dirUp, this.yawAngle);
+            this.obj.trfmLocal.dirFwd.SetRotated(-this.turnSpeed, GBL_UP);
+            this.obj.trfmLocal.dirRight.SetRotated(-this.turnSpeed, GBL_UP);
+            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, this.turnSpeed);
         }
-
     }
 };

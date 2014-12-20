@@ -136,6 +136,10 @@ Quaternion.prototype = {
         var last = (this.v.GetCross(temp)).SetScaleByNum(2.0);
         return vec3.GetAdd(temp.SetScaleByNum(2.0 * this.w)).SetAdd(last);
     },
+    GetAngularDiff: function(quat) {
+        // Might be more to this?
+        return quat.GetMultiplyQuat(this.GetInverse());
+    },
     SetIdentity: function() {
         /// <signature>
         ///  <summary>Set axis to 0 and w to 1</summary>
@@ -147,12 +151,15 @@ Quaternion.prototype = {
         this.w = 1.0;
         return this;
     },
+    GetDot: function() {
+        return this.w * this.w + this.v.GetMagSqr();
+    },
     GetMagSqr: function() {
         return this.w * this.w + this.v.GetMagSqr();
     },
     GetMag: function() {
         var magSqr = this.GetMagSqr();
-        if (magSqr < INFINTESIMAL)
+        if (magSqr < INFINITESIMAL)
             return 0;
         return Math.sqrt(magSqr);
     },
@@ -162,7 +169,7 @@ Quaternion.prototype = {
         ///  <returns type="Quaternion" />
         /// </signature>
         var magSqr = this.GetMagSqr();
-        if (magSqr < INFINTESIMAL)
+        if (magSqr < INFINITESIMAL)
             return;
         else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
             return this;
@@ -177,7 +184,7 @@ Quaternion.prototype = {
         ///  <returns type="Quaternion" />
         /// </signature>
         var magSqr = this.GetMagSqr();
-        if (magSqr < INFINTESIMAL)
+        if (magSqr < INFINITESIMAL)
             return;
         else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
             return this;

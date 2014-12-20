@@ -105,9 +105,10 @@ Camera.prototype = {
         this.obj.Update(this.obj.trfmLocal);
         if (this.obj.trfmLocal.IsChanging()) {
             this.mtxCam.SetIdentity();
-            this.mtxCam.SetTranslateVec3(this.obj.trfmLocal.pos);
             this.mtxCam.SetRotateAbout(this.obj.trfmLocal.orient.GetAxis(), this.obj.trfmLocal.orient.GetAngle());
+            this.mtxCam.SetTranslateVec3(this.obj.trfmLocal.pos);
             this.mtxCam.SetScaleVec3(this.obj.trfmLocal.scale);
+            //this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
         }
     }
     /*
