@@ -193,8 +193,19 @@ var GL = {
         this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
 
         //var frustumTestCount = 0;
+
         for (var i = 0; i < GM.models.length; i++)
         {
+            // Change this on a per-object basis, with near and far using objects sphere
+            // Frustum may come from just proj matrix, or from combo...
+            /*
+            var distToObj = GM.activeCam.obj.trfmGlobal.pos.GetSubtract(GM.models[i].drawSphere.pos).GetMag();
+            var near = distToObj - GM.models[i].drawSphere.radius;
+            var far = distToObj + GM.models[i].drawSphere.radius;
+            GM.activeCam.mtxProj.SetPerspective(45.0, GM.wndWidth / GM.wndHeight, 0.1, 200);
+            GM.activeCam.mtxProjView = GM.activeCam.mtxCam.GetMultiply(GM.activeCam.mtxProj);
+            */
+
             //if (GM.models[i].active && GM.activeCam.frustum.IntersectsSphere(GM.models[i].drawSphere)) {
                 //frustumTestCount++;
                 //var dist = ((GM.models[i].drawSphere.pos).GetSubtract(GM.activeCam.trfm.pos)).GetMag();
@@ -240,15 +251,7 @@ var GL = {
                 }
 
                 // SEND UP UNIFORMS
-                //this.ctx.uniformMatrix4fv(shdr.u_MtxProj, false, GM.activeCam.mtxProjView.data);
-                /* No definition for matrix 4 inverse yet!
-                var camInv = GM.activeCam.mtxCam.GetInverse();
-                GM.activeCam.mtxCam.SetMultiply(GM.activeCam.mtxProj);
-                GM.activeCam.mtxCam.SetMultiply(camInv);
-                GM.activeCam.mtxProj.SetIdentity();
-                */
-                this.ctx.uniformMatrix4fv(shdr.u_MtxProj, false, GM.activeCam.mtxProj.data);
-                this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxCam.data);
+                this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
                 this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, GM.models[i].mtxModel.data);
                 this.ctx.uniform3fv(shdr.u_tint, GM.models[i].colourTint.GetData());
 

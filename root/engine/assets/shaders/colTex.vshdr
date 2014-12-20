@@ -12,7 +12,7 @@ varying vec2 v_TextureCoord;
 void main()
 {
 	gl_PointSize = 4.0;
-	gl_Position = u_Matrix_Projection * u_Matrix_Camera * u_Matrix_Model * vec4(a_VertexPosition, 1.0);
+	gl_Position = u_Matrix_Camera * u_Matrix_Model * vec4(a_VertexPosition, 1.0);
 	v_Color = a_VertexColor;
 	v_TextureCoord = a_TextureCoord;
 }

@@ -491,12 +491,8 @@ Matrix4.prototype = {
         ///  <returns type="Matrix4" />
         /// </signature>
 
-        var out = new Matrix4(
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0
-        );
+        var out = new Matrix4();
+        out.data[0] = out.data[5] = out.data[10] = out.data[15] = 0.0;
 
         for (var i = 0; i < 4; i++)
             for (var j = 0; j < 4; j++)
