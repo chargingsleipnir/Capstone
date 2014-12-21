@@ -22,17 +22,19 @@ var GM = {
         GL.CreateShaderPrograms(EM.assets.shaderStrings, EM.assets.shaderPrograms);
 
         TwoD.Initialize(canvas2D.getContext('2d'));
+        GUI.InitializeCanvas();
 
         // Get and use GL canvas window sizing
         var canvasStyles = window.getComputedStyle(canvasWebGL, null);
         this.wndWidth = parseFloat(canvasStyles.width);
         this.wndHeight = parseFloat(canvasStyles.height);
 
+        // Set up initial camera
         var mainCam = new GameObject("Main Camera", Labels.camera);
         mainCam.AddScript(new FPController());
         this.activeCam = new Camera(mainCam, this.wndWidth, this.wndHeight);
-        // Give it this one for now, but if I want to do anything serious with the 2D canvas
-        this.activeCam.gui = new GUI(canvas2D);
+        this.activeCam.RunGUI();
+
         GL.ReshapeWindow(this.wndWidth, this.wndHeight);
     },
     LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, Callback) {

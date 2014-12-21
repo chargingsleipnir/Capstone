@@ -146,8 +146,8 @@ var GL = {
         this.ctx.pixelStorei(this.ctx.UNPACK_FLIP_Y_WEBGL, true);
         this.ctx.texImage2D(this.ctx.TEXTURE_2D, 0, this.ctx.RGBA, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, texture);
         // Might want to parameterize these to adjust quality.
-        this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.NEAREST);
-        this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.NEAREST);
+        this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.LINEAR);
+        this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.LINEAR_MIPMAP_NEAREST);
         this.ctx.generateMipmap(this.ctx.TEXTURE_2D);
         this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
         return texID;
