@@ -291,16 +291,23 @@ function Screen_Title(ScreenChangeCallback) {
         skyBox.trfmLocal.SetRotation(GBL_FWD, angle);
 
         // if button pressed
-        // var nextScreen = new Screen_InGame();
-        // GM.SetLoopCallback(nextScreen.Update);
+        //var nextScreen = new Screen_InGame();
+        //GM.SetLoopCallback(nextScreen.Update);
     }
 }
 
 function Screen_InGame(ScreenChangeCallback) {
 
-
+    var disc = new GameObject('disc', Labels.none);
+    disc.SetModel(GM.assets.models['disc']);
+    disc.AddComponent(Components.modelHandler);
+    disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface']);
+    disc.AddComponent(Components.collisionBody);
+    disc.trfmLocal.SetPosAxes(0.0, 0.0, -5.0);
+    GM.rootObj.AddChild(disc);
 
     this.Update = function() {
+
         // if loseCondition:
         //ScreenChangeCallback(new Screen_GameOver(ScreenChangeCallback));
     }

@@ -1,4 +1,4 @@
-﻿
+﻿/*
 function Frustum(mtxProj, fovY, ratio, boundNear, boundFar, pos, dirFwd, dirUp) {
 
     mtxProj.SetPerspective(fovY, ratio, boundNear, boundFar);
@@ -21,7 +21,61 @@ function Frustum(mtxProj, fovY, ratio, boundNear, boundFar, pos, dirFwd, dirUp) 
 
     this.CalculatePlanes(pos, dirFwd, dirUp);
 }
+*/
+function Frustum() {
+
+    this.planes = [6];
+    for (var i = 0; i < 6; i++)
+        this.planes[i] = new Plane();
+}
 Frustum.prototype = {
+    SetFromMtx: function(mtx) {
+
+        this.planes[Planes.left].norm.SetValues(
+            mtx.data[12] + mtx.data[0],
+            mtx.data[13] + mtx.data[1],
+            mtx.data[14] + mtx.data[2]
+        );
+        this.planes[Planes.left].dist = mtx.data[15] + mtx.data[3];
+
+        this.planes[Planes.right].norm.SetValues(
+            mtx.data[12] - mtx.data[0],
+            mtx.data[13] - mtx.data[1],
+            mtx.data[14] - mtx.data[2]
+        );
+        this.planes[Planes.right].dist = mtx.data[15] - mtx.data[3];
+
+        this.planes[Planes.bottom].norm.SetValues(
+            mtx.data[12] + mtx.data[4],
+            mtx.data[13] + mtx.data[5],
+            mtx.data[14] + mtx.data[6]
+        );
+        this.planes[Planes.bottom].dist = mtx.data[15] + mtx.data[7];
+
+        this.planes[Planes.top].norm.SetValues(
+            mtx.data[12] - mtx.data[4],
+            mtx.data[13] - mtx.data[5],
+            mtx.data[14] - mtx.data[6]
+        );
+        this.planes[Planes.top].dist = mtx.data[15] - mtx.data[7];
+
+        this.planes[Planes.near].norm.SetValues(
+            mtx.data[12] + mtx.data[8],
+            mtx.data[13] + mtx.data[9],
+            mtx.data[14] + mtx.data[10]
+        );
+        this.planes[Planes.near].dist = mtx.data[15] + mtx.data[11];
+
+        this.planes[Planes.far].norm.SetValues(
+            mtx.data[12] - mtx.data[8],
+            mtx.data[13] - mtx.data[9],
+            mtx.data[14] - mtx.data[10]
+        );
+        this.planes[Planes.far].dist = mtx.data[15] - mtx.data[11];
+
+        for (var i = 0; i < 6; i++)
+            this.planes[i].SetNormalized();
+    },
     CalculatePlanes: function(pos, dirFwd, dirUp) {
         var dirRight = dirFwd.GetCross(dirUp);
 
@@ -82,7 +136,8 @@ function Camera(gameObject, wndWidth, wndHeight) {
     //this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
     this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
 
-    this.gui = null;
+    this.frustum = new Frustum();
+    this.frustum.SetFromMtx(this.mtxProjView);
 }
 Camera.prototype = {
     /*
@@ -97,6 +152,12 @@ Camera.prototype = {
         return new Camera(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
     },
     */
+    RunGUI: function() {
+        this.obj.SetModel(new Primitives.Rect(new Vector2(0.1, 0.1)));
+        this.obj.AddComponent(Components.modelHandler);
+        this.obj.mdlHdlr.SetTexture(TwoD.GetCanvas());
+        this.obj.mdlHdlr.colourTint.SetValues(1.0, 0.0, 1.0);
+    },
     Update: function() {
         //if (this.trfm.IsChanging()) {
             //this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, Space.global);
@@ -109,8 +170,8 @@ Camera.prototype = {
             this.mtxCam.SetTranslateVec3(this.obj.trfmLocal.pos);
             this.mtxCam.SetScaleVec3(this.obj.trfmLocal.scale);
 
-
             GM.activeCam.mtxProjView = GM.activeCam.mtxCam.GetMultiply(GM.activeCam.mtxProj);
+            this.frustum.SetFromMtx(this.mtxProjView);
         }
     }
     /*

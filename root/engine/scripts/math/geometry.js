@@ -75,7 +75,7 @@ Ray.prototype = {
         ///  <param name="distance" type="decimal"></param>
         ///  <returns type="Vector3" />
         /// </signature>
-        return this.pos.GetAdd(this.dir.GetScale(dist));
+        return this.pos.GetAdd(this.dir.GetScaleByNum(dist));
     }
 };
 
@@ -138,14 +138,14 @@ Plane.prototype = {
         this.dist = dist;
     },
     SetNormalized: function() {
-        var magInv = 1.0 / this.norm.GetMag();
-        this.norm.SetScale(magInv);
+        var magInv = this.norm.GetMagInv();
+        this.norm.SetScaleByNum(magInv);
         this.dist *= magInv;
         return this;
     },
     GetNormalized: function() {
-        var magInv = 1.0 / this.norm.GetMag();
-        return new Plane(this.norm.GetScale(magInv), this.dist * magInv);
+        var magInv = this.norm.GetMagInv();
+        return new Plane(this.norm.GetScaleByNum(magInv), this.dist * magInv);
     },
     DistanceTo: function(point) {
         /// <signature>

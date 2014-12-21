@@ -536,22 +536,42 @@ Vector3.prototype = {
         ///  <summary>Returns the scalar length of the vector</summary>
         ///  <returns type="decimal" />
         /// </signature>
-        return Math.sqrt(this.GetMagSqr());
+        var magSqr = this.GetMagSqr();
+        if (magSqr < INFINITESIMAL)
+            return 0;
+        else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
+            return 1.0;
+        else
+            return Math.sqrt(magSqr);
+    },
+    GetMagInv: function() {
+        /// <signature>
+        ///  <summary>Returns the scalar length of the vector</summary>
+        ///  <returns type="decimal" />
+        /// </signature>
+        var magSqr = this.GetMagSqr();
+        if (magSqr < INFINITESIMAL)
+            return 0;
+        else if(magSqr > 1.0 - INFINITESIMAL && magSqr < 1.0 + INFINITESIMAL)
+            return 1.0;
+        else
+            return 1.0 / Math.sqrt(magSqr);
     },
     SetNormalized: function() {
         /// <signature>
         ///  <summary>Divides each component value by the magnitude</summary>
         ///  <returns type="Vector3" />
         /// </signature>
-        var mag = this.GetMag();
-        
-        if (mag < INFINITESIMAL)
+
+        var magInv = this.GetMag();
+        if (magInv < INFINITESIMAL)
             return;
 
-        mag = 1.0 / mag;
-        this.x *= mag;
-        this.y *= mag;
-        this.z *= mag;
+        magInv = 1.0 / magInv;
+
+        this.x *= magInv;
+        this.y *= magInv;
+        this.z *= magInv;
         return this;
     },
     GetNormalized: function() {
