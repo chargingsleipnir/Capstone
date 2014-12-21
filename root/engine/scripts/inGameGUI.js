@@ -62,8 +62,6 @@ var GUI = {
         var canvasHeight = MathUtils.GetGreatestDouble(msgHeight);
         (canvasWidth > canvasHeight) ? canvasHeight = canvasWidth : canvasWidth = canvasHeight;
 
-        console.log(canvasWidth);
-
         TwoD.GetCanvas().width = canvasWidth;
         TwoD.GetCanvas().height = canvasHeight;
         // These need to happen again now that the canvas has changed

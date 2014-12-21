@@ -108,9 +108,9 @@ GameObject.prototype = {
         if (this.trfmLocal.IsChanging() || trfmParent.active) {
             // Update global to pass to children
             this.trfmGlobal.active = true;
-            this.trfmGlobal.pos = (this.trfmLocal.pos.GetCopy()).SetAdd(trfmParent.pos);
-            this.trfmGlobal.orient = (this.trfmLocal.orient.GetCopy()).SetMultiplyQuat(trfmParent.orient);
-            this.trfmGlobal.scale = (this.trfmLocal.scale.GetCopy()).SetScaleByVec(trfmParent.scale);
+            this.trfmGlobal.pos = this.trfmLocal.pos.GetAdd(trfmParent.pos);
+            this.trfmGlobal.orient = this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient);
+            this.trfmGlobal.scale = this.trfmLocal.scale.GetScaleByVec(trfmParent.scale);
 
             //this.trfmGlobal.dirFwd.Set(this.trfmLocal.dirFwd);
             //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);

@@ -157,13 +157,16 @@ Camera.prototype = {
         this.obj.AddComponent(Components.modelHandler);
         this.obj.mdlHdlr.SetTexture(TwoD.GetCanvas());
         this.obj.mdlHdlr.colourTint.SetValues(1.0, 0.0, 1.0);
+        //GM.rootObj.AddChild(this.obj);
     },
     Update: function() {
         //if (this.trfm.IsChanging()) {
             //this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, Space.global);
             //this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
         //}
+
         this.obj.Update(this.obj.trfmLocal);
+        // Consider Using "trfmLocal.active" instead of IsChanging if I want it to update the model. Not good for a GUI/HUD though.
         if (this.obj.trfmLocal.IsChanging()) {
             this.mtxCam.SetIdentity();
             this.mtxCam.SetRotateAbout(this.obj.trfmLocal.orient.GetAxis(), this.obj.trfmLocal.orient.GetAngle());
