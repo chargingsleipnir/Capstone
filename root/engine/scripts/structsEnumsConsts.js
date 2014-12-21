@@ -99,6 +99,8 @@ var KeyMap = {
 };
 
 /***** CONSTS *****/
+var DEBUG = true;
+var GUI_ACTIVE = false;
 var DEG_TO_RAD = Math.PI / 180.0;
 var RAD_TO_DEG = 180.0 / Math.PI;
 var INFINITESIMAL = 1.0e-9;

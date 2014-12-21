@@ -1,46 +1,54 @@
 ﻿
 var Primitives = {
-    axesPositive: {
-        name: "Positive Axes",
-        numTris: 0,
-        materials: [],
-        vertices: {
-            byMesh: {
-                count: 4,
-                posCoords: [
-                    0.0, 0.0, 0.0,
-                    100.0, 0.0, 0.0,
-                    0.0, 100.0, 0.0,
-                    0.0, 0.0, 100.0
-                ],
-                colElems: [],
-                texCoords: [],
-                normAxes: [],
-                indices: []
+    Ray: function() {
+
+    },
+    AxesPositive: function(scaleVec) {
+        var x = scaleVec.x || 1.0;
+        var y = scaleVec.y || 1.0;
+        var z = scaleVec.z || 1.0;
+        return {
+            name: "Positive Axes",
+            numTris: 0,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: 4,
+                    posCoords: [
+                        0.0, 0.0, 0.0,
+                        x, 0.0, 0.0,
+                        0.0, y, 0.0,
+                        0.0, 0.0, z
+                    ],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: [],
+                    indices: []
+                },
+                byFaces: {
+                    count: 6,
+                    posCoords: [
+                        0.0, 0.0, 0.0,
+                        x, 0.0, 0.0,
+                        0.0, 0.0, 0.0,
+                        0.0, y, 0.0,
+                        0.0, 0.0, 0.0,
+                        0.0, 0.0, z
+                    ],
+                    colElems: [
+                        1.0, 0.0, 0.0,
+                        1.0, 0.0, 0.0,
+                        0.0, 0.8, 0.0,
+                        0.0, 0.8, 0.0,
+                        0.0, 0.0, 1.0,
+                        0.0, 0.0, 1.0
+                    ],
+                    texCoords: [],
+                    normAxes: []
+                }
             },
-            byFaces: {
-                count: 6,
-                posCoords: [
-                    0.0, 0.0, 0.0,
-                    100.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0,
-                    0.0, 100.0, 0.0,
-                    0.0, 0.0, 0.0,
-                    0.0, 0.0, 100.0
-                ],
-                colElems: [
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    0.0, 0.8, 0.0,
-                    0.0, 0.8, 0.0,
-                    0.0, 0.0, 1.0,
-                    0.0, 0.0, 1.0
-                ],
-                texCoords: [],
-                normAxes: []
-            }
-        },
-        drawMethod: DrawMethods.lines
+            drawMethod: DrawMethods.lines
+        };
     },
     axesNegative: {
         name: "Negative Axes",

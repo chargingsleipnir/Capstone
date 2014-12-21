@@ -6,7 +6,7 @@ function ModelHandler(model, shapeData) {
 
     // Create Buffer
     this.bufferData = new BufferData();
-    GL.CreateBufferObjects(this.vertData, this.bufferData);
+    GL.CreateBufferObjects(this.vertData, this.bufferData, false);
     // Get the appropriate shader for the model given
     this.shaderData = ModelUtils.AssignShaderProgram(this.vertData, model.materials);
 

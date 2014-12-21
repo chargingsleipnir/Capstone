@@ -8,10 +8,10 @@ function GameObject(name, label) {
     this.components = [];
     this.scripts = [];
 
-    this.trfmLocal = new Transform();
-    this.trfmGlobal = new Transform();
-
     this.shape = new AAShapeData3D();
+
+    this.trfmLocal = new Transform(this.shape);
+    this.trfmGlobal = new Transform();
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {

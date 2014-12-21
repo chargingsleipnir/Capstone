@@ -95,11 +95,14 @@ var GL = {
         for (var i = 0; i < shaderStrings.length; i++)
             container[shaderStrings[i].name] = CreateProgram(shaderStrings[i].vert, shaderStrings[i].frag);
     },
-    CreateBufferObjects: function(vertData, bufferData) {
+    CreateBufferObjects: function(vertData, bufferData, isDynamic) {
         /// <signature>
         ///  <summary>Creates appropriate buffers from given model data</summary>
         ///  <param name="model" type="object">May be primitive, or imported</param>
         /// </signature>
+        var drawType = this.ctx.STATIC_DRAW;
+        if(isDynamic)
+            drawType = this.ctx.DYNAMIC_DRAW;
 
         // Get appropriate set of verts based on whether or not indices can/will be used
         bufferData.numVerts = vertData.posCoords.length / 3;
@@ -107,7 +110,7 @@ var GL = {
             // Create and populate EABO
             bufferData.EABO = this.ctx.createBuffer();
             this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, bufferData.EABO);
-            this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertData.indices), this.ctx.STATIC_DRAW);
+            this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertData.indices), drawType);
             // Get total vertex count
             bufferData.numVerts = vertData.indices.length;
         }
@@ -122,7 +125,7 @@ var GL = {
         // Create VBO
         bufferData.VBO = this.ctx.createBuffer();
         this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, bufferData.VBO);
-        this.ctx.bufferData(this.ctx.ARRAY_BUFFER, VAO, this.ctx.STATIC_DRAW);
+        this.ctx.bufferData(this.ctx.ARRAY_BUFFER, VAO, drawType);
 
         bufferData.VAOBytes = VAO.BYTES_PER_ELEMENT;
         bufferData.lenPosCoords = vertData.posCoords.length;
@@ -268,8 +271,102 @@ var GL = {
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-            //}
         }
         //console.log(frustumTestCount);
+
+        if (GUI_ACTIVE) {
+
+            var shdr = EM.assets.shaderPrograms['gui'].program;
+            this.ctx.useProgram(shdr);
+
+            for (var i = 0; i < DM.shapes.length; i++)
+            {
+                // These just allow everything to be better read
+
+                var buff = DM.shapes[i].bufferData;
+
+                // USE PROGRAM AND VBO
+
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                if (shdr.a_Col != -1) {
+                    this.ctx.enableVertexAttribArray(shdr.a_Col);
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                }
+                if (shdr.a_TexCoord != -1) {
+                    this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                    this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+                    if (buff.texID) {
+                        this.ctx.activeTexture(this.ctx.TEXTURE0);
+                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                        this.ctx.uniform1i(shdr.u_Sampler, 0);
+                        // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
+                    }
+                }
+
+                // SEND UP UNIFORMS
+                this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, DM.shapes[i].mtxModel.data);
+                this.ctx.uniform3fv(shdr.u_tint, DM.shapes[i].colourTint.GetData());
+
+                // Draw calls
+                if (buff.EABO) {
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(DM.shapes[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                }
+                else {
+                    this.ctx.drawArrays(DM.shapes[i].drawMethod, 0, buff.numVerts);
+                }
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+            }
+        }
+
+        if (DEBUG) {
+
+            var shdr = EM.assets.shaderPrograms['col'].program;
+            this.ctx.useProgram(shdr);
+
+            for (var i = 0; i < DM.shapes.length; i++)
+            {
+                // These just allow everything to be better read
+
+                var buff = DM.shapes[i].bufferData;
+
+                // USE PROGRAM AND VBO
+
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                if (shdr.a_Col != -1) {
+                    this.ctx.enableVertexAttribArray(shdr.a_Col);
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                }
+
+                // SEND UP UNIFORMS
+                this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
+                this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, DM.shapes[i].mtxModel.data);
+                this.ctx.uniform3fv(shdr.u_tint, DM.shapes[i].colourTint.GetData());
+
+                // Draw calls
+                if (buff.EABO) {
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(DM.shapes[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                }
+                else {
+                    this.ctx.drawArrays(DM.shapes[i].drawMethod, 0, buff.numVerts);
+                }
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+            }
+        }
     }
 };

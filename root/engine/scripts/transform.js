@@ -1,5 +1,5 @@
 ﻿
-function Transform() {
+function Transform(shapeData) {
     // Start in standard position facing down -z
     this.pos = new Vector3(0.0, 0.0, 0.0);
     this.dirFwd = (new Vector3()).SetCopy(GBL_FWD);
@@ -7,6 +7,9 @@ function Transform() {
     this.dirRight = (new Vector3()).SetCopy(GBL_RIGHT);
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
+
+    //this.dirDisplay = new ModelHandler(new Primitives.AxesPositive(this.scale), shapeData);
+    //GM.models.push(this.dirDisplay);
 
     //this.offsetPos = Vector3.CreateZero();
     //this.offsetRot = Vector3.CreateZero();
@@ -181,4 +184,4 @@ Transform.prototype = {
         }
         return false;
     }
-}
+};
