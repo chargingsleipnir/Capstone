@@ -665,8 +665,7 @@ var Primitives = {
             radius = 1.0;
         vertPositions.add = function (vec3Data) {
             var magInv = 1.0 / Math.sqrt((vec3Data[0] * vec3Data[0]) + (vec3Data[1] * vec3Data[1]) + (vec3Data[2] * vec3Data[2]));
-            var scalar = magInv * radius;
-            this.push([vec3Data[0] * scalar, vec3Data[1] * scalar, vec3Data[2] * scalar]);
+            this.push([vec3Data[0] * magInv, vec3Data[1] * magInv, vec3Data[2] * magInv]);
             indexRecord[index] = [index, index];
             return index++;
         };
@@ -695,13 +694,15 @@ var Primitives = {
         }
 
         posCoords = [];
+        normals = [];
         var texCoords = [];
         var r = 1.0;
         var texBound = 0.75;
         var pivotPoint = [0, 0, 1];
         for (var i = 0; i < vertPositions.length; i++) {
             for (var j = 0; j < vertPositions[i].length; j++) {
-                posCoords.push(vertPositions[i][j]);
+                normals.push(vertPositions[i][j]);
+                posCoords.push(vertPositions[i][j] * radius);
             }
 
             var x = vertPositions[i][0], y = vertPositions[i][1], z = vertPositions[i][2];
@@ -744,7 +745,7 @@ var Primitives = {
                     posCoords: posCoords,
                     colElems: colors,
                     texCoords: texCoords,
-                    normAxes: posCoords,
+                    normAxes: normals,
                     indices: indices
                 },
                 byFaces: {

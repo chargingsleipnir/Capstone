@@ -8,7 +8,7 @@ var GM = {
     },
     LoopCall: function(){},
     activeCam: null,
-    rootObj: new GameObject("Root", Labels.none),
+    rootObj: null,
     models: [],
     Initialize: function(canvasWebGL, canvas2D) {
         /// <signature>
@@ -20,6 +20,8 @@ var GM = {
         // get webGL context - use it to create shader programs
         GL.Initialize(canvasWebGL.getContext('webgl'));
         GL.CreateShaderPrograms(EM.assets.shaderStrings, EM.assets.shaderPrograms);
+
+        this.rootObj = new GameObject("Root", Labels.none);
 
         TwoD.Initialize(canvas2D.getContext('2d'));
         GUI.InitializeCanvas();
@@ -48,6 +50,8 @@ var GM = {
         this.rootObj.Update(this.rootObj.trfmLocal);
         this.activeCam.Update();
         CollisionNetwork.Update();
+        if(DEBUG)
+            DM.Update();
     },
     SetActiveCamera: function(camera) {
         this.activeCam = camera;

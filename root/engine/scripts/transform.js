@@ -2,14 +2,17 @@
 function Transform(shapeData) {
     // Start in standard position facing down -z
     this.pos = new Vector3(0.0, 0.0, 0.0);
+    this.orient = new Quaternion();
+    this.scale = new Vector3(1.0, 1.0, 1.0);
     this.dirFwd = (new Vector3()).SetCopy(GBL_FWD);
     this.dirUp = (new Vector3()).SetCopy(GBL_UP);
     this.dirRight = (new Vector3()).SetCopy(GBL_RIGHT);
-    this.orient = new Quaternion();
-    this.scale = new Vector3(1.0, 1.0, 1.0);
 
-    //this.dirDisplay = new ModelHandler(new Primitives.AxesPositive(this.scale), shapeData);
-    //GM.models.push(this.dirDisplay);
+    if(DEBUG) {
+        if (shapeData) {
+            DM.dispObjs.push(new DispObj(new ModelHandler(new Primitives.AxesPositive(shapeData.radii.GetScaleByVec(this.scale)), shapeData), this));
+        }
+    }
 
     //this.offsetPos = Vector3.CreateZero();
     //this.offsetRot = Vector3.CreateZero();

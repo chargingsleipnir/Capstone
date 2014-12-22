@@ -16,11 +16,13 @@ function CollisionBody(shapeData, trfm) {
     // Sphere set as standard
     //this.activeShape = this.sphere;
 
-    this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
-    this.activeFrame.MakeWireFrame();
-    this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
+    if(DEBUG) {
+        var activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
+        activeFrame.MakeWireFrame();
+        activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
 
-    GM.models.push(this.activeFrame);
+        DM.dispObjs.push(new DispObj(activeFrame, this.trfm));
+    }
     // Intentionally left this blank to bypass condition checks
     //this.SetBoundingShape();
 
@@ -81,8 +83,6 @@ CollisionBody.prototype = {
         //this.aabb.pos = this.trfm.pos;
         this.sphere.radius = this.shapeData.radius * this.trfm.GetLargestScaleValue();
         //this.aabb.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
-
-        this.activeFrame.UpdateModelViewControl(this.trfm);
     }
 };
 
