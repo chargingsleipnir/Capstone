@@ -184,7 +184,7 @@ var GeomUtils = {
      return Vector3.DotProduct(acd, acb) < 0.0;
      },
      */
-    GetFromVertCoords: function (coords) {
+    GetShapeData3D: function (coords, centre) {
         /// <signature>
         ///  <summary>Returns the object provided, sized to wrap around the vertices provided</summary>
         ///  <param name="allPosCoords" type="[]">entire list of vertex positions, as decimals, in x, y, z order</param>
@@ -202,7 +202,18 @@ var GeomUtils = {
             shape.max.z = (coords[i + 2] > shape.max.z) ? coords[i + 2] : shape.max.z;
             shape.min.z = (coords[i + 2] < shape.min.z) ? coords[i + 2] : shape.min.z;
         }
+
         shape.RecalculateDimensions();
+
+        if(centre) {
+            for (var i = 0; i < coords.length; i += 3) {
+                coords[i] -= shape.centre.x;
+                coords[i + 1] -= shape.centre.y;
+                coords[i + 2] -= shape.centre.z;
+            }
+            shape.centre.SetZero();
+            shape.RecalculateExtents();
+        }
 
         // Go over all vertices again to get most accurate radius
         for (var i = 0; i < coords.length; i += 3) {

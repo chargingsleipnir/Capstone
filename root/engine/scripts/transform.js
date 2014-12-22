@@ -8,12 +8,6 @@ function Transform(shapeData) {
     this.dirUp = (new Vector3()).SetCopy(GBL_UP);
     this.dirRight = (new Vector3()).SetCopy(GBL_RIGHT);
 
-    if(DEBUG) {
-        if (shapeData) {
-            DM.dispObjs.push(new DispObj(new ModelHandler(new Primitives.AxesPositive(shapeData.radii.GetScaleByVec(this.scale)), shapeData), this));
-        }
-    }
-
     //this.offsetPos = Vector3.CreateZero();
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();

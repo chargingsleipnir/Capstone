@@ -229,13 +229,17 @@ function Screen_Title(ScreenChangeCallback) {
     arrow.trfmLocal.SetRotation(new Vector3(1.0, 0.0, 0.0), 45.0);
     grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
-    testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.0, -1.0));
+    testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.5, -1.5));
     disc.trfmLocal.SetPosAxes(0.0, 1.0, -5.0);
     cube.trfmLocal.SetPosVec3(new Vector3(-3.5, 0.0, -20.0));
 
     arrow.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
     heart.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
     cube.mdlHdlr.colourTint.SetValues(0.0, 0.5, 0.5);
+
+    testCube.AddComponent(Components.collisionBody);
+    arrow.AddComponent(Components.collisionBody);
+    heart.AddComponent(Components.collisionBody);
 
     // Add to Capstone node
     GM.rootObj.AddChild(arrow);
@@ -246,6 +250,10 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(testCube);
     GM.rootObj.AddChild(disc);
     GM.rootObj.AddChild(cube);
+
+    //console.log(testCube.shape);
+    //console.log(testCube.trfmLocal.pos);
+    //console.log(testCube.collider.aabb);
 
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];

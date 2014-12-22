@@ -4,9 +4,15 @@ var Primitives = {
 
     },
     AxesPositive: function(scaleVec) {
-        var x = scaleVec.x || 1.0;
-        var y = scaleVec.y || 1.0;
-        var z = scaleVec.z || 1.0;
+        var x, y, z;
+        if(scaleVec) {
+            x = scaleVec.x;
+            y = scaleVec.y;
+            z = scaleVec.z;
+        }
+        else
+            x = y = z = 1.0;
+
         return {
             name: "Positive Axes",
             numTris: 0,
@@ -272,8 +278,14 @@ var Primitives = {
         drawMethod: DrawMethods.lines
     },
     Rect: function (radii) {
-        var w = radii.x || 1.0,
-            h = radii.y || 1.0;
+        var w, h;
+        if(radii) {
+            w = radii.x;
+            h = radii.y;
+        }
+        else {
+            w = h = 1.0;
+        }
 
         var posCoords = [
             -w, h, 0.0,
@@ -461,9 +473,14 @@ var Primitives = {
     },
     Cube: function (radii, canTexture) {
 
-        var w = radii.x || 1.0,
-            h = radii.y || 1.0,
-            d = radii.z || 1.0;
+        var w, h, d;
+        if(radii) {
+            w = radii.x;
+            h = radii.y;
+            d = radii.z;
+        }
+        else
+            w = h = d = 1.0;
 
         var posCoords = [
             -w, h, -d,

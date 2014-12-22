@@ -10,18 +10,19 @@ function CollisionBody(shapeData, trfm) {
     this.trfm = trfm;
     this.shapeData = shapeData;
 
-    this.sphere = new Sphere(shapeData.centre, shapeData.radius);
-    //this.aabb = new AABB(this.shapeData.centre, this.shapeData.radii);
+    this.sphere = new Sphere(this.trfm.pos, shapeData.radius);
+    this.aabb = new AABB(this.trfm.pos, shapeData.radii);
 
     // Sphere set as standard
     //this.activeShape = this.sphere;
 
     if(DEBUG) {
         var activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
+        //var activeFrame = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
         activeFrame.MakeWireFrame();
         activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
 
-        DM.dispObjs.push(new DispObj(activeFrame, this.trfm));
+        DM.AddDisplayObject(activeFrame, this.trfm);
     }
     // Intentionally left this blank to bypass condition checks
     //this.SetBoundingShape();

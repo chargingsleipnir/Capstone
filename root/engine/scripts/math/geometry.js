@@ -4,7 +4,7 @@ function AAShapeData3D(centre, min, max, radii, radius) {
     this.min = new Vector3();
     this.max = new Vector3();
     this.radii = new Vector3(1.0, 1.0, 1.0);
-    this.radius = radius || 1.0;
+    this.radius = radius ? radius : 1.0;
 
     this.centre.SetCopy(centre || this.centre);
     this.min.SetCopy(min || this.min);
@@ -324,9 +324,12 @@ function AABB(pos, radii) {
     ///  <returns type="AABB" />
     /// </signature>
     this.pos = new Vector3();
-    this.radii = new Vector3(0.5, 0.5, 0.5);
-    this.pos.SetCopy(pos || this.pos);
-    this.radii.SetCopy(radii || this.radii);
+    this.radii = new Vector3(1.0, 1.0, 1.0);
+
+    if(pos)
+        this.pos.SetCopy(pos);
+    if(radii)
+        this.radii.SetCopy(radii);
 }
 AABB.prototype = {
     SetCopy: function(box) {

@@ -10,8 +10,11 @@ function GameObject(name, label) {
 
     this.shape = new AAShapeData3D();
 
-    this.trfmLocal = new Transform(this.shape);
+    this.trfmLocal = new Transform();
     this.trfmGlobal = new Transform();
+
+    if(DEBUG)
+        this.debugDispIdx = DM.AddDisplayObject(new ModelHandler(new Primitives.AxesPositive(), this.shape), this.trfmGlobal);
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -48,9 +51,11 @@ GameObject.prototype = {
         ///  <returns type="void" />
         /// </signature>
         if (component == Components.modelHandler) {
-            this.mdlHdlr = new ModelHandler(this.model, this.shape);
-            // Add controller to draw call;
-            GM.models.push(this.mdlHdlr);
+            if(this.model) {
+                this.mdlHdlr = new ModelHandler(this.model, this.shape);
+                // Add controller to draw call;
+                GM.models.push(this.mdlHdlr);
+            }
         }
         else if (component == Components.rigidBody) {
             this.rigidBody = new RigidBody(this.trfmLocal, this.shape.radius);
@@ -97,7 +102,14 @@ GameObject.prototype = {
         ///  <returns type="void" />
         /// </signature>
         this.model = model;
-        this.shape = GeomUtils.GetFromVertCoords(model.vertices.byMesh.posCoords);
+        // Make sure the correct set of vertices are being centred.
+        var vertData = ModelUtils.SelectVAOData(this.model.vertices);
+        this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
+
+        if(DEBUG) {
+            var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.5));
+            DM.ReplaceDisplayObject(this.debugDispIdx, new ModelHandler(new Primitives.AxesPositive(axesLengths), this.shape), this.trfmGlobal);
+        }
     },
     Update: function(trfmParent) {
         /// <signature>
