@@ -52,7 +52,11 @@ GameObject.prototype = {
         ///  <param name="component" type="enum">component to add</param>
         ///  <returns type="void" />
         /// </signature>
-        if (component == Components.modelHandler) {
+        if(component == Components.camera) {
+            this.camera = new Camera(this.trfmLocal);
+            this.components.push(this.camera);
+        }
+        else if (component == Components.modelHandler) {
             if(this.model) {
                 this.mdlHdlr = new ModelHandler(this.model, this.shape);
                 // Add controller to draw call;

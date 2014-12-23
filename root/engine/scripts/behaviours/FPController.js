@@ -50,22 +50,20 @@ FPController.prototype = {
             this.obj.trfmLocal.TranslateFwd(-this.moveSpeed * Time.delta_Milli);
         }
         if(this.ctrl.pitchUp.pressed) {
-            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, this.turnSpeed);
+            this.obj.trfmLocal.RotateLocalViewX(this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, -this.turnSpeed);
         }
         else if(this.ctrl.pitchDown.pressed) {
-            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, -this.turnSpeed);
+            this.obj.trfmLocal.RotateLocalViewX(-this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, this.turnSpeed);
         }
         if(this.ctrl.yawLeft.pressed) {
-            //his.obj.trfmLocal.dirFwd.SetRotated(this.turnSpeed, GBL_UP);
-            //this.obj.trfmLocal.dirRight.SetRotated(this.turnSpeed, GBL_UP);
-            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, this.turnSpeed);
-            console.log(this.obj.trfmLocal.dirRight);
+            this.obj.trfmLocal.RotateLocalView(GBL_UP, this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, this.turnSpeed);
         }
         else if(this.ctrl.yawRight.pressed) {
-            //this.obj.trfmLocal.dirFwd.SetRotated(-this.turnSpeed, GBL_UP);
-            //this.obj.trfmLocal.dirRight.SetRotated(-this.turnSpeed, GBL_UP);
-            this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, -this.turnSpeed);
-            console.log(this.obj.trfmLocal.dirRight);
+            this.obj.trfmLocal.RotateLocalView(GBL_UP, -this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, -this.turnSpeed);
         }
     }
 };

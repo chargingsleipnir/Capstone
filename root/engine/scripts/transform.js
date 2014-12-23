@@ -1,5 +1,5 @@
 ﻿
-function Transform(shapeData) {
+function Transform() {
     // Start in standard position facing down -z
     this.pos = new Vector3();
     this.orient = new Quaternion();
@@ -99,7 +99,7 @@ Transform.prototype = {
     //    this.dirUp.Set(dirUp.Normalize());
     //    this.active = true;
     //},
-    RotateView: function(axis, thetaDeg) {
+    RotateLocalView: function(axis, thetaDeg) {
         /// <signature>
         ///  <summary>SetRotation around the given axis by degree specified</summary>
         ///  <param name="thetaDeg" type="decimal"></param>
@@ -111,6 +111,21 @@ Transform.prototype = {
         this.dirRight.SetRotated(thetaDeg, axis);
         this.active = true;
     },
+    RotateLocalViewX: function(thetaDeg) {
+        this.dirFwd.SetRotated(thetaDeg, this.dirRight);
+        this.dirUp.SetRotated(thetaDeg, this.dirRight);
+        this.active = true;
+    },
+    RotateLocalViewY: function(thetaDeg) {
+        this.dirFwd.SetRotated(thetaDeg, this.dirUp);
+        this.dirRight.SetRotated(thetaDeg, this.dirUp);
+        this.active = true;
+    },
+    RotateLocalViewZ: function(thetaDeg) {
+        this.dirUp.SetRotated(thetaDeg, this.dirFwd);
+        this.dirRight.SetRotated(thetaDeg, this.dirFwd);
+        this.active = true;
+    },
     SetRotation: function(axis, thetaDeg) {
         /// <signature>
         ///  <summary>Set Rotation around given axis by given angle</summary>
@@ -119,7 +134,7 @@ Transform.prototype = {
         ///  <returns type="void" />
         /// </signature>
         this.orient.SetFromAxisAngle(axis, thetaDeg);
-        this.RotateView(axis, thetaDeg);
+        //this.RotateView(axis, thetaDeg);
         this.active = true;
     },
     Rotate: function(axis, thetaDeg) {
@@ -131,7 +146,7 @@ Transform.prototype = {
         /// </signature>
         var rotation = new Quaternion();
         this.orient.SetMultiplyQuat(rotation.SetFromAxisAngle(axis, thetaDeg));
-        this.RotateView(axis, thetaDeg);
+        //this.RotateView(axis, thetaDeg);
         this.active = true;
     },
     SetScaleAxes: function(x, y, z) {

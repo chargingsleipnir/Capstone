@@ -32,10 +32,8 @@ var GM = {
         this.wndHeight = parseFloat(canvasStyles.height);
 
         // Set up initial camera
-        var mainCam = new GameObject("Main Camera", Labels.camera);
-        //mainCam.AddScript(new FPController());
-        this.activeCam = new Camera(mainCam, this.wndWidth, this.wndHeight);
-        this.activeCam.RunGUI();
+        this.rootObj.AddComponent(Components.camera);
+        this.rootObj.camera.SetControlsActive(true);
 
         GL.ReshapeWindow(this.wndWidth, this.wndHeight);
     },
@@ -48,12 +46,15 @@ var GM = {
     },
     Update: function() {
         this.rootObj.Update(this.rootObj.trfmLocal);
-        this.activeCam.Update();
         CollisionNetwork.Update();
         if(DEBUG)
             DM.Update();
     },
     SetActiveCamera: function(camera) {
+        if(this.activeCam)
+            this.activeCam.active = false;
+
+        camera.active = true;
         this.activeCam = camera;
     },
     SetLoopCallback: function(Callback) {

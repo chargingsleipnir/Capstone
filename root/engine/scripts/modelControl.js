@@ -54,14 +54,12 @@ ModelHandler.prototype = {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     },
     UpdateModelViewControl: function(trfm) {
-        this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, trfm.dirRight, Space.local);
-        /*
+        //this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, trfm.dirRight, Space.local);
+
         this.mtxModel.SetIdentity();
         this.mtxModel.SetTranslateVec3(trfm.pos);
         this.mtxModel.SetRotateAbout(trfm.orient.GetAxis(), trfm.orient.GetAngle());
-         */
         this.mtxModel.SetScaleVec3(trfm.scale);
-
 
         // Keep bounding sphere updated for accurate frustum culling
         this.drawSphere.pos.SetCopy(trfm.pos);

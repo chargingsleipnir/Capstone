@@ -125,56 +125,70 @@ Frustum.prototype = {
     }
 };
 
-function Camera(gameObject, wndWidth, wndHeight) {
+function Camera(trfmObj) {
 
-    this.obj = gameObject;
+    this.trfmObj = trfmObj;
+    this.trfm = new Transform();
 
     this.mtxCam = new Matrix4();
     // Make proj matrix with frustum
     this.mtxProj = new Matrix4();
-    this.mtxProj.SetPerspective(45.0, wndWidth / wndHeight, 0.1, 200.0);
+    this.mtxProj.SetPerspective(45.0, GM.wndWidth / GM.wndHeight, 0.1, 200.0);
     //this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
     this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
 
     this.frustum = new Frustum();
     this.frustum.SetFromMtx(this.mtxProjView);
+
+    this.active = false;
+    GM.SetActiveCamera(this);
 }
 Camera.prototype = {
-    /*
-    SetCopy: function(camera) {
-        this.pos.SetCopy(camera.pos);
-        this.dirFwd.SetCopy(camera.dirFwd);
-        this.dirUp.SetCopy(camera.dirUp);
-        this.trfm.active = true;
-        return this;
-    },
-    GetCopy: function() {
-        return new Camera(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
-    },
-    */
     RunGUI: function() {
+        /*
         this.obj.SetModel(new Primitives.Rect(new Vector2(0.1, 0.1)));
         this.obj.AddComponent(Components.modelHandler);
         this.obj.mdlHdlr.SetTexture(TwoD.GetCanvas());
         this.obj.mdlHdlr.colourTint.SetValues(1.0, 0.0, 1.0);
         //GM.rootObj.AddChild(this.obj);
+        */
+    },
+    SetControlsActive: function(ctrlActive) {
+        if(!this.ctrl)
+            this.ctrl = new CameraController(this.trfm);
+
+        this.ctrl.active = ctrlActive;
     },
     Update: function() {
-        //if (this.trfm.IsChanging()) {
-            //this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, Space.global);
-            //this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
-        //}
+        // Update controls
+        if(this.ctrl)
+            this.ctrl.Update();
 
-        this.obj.Update(this.obj.trfmLocal);
-        // Consider Using "trfmLocal.active" instead of IsChanging if I want it to update the model. Not good for a GUI/HUD though.
-        if (this.obj.trfmLocal.IsChanging()) {
-            this.mtxCam.SetIdentity();
-            this.mtxCam.SetRotateAbout(this.obj.trfmLocal.orient.GetAxis(), this.obj.trfmLocal.orient.GetAngle());
-            this.mtxCam.SetTranslateVec3(this.obj.trfmLocal.pos);
-            this.mtxCam.SetScaleVec3(this.obj.trfmLocal.scale);
+        if (this.active && this.trfm.IsChanging()) {
 
-            GM.activeCam.mtxProjView = GM.activeCam.mtxCam.GetMultiply(GM.activeCam.mtxProj);
+            /* This same kind of parent-child updating is what makes it at all
+            * valuable to add a camera as a component of a gameObject */
+            /*
+            var newPos = this.trfmLocal.pos.GetAdd(trfmParent.pos);
+            var newOrient = this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient);
+            var newScale = this.trfmLocal.scale.GetScaleByVec(trfmParent.scale);
+
+            var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
+            //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
+            var newDirUp.SetCopy(this.trfmLocal.dirUp);
+            //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
+            var newDirRight.SetCopy(this.trfmLocal.dirRight);
+            */
+
+            // Update game view
+            this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
+            //this.mtxCam.SetIdentity();
+            //this.mtxCam.SetRotateAbout(this.trfmObj.orient.GetAxis(), this.trfmObj.orient.GetAngle());
+            //this.mtxCam.SetTranslateVec3(this.trfmObj.pos);
+            //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
+            this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
             this.frustum.SetFromMtx(this.mtxProjView);
+            //this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
         }
     }
     /*

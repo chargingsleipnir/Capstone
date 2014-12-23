@@ -248,8 +248,6 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(disc);
     GM.rootObj.AddChild(cube);
 
-    arrow.AddScript(new FPController());
-
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];
     var startPositions = [
@@ -275,6 +273,8 @@ function Screen_Title(ScreenChangeCallback) {
 
         GM.rootObj.AddChild(balls[i]);
     }
+
+    //balls[0].AddComponent(Components.camera);
 
     var physicsTestName = "PhysicsTest";
     Input.RegisterObject(physicsTestName, true);
