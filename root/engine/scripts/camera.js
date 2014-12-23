@@ -129,6 +129,7 @@ function Camera(trfmObj) {
 
     this.trfmObj = trfmObj;
     this.trfm = new Transform();
+    this.trfm.pos.SetCopy(this.trfmObj.pos);
 
     this.mtxCam = new Matrix4();
     // Make proj matrix with frustum
@@ -164,15 +165,14 @@ Camera.prototype = {
         if(this.ctrl)
             this.ctrl.Update();
 
-        if (this.active && this.trfm.IsChanging()) {
+        if (this.active && (this.trfm.IsChanging() || this.trfmObj.IsChanging())) {
 
             /* This same kind of parent-child updating is what makes it at all
             * valuable to add a camera as a component of a gameObject */
-            /*
-            var newPos = this.trfmLocal.pos.GetAdd(trfmParent.pos);
-            var newOrient = this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient);
-            var newScale = this.trfmLocal.scale.GetScaleByVec(trfmParent.scale);
 
+            var newPos = this.trfm.pos.GetAdd(this.trfmObj.pos);
+            var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
+            /*
             var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
             //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
             var newDirUp.SetCopy(this.trfmLocal.dirUp);
@@ -181,10 +181,15 @@ Camera.prototype = {
             */
 
             // Update game view
-            this.mtxCam.SetOrientation(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
-            //this.mtxCam.SetIdentity();
-            //this.mtxCam.SetRotateAbout(this.trfmObj.orient.GetAxis(), this.trfmObj.orient.GetAngle());
+            this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
+
+            /* Use these to adjust controls, if set by user, to rotate camera around object.
+             * Allow user to set camera modes...
+             * This is where pushing and popping matrices will come into play!! */
             //this.mtxCam.SetTranslateVec3(this.trfmObj.pos);
+            //this.mtxCam.SetRotateAbout(newOrient.GetAxis(), -newOrient.GetAngle());
+            //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
+
             //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
             this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
             this.frustum.SetFromMtx(this.mtxProjView);

@@ -53,7 +53,7 @@ GameObject.prototype = {
         ///  <returns type="void" />
         /// </signature>
         if(component == Components.camera) {
-            this.camera = new Camera(this.trfmLocal);
+            this.camera = new Camera(this.trfmGlobal);
             this.components.push(this.camera);
         }
         else if (component == Components.modelHandler) {

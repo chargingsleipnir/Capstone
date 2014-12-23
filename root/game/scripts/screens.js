@@ -274,23 +274,25 @@ function Screen_Title(ScreenChangeCallback) {
         GM.rootObj.AddChild(balls[i]);
     }
 
-    //balls[0].AddComponent(Components.camera);
+    balls[0].AddComponent(Components.camera);
+    balls[0].camera.SetControlsActive(true);
 
     var physicsTestName = "PhysicsTest";
     Input.RegisterObject(physicsTestName, true);
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var launchForce = new Vector3(0.0, 0.0, -250.0);
 
-    var angle = 0.005;
+    var angle = 0.0;
     this.Update = function() {
+
+        angle += 0.005;
 
         if(launch.pressed){
             balls[0].rigidBody.AddForce(launchForce);
             launch.Release();
         }
 
-        //angle += 0.005;
-
+        //balls[0].trfmLocal.SetRotation(GBL_UP, angle);
         skyBox.trfmLocal.SetRotation(GBL_FWD, angle);
 
         // if button pressed
