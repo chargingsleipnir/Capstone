@@ -6,7 +6,7 @@ function ModelHandler(model, shapeData) {
 
     // Create Buffer
     this.bufferData = new BufferData();
-    GL.CreateBufferObjects(this.vertData, this.bufferData, false);
+    GL.CreateBufferObjects(this.vertData, this.bufferData, true);
     // Get the appropriate shader for the model given
     this.shaderData = ModelUtils.AssignShaderProgram(this.vertData, model.materials);
 
@@ -50,12 +50,18 @@ ModelHandler.prototype = {
     MakePointSet: function() {
         this.drawMethod = GL.GetDrawMethod(DrawMethods.points);
     },
+    RewriteVerts: function(vertArray) {
+        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    },
     UpdateModelViewControl: function(trfm) {
-        //this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, Space.local);
+        this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, trfm.dirRight, Space.local);
+        /*
         this.mtxModel.SetIdentity();
         this.mtxModel.SetTranslateVec3(trfm.pos);
         this.mtxModel.SetRotateAbout(trfm.orient.GetAxis(), trfm.orient.GetAngle());
+         */
         this.mtxModel.SetScaleVec3(trfm.scale);
+
 
         // Keep bounding sphere updated for accurate frustum culling
         this.drawSphere.pos.SetCopy(trfm.pos);

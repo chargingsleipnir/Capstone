@@ -793,7 +793,7 @@ Matrix4.prototype = {
 
         return this;
     },
-    SetOrientation: function(pos, dirFwd, dirUp, space) {
+    SetOrientation: function(pos, dirFwd, dirUp, dirRight, space) {
         /// <signature>
         ///  <summary>Create matrix oriented by directional control</summary>
         ///  <param name="pos" type="Vector3">Location of viewer</param>
@@ -802,14 +802,13 @@ Matrix4.prototype = {
         ///  <param name="space" type="enum">Determines if orientation is local or global</param>
         ///  <returns type="Matrix4" />
         /// </signature>
-        var dirSide = dirFwd.GetCross(dirUp);
         this.SetMat3(
-            dirSide.x, dirUp.x, -dirFwd.x,
-            dirSide.y, dirUp.y, -dirFwd.y,
-            dirSide.z, dirUp.z, -dirFwd.z
+            dirRight.x, dirUp.x, -dirFwd.x,
+            dirRight.y, dirUp.y, -dirFwd.y,
+            dirRight.z, dirUp.z, -dirFwd.z
         );
         if (space == Space.global) {
-            this.data[12] = -dirSide.GetDot(pos);
+            this.data[12] = -dirRight.GetDot(pos);
             this.data[13] = -dirUp.GetDot(pos);
             this.data[14] = dirFwd.GetDot(pos);
         }

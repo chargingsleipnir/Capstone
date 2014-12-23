@@ -13,8 +13,10 @@ function GameObject(name, label) {
     this.trfmLocal = new Transform();
     this.trfmGlobal = new Transform();
 
-    if(DEBUG)
-        this.debugDispIdx = DM.AddDisplayObject(new ModelHandler(new Primitives.AxesPositive(), this.shape), this.trfmGlobal);
+    if(DEBUG) {
+        this.dirDisplay = new DebugDispObj(new ModelHandler(new Primitives.AxesPositive(), this.shape), new Transform());
+        DM.dispObjs.push(this.dirDisplay);
+    }
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -108,7 +110,9 @@ GameObject.prototype = {
 
         if(DEBUG) {
             var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.5));
-            DM.ReplaceDisplayObject(this.debugDispIdx, new ModelHandler(new Primitives.AxesPositive(axesLengths), this.shape), this.trfmGlobal);
+            this.dirDisplay.model = new ModelHandler(new Primitives.AxesPositive(axesLengths), this.shape);
+
+            this.dirDisplay.model.active = DM.ShowTransformAxes ? true : false;
         }
     },
     Update: function(trfmParent) {
@@ -124,10 +128,28 @@ GameObject.prototype = {
             this.trfmGlobal.orient = this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient);
             this.trfmGlobal.scale = this.trfmLocal.scale.GetScaleByVec(trfmParent.scale);
 
-            //this.trfmGlobal.dirFwd.Set(this.trfmLocal.dirFwd);
+            this.trfmGlobal.dirFwd.SetCopy(this.trfmLocal.dirFwd);
             //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
-            //this.trfmGlobal.dirUp.Set(this.trfmLocal.dirUp);
+            this.trfmGlobal.dirUp.SetCopy(this.trfmLocal.dirUp);
             //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
+            this.trfmGlobal.dirRight.SetCopy(this.trfmLocal.dirRight);
+
+            if(DEBUG) {
+                this.dirDisplay.trfm.pos.SetCopy(this.trfmGlobal.pos);
+
+                var newVertData = [];
+                var zeroVec = new Vector3();
+                newVertData = newVertData.concat(zeroVec.GetData());
+                newVertData = newVertData.concat(this.trfmLocal.dirRight.GetData());
+                newVertData = newVertData.concat(zeroVec.GetData());
+                newVertData = newVertData.concat(this.trfmLocal.dirUp.GetData());
+                newVertData = newVertData.concat(zeroVec.GetData());
+                newVertData = newVertData.concat(this.trfmLocal.dirFwd.GetData());
+                newVertData = newVertData.concat(this.dirDisplay.model.vertData.colElems);
+                this.dirDisplay.model.RewriteVerts(newVertData);
+
+                //DEBUG = false;
+            }
 
             if (this.mdlHdlr)
                 this.mdlHdlr.UpdateModelViewControl(this.trfmGlobal);

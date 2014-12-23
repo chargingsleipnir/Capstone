@@ -22,7 +22,8 @@ function CollisionBody(shapeData, trfm) {
         activeFrame.MakeWireFrame();
         activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
 
-        DM.AddDisplayObject(activeFrame, this.trfm);
+        this.shell = new DebugDispObj(activeFrame, new Transform());
+        DM.dispObjs.push(this.shell);
     }
     // Intentionally left this blank to bypass condition checks
     //this.SetBoundingShape();
@@ -82,8 +83,20 @@ CollisionBody.prototype = {
     Update: function() {
         this.sphere.pos = this.trfm.pos;
         //this.aabb.pos = this.trfm.pos;
-        this.sphere.radius = this.shapeData.radius * this.trfm.GetLargestScaleValue();
+        var mostScale = this.trfm.GetLargestScaleValue();
+        this.sphere.radius = this.shapeData.radius * mostScale;
         //this.aabb.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
+
+        if(DEBUG) {
+            this.shell.trfm.pos.SetCopy(this.trfm.pos);
+            if(this.sphere) {
+                this.shell.trfm.scale.SetValues(mostScale, mostScale, mostScale);
+            }
+            else
+                this.shell.trfm.scale.SetCopy(this.aabb.radii);
+
+            this.shell.model.active = DM.ShowBoundingShells ? true : false;
+        }
     }
 };
 

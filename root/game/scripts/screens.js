@@ -223,10 +223,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
-    arrow.trfmLocal.SetScaleVec3(new Vector3(0.5, 2.0, 1.0));
     heart.trfmLocal.SetPosVec3(new Vector3(0.5, 0.5, -1.0));
-    heart.trfmLocal.SetScaleAxes(3.0, 0.25, 1.0);
-    arrow.trfmLocal.SetRotation(new Vector3(1.0, 0.0, 0.0), 45.0);
     grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
     testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.5, -1.5));
@@ -251,9 +248,7 @@ function Screen_Title(ScreenChangeCallback) {
     GM.rootObj.AddChild(disc);
     GM.rootObj.AddChild(cube);
 
-    //console.log(testCube.shape);
-    //console.log(testCube.trfmLocal.pos);
-    //console.log(testCube.collider.aabb);
+    arrow.AddScript(new FPController());
 
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];
@@ -286,7 +281,7 @@ function Screen_Title(ScreenChangeCallback) {
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var launchForce = new Vector3(0.0, 0.0, -250.0);
 
-    var angle = 0.0;
+    var angle = 0.005;
     this.Update = function() {
 
         if(launch.pressed){
@@ -294,7 +289,7 @@ function Screen_Title(ScreenChangeCallback) {
             launch.Release();
         }
 
-        angle += 0.005;
+        //angle += 0.005;
 
         skyBox.trfmLocal.SetRotation(GBL_FWD, angle);
 

@@ -33,7 +33,7 @@ var GM = {
 
         // Set up initial camera
         var mainCam = new GameObject("Main Camera", Labels.camera);
-        mainCam.AddScript(new FPController());
+        //mainCam.AddScript(new FPController());
         this.activeCam = new Camera(mainCam, this.wndWidth, this.wndHeight);
         this.activeCam.RunGUI();
 

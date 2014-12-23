@@ -624,7 +624,7 @@ Vector3.prototype = {
         var s = Math.sin(angle),
             c = Math.cos(angle);
 
-        var last = (norm.GetCross(this)).GetScaleByNum(s);
+        var last = (norm.GetCross(this)).SetScaleByNum(s);
         var middle = norm.GetScaleByNum(this.GetDot(norm) * (1.0 - c));
         var first = this.GetScaleByNum(c);
 

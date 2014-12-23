@@ -69,7 +69,7 @@ function ControlScheme() {
     this.yawLeft;
     this.yawRight;
 }
-function DispObj(model, trfm) {
+function DebugDispObj(model, trfm) {
     this.model = model;
     this.trfm = trfm;
 }

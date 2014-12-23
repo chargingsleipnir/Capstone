@@ -136,6 +136,11 @@ var GL = {
         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
         this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
     },
+    RewriteVAO: function(VBO, VAO) {
+        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, VBO);
+        this.ctx.bufferSubData(this.ctx.ARRAY_BUFFER, 0, VAO);
+        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+    },
     RewriteIndexBuffer: function(EABO, indices) {
         if(!EABO)
             EABO = this.ctx.createBuffer();
@@ -330,38 +335,41 @@ var GL = {
         if (DEBUG) {
             for (var i = 0; i < DM.dispObjs.length; i++)
             {
-                shdr = DM.dispObjs[i].model.shaderData;
-                buff = DM.dispObjs[i].model.bufferData;
+                if(DM.dispObjs[i].model.active) {
 
-                // USE PROGRAM AND VBO
-                this.ctx.useProgram(shdr.program);
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+                    shdr = DM.dispObjs[i].model.shaderData;
+                    buff = DM.dispObjs[i].model.bufferData;
 
-                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-                if (shdr.a_Col != -1) {
-                    this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                    // USE PROGRAM AND VBO
+                    this.ctx.useProgram(shdr.program);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                    if (shdr.a_Col != -1) {
+                        this.ctx.enableVertexAttribArray(shdr.a_Col);
+                        this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                    }
+
+                    // SEND UP UNIFORMS
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, DM.dispObjs[i].model.mtxModel.data);
+                    this.ctx.uniform3fv(shdr.u_tint, DM.dispObjs[i].model.colourTint.GetData());
+
+                    // Draw calls
+                    if (buff.EABO) {
+                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                        this.ctx.drawElements(DM.dispObjs[i].model.drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                    }
+                    else {
+                        this.ctx.drawArrays(DM.dispObjs[i].model.drawMethod, 0, buff.numVerts);
+                    }
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 }
-
-                // SEND UP UNIFORMS
-                this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
-                this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, DM.dispObjs[i].model.mtxModel.data);
-                this.ctx.uniform3fv(shdr.u_tint, DM.dispObjs[i].model.colourTint.GetData());
-
-                // Draw calls
-                if (buff.EABO) {
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(DM.dispObjs[i].model.drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-                }
-                else {
-                    this.ctx.drawArrays(DM.dispObjs[i].model.drawMethod, 0, buff.numVerts);
-                }
-
-                // Unbind buffers after use
-                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
             }
         }
     }

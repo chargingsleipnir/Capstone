@@ -1,7 +1,7 @@
 ﻿
 function Transform(shapeData) {
     // Start in standard position facing down -z
-    this.pos = new Vector3(0.0, 0.0, 0.0);
+    this.pos = new Vector3();
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
     this.dirFwd = (new Vector3()).SetCopy(GBL_FWD);
@@ -99,16 +99,16 @@ Transform.prototype = {
     //    this.dirUp.Set(dirUp.Normalize());
     //    this.active = true;
     //},
-    RotateView: function(thetaDeg, axis) {
+    RotateView: function(axis, thetaDeg) {
         /// <signature>
         ///  <summary>SetRotation around the given axis by degree specified</summary>
         ///  <param name="thetaDeg" type="decimal"></param>
         ///  <param name="axis" type="Vector3"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.dirFwd.SetRotated(thetaDeg, axis.GetCopy());
-        this.dirUp.SetRotated(thetaDeg, axis.GetCopy());
-        this.dirRight.SetRotated(thetaDeg, axis.GetCopy());
+        this.dirFwd.SetRotated(thetaDeg, axis);
+        this.dirUp.SetRotated(thetaDeg, axis);
+        this.dirRight.SetRotated(thetaDeg, axis);
         this.active = true;
     },
     SetRotation: function(axis, thetaDeg) {
@@ -119,6 +119,7 @@ Transform.prototype = {
         ///  <returns type="void" />
         /// </signature>
         this.orient.SetFromAxisAngle(axis, thetaDeg);
+        this.RotateView(axis, thetaDeg);
         this.active = true;
     },
     Rotate: function(axis, thetaDeg) {
@@ -130,6 +131,7 @@ Transform.prototype = {
         /// </signature>
         var rotation = new Quaternion();
         this.orient.SetMultiplyQuat(rotation.SetFromAxisAngle(axis, thetaDeg));
+        this.RotateView(axis, thetaDeg);
         this.active = true;
     },
     SetScaleAxes: function(x, y, z) {
