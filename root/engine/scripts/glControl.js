@@ -373,6 +373,39 @@ var GL = {
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 }
             }
+
+            // Ray casts
+            dispObjs = DM.GetDispObjs.RayCasts();
+
+            shdr = EM.assets.shaderPrograms['ray'];
+            this.ctx.useProgram(shdr.program);
+
+            for (var i = 0; i < dispObjs.length; i++)
+            {
+                if(dispObjs[i].active) {
+
+                    buff = dispObjs[i].bufferData;
+
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                    this.ctx.enableVertexAttribArray(shdr.a_Col);
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                    // SEND UP UNIFORMS
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
+                    this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].colourTint.GetData());
+
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                }
+            }
         }
     }
 };

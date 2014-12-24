@@ -24,7 +24,7 @@ function RigidBody(trfm, modelRadius) {
     this.radiusToPt = new Vector3();
 
     if(DM.GetActive())
-        DM.AddOrientAxes(new ModelHandler(new Primitives.Ray(), new AAShapeData3D()));
+        DM.AddRayCast(new RayCastHandler(new Primitives.Ray()), this.trfm.pos, this.velFinal);
 }
 RigidBody.prototype = {
     SetMass: function(mass) {

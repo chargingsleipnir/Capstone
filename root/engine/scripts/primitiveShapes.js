@@ -1,7 +1,25 @@
 ﻿
 var Primitives = {
-    Ray: function() {
+    Ray: function(pt1, pt2) {
+        var posCoords = [];
 
+        if(pt1) posCoords = posCoords.concat(pt1.GetData());
+        else posCoords = posCoords.concat([0.0, 0.0, 0.0]);
+
+        if(pt2) posCoords = posCoords.concat(pt2.GetData());
+        else posCoords = posCoords.concat([0.0, 1.0, 0.0]);
+
+        return {
+            count: 2,
+            posCoords: posCoords,
+            colElems: [
+                1.0, 0.0, 1.0,
+                1.0, 0.0, 1.0
+            ],
+            texCoords: [],
+            normAxes: [],
+            indices: [0, 1]
+        };
     },
     OrientAxes: function(scaleVec) {
         var x, y, z;

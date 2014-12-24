@@ -12,6 +12,7 @@ var EM = {
         // SHADERS
         var shaderNamesFilepaths = [
             ['test', 'engine/assets/shaders/test.vshdr', 'engine/assets/shaders/test.fshdr'],
+            ['ray', 'engine/assets/shaders/ray.vshdr', 'engine/assets/shaders/ray.fshdr'],
             ['col', 'engine/assets/shaders/col.vshdr', 'engine/assets/shaders/col.fshdr'],
             ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr'],
             ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr'],

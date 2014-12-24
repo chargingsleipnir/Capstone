@@ -6,7 +6,7 @@ function ModelHandler(model, shapeData) {
 
     // Create Buffer
     this.bufferData = new BufferData();
-    GL.CreateBufferObjects(this.vertData, this.bufferData, true);
+    GL.CreateBufferObjects(this.vertData, this.bufferData, false);
     // Get the appropriate shader for the model given
     this.shaderData = ModelUtils.AssignShaderProgram(this.vertData, model.materials);
 
@@ -64,5 +64,19 @@ ModelHandler.prototype = {
         // Keep bounding sphere updated for accurate frustum culling
         this.drawSphere.pos.SetCopy(trfm.pos);
         this.drawSphere.radius = this.shapeData.radius * trfm.GetLargestScaleValue();
+    }
+};
+
+function RayCastHandler(rayVerts) {
+    // Create Buffer
+    this.bufferData = new BufferData();
+    GL.CreateBufferObjects(rayVerts, this.bufferData, true);
+
+    this.active = true;
+    this.colourTint = new Vector3();
+}
+RayCastHandler.prototype = {
+    RewriteVerts: function(vertArray) {
+        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     }
 };

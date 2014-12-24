@@ -15,8 +15,10 @@ var DM = (function() {
             trfms: [],
             shapes: []
         },
-        velocities: {
-            models: []
+        rayCasts: {
+            rays: [],
+            pos: [],
+            slopes: []
         }
     };
 
@@ -24,7 +26,7 @@ var DM = (function() {
         worldAxes: false,
         orientAxes: false,
         shells: false,
-        velocities: false,
+        rayCasts: false,
         processingData: false
     };
 
@@ -35,7 +37,7 @@ var DM = (function() {
         GetActive: function() {
             return active;
         },
-        ToDisplay: function(showWorldAxes, showObjOrient, showObjShells, showObjVel, showProcessData) {
+        ToDisplay: function(showWorldAxes, showObjOrient, showObjShells, showRays, showProcessData) {
             dispActive.worldAxes = showWorldAxes;
 
             dispActive.orientAxes = showObjOrient;
@@ -46,9 +48,9 @@ var DM = (function() {
             for (var i = 0; i < dispObjs.shells.models.length; i++)
                 dispObjs.shells.models[i].active = showObjShells;
 
-            dispActive.velocities = showObjVel;
-            for (var i = 0; i < dispObjs.velocities.models.length; i++)
-                dispObjs.velocities.models[i].active = showObjVel;
+            dispActive.rayCasts = showRays;
+            for (var i = 0; i < dispObjs.rayCasts.rays.length; i++)
+                dispObjs.rayCasts.rays[i].active = showRays;
 
             dispActive.processingData = showProcessData;
         },
@@ -68,12 +70,15 @@ var DM = (function() {
             dispObjs.shells.trfms.push(trfm);
             dispObjs.shells.shapes.push(shape);
         },
-        AddVelocity: function(model) {
-            dispObjs.velocities.models.push(model);
+        AddRayCast: function(ray, pos, slope) {
+            dispObjs.rayCasts.rays.push(ray);
+            dispObjs.rayCasts.pos.push(pos);
+            dispObjs.rayCasts.slopes.push(slope);
         },
         GetDispObjs: {
             OrientAxes: function() {return dispObjs.orientAxes.models;},
-            BoundingShells: function() {return dispObjs.shells.models;}
+            BoundingShells: function() {return dispObjs.shells.models;},
+            RayCasts: function() {return dispObjs.rayCasts.rays;}
         },
         Update: function () {
             if(active) {
@@ -91,20 +96,11 @@ var DM = (function() {
                         dispObjs.shells.models[i].UpdateModelViewControl(dispObjs.shells.trfms[i]);
                     }
                 }
-                if(dispActive.velocities) {
-                    for (var i = 0; i < dispObjs.velocities.models.length; i++) {
-                        /*
-                         var newVertData = [];
-                         var zeroVec = new Vector3();
-                         newVertData = newVertData.concat(zeroVec.GetData());
-                         newVertData = newVertData.concat(this.trfmLocal.dirRight.GetData());
-                         newVertData = newVertData.concat(zeroVec.GetData());
-                         newVertData = newVertData.concat(this.trfmLocal.dirUp.GetData());
-                         newVertData = newVertData.concat(zeroVec.GetData());
-                         newVertData = newVertData.concat(this.trfmLocal.dirFwd.GetData());
-                         newVertData = newVertData.concat(this.dirDisplay.model.vertData.colElems);
-                         this.dirDisplay.model.RewriteVerts(newVertData);
-                         */
+                if(dispActive.rayCasts) {
+                    for (var i = 0; i < dispObjs.rayCasts.rays.length; i++) {
+                        var newVertData = dispObjs.rayCasts.pos[i].GetData();
+                        newVertData = newVertData.concat(dispObjs.rayCasts.pos[i].GetAdd(dispObjs.rayCasts.slopes[i]).GetData());
+                        dispObjs.rayCasts.rays[i].RewriteVerts(newVertData);
                     }
                 }
             }
