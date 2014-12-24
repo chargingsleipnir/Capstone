@@ -107,13 +107,10 @@ GameObject.prototype = {
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
 
-        /*
-        if(DM.active) {
+        if(DM.GetActive()) {
             var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.25));
-            this.trfmGlobal.orientDisplay.model = new ModelHandler(new Primitives.OrientAxes(axesLengths), this.shape);
-            this.trfmGlobal.orientDisplay.model.active = DM.showQuatOrientationAxes ? true : false;
+            DM.ReplaceOrientModel(new ModelHandler(new Primitives.OrientAxes(axesLengths), this.shape), this.trfmGlobal);
         }
-        */
     },
     Update: function(trfmParent) {
         /// <signature>
@@ -138,26 +135,6 @@ GameObject.prototype = {
             this.trfmGlobal.dirRight.SetCopy(this.trfmLocal.dirRight);
 
             this.trfmGlobal.IsChanging();
-
-            if(DEBUG) {
-                //this.dirDisplay.trfm.pos.SetCopy(this.trfmGlobal.pos);
-                //this.dirDisplay.trfm.orient.SetCopy(this.trfmGlobal.orient);
-
-                /*
-                var newVertData = [];
-                var zeroVec = new Vector3();
-                newVertData = newVertData.concat(zeroVec.GetData());
-                newVertData = newVertData.concat(this.trfmLocal.dirRight.GetData());
-                newVertData = newVertData.concat(zeroVec.GetData());
-                newVertData = newVertData.concat(this.trfmLocal.dirUp.GetData());
-                newVertData = newVertData.concat(zeroVec.GetData());
-                newVertData = newVertData.concat(this.trfmLocal.dirFwd.GetData());
-                newVertData = newVertData.concat(this.dirDisplay.model.vertData.colElems);
-                this.dirDisplay.model.RewriteVerts(newVertData);
-                */
-
-                //DEBUG = false;
-            }
 
             if (this.mdlHdlr)
                 this.mdlHdlr.UpdateModelViewControl(this.trfmGlobal);

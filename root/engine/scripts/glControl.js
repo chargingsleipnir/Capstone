@@ -337,10 +337,10 @@ var GL = {
             dispObjs = dispObjs.concat(DM.GetDispObjs.BoundingShells());
             for (var i = 0; i < dispObjs.length; i++)
             {
-                if(dispObjs[i].model.active) {
+                if(dispObjs[i].active) {
 
-                    shdr = dispObjs[i].model.shaderData;
-                    buff = dispObjs[i].model.bufferData;
+                    shdr = dispObjs[i].shaderData;
+                    buff = dispObjs[i].bufferData;
 
                     // USE PROGRAM AND VBO
                     this.ctx.useProgram(shdr.program);
@@ -356,16 +356,16 @@ var GL = {
 
                     // SEND UP UNIFORMS
                     this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].model.mtxModel.data);
-                    this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].model.colourTint.GetData());
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].mtxModel.data);
+                    this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].colourTint.GetData());
 
                     // Draw calls
                     if (buff.EABO) {
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                        this.ctx.drawElements(dispObjs[i].model.drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                        this.ctx.drawElements(dispObjs[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
                     }
                     else {
-                        this.ctx.drawArrays(dispObjs[i].model.drawMethod, 0, buff.numVerts);
+                        this.ctx.drawArrays(dispObjs[i].drawMethod, 0, buff.numVerts);
                     }
 
                     // Unbind buffers after use

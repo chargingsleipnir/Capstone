@@ -69,10 +69,6 @@ function ControlScheme() {
     this.yawLeft;
     this.yawRight;
 }
-function DebugDispObj(model, trfm) {
-    this.model = model;
-    this.trfm = trfm;
-}
 
 var Time = {
     delta_Milli: 0.0,
@@ -103,14 +99,14 @@ var KeyMap = {
 };
 
 /***** CONSTS *****/
-var DEBUG = true;
 var DEG_TO_RAD = Math.PI / 180.0;
 var RAD_TO_DEG = 180.0 / Math.PI;
 var INFINITESIMAL = 1.0e-9;
-var GRAVITY = new Vector3(0.0, -10.0, 0.0);
-var GBL_FWD = new Vector3(0.0, 0.0, -1.0);
-var GBL_BACK = new Vector3(0.0, 0.0, 1.0);
-var GBL_LEFT = new Vector3(-1.0, 0.0, 0.0);
-var GBL_RIGHT = new Vector3(1.0, 0.0, 0.0);
-var GBL_DOWN = new Vector3(0.0, -1.0, 0.0);
-var GBL_UP = new Vector3(0.0, 1.0, 0.0);
+var VEC3_ZERO = new Vector3();
+var VEC3_GRAVITY = new Vector3(0.0, -10.0, 0.0);
+var VEC3_FWD = new Vector3(0.0, 0.0, -1.0);
+var VEC3_BACK = new Vector3(0.0, 0.0, 1.0);
+var VEC3_LEFT = new Vector3(-1.0, 0.0, 0.0);
+var VEC3_RIGHT = new Vector3(1.0, 0.0, 0.0);
+var VEC3_DOWN = new Vector3(0.0, -1.0, 0.0);
+var VEC3_UP = new Vector3(0.0, 1.0, 0.0);

@@ -58,11 +58,11 @@ FPController.prototype = {
             //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, this.turnSpeed);
         }
         if(this.ctrl.yawLeft.pressed) {
-            this.obj.trfmLocal.RotateLocalView(GBL_UP, this.turnSpeed);
+            this.obj.trfmLocal.RotateLocalView(VEC3_UP, this.turnSpeed);
             //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, this.turnSpeed);
         }
         else if(this.ctrl.yawRight.pressed) {
-            this.obj.trfmLocal.RotateLocalView(GBL_UP, -this.turnSpeed);
+            this.obj.trfmLocal.RotateLocalView(VEC3_UP, -this.turnSpeed);
             //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, -this.turnSpeed);
         }
     }

@@ -296,9 +296,9 @@ function Screen_Title(ScreenChangeCallback) {
         waveringValue += angle;
         //waveringValue = Math.sin(waveringValue);
 
-        skyBox.trfmLocal.Rotate(GBL_FWD, angle);
-        disc.trfmLocal.Rotate(GBL_RIGHT, angle * 20.0);
-        disc.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, Math.sin(waveringValue) / 100);
+        skyBox.trfmLocal.Rotate(VEC3_FWD, angle);
+        disc.trfmLocal.Rotate(VEC3_RIGHT, angle * 20.0);
+        disc.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, 0.0);
 
         // if button pressed
         //var nextScreen = new Screen_InGame();

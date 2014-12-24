@@ -4,9 +4,9 @@ function Transform(space) {
     this.pos = new Vector3();
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
-    this.dirFwd = (new Vector3()).SetCopy(GBL_FWD);
-    this.dirUp = (new Vector3()).SetCopy(GBL_UP);
-    this.dirRight = (new Vector3()).SetCopy(GBL_RIGHT);
+    this.dirFwd = (new Vector3()).SetCopy(VEC3_FWD);
+    this.dirUp = (new Vector3()).SetCopy(VEC3_UP);
+    this.dirRight = (new Vector3()).SetCopy(VEC3_RIGHT);
 
     //this.offsetPos = Vector3.CreateZero();
     //this.offsetRot = Vector3.CreateZero();
@@ -196,9 +196,9 @@ Transform.prototype = {
         /* Accurate representation of directions, but forces use of
         quaternions for everything, which causes too many problems*/
         /*
-        this.dirFwd = this.orient.GetMultiplyVec3(GBL_FWD);
-        this.dirUp = this.orient.GetMultiplyVec3(GBL_UP);
-        this.dirRight = this.orient.GetMultiplyVec3(GBL_RIGHT);
+        this.dirFwd = this.orient.GetMultiplyVec3(VEC3_FWD);
+        this.dirUp = this.orient.GetMultiplyVec3(VEC3_UP);
+        this.dirRight = this.orient.GetMultiplyVec3(VEC3_RIGHT);
         */
 
         if (this.active) {

@@ -17,15 +17,12 @@ function CollisionBody(shapeData, trfm) {
     //this.activeShape = this.sphere;
 
     if(DM.GetActive()) {
-        var shell = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
-        //var shell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
-        shell.MakeWireFrame();
-        shell.colourTint.SetValues(1.0, 1.0, 0.0);
+        var sphereShell = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
+        //var aabbShell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
+        sphereShell.MakeWireFrame();
+        sphereShell.colourTint.SetValues(1.0, 1.0, 0.0);
 
-        var debugTrfm = new Transform(Space.local);
-        debugTrfm.pos = this.trfm.pos;
-
-        DM.AddBoundingShell(shell, debugTrfm);
+        DM.AddBoundingShell(sphereShell, this.trfm, BoundingShapes.sphere);
     }
     // Intentionally left this blank to bypass condition checks
     //this.SetBoundingShape();
@@ -64,6 +61,8 @@ CollisionBody.prototype = {
         }
         this.activeFrame.MakeWireFrame();
         this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
+
+        // DO A DM.REPLACEMODEL...
     },
     */
     SetDetectionCall: function(Callback) {
@@ -88,16 +87,6 @@ CollisionBody.prototype = {
         var mostScale = this.trfm.GetLargestScaleValue();
         this.sphere.radius = this.shapeData.radius * mostScale;
         //this.aabb.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
-
-        /*
-        if(DEBUG) {
-            if(this.sphere) {
-                this.shell.trfm.scale.SetValues(mostScale, mostScale, mostScale);
-            }
-            else
-                this.shell.trfm.scale.SetCopy(this.aabb.radii);
-        }
-        */
     }
 };
 
