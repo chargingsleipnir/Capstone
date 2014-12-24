@@ -46,12 +46,8 @@
                 ['disc', 'game/assets/models/GameObjects_Disc.json']
             ];
 
-            DM.ShowWorldAxes = true;
-            DM.ShowQuatOrientationAxes = true;
-            DM.ShowVecDirAxes = true;
-            DM.ShowBoundingShells = false;
-            DM.ShowVelocities = true;
-            DM.PrintProcessingData = true;
+            DM.SetActive(true);
+            DM.ToDisplay(true, true, true, false, false);
 
             // Initialize the Game Manager, passing the canvas to do much of the startup
             GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));

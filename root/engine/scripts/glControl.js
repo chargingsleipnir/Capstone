@@ -332,13 +332,15 @@ var GL = {
         }
         */
 
-        if (DEBUG) {
-            for (var i = 0; i < DM.dispObjs.length; i++)
+        if (DM.GetActive()) {
+            var dispObjs = DM.GetDispObjs.OrientAxes();
+            dispObjs = dispObjs.concat(DM.GetDispObjs.BoundingShells());
+            for (var i = 0; i < dispObjs.length; i++)
             {
-                if(DM.dispObjs[i].model.active) {
+                if(dispObjs[i].model.active) {
 
-                    shdr = DM.dispObjs[i].model.shaderData;
-                    buff = DM.dispObjs[i].model.bufferData;
+                    shdr = dispObjs[i].model.shaderData;
+                    buff = dispObjs[i].model.bufferData;
 
                     // USE PROGRAM AND VBO
                     this.ctx.useProgram(shdr.program);
@@ -354,16 +356,16 @@ var GL = {
 
                     // SEND UP UNIFORMS
                     this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, DM.dispObjs[i].model.mtxModel.data);
-                    this.ctx.uniform3fv(shdr.u_tint, DM.dispObjs[i].model.colourTint.GetData());
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].model.mtxModel.data);
+                    this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].model.colourTint.GetData());
 
                     // Draw calls
                     if (buff.EABO) {
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                        this.ctx.drawElements(DM.dispObjs[i].model.drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                        this.ctx.drawElements(dispObjs[i].model.drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
                     }
                     else {
-                        this.ctx.drawArrays(DM.dispObjs[i].model.drawMethod, 0, buff.numVerts);
+                        this.ctx.drawArrays(dispObjs[i].model.drawMethod, 0, buff.numVerts);
                     }
 
                     // Unbind buffers after use

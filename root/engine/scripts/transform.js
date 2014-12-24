@@ -12,19 +12,8 @@ function Transform(space) {
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();
 
-    if(DEBUG && space == Space.global) {
-        this.orientDisplay = new DebugDispObj(new ModelHandler(new Primitives.OrientAxes(), new AAShapeData3D()), new Transform(Space.local));
-        DM.dispObjs.push(this.orientDisplay);
-        this.orientDisplay.model.active = DM.ShowQuatOrientationAxes ? true : false;
-
-        // This will need some special consideration for the uncertainty of those directions.
-        // This model is no good for this
-        /*
-        this.dirDisplay = new DebugDispObj(new ModelHandler(new Primitives.DirAxes(), new AAShapeData3D()), new Transform(Space.local));
-        DM.dispObjs.push(this.dirDisplay);
-        this.dirDisplay.model.active = DM.ShowVecDirAxes ? true : false;
-        */
-    }
+    if(DM.GetActive() && space == Space.global)
+        DM.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(), new AAShapeData3D()), this);
 
     this.active = false;
     this.space = space;
@@ -204,12 +193,6 @@ Transform.prototype = {
         this.active = true;
     },
     IsChanging: function() {
-
-        if(DEBUG && this.space == Space.global) {
-            this.orientDisplay.trfm.pos.SetCopy(this.pos);
-            this.orientDisplay.trfm.orient.SetCopy(this.orient);
-            this.orientDisplay.trfm.scale.SetCopy(this.scale);
-        }
         /* Accurate representation of directions, but forces use of
         quaternions for everything, which causes too many problems*/
         /*

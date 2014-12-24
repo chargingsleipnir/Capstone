@@ -284,15 +284,21 @@ function Screen_Title(ScreenChangeCallback) {
     var launchForce = new Vector3(0.0, 0.0, -250.0);
 
     var angle = 0.01;
+    var waveringValue = 0.0;
     this.Update = function() {
 
         if(launch.pressed){
             balls[0].rigidBody.AddForce(launchForce);
+            DM.ToDisplay(false, false, false, true, true);
             launch.Release();
         }
 
+        waveringValue += angle;
+        //waveringValue = Math.sin(waveringValue);
+
         skyBox.trfmLocal.Rotate(GBL_FWD, angle);
         disc.trfmLocal.Rotate(GBL_RIGHT, angle * 20.0);
+        disc.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, Math.sin(waveringValue) / 100);
 
         // if button pressed
         //var nextScreen = new Screen_InGame();

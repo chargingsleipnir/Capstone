@@ -13,8 +13,8 @@ var Primitives = {
         else
             x = y = z = 1.0;
 
-        var l = 0.2;
-        var s = 0.1;
+        var l = 0.15;
+        var s = 0.075;
 
         return {
             name: "Orientation Axes",

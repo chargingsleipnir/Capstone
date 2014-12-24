@@ -16,15 +16,16 @@ function CollisionBody(shapeData, trfm) {
     // Sphere set as standard
     //this.activeShape = this.sphere;
 
-    if(DEBUG) {
-        var activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
-        //var activeFrame = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
-        activeFrame.MakeWireFrame();
-        activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
+    if(DM.GetActive()) {
+        var shell = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
+        //var shell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
+        shell.MakeWireFrame();
+        shell.colourTint.SetValues(1.0, 1.0, 0.0);
 
-        this.shell = new DebugDispObj(activeFrame, new Transform());
-        this.shell.model.active = DM.ShowBoundingShells ? true : false;
-        DM.dispObjs.push(this.shell);
+        var debugTrfm = new Transform(Space.local);
+        debugTrfm.pos = this.trfm.pos;
+
+        DM.AddBoundingShell(shell, debugTrfm);
     }
     // Intentionally left this blank to bypass condition checks
     //this.SetBoundingShape();
@@ -88,26 +89,15 @@ CollisionBody.prototype = {
         this.sphere.radius = this.shapeData.radius * mostScale;
         //this.aabb.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
 
+        /*
         if(DEBUG) {
-            this.shell.trfm.pos.SetCopy(this.trfm.pos);
             if(this.sphere) {
                 this.shell.trfm.scale.SetValues(mostScale, mostScale, mostScale);
             }
             else
                 this.shell.trfm.scale.SetCopy(this.aabb.radii);
         }
-    }
-};
-
-var CollisionDetect = {
-    SphereVSphere: function(s1, s2) {
-        var collisionDist = s1.trfmGlobal.pos.GetSubtract(s2.trfmGlobal.pos);
-        if(collisionDist.GetMagSqr() < Math.pow(s1.collider.sphere.radius, 2) + Math.pow(s2.collider.sphere.radius, 2)) {
-            var netVel = s1.rigidBody.velFinal.GetSubtract(s2.rigidBody.velFinal);
-            if(netVel.GetDot(collisionDist) < 0)
-                return collisionDist;
-        }
-        return false;
+        */
     }
 };
 

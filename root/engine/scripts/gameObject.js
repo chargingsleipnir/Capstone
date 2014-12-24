@@ -12,11 +12,6 @@ function GameObject(name, label) {
 
     this.trfmLocal = new Transform(Space.local);
     this.trfmGlobal = new Transform(Space.global);
-
-    if(DEBUG) {
-        //this.dirDisplay = new DebugDispObj(new ModelHandler(new Primitives.AxesPositive(), this.shape), new Transform());
-        //DM.dispObjs.push(this.dirDisplay);
-    }
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -112,11 +107,13 @@ GameObject.prototype = {
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
 
-        if(DEBUG && this.trfmGlobal.space == Space.global) {
+        /*
+        if(DM.active) {
             var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.25));
             this.trfmGlobal.orientDisplay.model = new ModelHandler(new Primitives.OrientAxes(axesLengths), this.shape);
-            this.trfmGlobal.orientDisplay.model.active = DM.ShowQuatOrientationAxes ? true : false;
+            this.trfmGlobal.orientDisplay.model.active = DM.showQuatOrientationAxes ? true : false;
         }
+        */
     },
     Update: function(trfmParent) {
         /// <signature>
