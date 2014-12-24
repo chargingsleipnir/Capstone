@@ -3,6 +3,195 @@ var Primitives = {
     Ray: function() {
 
     },
+    OrientAxes: function(scaleVec) {
+        var x, y, z;
+        if(scaleVec) {
+            x = scaleVec.x;
+            y = scaleVec.y;
+            z = scaleVec.z;
+        }
+        else
+            x = y = z = 1.0;
+
+        var l = 0.2;
+        var s = 0.1;
+
+        return {
+            name: "Orientation Axes",
+            numTris: 0,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: 28,
+                    posCoords: [
+                        0.0, 0.0, 0.0,
+                        // x arm
+                        x, 0.0, 0.0,
+                        // x end
+                        x, l, s,
+                        x, s, l,
+                        x, -s, l,
+                        x, -l, s,
+                        x, -l, -s,
+                        x, -s, -l,
+                        x, s, -l,
+                        x, l, -s,
+                        // y arm
+                        0.0, y, 0.0,
+                        // y end
+                        -s, y, -l,
+                        -l, y, -s,
+                        -l, y, s,
+                        -s, y, l,
+                        s, y, l,
+                        l, y, s,
+                        l, y, -s,
+                        s, y, -l,
+                        // z arm
+                        0.0, 0.0, z,
+                        // z end
+                        -s, l, z,
+                        -l, s, z,
+                        -l, -s, z,
+                        -s, -l, z,
+                        s, -l, z,
+                        l, -s, z,
+                        l, s, z,
+                        s, l, z
+                    ],
+                    colElems: (function () {
+                        var colors = [];
+                        // Origin
+                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        // x arn
+                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        // x end
+                        for (var i = 0; i < 8; i++)
+                            colors = colors.concat([1.0, 0.0, 0.0]);
+                        // y arm
+                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        // y end
+                        for (var i = 0; i < 8; i++)
+                            colors = colors.concat([0.0, 0.8, 0.0]);
+                        // z arm
+                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        // z end
+                        for (var i = 0; i < 8; i++)
+                            colors = colors.concat([0.0, 0.0, 1.0]);
+                        return colors;
+                    })(),
+                    texCoords: [],
+                    normAxes: [],
+                    indices: [
+                        0, 1,
+                        2, 3,   3, 4,   4, 5,   5, 6,   6, 7,   7, 8,   8, 9,   9, 2,
+                        0, 10,
+                        11, 12,   12, 13,   13, 14,   14, 15,   15, 16,   16, 17,   17, 18,   18, 11,
+                        0, 19,
+                        20, 21,   21, 22,   22, 23,   23, 24,   24, 25,   25, 26,   26, 27,   27, 20
+                    ]
+                },
+                byFaces: {
+                    count: 0,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.lines
+        };
+    },
+    DirAxes: function(scaleVec) {
+        var x, y, z;
+        if(scaleVec) {
+            x = scaleVec.x;
+            y = scaleVec.y;
+            z = scaleVec.z;
+        }
+        else
+            x = y = z = 1.0;
+
+        var l = 0.15;
+        var s = 0.05;
+
+        return {
+            name: "Orientation Axes",
+            numTris: 0,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: 19,
+                    posCoords: [
+                        0.0, 0.0, 0.0,
+                        // x arm
+                        x, 0.0, 0.0,
+                        // x end
+                        x, s, s,
+                        x, -s, s,
+                        x, -s, -s,
+                        x, s, -s,
+                        x + l, 0.0, 0.0,
+                        // y arm
+                        0.0, y, 0.0,
+                        // y end
+                        -s, y, -s,
+                        -s, y, s,
+                        s, y, s,
+                        s, y, -s,
+                        0.0, y + l, 0.0,
+                        // z arm
+                        0.0, 0.0, z,
+                        // z end
+                        -s, s, z,
+                        -s, -s, z,
+                        s, -s, z,
+                        s, s, z,
+                        0.0, 0.0, z + l
+                    ],
+                    colElems: (function () {
+                        var colors = [];
+                        // Origin
+                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        // x arn
+                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        // x end
+                        for (var i = 0; i < 5; i++)
+                            colors = colors.concat([1.0, 0.0, 0.0]);
+                        // y arm
+                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        // y end
+                        for (var i = 0; i < 5; i++)
+                            colors = colors.concat([0.0, 0.8, 0.0]);
+                        // z arm
+                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        // z end
+                        for (var i = 0; i < 5; i++)
+                            colors = colors.concat([0.0, 0.0, 1.0]);
+                        return colors;
+                    })(),
+                    texCoords: [],
+                    normAxes: [],
+                    indices: [
+                        0, 1,
+                        2, 6,   6, 4,   4, 2,   3, 6,   6, 5,   5, 3,
+                        0, 7,
+                        8, 12,   12, 10,   10, 8,   9, 12,   12, 11,   11, 9,
+                        0, 13,
+                        14, 18,   18, 16,   16, 14,   15, 18,   18, 17,   17, 15
+                    ]
+                },
+                byFaces: {
+                    count: 0,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.lines
+        };
+    },
     AxesPositive: function(scaleVec) {
         var x, y, z;
         if(scaleVec) {

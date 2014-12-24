@@ -1,5 +1,5 @@
 ﻿
-function Transform() {
+function Transform(space) {
     // Start in standard position facing down -z
     this.pos = new Vector3();
     this.orient = new Quaternion();
@@ -12,7 +12,22 @@ function Transform() {
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();
 
+    if(DEBUG && space == Space.global) {
+        this.orientDisplay = new DebugDispObj(new ModelHandler(new Primitives.OrientAxes(), new AAShapeData3D()), new Transform(Space.local));
+        DM.dispObjs.push(this.orientDisplay);
+        this.orientDisplay.model.active = DM.ShowQuatOrientationAxes ? true : false;
+
+        // This will need some special consideration for the uncertainty of those directions.
+        // This model is no good for this
+        /*
+        this.dirDisplay = new DebugDispObj(new ModelHandler(new Primitives.DirAxes(), new AAShapeData3D()), new Transform(Space.local));
+        DM.dispObjs.push(this.dirDisplay);
+        this.dirDisplay.model.active = DM.ShowVecDirAxes ? true : false;
+        */
+    }
+
     this.active = false;
+    this.space = space;
 }
 Transform.prototype = {
     GetLargestScaleValue: function() {
@@ -92,16 +107,9 @@ Transform.prototype = {
         this.pos.SetAdd(this.dirRight.GetScaleByNum(speed));
         this.active = true;
     },
-    //SetOrientation: function(dirFwd, dirUp) {
-    //    //this.staticDirFwd.Set(dirFwd.Normalize());
-    //    //this.staticDirUp.Set(dirUp.Normalize());
-    //    this.dirFwd.Set(dirFwd.Normalize());
-    //    this.dirUp.Set(dirUp.Normalize());
-    //    this.active = true;
-    //},
     RotateLocalView: function(axis, thetaDeg) {
         /// <signature>
-        ///  <summary>SetRotation around the given axis by degree specified</summary>
+        ///  <summary>SetOrientation around the given axis by degree specified</summary>
         ///  <param name="thetaDeg" type="decimal"></param>
         ///  <param name="axis" type="Vector3"></param>
         ///  <returns type="void" />
@@ -126,7 +134,11 @@ Transform.prototype = {
         this.dirRight.SetRotated(thetaDeg, this.dirFwd);
         this.active = true;
     },
-    SetRotation: function(axis, thetaDeg) {
+    SetOrient: function(quat) {
+        this.orient.SetCopy(quat);
+        this.active = true;
+    },
+    SetOrientAxisAngle: function(axis, thetaDeg) {
         /// <signature>
         ///  <summary>Set Rotation around given axis by given angle</summary>
         ///  <param name="axis" type="Vector3">Axis around which to rotate</param>
@@ -192,8 +204,24 @@ Transform.prototype = {
         this.active = true;
     },
     IsChanging: function() {
+
+        if(DEBUG && this.space == Space.global) {
+            this.orientDisplay.trfm.pos.SetCopy(this.pos);
+            this.orientDisplay.trfm.orient.SetCopy(this.orient);
+            this.orientDisplay.trfm.scale.SetCopy(this.scale);
+        }
+        /* Accurate representation of directions, but forces use of
+        quaternions for everything, which causes too many problems*/
+        /*
+        this.dirFwd = this.orient.GetMultiplyVec3(GBL_FWD);
+        this.dirUp = this.orient.GetMultiplyVec3(GBL_UP);
+        this.dirRight = this.orient.GetMultiplyVec3(GBL_RIGHT);
+        */
+
         if (this.active) {
-            this.active = false;
+            if(this.space == Space.local)
+                this.active = false;
+
             return true;
         }
         return false;

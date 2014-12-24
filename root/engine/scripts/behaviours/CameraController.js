@@ -57,11 +57,11 @@ CameraController.prototype = {
             }
             if (this.ctrl.yawLeft.pressed) {
                 this.trfm.RotateLocalView(GBL_UP, this.turnSpeed);
-                //this.trfm.Rotate(this.trfm.dirUp, this.turnSpeed);
+                //this.trfm.Rotate(GBL_UP, this.turnSpeed);
             }
             else if (this.ctrl.yawRight.pressed) {
                 this.trfm.RotateLocalView(GBL_UP, -this.turnSpeed);
-                //this.trfm.Rotate(this.trfm.dirUp, -this.turnSpeed);
+                //this.trfm.Rotate(GBL_UP, -this.turnSpeed);
             }
         }
     }

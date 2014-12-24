@@ -10,12 +10,12 @@ function GameObject(name, label) {
 
     this.shape = new AAShapeData3D();
 
-    this.trfmLocal = new Transform();
-    this.trfmGlobal = new Transform();
+    this.trfmLocal = new Transform(Space.local);
+    this.trfmGlobal = new Transform(Space.global);
 
     if(DEBUG) {
-        this.dirDisplay = new DebugDispObj(new ModelHandler(new Primitives.AxesPositive(), this.shape), new Transform());
-        DM.dispObjs.push(this.dirDisplay);
+        //this.dirDisplay = new DebugDispObj(new ModelHandler(new Primitives.AxesPositive(), this.shape), new Transform());
+        //DM.dispObjs.push(this.dirDisplay);
     }
 }
 GameObject.prototype = {
@@ -112,11 +112,10 @@ GameObject.prototype = {
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
 
-        if(DEBUG) {
-            var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.5));
-            this.dirDisplay.model = new ModelHandler(new Primitives.AxesPositive(axesLengths), this.shape);
-
-            this.dirDisplay.model.active = DM.ShowTransformAxes ? true : false;
+        if(DEBUG && this.trfmGlobal.space == Space.global) {
+            var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.25));
+            this.trfmGlobal.orientDisplay.model = new ModelHandler(new Primitives.OrientAxes(axesLengths), this.shape);
+            this.trfmGlobal.orientDisplay.model.active = DM.ShowQuatOrientationAxes ? true : false;
         }
     },
     Update: function(trfmParent) {
@@ -125,12 +124,15 @@ GameObject.prototype = {
         ///  <param name="trfmParentGlobal" type="Transform">The transform data of the parent</param>
         ///  <returns type="void" />
         /// </signature>
-        if (this.trfmLocal.IsChanging() || trfmParent.active) {
+        if (this.trfmLocal.IsChanging() || trfmParent.IsChanging()) {
+            /* I shouldn't need to reset this so long as the check in Transform
+             * only deactivates "local" transform updates */
+            //trfmParent.active = true;
+
             // Update global to pass to children
-            this.trfmGlobal.active = true;
-            this.trfmGlobal.pos = this.trfmLocal.pos.GetAdd(trfmParent.pos);
-            this.trfmGlobal.orient = this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient);
-            this.trfmGlobal.scale = this.trfmLocal.scale.GetScaleByVec(trfmParent.scale);
+            this.trfmGlobal.SetPosVec3(this.trfmLocal.pos.GetAdd(trfmParent.pos));
+            this.trfmGlobal.SetOrient(this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient));
+            this.trfmGlobal.SetScaleVec3(this.trfmLocal.scale.GetScaleByVec(trfmParent.scale));
 
             this.trfmGlobal.dirFwd.SetCopy(this.trfmLocal.dirFwd);
             //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
@@ -138,9 +140,13 @@ GameObject.prototype = {
             //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
             this.trfmGlobal.dirRight.SetCopy(this.trfmLocal.dirRight);
 
-            if(DEBUG) {
-                this.dirDisplay.trfm.pos.SetCopy(this.trfmGlobal.pos);
+            this.trfmGlobal.IsChanging();
 
+            if(DEBUG) {
+                //this.dirDisplay.trfm.pos.SetCopy(this.trfmGlobal.pos);
+                //this.dirDisplay.trfm.orient.SetCopy(this.trfmGlobal.orient);
+
+                /*
                 var newVertData = [];
                 var zeroVec = new Vector3();
                 newVertData = newVertData.concat(zeroVec.GetData());
@@ -151,6 +157,7 @@ GameObject.prototype = {
                 newVertData = newVertData.concat(this.trfmLocal.dirFwd.GetData());
                 newVertData = newVertData.concat(this.dirDisplay.model.vertData.colElems);
                 this.dirDisplay.model.RewriteVerts(newVertData);
+                */
 
                 //DEBUG = false;
             }

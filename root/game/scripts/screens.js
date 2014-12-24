@@ -223,7 +223,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
-    heart.trfmLocal.SetPosVec3(new Vector3(0.5, 0.5, -1.0));
+    heart.trfmLocal.SetPosVec3(new Vector3(3.5, 0.5, -1.0));
     grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
     testCube.trfmLocal.SetPosVec3(new Vector3(1.5, 1.5, -1.5));
@@ -239,13 +239,14 @@ function Screen_Title(ScreenChangeCallback) {
     heart.AddComponent(Components.collisionBody);
 
     // Add to Capstone node
-    GM.rootObj.AddChild(arrow);
-    arrow.AddChild(heart);
+    GM.rootObj.AddChild(skyBox);
+    GM.rootObj.AddChild(disc);
+    disc.AddChild(arrow);
+    disc.AddChild(heart);
     GM.rootObj.AddChild(zeroPointAxes);
     GM.rootObj.AddChild(grid);
-    GM.rootObj.AddChild(skyBox);
     GM.rootObj.AddChild(testCube);
-    GM.rootObj.AddChild(disc);
+
     GM.rootObj.AddChild(cube);
 
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
@@ -282,18 +283,16 @@ function Screen_Title(ScreenChangeCallback) {
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var launchForce = new Vector3(0.0, 0.0, -250.0);
 
-    var angle = 0.0;
+    var angle = 0.01;
     this.Update = function() {
-
-        angle += 0.005;
 
         if(launch.pressed){
             balls[0].rigidBody.AddForce(launchForce);
             launch.Release();
         }
 
-        //balls[0].trfmLocal.SetRotation(GBL_UP, angle);
-        skyBox.trfmLocal.SetRotation(GBL_FWD, angle);
+        skyBox.trfmLocal.Rotate(GBL_FWD, angle);
+        disc.trfmLocal.Rotate(GBL_RIGHT, angle * 20.0);
 
         // if button pressed
         //var nextScreen = new Screen_InGame();

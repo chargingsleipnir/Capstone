@@ -614,12 +614,19 @@ Vector3.prototype = {
     },
     SetRotated: function(thetaDeg, axis) {
         /// <signature>
-        ///  <summary>SetRotation around the given axis by degree specified</summary>
+        ///  <summary>SetOrientationAxisAngle around the given axis by degree specified</summary>
         ///  <param name="thetaDeg" type="decimal"></param>
         ///  <param name="axis" type="Vector3"></param>
         ///  <returns type="Vector3" />
         /// </signature>
-        var norm = axis.GetNormalized();
+
+        var norm;
+        var magSqr = axis.GetMagSqr();
+        if(magSqr > 1.0 + INFINITESIMAL || magSqr < 1 - INFINITESIMAL)
+            norm = axis.GetScaleByNum(1.0 / Math.sqrt(magSqr));
+        else
+            norm = axis;
+
         var angle = thetaDeg * DEG_TO_RAD;
         var s = Math.sin(angle),
             c = Math.cos(angle);

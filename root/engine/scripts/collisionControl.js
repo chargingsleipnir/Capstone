@@ -23,6 +23,7 @@ function CollisionBody(shapeData, trfm) {
         activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
 
         this.shell = new DebugDispObj(activeFrame, new Transform());
+        this.shell.model.active = DM.ShowBoundingShells ? true : false;
         DM.dispObjs.push(this.shell);
     }
     // Intentionally left this blank to bypass condition checks
@@ -94,8 +95,6 @@ CollisionBody.prototype = {
             }
             else
                 this.shell.trfm.scale.SetCopy(this.aabb.radii);
-
-            this.shell.model.active = DM.ShowBoundingShells ? true : false;
         }
     }
 };

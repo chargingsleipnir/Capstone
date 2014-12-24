@@ -2,7 +2,8 @@
 var DM = {
     dispObjs: [],
     ShowWorldAxes: false,
-    ShowTransformAxes: false,
+    ShowQuatOrientationAxes: false,
+    ShowVecDirAxes: false,
     ShowBoundingShells: false,
     ShowVelocities: false,
     PrintProcessingData: false,
