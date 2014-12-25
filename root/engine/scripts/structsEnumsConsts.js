@@ -37,9 +37,9 @@ function ShaderProgramData() {
     this.u_PntBright;
     this.u_PntPos;
 
-    this.u_MtxModel;
-    this.u_MtxProj;
-    this.u_MtxCam;
+    this.u_MtxM;
+    this.u_MtxVP;
+    this.u_MtxMVP;
     this.u_MtxNorm;
 }
 function BufferData() {

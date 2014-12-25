@@ -1,15 +1,13 @@
-attribute vec3 a_VertexPosition;
-attribute vec3 a_VertexColor;
+attribute vec3 a_Pos;
+attribute vec3 a_Col;
 
-uniform mat4 u_Matrix_Projection;
-uniform mat4 u_Matrix_Camera;
-uniform mat4 u_Matrix_Model;
+uniform mat4 u_MtxMVP;
 
-varying vec3 v_Color;
+varying vec3 v_Col;
 
 void main()
 {
 	gl_PointSize = 4.0;
-	gl_Position = u_Matrix_Camera * u_Matrix_Model * vec4(a_VertexPosition, 1.0);
-	v_Color = a_VertexColor;
+	gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);
+	v_Col = a_Col;
 }

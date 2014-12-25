@@ -2,6 +2,7 @@
 var GM = {
     wndWidth: 0,
     wndHeight: 0,
+    mtxProj: new Matrix4(),
     assets: {
         textures: {},
         models: {}
@@ -30,6 +31,7 @@ var GM = {
         var canvasStyles = window.getComputedStyle(canvasWebGL, null);
         this.wndWidth = parseFloat(canvasStyles.width);
         this.wndHeight = parseFloat(canvasStyles.height);
+        this.mtxProj.SetPerspective(45.0, this.wndWidth / this.wndHeight, 0.1, 200.0);
 
         // Set up initial camera
         this.rootObj.AddComponent(Components.camera);

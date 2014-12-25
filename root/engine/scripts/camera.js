@@ -128,18 +128,17 @@ Frustum.prototype = {
 function Camera(trfmObj) {
 
     this.trfmObj = trfmObj;
-    this.trfm = new Transform();
+    this.trfm = new Transform(Space.local);
     this.trfm.pos.SetCopy(this.trfmObj.pos);
 
     this.mtxCam = new Matrix4();
-    // Make proj matrix with frustum
-    this.mtxProj = new Matrix4();
-    this.mtxProj.SetPerspective(45.0, GM.wndWidth / GM.wndHeight, 0.1, 200.0);
+
     //this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
-    this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
 
     this.frustum = new Frustum();
-    this.frustum.SetFromMtx(this.mtxProjView);
+    //this.frustum.SetFromMtx(this.mtxProjView);
+
+    //console.log(this.frustum);
 
     this.active = false;
     GM.SetActiveCamera(this);
@@ -171,7 +170,7 @@ Camera.prototype = {
             * valuable to add a camera as a component of a gameObject */
 
             var newPos = this.trfm.pos.GetAdd(this.trfmObj.pos);
-            var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
+            //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
             /*
             var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
             //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
@@ -186,13 +185,16 @@ Camera.prototype = {
             /* Use these to adjust controls, if set by user, to rotate camera around object.
              * Allow user to set camera modes...
              * This is where pushing and popping matrices will come into play!! */
+            //this.mtxCam.SetIdentity();
             //this.mtxCam.SetTranslateVec3(this.trfmObj.pos);
             //this.mtxCam.SetRotateAbout(newOrient.GetAxis(), -newOrient.GetAngle());
             //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
 
             //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
-            this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
-            this.frustum.SetFromMtx(this.mtxProjView);
+            //this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
+            //this.frustum.SetFromMtx(this.mtxProjView);
+            //console.log("active");
+            //console.log(this.frustum);
             //this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
         }
     }

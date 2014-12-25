@@ -1,6 +1,6 @@
 precision mediump float;
 
-uniform vec3 u_ColourTint;
+uniform vec3 u_Tint;
 
 varying vec3 v_LightWeighting;
 
@@ -8,5 +8,5 @@ uniform float u_Alpha;
 
 void main()
 {
-	gl_FragColor = vec4(v_LightWeighting, u_Alpha);
+	gl_FragColor = vec4(v_LightWeighting + u_Tint, u_Alpha);
 }

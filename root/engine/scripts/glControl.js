@@ -54,13 +54,13 @@ var GL = {
             programData.program = program;
 
             // Attributes will return their int location, -1 if not found
-            programData.a_Pos = ctx.getAttribLocation(program, 'a_VertexPosition');
-            programData.a_Col = ctx.getAttribLocation(program, 'a_VertexColor');
-            programData.a_TexCoord = ctx.getAttribLocation(program, "a_TextureCoord");
-            programData.a_Norm = ctx.getAttribLocation(program, 'a_VertexNormal');
+            programData.a_Pos = ctx.getAttribLocation(program, 'a_Pos');
+            programData.a_Col = ctx.getAttribLocation(program, 'a_Col');
+            programData.a_TexCoord = ctx.getAttribLocation(program, "a_TexCoord");
+            programData.a_Norm = ctx.getAttribLocation(program, 'a_Norm');
 
             // Uniforms will return uniform object, null if not found
-            programData.u_tint = ctx.getUniformLocation(program, "u_ColourTint");
+            programData.u_tint = ctx.getUniformLocation(program, "u_Tint");
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
             programData.u_Alpha = ctx.getUniformLocation(program, "u_Alpha");
             // MATERIALS
@@ -83,10 +83,10 @@ var GL = {
             programData.u_PntBright = ctx.getUniformLocation(program, "u_Light_Point_Brightness");
             programData.u_PntPos = ctx.getUniformLocation(program, "u_Light_Point_Position");
             // MATRICES
-            programData.u_MtxModel = ctx.getUniformLocation(program, "u_Matrix_Model");
-            programData.u_MtxProj = ctx.getUniformLocation(program, "u_Matrix_Projection");
-            programData.u_MtxCam = ctx.getUniformLocation(program, "u_Matrix_Camera");
-            programData.u_MtxNorm = ctx.getUniformLocation(program, "u_Matrix_Normal");
+            programData.u_MtxM = ctx.getUniformLocation(program, "u_MtxM");
+            programData.u_MtxVP = ctx.getUniformLocation(program, "u_MtxVP");
+            programData.u_MtxMVP = ctx.getUniformLocation(program, "u_MtxMVP");
+            programData.u_MtxNorm = ctx.getUniformLocation(program, "u_MtxNorm");
 
             return programData;
         }
@@ -204,6 +204,9 @@ var GL = {
 
         //var frustumTestCount = 0;
 
+        var mtxVP = GM.activeCam.mtxCam.GetMultiply(GM.mtxProj);
+        var mtxMVP;
+
         for (var i = 0; i < GM.models.length; i++)
         {
             // Change this on a per-object basis, with near and far using objects sphere
@@ -216,7 +219,7 @@ var GL = {
             GM.activeCam.mtxProjView = GM.activeCam.mtxCam.GetMultiply(GM.activeCam.mtxProj);
             */
 
-            //if (GM.models[i].active && GM.activeCam.frustum.IntersectsSphere(GM.models[i].drawSphere)) {
+            if (GM.models[i].active /*&& GM.activeCam.frustum.IntersectsSphere(GM.models[i].drawSphere)*/) {
                 //frustumTestCount++;
                 //var dist = ((GM.models[i].drawSphere.pos).GetSubtract(GM.activeCam.trfm.pos)).GetMag();
                 //console.log(dist);
@@ -245,24 +248,22 @@ var GL = {
                         this.ctx.uniform1i(shdr.u_Sampler, 0);
                         // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
                     }
-                    else {
-                        /*
-                        this.ctx.disableVertexAttribArray(shdr.a_TexCoord);
-                        var whiteTexture = this.ctx.createTexture();
-                        this.ctx.bindTexture(this.TEXTURE_2D, whiteTexture);
-                        var whitePixel = new Uint8Array([255, 255, 255, 255]);
-                        this.ctx.texImage2D(this.ctx.TEXTURE_2D, 0, this.ctx.RGBA, 1, 1, 0, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, whitePixel);
-                        */
-                    }
                 }
                 if (shdr.a_Norm != -1) {
                     this.ctx.enableVertexAttribArray(shdr.a_Norm);
                     this.ctx.vertexAttribPointer(shdr.a_Norm, 3, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems + buff.lenTexCoords) * buff.VAOBytes);
-                }
 
-                // SEND UP UNIFORMS
-                this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
-                this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, GM.models[i].mtxModel.data);
+
+                    /* If there's lighting, than the model and view-proj matrices
+                     * are sent up independently. The lighting calculations require
+                     * holding onto the verts modified from the model-matrix. */
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, GM.models[i].mtxModel.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+                }
+                else {
+                    mtxMVP = GM.models[i].mtxModel.GetMultiply(mtxVP);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
+                }
                 this.ctx.uniform3fv(shdr.u_tint, GM.models[i].colourTint.GetData());
 
                 // Draw calls
@@ -273,11 +274,12 @@ var GL = {
                 else {
                     this.ctx.drawArrays(GM.models[i].drawMethod, 0, buff.numVerts);
                 }
-                
+
                 // Unbind buffers after use
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
+            }
         }
         //console.log(frustumTestCount);
 
@@ -332,7 +334,11 @@ var GL = {
         }
         */
 
+        /******************* DEBUG DRAWING *************************/
+
         if (DM.GetActive()) {
+
+            // Debug models
             var dispObjs = DM.GetDispObjs.OrientAxes();
             dispObjs = dispObjs.concat(DM.GetDispObjs.BoundingShells());
             for (var i = 0; i < dispObjs.length; i++)
@@ -354,9 +360,11 @@ var GL = {
                         this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
                     }
 
+                    mtxMVP = dispObjs[i].mtxModel.GetMultiply(mtxVP);
+
                     // SEND UP UNIFORMS
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].mtxModel.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
+                    //this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].mtxModel.data);
                     this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].colourTint.GetData());
 
                     // Draw calls
@@ -373,6 +381,7 @@ var GL = {
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 }
             }
+
 
             // Ray casts
             dispObjs = DM.GetDispObjs.RayCasts();
@@ -396,7 +405,7 @@ var GL = {
                     this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
                     // SEND UP UNIFORMS
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxCam, false, GM.activeCam.mtxProjView.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
                     this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].colourTint.GetData());
 
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);

@@ -275,8 +275,8 @@ function Screen_Title(ScreenChangeCallback) {
         GM.rootObj.AddChild(balls[i]);
     }
 
-    balls[0].AddComponent(Components.camera);
-    balls[0].camera.SetControlsActive(true);
+    //balls[0].AddComponent(Components.camera);
+    //balls[0].camera.SetControlsActive(true);
 
     var physicsTestName = "PhysicsTest";
     Input.RegisterObject(physicsTestName, true);
