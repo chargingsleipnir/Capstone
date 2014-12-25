@@ -205,11 +205,12 @@ var GL = {
         var mtxVP = GM.activeCam.mtxCam.GetMultiply(GM.mtxProj);
         var mtxMVP;
 
-        var frustumTestCount = 0;
+        //var frustumTestCount = 0;
         for (var i = 0; i < GM.models.length; i++)
         {
-            if (GM.models[i].active && GM.frustum.IntersectsSphere(GM.models[i].drawSphere)) {
-                frustumTestCount++;
+            if (GM.models[i].active && GM.frustum.IntersectsSphere(GM.models[i].drawSphere))
+            {
+                //frustumTestCount++;
 
                 // These just allow everything to be better read
                 shdr = GM.models[i].shaderData;
@@ -268,7 +269,6 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
-        console.log(frustumTestCount);
 
         /******************* GUI DRAWING *************************/
 
@@ -287,7 +287,9 @@ var GL = {
             dispObjs = dispObjs.concat(DM.GetDispObjs.BoundingShells());
             for (var i = 0; i < dispObjs.length; i++)
             {
-                if(dispObjs[i].active) {
+                if(dispObjs[i].active && GM.frustum.IntersectsSphere(dispObjs[i].drawSphere))
+                {
+                    //frustumTestCount++;
 
                     shdr = dispObjs[i].shaderData;
                     buff = dispObjs[i].bufferData;
@@ -325,6 +327,7 @@ var GL = {
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
                 }
             }
+            //console.log(frustumTestCount);
 
 
             // Ray casts

@@ -30,10 +30,10 @@ function Frustum(mtxProj, verticalViewThetaDeg, aspectRatio, boundNear, boundFar
         this.planes[i] = new Plane();
 
     var tanTheta = Math.tan((verticalViewThetaDeg * DEG_TO_RAD) / 2.0);
-    var d = 1.0 / tanTheta;
-
-    this.planeNearDist = d + boundNear;
-    this.planeFarDist = d + boundFar;
+    /* I could add "d" to these amounts, but it only seems to screw things up
+     * if I want a tight frustum, close to the camera. */
+    this.planeNearDist = boundNear;
+    this.planeFarDist = boundFar;
 
     this.planeNearRadii = new Vector2();
     this.planeNearRadii.y = tanTheta * this.planeNearDist;
@@ -44,6 +44,7 @@ function Frustum(mtxProj, verticalViewThetaDeg, aspectRatio, boundNear, boundFar
     this.planeFarRadii.x = this.planeFarRadii.y * aspectRatio;
 
     // BUILD PROJECTION MATRIX RIGHT HERE - WHY NOT...
+    var d = 1.0 / tanTheta;
     var nf = 1.0 / (boundNear - boundFar);
     mtxProj.SetElems(
         d / aspectRatio, 0.0, 0.0,                               0.0,
@@ -201,10 +202,8 @@ Camera.prototype = {
             //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
             var newDirRight.SetCopy(this.trfmLocal.dirRight);
             */
-
             // Update game view
             this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
-
             GM.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
 
             /* Use these to adjust controls, if set by user, to rotate camera around object.
