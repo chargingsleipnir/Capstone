@@ -64,10 +64,10 @@ var GL = {
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
             programData.u_Alpha = ctx.getUniformLocation(program, "u_Alpha");
             // MATERIALS
-            programData.u_DiffCol = ctx.getUniformLocation(program, "u_Diffuse_Color");
-            programData.u_DiffInt = ctx.getUniformLocation(program, "u_Diffuse_Intensity");
-            programData.u_SpecCol = ctx.getUniformLocation(program, "u_Specular_Color");
-            programData.u_SpecInt = ctx.getUniformLocation(program, "u_Specular_Intensity");
+            programData.u_DiffCol = ctx.getUniformLocation(program, "u_DiffCol");
+            programData.u_DiffInt = ctx.getUniformLocation(program, "u_DiffInt");
+            programData.u_SpecCol = ctx.getUniformLocation(program, "u_SpecCol");
+            programData.u_SpecInt = ctx.getUniformLocation(program, "u_SpecInt");
             //ctx.getUniformLocation(program, "u_Specular_Hardness");
             //ctx.getUniformLocation(program, "u_Mirror_Color");
             //ctx.getUniformLocation(program, "u_Mirror_Distance");
@@ -77,11 +77,11 @@ var GL = {
             //ctx.getUniformLocation(program, "u_Shading_Translucent");
             //ctx.getUniformLocation(program, "u_Darkness");
             // LIGHTS
-            programData.u_AmbBright = ctx.getUniformLocation(program, "u_Light_Ambient_Brightness");
-            programData.u_DirBright = ctx.getUniformLocation(program, "u_Light_Directional_Brightness");
-            programData.u_DirDir = ctx.getUniformLocation(program, "u_Light_Directional_Direction");
-            programData.u_PntBright = ctx.getUniformLocation(program, "u_Light_Point_Brightness");
-            programData.u_PntPos = ctx.getUniformLocation(program, "u_Light_Point_Position");
+            programData.u_AmbBright = ctx.getUniformLocation(program, "u_AmbBright");
+            programData.u_DirBright = ctx.getUniformLocation(program, "u_DirBright");
+            programData.u_DirDir = ctx.getUniformLocation(program, "u_DirDir");
+            programData.u_PntBright = ctx.getUniformLocation(program, "u_PntBright");
+            programData.u_PntPos = ctx.getUniformLocation(program, "u_PntPos");
             // MATRICES
             programData.u_MtxM = ctx.getUniformLocation(program, "u_MtxM");
             programData.u_MtxVP = ctx.getUniformLocation(program, "u_MtxVP");
