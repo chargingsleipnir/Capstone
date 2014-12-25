@@ -850,9 +850,7 @@ Matrix4.prototype = {
         ///  <param name="boundFar" type="decimal">Dist to furthest draw vertex</param>
         ///  <returns type="Matrix4" />
         /// </signature>
-
-        var angle = thetaDeg * DEG_TO_RAD;
-        var d = 1.0 / Math.tan(angle / 2.0);
+        var d = 1.0 / Math.tan(thetaDeg * DEG_TO_RAD / 2.0);
         var nf = 1.0 / (boundNear - boundFar);
 
         this.SetElems(

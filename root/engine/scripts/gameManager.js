@@ -9,6 +9,7 @@ var GM = {
     },
     LoopCall: function(){},
     activeCam: null,
+    frustum: null,
     rootObj: null,
     models: [],
     Initialize: function(canvasWebGL, canvas2D) {
@@ -31,7 +32,9 @@ var GM = {
         var canvasStyles = window.getComputedStyle(canvasWebGL, null);
         this.wndWidth = parseFloat(canvasStyles.width);
         this.wndHeight = parseFloat(canvasStyles.height);
-        this.mtxProj.SetPerspective(45.0, this.wndWidth / this.wndHeight, 0.1, 200.0);
+
+        // Instantiate frustum and projection matrix together
+        this.frustum = new Frustum(this.mtxProj, 45.0, this.wndWidth / this.wndHeight, 0.1, 200.0);
 
         // Set up initial camera
         this.rootObj.AddComponent(Components.camera);

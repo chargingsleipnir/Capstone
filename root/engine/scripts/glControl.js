@@ -202,27 +202,14 @@ var GL = {
         // Clear the scene for new draw call
         this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
 
-        //var frustumTestCount = 0;
-
         var mtxVP = GM.activeCam.mtxCam.GetMultiply(GM.mtxProj);
         var mtxMVP;
 
+        var frustumTestCount = 0;
         for (var i = 0; i < GM.models.length; i++)
         {
-            // Change this on a per-object basis, with near and far using objects sphere
-            // Frustum may come from just proj matrix, or from combo...
-            /*
-            var distToObj = GM.activeCam.obj.trfmGlobal.pos.GetSubtract(GM.models[i].drawSphere.pos).GetMag();
-            var near = distToObj - GM.models[i].drawSphere.radius;
-            var far = distToObj + GM.models[i].drawSphere.radius;
-            GM.activeCam.mtxProj.SetPerspective(45.0, GM.wndWidth / GM.wndHeight, 0.1, 200);
-            GM.activeCam.mtxProjView = GM.activeCam.mtxCam.GetMultiply(GM.activeCam.mtxProj);
-            */
-
-            if (GM.models[i].active /*&& GM.activeCam.frustum.IntersectsSphere(GM.models[i].drawSphere)*/) {
-                //frustumTestCount++;
-                //var dist = ((GM.models[i].drawSphere.pos).GetSubtract(GM.activeCam.trfm.pos)).GetMag();
-                //console.log(dist);
+            if (GM.models[i].active && GM.frustum.IntersectsSphere(GM.models[i].drawSphere)) {
+                frustumTestCount++;
 
                 // These just allow everything to be better read
                 shdr = GM.models[i].shaderData;
@@ -281,58 +268,15 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
-        //console.log(frustumTestCount);
+        console.log(frustumTestCount);
+
+        /******************* GUI DRAWING *************************/
 
         /*
         shdr = EM.assets.shaderPrograms['gui'].program;
         this.ctx.useProgram(shdr);
-
-        for (var i = 0; i < DM.shapes.length; i++)
-        {
-            // These just allow everything to be better read
-
-            buff = DM.shapes[i].bufferData;
-
-            // USE PROGRAM AND VBO
-
-            this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-            // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-            this.ctx.enableVertexAttribArray(shdr.a_Pos);
-            this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-            if (shdr.a_Col != -1) {
-                this.ctx.enableVertexAttribArray(shdr.a_Col);
-                this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-            }
-            if (shdr.a_TexCoord != -1) {
-                this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-                if (buff.texID) {
-                    this.ctx.activeTexture(this.ctx.TEXTURE0);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                    this.ctx.uniform1i(shdr.u_Sampler, 0);
-                    // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
-                }
-            }
-
-            // SEND UP UNIFORMS
-            this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, DM.shapes[i].mtxModel.data);
-            this.ctx.uniform3fv(shdr.u_tint, DM.shapes[i].colourTint.GetData());
-
-            // Draw calls
-            if (buff.EABO) {
-                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                this.ctx.drawElements(DM.shapes[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-            }
-            else {
-                this.ctx.drawArrays(DM.shapes[i].drawMethod, 0, buff.numVerts);
-            }
-
-            // Unbind buffers after use
-            this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-            this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-        }
         */
+
 
         /******************* DEBUG DRAWING *************************/
 

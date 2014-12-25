@@ -22,13 +22,40 @@ function Frustum(mtxProj, fovY, ratio, boundNear, boundFar, pos, dirFwd, dirUp) 
     this.CalculatePlanes(pos, dirFwd, dirUp);
 }
 */
-function Frustum() {
+
+function Frustum(mtxProj, verticalViewThetaDeg, aspectRatio, boundNear, boundFar) {
 
     this.planes = [6];
     for (var i = 0; i < 6; i++)
         this.planes[i] = new Plane();
+
+    var tanTheta = Math.tan((verticalViewThetaDeg * DEG_TO_RAD) / 2.0);
+    var d = 1.0 / tanTheta;
+
+    this.planeNearDist = d + boundNear;
+    this.planeFarDist = d + boundFar;
+
+    this.planeNearRadii = new Vector2();
+    this.planeNearRadii.y = tanTheta * this.planeNearDist;
+    this.planeNearRadii.x = this.planeNearRadii.y * aspectRatio;
+
+    this.planeFarRadii = new Vector2();
+    this.planeFarRadii.y = tanTheta * this.planeFarDist;
+    this.planeFarRadii.x = this.planeFarRadii.y * aspectRatio;
+
+    // BUILD PROJECTION MATRIX RIGHT HERE - WHY NOT...
+    var nf = 1.0 / (boundNear - boundFar);
+    mtxProj.SetElems(
+        d / aspectRatio, 0.0, 0.0,                               0.0,
+        0.0,             d,   0.0,                               0.0,
+        0.0,             0.0, (boundFar + boundNear) * nf,       -1.0,
+        0.0,             0.0, (2.0 * boundFar * boundNear) * nf, 0.0
+    );
 }
 Frustum.prototype = {
+
+    // CANNOT MAKE THIS BS FUNCTION WORK.
+    // The distances don't change. The norms just constantly rotate
     SetFromMtx: function(mtx) {
 
         this.planes[Planes.left].norm.SetValues(
@@ -76,28 +103,29 @@ Frustum.prototype = {
         for (var i = 0; i < 6; i++)
             this.planes[i].SetNormalized();
     },
-    CalculatePlanes: function(pos, dirFwd, dirUp) {
-        var dirRight = dirFwd.GetCross(dirUp);
+    CalculatePlanes: function(pos, dirFwd, dirUp, dirRight) {
 
-        // Compute centre and corners of near and far planes
-        var posNear = pos.GetAdd(dirFwd.GetScaleByNum(this.distNear));
-        var topNear = dirUp.GetScaleByNum(this.radiiNear.y);
-        var rightNear = dirRight.GetScaleByNum(this.radiiNear.x);
-
-        var posFar = pos.GetAdd(dirFwd.GetScaleByNum(this.distFar));
-        var topFar = dirUp.GetScaleByNum(this.radiiFar.y);
-        var rightFar = dirRight.GetScaleByNum(this.radiiFar.x);
+        // COMPUTE NEAR CORNERS
+        var posNear = pos.GetAddScaled(dirFwd, this.planeNearDist);
+        var topNear = dirUp.GetScaleByNum(this.planeNearRadii.y);
+        var rightNear = dirRight.GetScaleByNum(this.planeNearRadii.x);
 
         var nearTL = posNear.GetAdd(topNear).SetSubtract(rightNear);
         var nearTR = posNear.GetAdd(topNear).SetAdd(rightNear);
         var nearBL = posNear.GetSubtract(topNear).SetSubtract(rightNear);
         var nearBR = posNear.GetSubtract(topNear).SetAdd(rightNear);
 
+        // COMPUTE FAR CORNERS
+        var posFar = pos.GetAddScaled(dirFwd, this.planeFarDist);
+        var topFar = dirUp.GetScaleByNum(this.planeFarRadii.y);
+        var rightFar = dirRight.GetScaleByNum(this.planeFarRadii.x);
+
         var farTL = posFar.GetAdd(topFar).SetSubtract(rightFar);
         var farTR = posFar.GetAdd(topFar).SetAdd(rightFar);
         var farBL = posFar.GetSubtract(topFar).SetSubtract(rightFar);
         var farBR = posFar.GetSubtract(topFar).SetAdd(rightFar);
 
+        // GET PLANES FROM CORNERS
         this.planes[Planes.left].SetFromPoints(nearTL, nearBL, farTL);
         this.planes[Planes.right].SetFromPoints(nearTR, farTR, nearBR);
         this.planes[Planes.bottom].SetFromPoints(nearBL, nearBR, farBL);
@@ -127,20 +155,15 @@ Frustum.prototype = {
 
 function Camera(trfmObj) {
 
+    this.active = false;
+
     this.trfmObj = trfmObj;
     this.trfm = new Transform(Space.local);
     this.trfm.pos.SetCopy(this.trfmObj.pos);
 
     this.mtxCam = new Matrix4();
 
-    //this.frustum = new Frustum(this.mtxProj, 45.0, wndWidth / wndHeight, 0.1, 200.0, pos, dirFwd, dirUp);
-
-    this.frustum = new Frustum();
-    //this.frustum.SetFromMtx(this.mtxProjView);
-
-    //console.log(this.frustum);
-
-    this.active = false;
+    GM.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
     GM.SetActiveCamera(this);
 }
 Camera.prototype = {
@@ -182,6 +205,8 @@ Camera.prototype = {
             // Update game view
             this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
 
+            GM.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+
             /* Use these to adjust controls, if set by user, to rotate camera around object.
              * Allow user to set camera modes...
              * This is where pushing and popping matrices will come into play!! */
@@ -191,18 +216,6 @@ Camera.prototype = {
             //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
 
             //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
-            //this.mtxProjView = this.mtxCam.GetMultiply(this.mtxProj);
-            //this.frustum.SetFromMtx(this.mtxProjView);
-            //console.log("active");
-            //console.log(this.frustum);
-            //this.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp);
         }
     }
-    /*
-    UpdatePlanes: function(near, far) {
-        if (this.trfm.IsChanging()) {
-            this.mtxProj.SetPerspective(45.0, GM.wndWidth / GM.wndHeight, near, far);
-        }
-    }
-    */
 };
