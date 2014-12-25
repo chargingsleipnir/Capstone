@@ -80,3 +80,29 @@ RayCastHandler.prototype = {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     }
 };
+
+/*
+function GUIBoxHandler(rectModel) {
+    // Create Buffer
+    this.bufferData = new BufferData();
+    GL.CreateBufferObjects(rayVerts, this.bufferData, true);
+
+    this.active = true;
+    this.colourTint = new Vector3();
+}
+GUIBoxHandler.prototype = {
+    RewriteVerts: function(vertArray) {
+        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    }
+};
+*/
+
+var stringHndls = [];
+
+function StringDisplayHandler(stringLine) {
+    // Create Buffer
+    this.bufferData = new BufferData();
+
+    GL.CreateBufferObjects(stringLine, this.bufferData, false);
+    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['characterMapLarge']);
+}

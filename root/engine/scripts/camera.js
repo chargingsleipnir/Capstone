@@ -204,7 +204,7 @@ Camera.prototype = {
             */
             // Update game view
             this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
-            GM.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+            GM.frustum.CalculatePlanes(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
 
             /* Use these to adjust controls, if set by user, to rotate camera around object.
              * Allow user to set camera modes...

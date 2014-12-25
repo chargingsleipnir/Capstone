@@ -262,3 +262,27 @@ var ModelUtils = {
         return matches[matches.length - 1];
     }
 };
+
+var SpecialUtils = {
+    GetTexCoords: function(char) {
+        // For textures, specify row and col from bottom-left to top-right
+        var eigth = 0.125;
+        function GetCoordsByIndex(row, col) {
+            return [
+                row * eigth, (col+1) * eigth,
+                row * eigth, col * eigth,
+                (row+1) * eigth, col * eigth,
+
+                row * eigth, (col+1) * eigth,
+                (row+1) * eigth, col * eigth,
+                (row+1) * eigth, (col+1) * eigth
+            ];
+        }
+
+        switch (char) {
+            case 'A': return GetCoordsByIndex(0, 7) ;
+            case 'B': return GetCoordsByIndex(1, 7) ;
+            case 'C': return GetCoordsByIndex(2, 7) ;
+        }
+    }
+};

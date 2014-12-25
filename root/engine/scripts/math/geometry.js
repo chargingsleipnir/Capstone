@@ -250,9 +250,17 @@ function Tri() {
     */
 }
 
-function Rect() {
-
+function Rect(x, y, w, h) {
+    this.x = x || 0.0;
+    this.y = y || 0.0;
+    this.w = w || 20.0;
+    this.h = h || 20.0;
 }
+Rect.prototype = {
+    GetCopy: function() {
+        return new Rect(this.x, this.y, this.w, this.h);
+    }
+};
 
 function Sphere(pos, radius) {
     /// <signature>

@@ -270,14 +270,6 @@ var GL = {
             }
         }
 
-        /******************* GUI DRAWING *************************/
-
-        /*
-        shdr = EM.assets.shaderPrograms['gui'].program;
-        this.ctx.useProgram(shdr);
-        */
-
-
         /******************* DEBUG DRAWING *************************/
 
         if (DM.GetActive()) {
@@ -360,6 +352,55 @@ var GL = {
 
                     // Unbind buffers after use
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                }
+            }
+        }
+
+        /******************* GUI DRAWING *************************/
+
+        // JUST TESTING - THIS WILL CERTAINLY END UP IN THE NEXT DRAW CALL
+
+        shdr = EM.assets.shaderPrograms['gui'];
+        this.ctx.useProgram(shdr.program);
+        for(var i = 0; i < stringHndls.length; i++) {
+            buff = stringHndls[i].bufferData;
+
+            this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+            // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+            this.ctx.enableVertexAttribArray(shdr.a_Pos);
+            this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+            this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+            this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+
+            this.ctx.activeTexture(this.ctx.TEXTURE0);
+            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+            this.ctx.uniform1i(shdr.u_Sampler, 0);
+
+            // SEND UP UNIFORMS
+            this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+
+            this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
+
+            // Unbind buffers after use
+            this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+        }
+
+
+
+        /*
+         shdr = EM.assets.shaderPrograms['gui'].program;
+         this.ctx.useProgram(shdr);
+         */
+
+        var guiSystems = GUINetwork.GetSystems();
+        for(var i = 0; i < guiSystems.length; i++) {
+            if(guiSystems[i].active) {
+                for(var j = 0; j < guiSystems[i].msgBoxes.dispBoxes.length; j++) {
+                    var dispObj = guiSystems[i].msgBoxes.dispBoxes[j];
+
+
                 }
             }
         }

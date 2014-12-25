@@ -53,6 +53,7 @@ var GM = {
         this.rootObj.Update(this.rootObj.trfmLocal);
         CollisionNetwork.Update();
         DM.Update();
+        GUINetwork.Update();
     },
     SetActiveCamera: function(camera) {
         if(this.activeCam)

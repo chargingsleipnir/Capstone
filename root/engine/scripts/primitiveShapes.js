@@ -1,5 +1,42 @@
 ﻿
 var Primitives = {
+    StringLine: function(string, charRadii) {
+        var w, h;
+        if(charRadii) {
+            w = charRadii.x;
+            h = charRadii.y;
+        }
+        else {
+            w = h = 1.0;
+        }
+
+        function ShiftedPosCoords(shift) {
+            return [
+                -w + shift, h, 0.0,
+                -w + shift, -h, 0.0,
+                w + shift, -h, 0.0,
+                -w + shift, h, 0.0,
+                w + shift, -h, 0.0,
+                w + shift, h, 0.0
+            ];
+        }
+
+        var posCoords = [];
+        var texCoords = [];
+
+        for (var i = 0; i < string.length; i++) {
+            posCoords = posCoords.concat(ShiftedPosCoords(i*w));
+            texCoords = texCoords.concat(SpecialUtils.GetTexCoords(string[i]));
+        }
+
+        return {
+            count: string.length * 6,
+            posCoords: posCoords,
+            colElems: [],
+            texCoords: texCoords,
+            normAxes: []
+        };
+    },
     Ray: function(pt1, pt2) {
         var posCoords = [];
 
@@ -484,7 +521,7 @@ var Primitives = {
         },
         drawMethod: DrawMethods.lines
     },
-    Rect: function (radii) {
+    Rect: function (radii, colour) {
         var w, h;
         if(radii) {
             w = radii.x;
@@ -505,7 +542,7 @@ var Primitives = {
         for (var i = 0; i < posCoords.length; i += 3) {
             var magInv = 1.0 / (new Vector3(posCoords[i], posCoords[i + 1], 0.0)).GetMag();
             normals = normals.concat([posCoords[i] * magInv, posCoords[i + 1] * magInv, 0.0]);
-            colours = colours.concat([0.0, 0.0, 0.0]);
+            colours = colours.concat(colour.GetData());
         }
         return {
             name: "Rect",

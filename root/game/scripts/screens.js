@@ -249,6 +249,18 @@ function Screen_Title(ScreenChangeCallback) {
 
     GM.rootObj.AddChild(cube);
 
+    /******************************** GOOD TIME TO MAKE A HUD *************************************************/
+
+    //GUINetwork
+
+    var stringObj = Primitives.StringLine("ABC", new Vector2(1.0, 1.0));
+    var stringObjHndl = new StringDisplayHandler(stringObj);
+
+    console.log(stringObj);
+
+    stringHndls.push(stringObjHndl);
+
+
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];
     var startPositions = [
@@ -307,14 +319,6 @@ function Screen_Title(ScreenChangeCallback) {
 }
 
 function Screen_InGame(ScreenChangeCallback) {
-
-    var disc = new GameObject('disc', Labels.none);
-    disc.SetModel(GM.assets.models['disc']);
-    disc.AddComponent(Components.modelHandler);
-    disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface']);
-    disc.AddComponent(Components.collisionBody);
-    disc.trfmLocal.SetPosAxes(0.0, 0.0, -5.0);
-    GM.rootObj.AddChild(disc);
 
     this.Update = function() {
 
