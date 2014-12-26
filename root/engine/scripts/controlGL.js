@@ -371,72 +371,70 @@ var GL = {
 
         /******************* GUI DRAWING *************************/
 
-        var guiSystems = GUINetwork.GetSystems();
+        var guiSystems = GUINetwork.GetActiveSystems();
 
         for(var i = 0; i < guiSystems.length; i++) {
-            if(guiSystems[i].active) {
 
-                /* This shader is very specific to gui text, having no matrices, and with textures*/
-                shdr = EM.assets.shaderPrograms['guiText'];
+            /* This shader is very specific to gui text, having no matrices, and with textures*/
+            shdr = EM.assets.shaderPrograms['guiText'];
+            this.ctx.useProgram(shdr.program);
+
+            for(var j = 0; j < guiSystems[i].textBlocks.length; j++) {
+
+                buff = guiSystems[i].textBlocks[j].bufferData;
+
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                // ALWAYS HAS TEXTURES
+                this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+
+                this.ctx.activeTexture(this.ctx.TEXTURE0);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                this.ctx.uniform1i(shdr.u_Sampler, 0);
+
+                this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].textBlocks[j].colourTint.GetData());
+
+                this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+            }
+
+            for(var j = 0; j < guiSystems[i].boxMdls.length; j++) {
+
+                shdr = guiSystems[i].boxMdls[j].shaderData;
+                buff = guiSystems[i].boxMdls[j].bufferData;
+
                 this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
-                for(var j = 0; j < guiSystems[i].msgBoxes.textBlocks.length; j++) {
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
 
-                    buff = guiSystems[i].msgBoxes.textBlocks[j].bufferData;
-
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                    // ALWAYS HAS TEXTURES
+                // MAY HAVE TEXTURES - NO VERT COLOURS
+                if (shdr.a_TexCoord != -1) {
                     this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
                     this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-
-                    this.ctx.activeTexture(this.ctx.TEXTURE0);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                    this.ctx.uniform1i(shdr.u_Sampler, 0);
-
-                    this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].msgBoxes.textBlocks[j].colourTint.GetData());
-
-                    this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                }
-
-                for(var j = 0; j < guiSystems[i].msgBoxes.boxMdls.length; j++) {
-
-                    shdr = guiSystems[i].msgBoxes.boxMdls[j].shaderData;
-                    buff = guiSystems[i].msgBoxes.boxMdls[j].bufferData;
-
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                    // MAY HAVE TEXTURES - NO VERT COLOURS
-                    if (shdr.a_TexCoord != -1) {
-                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-                        if (buff.texID) {
-                            this.ctx.activeTexture(this.ctx.TEXTURE0);
-                            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                            this.ctx.uniform1i(shdr.u_Sampler, 0);
-                            // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
-                        }
+                    if (buff.texID) {
+                        this.ctx.activeTexture(this.ctx.TEXTURE0);
+                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                        this.ctx.uniform1i(shdr.u_Sampler, 0);
+                        // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
                     }
-
-                    this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].msgBoxes.boxMdls[j].colourTint.GetData());
-
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                 }
+
+                this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].boxMdls[j].colourTint.GetData());
+
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
             }
         }
     }

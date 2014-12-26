@@ -251,7 +251,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     /******************************** GOOD TIME TO MAKE A HUD *************************************************/
 
-    var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth, GM.wndHeight), "in-game HUD");
+    var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth - 20, GM.wndHeight - 20), "in-game HUD");
 
     var style = new MsgBoxStyle();
     style.fontSize = 30;

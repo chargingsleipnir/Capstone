@@ -12,45 +12,15 @@ function GUIObject(wndRect, msg, style) {
     ///  <param name="depth" type="int">Defines overlap position relative to other elements within this system</param>
     ///  <param name="style" type="MsgBoxStyle Object">A struct of various styke details that can be applied to this message box</param>
     /// </signature>
-    this.wndRect = wndRect;
+    this.rectLocal = wndRect;
+    this.posGlobal = new Vector2();
+    this.msg = msg;
+    this.style = style;
     this.children = [];
 
     /* Might be able to create a range of depth within the NDC, and in front
      * of everything else being affected by transformations. Maybe convert the
      * "depth" to a range of 0.00 to -0.10 */
-
-    /********* BOX ***********/
-
-    // Convert sizes to account for NDC of viewport, -1 to 1
-    var w = WndUtils.WndX_To_GLNDCX(wndRect.w),
-        h = WndUtils.WndY_To_GLNDCY(wndRect.h),
-        x = WndUtils.WndX_To_GLNDCX(wndRect.x) + this.sysRect.pos.x,
-        y = (WndUtils.WndY_To_GLNDCY(wndRect.y) + this.sysRect.pos.y) * -1;
-
-    var boxModel = new Primitives.Rect(new Vector2(w, h));
-    var posCoords = boxModel.vertices.byMesh.posCoords;
-    // Set box' pos to that defined in the rect
-
-    for(var i = 0; i < posCoords.length; i+= 3) {
-        posCoords[i] += x;
-        posCoords[i+1] += y;
-    }
-
-    this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
-    if(style.bgColour)
-        this.boxHdl.colourTint.SetCopy(style.bgColour);
-    if(style.bgTexture)
-        this.boxHdl.SetTexture(style.bgTexture, TextureFilters.linear);
-
-
-    /********* TEXT ***********/
-
-    var fsW = style.fontSize ? WndUtils.WndX_To_GLNDCX(style.fontSize) : 0.01 * (GM.wndWidth / GM.wndHeight),
-        fsH = style.fontSize ? WndUtils.WndY_To_GLNDCY(style.fontSize) : 0.01;
-
-    this.strObjHndl = new StringDisplayHandler(new StringLine(msg, new Vector2(fsW/2.0, fsH/2.0)));
-    if(style.fontColour)
-        this.strObjHndl.colourTint.SetCopy(style.fontColour);
 }
 GUIObject.prototype = {
     AddChild: function(guiObject) {
@@ -59,15 +29,51 @@ GUIObject.prototype = {
         ///  <param name="guiObject" type="GUIObject"></param>
         ///  <returns type="void" />
         /// </signature>
-        guiObject.parent = this;
         this.children.push(guiObject);
     },
-    AsMsgBox: function(msg, style) {
+    UpdatePos: function(parentPos) {
+        this.posGlobal.SetValues(
+            this.rectLocal.x + parentPos.x,
+            this.rectLocal.y + parentPos.y
+        )
+    },
+    InstantiateDisplay: function() {
+        /********* BOX ***********/
 
+        // Convert sizes to account for NDC of viewport, -1 to 1
+        var w = WndUtils.WndX_To_GLNDCX(this.rectLocal.w),
+            h = WndUtils.WndY_To_GLNDCY(this.rectLocal.h),
+            x = WndUtils.WndX_To_GLNDCX(this.posGlobal.x),
+            y = WndUtils.WndY_To_GLNDCY(this.posGlobal.y) * -1;
+
+        var boxModel = new Primitives.Rect(new Vector2(w, h));
+        var posCoords = boxModel.vertices.byMesh.posCoords;
+        // Set box' pos to that defined in the rect
+
+        for(var i = 0; i < posCoords.length; i+= 3) {
+            posCoords[i] += x;
+            posCoords[i+1] += y;
+        }
+
+        this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
+        if(this.style.bgColour)
+            this.boxHdl.colourTint.SetCopy(this.style.bgColour);
+        if(this.style.bgTexture)
+            this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
+
+
+        /********* TEXT ***********/
+
+        var fsW = this.style.fontSize ? WndUtils.WndX_To_GLNDCX(this.style.fontSize) : 0.01 * (GM.wndWidth / GM.wndHeight),
+            fsH = this.style.fontSize ? WndUtils.WndY_To_GLNDCY(this.style.fontSize) : 0.01;
+
+        this.strObjHdl = new StringDisplayHandler(new StringLine(this.msg, new Vector2(fsW/2.0, fsH/2.0)));
+        if(this.style.fontColour)
+            this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
     },
     Update: function() {
         for (var i = 0; i < this.children.length; i++) {
-            this.children[i].Update(this.wndRect);
+            this.children[i].Update();
         }
     }
 };
@@ -80,37 +86,39 @@ function GUISystem(wndRect, name) {
     ///  <param name="name" type="string">System identifier</param>
     ///  <param name="wndRect" type="Rect">The size of the container. No elements added to the system will be outside this area</param>
     /// </signature>
-
-    this.sysRect = new WndRect();
+    this.sysRect = wndRect;
     this.name = name;
     this.rootObjs = [];
     this.boxMdls = [];
     this.textBlocks = [];
-
-    if (wndRect) {
-        this.sysRect.SetValues(
-            WndUtils.WndX_To_GLNDCX(wndRect.x) - 1,
-            WndUtils.WndY_To_GLNDCY(wndRect.y) - 1,
-            WndUtils.WndX_To_GLNDCX(wndRect.w),
-            WndUtils.WndY_To_GLNDCY(wndRect.h)
-        );
-    }
 }
 GUISystem.prototype = {
     AddGUIObject: function(guiObj) {
-        guiObj.system = this;
-        // Traverse tree and get all models
+        /// <signature>
+        ///  <summary>Add GUI objects or roots of objects, to be a part of this systems. Objects are updated and their visuals prepared when added</summary>
+        ///  <param name="guiObj" type="GUIObject"></param>
+        /// </signature>
+        guiObj.UpdatePos(new Vector2(this.sysRect.x, this.sysRect.y));
+        guiObj.InstantiateDisplay();
+
+        // Traverse added tree
+        var that = this;
         function TraverseTree(parent) {
-            this.boxMdls.push(parent.boxHdl);
-            this.textBlocks.push(parent.strObjHdl);
-            for (var i = 0; i < parent.children.length; i++)
+            for (var i = 0; i < parent.children.length; i++) {
+                /* First Update all position information to create accurately placed models.
+                * This must be done here to pass parent-to-child information */
+                parent.children[i].UpdatePos(parent.posGlobal);
+                parent.children[i].InstantiateDisplay();
+
                 TraverseTree(parent.children[i]);
+            }
+            // Then get the created models
+            that.boxMdls.push(parent.boxHdl);
+            that.textBlocks.push(parent.strObjHdl);
         }
         TraverseTree(guiObj);
 
         this.rootObjs.push(guiObj);
-
-        // SEND RECT INFO
     },
     Update: function() {
         for(var i = 0; i < this.rootObjs.length; i++)
@@ -159,7 +167,7 @@ var GUINetwork = (function() {
             else
                 throw ("Object is already where you want it");
         },
-        GetSystems: function() {
+        GetActiveSystems: function() {
             return activeSystems;
         },
         ListGUISystems: function() {
