@@ -345,5 +345,11 @@ var SpecialUtils = {
             case 'y': return GetCoordsByIndex(6, 0) ;
             case 'z': return GetCoordsByIndex(7, 0) ;
         }
+    },
+    WndX_To_GLNDCX: function(wndX) {
+        return (wndX / (0.5 * GM.wndWidth)) - 1.0;
+    },
+    WndY_To_GLNDCY: function(wndY) {
+        return ((wndY / (0.5 * GM.wndHeight)) - 1.0) * -1.0;
     }
 };

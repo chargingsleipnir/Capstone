@@ -251,8 +251,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     /******************************** GOOD TIME TO MAKE A HUD *************************************************/
 
-    //GUINetwork
-    var hud = new GUISystem(new Rect(0.0, 0.0, GM.wndWidth, GM.wndHeight));
+    var hud = new GUISystem(new Rect(0.0, 0.0, GM.wndWidth/2.0, GM.wndHeight/2.0));
 
     var style = new MsgBoxStyle();
     style.fontSize = 30;
@@ -263,7 +262,7 @@ function Screen_Title(ScreenChangeCallback) {
     style.bgTexture = null;
     style.bgColour = new Vector3(0.0, 1.0, 0.0);
 
-    hud.AddMsgBox("Looky at me. I made my own font.", new Rect(20, 20, 300, 300), 0, style);
+    hud.AddMsgBox("Looky at me. I made my own font.", new Rect(160, 160, 150, 150), 0, style);
 
     GUINetwork.AddSystem(hud, true);
 

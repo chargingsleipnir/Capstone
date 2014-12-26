@@ -81,24 +81,8 @@ RayCastHandler.prototype = {
     }
 };
 
-/*
-function GUIBoxHandler(rectModel) {
-    // Create Buffer
-    this.bufferData = new BufferData();
-    GL.CreateBufferObjects(rayVerts, this.bufferData, true);
-
-    this.active = true;
-    this.colourTint = new Vector3();
-}
-GUIBoxHandler.prototype = {
-    RewriteVerts: function(vertArray) {
-        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
-    }
-};
-*/
 
 function GUIBoxHandler(boxVerts) {
-    // Create Buffer
     this.bufferData = new BufferData();
     GL.CreateBufferObjects(boxVerts, this.bufferData, false);
 
@@ -113,7 +97,6 @@ GUIBoxHandler.prototype = {
 };
 
 function StringDisplayHandler(stringLine) {
-    // Create Buffer
     this.bufferData = new BufferData();
 
     GL.CreateBufferObjects(stringLine, this.bufferData, false);

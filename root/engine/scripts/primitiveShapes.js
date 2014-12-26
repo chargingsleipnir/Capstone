@@ -1,42 +1,5 @@
 ﻿
 var Primitives = {
-    StringLine: function(string, charRadii) {
-        var w, h;
-        if(charRadii) {
-            w = charRadii.x;
-            h = charRadii.y;
-        }
-        else {
-            w = h = 1.0;
-        }
-
-        function ShiftedPosCoords(shift) {
-            return [
-                -w + shift, h, 0.0,
-                -w + shift, -h, 0.0,
-                w + shift, -h, 0.0,
-                -w + shift, h, 0.0,
-                w + shift, -h, 0.0,
-                w + shift, h, 0.0
-            ];
-        }
-
-        var posCoords = [];
-        var texCoords = [];
-
-        for (var i = 0; i < string.length; i++) {
-            posCoords = posCoords.concat(ShiftedPosCoords(i*w*2));
-            texCoords = texCoords.concat(SpecialUtils.GetTexCoords(string[i]));
-        }
-
-        return {
-            count: string.length * 6,
-            posCoords: posCoords,
-            colElems: [],
-            texCoords: texCoords,
-            normAxes: []
-        };
-    },
     Ray: function(pt1, pt2) {
         var posCoords = [];
 

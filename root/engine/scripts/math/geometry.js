@@ -250,15 +250,13 @@ function Tri() {
     */
 }
 
-function Rect(x, y, w, h) {
-    this.x = x || 0.0;
-    this.y = y || 0.0;
-    this.w = w || 20.0;
-    this.h = h || 20.0;
+function Rect(posX, posY, radialWidth, radialHeight) {
+    this.pos = new Vector2(posX || 0.0, posY || 0.0);
+    this.radii = new Vector2(radialWidth || 1.0, radialHeight || 1.0);
 }
 Rect.prototype = {
     GetCopy: function() {
-        return new Rect(this.x, this.y, this.w, this.h);
+        return new Rect(this.pos.x, this.pos.y, this.radii.x, this.radii.y);
     }
 };
 
