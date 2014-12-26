@@ -251,7 +251,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     /******************************** GOOD TIME TO MAKE A HUD *************************************************/
 
-    var hud = new GUISystem(new Rect(0.0, 0.0, GM.wndWidth/2.0, GM.wndHeight/2.0));
+    var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth, GM.wndHeight), "in-game HUD");
 
     var style = new MsgBoxStyle();
     style.fontSize = 30;
@@ -262,9 +262,11 @@ function Screen_Title(ScreenChangeCallback) {
     style.bgTexture = null;
     style.bgColour = new Vector3(0.0, 1.0, 0.0);
 
-    hud.AddMsgBox("Looky at me. I made my own font.", new Rect(160, 160, 150, 150), 0, style);
+    var firstMsg = new GUIObject(new Rect(20, 20, 300, 300), "Looky at me. I made my own font.", style);
+    hud.AddGUIObject(firstMsg);
 
-    GUINetwork.AddSystem(hud, true);
+    GUINetwork.AddSystem(hud, false);
+    GUINetwork.SetActive(hud.name, true);
 
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];

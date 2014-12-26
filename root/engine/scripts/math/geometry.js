@@ -251,12 +251,188 @@ function Tri() {
 }
 
 function Rect(posX, posY, radialWidth, radialHeight) {
+    /// <signature>
+    ///  <summary>Defined by position and radii</summary>
+    ///  <param name="posX" type="decimal"></param>
+    ///  <param name="posY" type="decimal"></param>
+    ///  <param name="radialWidth" type="decimal"></param>
+    ///  <param name="radialHeight" type="decimal"></param>
+    ///  <returns type="Rect" />
+    /// </signature>
     this.pos = new Vector2(posX || 0.0, posY || 0.0);
     this.radii = new Vector2(radialWidth || 1.0, radialHeight || 1.0);
 }
 Rect.prototype = {
+    SetCopy: function(rect) {
+        /// <signature>
+        ///  <summary>Create new copy</summary>
+        ///  <param name="rect" type="Rect"></param>
+        ///  <returns type="Rect" />
+        /// </signature>
+        this.pos.SetCopy(rect.pos);
+        this.radii.SetCopy(rect.radii);
+        return this;
+    },
     GetCopy: function() {
+        /// <signature>
+        ///  <summary>Create new copy of this</summary>
+        ///  <returns type="Rect" />
+        /// </signature>
         return new Rect(this.pos.x, this.pos.y, this.radii.x, this.radii.y);
+    },
+    SetValues: function(posX, posY, radialWidth, radialHeight) {
+        /// <signature>
+        ///  <summary>Defined by position and radii</summary>
+        ///  <param name="posX" type="decimal"></param>
+        ///  <param name="posY" type="decimal"></param>
+        ///  <param name="radialWidth" type="decimal"></param>
+        ///  <param name="radialHeight" type="decimal"></param>
+        ///  <returns type="Rect" />
+        /// </signature>
+        this.pos.SetValues(posX, posY);
+        this.radii.SetValues(radialWidth, radialHeight);
+    },
+    Scale: function(scalar) {
+        /// <signature>
+        ///  <summary>Modify scale value</summary>
+        ///  <param name="scalar" type="Vector2"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.radii.SetScaleByVec(scalar);
+    },
+    GetScaled: function(scalar) {
+        /// <signature>
+        ///  <summary>Get radii components times scale factors</summary>
+        ///  <param name="scalar" type="Vector2"></param>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        return this.radii.GetScaleByVec(scalar);
+    },
+    GetMinCorner: function() {
+        /// <signature>
+        ///  <summary>Get the vector representing the lowest valued corner</summary>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return this.pos.GetSubtract(this.radii);
+    },
+    GetMaxCorner: function() {
+        /// <signature>
+        ///  <summary>Get the vector representing the highest valued corner</summary>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return this.pos.GetAdd(this.radii);
+    },
+    GetCornerFurthestAlong: function(norm) {
+        /// <signature>
+        ///  <summary>Return the Rect values most in the direction given</summary>
+        ///  <param name="norm" type="Vector2"></param>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return new Vector2(
+            (norm.x > 0) ? this.GetMaxCorner().x : this.GetMinCorner().x,
+            (norm.y > 0) ? this.GetMaxCorner().y : this.GetMinCorner().y
+        );
+    },
+    GetCornerLeastAlong: function(norm) {
+        /// <signature>
+        ///  <summary>Return the Rect values least in the direction given</summary>
+        ///  <param name="norm" type="Vector2"></param>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return Vector2(
+            (norm.x < 0) ? this.GetMaxCorner().x : this.GetMinCorner().x,
+            (norm.y < 0) ? this.GetMaxCorner().y : this.GetMinCorner().y
+        );
+    }
+};
+function WndRect(x, y, w, h) {
+    /// <signature>
+    ///  <summary>Defined by x, y, positions and w, h, dimensions</summary>
+    ///  <param name="x" type="decimal"></param>
+    ///  <param name="y" type="decimal"></param>
+    ///  <param name="w" type="decimal"></param>
+    ///  <param name="h" type="decimal"></param>
+    ///  <returns type="WndRect" />
+    /// </signature>
+    this.x = x || 0.0;
+    this.y = y || 0.0;
+    this.w = w || 0.0;
+    this.h = h || 0.0;
+}
+WndRect.prototype = {
+    SetCopy: function(wndRect) {
+        /// <signature>
+        ///  <summary>Create new copy</summary>
+        ///  <param name="wndRect" type="WndRect"></param>
+        ///  <returns type="WndRect" />
+        /// </signature>
+        this.x = wndRect.x;
+        this.y = wndRect.y;
+        this.w = wndRect.w;
+        this.h = wndRect.h;
+        return this;
+    },
+    GetCopy: function() {
+        /// <signature>
+        ///  <summary>Create new copy of this</summary>
+        ///  <returns type="WndRect" />
+        /// </signature>
+        return new WndRect(this.x, this.y, this.w, this.h);
+    },
+    SetValues: function(x, y, w, h) {
+        /// <signature>
+        ///  <summary>Defined by x, y, positions and w, h, dimensions</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="w" type="decimal"></param>
+        ///  <param name="h" type="decimal"></param>
+        ///  <returns type="WndRect" />
+        /// </signature>
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        return this;
+    },
+    Scale: function(scaleW, scaleH) {
+        /// <signature>
+        ///  <summary>Modify width and height values</summary>
+        ///  <param name="scaleW" type="decimal"></param>
+        ///  <param name="scaleH" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.w *= scaleW;
+        this.h *= scaleH;
+    },
+    GetScaled: function(scaleW, scaleH) {
+        /// <signature>
+        ///  <summary>Get radii components times scale factors</summary>
+        ///  <param name="scaleW" type="decimal"></param>
+        ///  <param name="scaleH" type="decimal"></param>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        return new WndRect(this.x, this.y, this.w * scaleW, this.h * scaleH);
+    },
+    GetCentre: function() {
+        /// <signature>
+        ///  <summary>Get the centre point of this rect</summary>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return new Vector2((this.x + this.w) / 2, (this.y + this.h) / 2);
+    },
+    GetRadii: function() {
+        /// <signature>
+        ///  <summary>Get the radii this rect</summary>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return new Vector2(this.w / 2, this.h / 2);
+    },
+    GetMaxCorner: function() {
+        /// <signature>
+        ///  <summary>Get the vector representing the highest valued corner</summary>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return new Vector2(this.x + this.w, this.y + this.h);
     }
 };
 

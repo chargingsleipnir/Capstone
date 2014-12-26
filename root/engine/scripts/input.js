@@ -62,8 +62,7 @@ var Input = (function() {
             /// </signature>
             if (!(objectName in activeRegistry) && !(objectName in inactiveRegistry))
                 throw ("No object by that name to change active status");
-
-            if (objectName in activeRegistry && beActive == false) {
+            else if (objectName in activeRegistry && beActive == false) {
                 inactiveRegistry[objectName] = activeRegistry[objectName];
                 delete activeRegistry[objectName];
             }
@@ -72,7 +71,7 @@ var Input = (function() {
                 delete inactiveRegistry[objectName];
             }
             else
-                console.log("Object is already where you want it");
+                throw ("Object is already where you want it");
         },
         ListInputObjects: function()
         {
