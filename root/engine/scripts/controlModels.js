@@ -27,8 +27,8 @@ function ModelHandler(model, shapeData) {
     this.indices = model.vertices.byMesh.indices;
 }
 ModelHandler.prototype = {
-    SetTexture: function(texture) {
-        this.bufferData.texID = GL.CreateTextureObject(texture);
+    SetTexture: function(texture, texFilter) {
+        this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
     },
     MakeWireFrame: function() {
         // Change draw type
@@ -97,12 +97,27 @@ GUIBoxHandler.prototype = {
 };
 */
 
-var stringHndls = [];
+function GUIBoxHandler(boxVerts) {
+    // Create Buffer
+    this.bufferData = new BufferData();
+    GL.CreateBufferObjects(boxVerts, this.bufferData, false);
+
+    this.shaderData = EM.assets.shaderPrograms['guiBoxTint'];
+    this.colourTint = new Vector3();
+}
+GUIBoxHandler.prototype = {
+    SetTexture: function(texture, texFilter) {
+        this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
+        this.shaderData = EM.assets.shaderPrograms['guiText'];
+    }
+};
 
 function StringDisplayHandler(stringLine) {
     // Create Buffer
     this.bufferData = new BufferData();
 
     GL.CreateBufferObjects(stringLine, this.bufferData, false);
-    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['characterMapLarge']);
+
+    this.colourTint = new Vector3();
+    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['characterMapLarge'], TextureFilters.nearest);
 }

@@ -211,15 +211,15 @@ function Screen_Title(ScreenChangeCallback) {
     zeroPointAxes.AddComponent(Components.modelHandler);
     grid.AddComponent(Components.modelHandler);
     skyBox.AddComponent(Components.modelHandler);
-    skyBox.mdlHdlr.SetTexture(EM.assets.textures['starfield']);
+    skyBox.mdlHdlr.SetTexture(EM.assets.textures['starfield'], TextureFilters.nearest);
     testCube.AddComponent(Components.modelHandler);
-    testCube.mdlHdlr.SetTexture(EM.assets.textures['logo']);
+    testCube.mdlHdlr.SetTexture(EM.assets.textures['logo'], TextureFilters.linear);
     disc.AddComponent(Components.modelHandler);
-    disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface']);
+    disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface'], TextureFilters.linear);
     disc.AddComponent(Components.collisionBody);
     //disc.collider.SetBoundingShape(BoundingShapes.aabb);
     cube.AddComponent(Components.modelHandler);
-    cube.mdlHdlr.SetTexture(EM.assets.textures['questionBlock']);
+    cube.mdlHdlr.SetTexture(EM.assets.textures['questionBlock'], TextureFilters.linear);
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
@@ -252,14 +252,20 @@ function Screen_Title(ScreenChangeCallback) {
     /******************************** GOOD TIME TO MAKE A HUD *************************************************/
 
     //GUINetwork
+    var hud = new GUISystem(new Rect(0.0, 0.0, GM.wndWidth, GM.wndHeight));
 
-    var stringObj = Primitives.StringLine("ABC", new Vector2(1.0, 1.0));
-    var stringObjHndl = new StringDisplayHandler(stringObj);
+    var style = new MsgBoxStyle();
+    style.fontSize = 30;
+    style.fontColour = new Vector3(1.0, 0.0, 0.0);
+    style.textMaxWidth = 60;
+    style.textAlignWidth = Alignment.centre;
+    style.textAlignHeight = Alignment.bottom;
+    style.bgTexture = null;
+    style.bgColour = new Vector3(0.0, 1.0, 0.0);
 
-    console.log(stringObj);
+    hud.AddMsgBox("Looky at me. I made my own font.", new Rect(20, 20, 300, 300), 0, style);
 
-    stringHndls.push(stringObjHndl);
-
+    GUINetwork.AddSystem(hud, true);
 
     /******************************** PHYSICS IMPLEMENTATION *************************************************/
     var balls = [];
@@ -287,8 +293,8 @@ function Screen_Title(ScreenChangeCallback) {
         GM.rootObj.AddChild(balls[i]);
     }
 
-    //balls[0].AddComponent(Components.camera);
-    //balls[0].camera.SetControlsActive(true);
+    balls[0].AddComponent(Components.camera);
+    balls[0].camera.SetControlsActive(true);
 
     var physicsTestName = "PhysicsTest";
     Input.RegisterObject(physicsTestName, true);

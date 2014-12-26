@@ -13,7 +13,8 @@ var EM = {
         var shaderNamesFilepaths = [
             ['test', 'engine/assets/shaders/test.vshdr', 'engine/assets/shaders/test.fshdr'],
             ['ray', 'engine/assets/shaders/ray.vshdr', 'engine/assets/shaders/ray.fshdr'],
-            ['gui', 'engine/assets/shaders/gui.vshdr', 'engine/assets/shaders/gui.fshdr'],
+            ['guiBoxTint', 'engine/assets/shaders/guiBoxTint.vshdr', 'engine/assets/shaders/guiBoxTint.fshdr'],
+            ['guiText', 'engine/assets/shaders/guiText.vshdr', 'engine/assets/shaders/guiText.fshdr'],
             ['col', 'engine/assets/shaders/col.vshdr', 'engine/assets/shaders/col.fshdr'],
             ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr'],
             ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr'],

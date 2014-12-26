@@ -148,17 +148,30 @@ var GL = {
         //this.ctx.bufferSubData(this.ctx.ELEMENT_ARRAY_BUFFER, 0, new Uint16Array(indices));
         this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.ctx.STATIC_DRAW);
     },
-    CreateTextureObject: function(texture) {
+    CreateTextureObject: function(texture, texFilter) {
         var texID = this.ctx.createTexture();
         this.ctx.bindTexture(this.ctx.TEXTURE_2D, texID);
         this.ctx.pixelStorei(this.ctx.UNPACK_FLIP_Y_WEBGL, true);
         this.ctx.texImage2D(this.ctx.TEXTURE_2D, 0, this.ctx.RGBA, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, texture);
-        // Might want to parameterize these to adjust quality.
-        this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.LINEAR);
-        this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.LINEAR_MIPMAP_NEAREST);
-        this.ctx.generateMipmap(this.ctx.TEXTURE_2D);
+
+        if (texFilter == TextureFilters.nearest) {
+            this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.NEAREST);
+            this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.NEAREST);
+        }
+        else if (texFilter == TextureFilters.linear) {
+            this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.LINEAR);
+            this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.LINEAR);
+        }
+        else if (texFilter == TextureFilters.mipmap) {
+            this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.LINEAR);
+            this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.LINEAR_MIPMAP_NEAREST);
+            this.ctx.generateMipmap(this.ctx.TEXTURE_2D);
+        }
+
         this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
         return texID;
+
+
         /* Consider loading from an array of textures images
         for (var i in textureArray) {
             this.textures[i] = gl.createTexture();
@@ -358,49 +371,71 @@ var GL = {
 
         /******************* GUI DRAWING *************************/
 
-        // JUST TESTING - THIS WILL CERTAINLY END UP IN THE NEXT DRAW CALL
-
-        shdr = EM.assets.shaderPrograms['gui'];
-        this.ctx.useProgram(shdr.program);
-        for(var i = 0; i < stringHndls.length; i++) {
-            buff = stringHndls[i].bufferData;
-
-            this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-            // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-            this.ctx.enableVertexAttribArray(shdr.a_Pos);
-            this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-            this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-            this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-
-            this.ctx.activeTexture(this.ctx.TEXTURE0);
-            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-            this.ctx.uniform1i(shdr.u_Sampler, 0);
-
-            // SEND UP UNIFORMS
-            this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-
-            this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
-
-            // Unbind buffers after use
-            this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-        }
-
-
-
-        /*
-         shdr = EM.assets.shaderPrograms['gui'].program;
-         this.ctx.useProgram(shdr);
-         */
-
         var guiSystems = GUINetwork.GetSystems();
+
         for(var i = 0; i < guiSystems.length; i++) {
             if(guiSystems[i].active) {
-                for(var j = 0; j < guiSystems[i].msgBoxes.dispBoxes.length; j++) {
-                    var dispObj = guiSystems[i].msgBoxes.dispBoxes[j];
 
+                /* This shader is very specific to gui text, having no matrices, and with textures*/
+                shdr = EM.assets.shaderPrograms['guiText'];
+                this.ctx.useProgram(shdr.program);
 
+                for(var j = 0; j < guiSystems[i].msgBoxes.textBlocks.length; j++) {
+
+                    buff = guiSystems[i].msgBoxes.textBlocks[j].bufferData;
+
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                    // ALWAYS HAS TEXTURES
+                    this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                    this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+
+                    this.ctx.activeTexture(this.ctx.TEXTURE0);
+                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                    this.ctx.uniform1i(shdr.u_Sampler, 0);
+
+                    this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].msgBoxes.textBlocks[j].colourTint.GetData());
+
+                    this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                }
+
+                for(var j = 0; j < guiSystems[i].msgBoxes.boxMdls.length; j++) {
+
+                    shdr = guiSystems[i].msgBoxes.boxMdls[j].shaderData;
+                    buff = guiSystems[i].msgBoxes.boxMdls[j].bufferData;
+
+                    this.ctx.useProgram(shdr.program);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                    // MAY HAVE TEXTURES - NO VERT COLOURS
+                    if (shdr.a_TexCoord != -1) {
+                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+                        if (buff.texID) {
+                            this.ctx.activeTexture(this.ctx.TEXTURE0);
+                            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                            this.ctx.uniform1i(shdr.u_Sampler, 0);
+                            // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
+                        }
+                    }
+
+                    this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].msgBoxes.boxMdls[j].colourTint.GetData());
+
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                 }
             }
         }

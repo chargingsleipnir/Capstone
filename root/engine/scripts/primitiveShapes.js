@@ -25,7 +25,7 @@ var Primitives = {
         var texCoords = [];
 
         for (var i = 0; i < string.length; i++) {
-            posCoords = posCoords.concat(ShiftedPosCoords(i*w));
+            posCoords = posCoords.concat(ShiftedPosCoords(i*w*2));
             texCoords = texCoords.concat(SpecialUtils.GetTexCoords(string[i]));
         }
 
@@ -521,7 +521,7 @@ var Primitives = {
         },
         drawMethod: DrawMethods.lines
     },
-    Rect: function (radii, colour) {
+    Rect: function (radii) {
         var w, h;
         if(radii) {
             w = radii.x;
@@ -542,7 +542,7 @@ var Primitives = {
         for (var i = 0; i < posCoords.length; i += 3) {
             var magInv = 1.0 / (new Vector3(posCoords[i], posCoords[i + 1], 0.0)).GetMag();
             normals = normals.concat([posCoords[i] * magInv, posCoords[i + 1] * magInv, 0.0]);
-            colours = colours.concat(colour.GetData());
+            colours = colours.concat([0.0, 0.0, 0.0]);
         }
         return {
             name: "Rect",

@@ -69,6 +69,17 @@ function ControlScheme() {
     this.yawLeft;
     this.yawRight;
 }
+function MsgBoxStyle() {
+    this.fontSize;
+    this.fontColour;
+    this.textMaxWidth;
+    this.textAlignWidth;
+    this.textAlignHeight;
+    this.textLineSpacing;
+    this.bgTexture;
+    this.bgColour;
+    this.bgAlpha;
+}
 
 var Time = {
     delta_Milli: 0.0,
@@ -83,6 +94,8 @@ var Space = { local: 0, global: 1 };
 var BoundingShapes = { sphere: 0, aabb: 1 };
 var Planes = { left: 0, right: 1, bottom: 2, top: 3, far: 4, near: 5 };
 var MoveMethod = { input: 0, physics: 1, script: 2 };
+var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
+var Alignment = { left: 0, centre: 1, right: 2, bottom: 3, top: 4 };
 
 var KeyMap = {
     Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, CapsLock: 20, Esc: 27,
