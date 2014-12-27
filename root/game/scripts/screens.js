@@ -255,32 +255,39 @@ function Screen_Title(ScreenChangeCallback) {
 
     var style = new MsgBoxStyle();
     style.fontSize = 20;
-    style.fontColour = new Vector3(1.0, 0.0, 0.0);
+    style.fontColour = new Vector3(0.7, 0.0, 0.0);
     style.textMaxWidth = 60;
     style.textAlignWidth = Alignment.right;
     style.textAlignHeight = Alignment.bottom;
     style.bgTexture = null;
-    style.bgColour = new Vector3(0.0, 1.0, 0.0);
+    style.bgColour = new Vector3(0.0, 0.6, 0.0);
     style.textLineSpacing = 15.0;
-    style.margin = 1.0;
-
+    style.margin = 5.0;
     var firstMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
 
-    hud.AddGUIObject(firstMsg);
-
-    /*
     style.bgColour = new Vector3(0.0, 0.0, 1.0);
-    var firstMsgCh1 = new GUIObject(new WndRect(20, 20, 200, 200), "Child 1 of first message.", style);
+    style.fontSize = 15;
+    style.textAlignWidth = Alignment.left;
+    style.textAlignHeight = Alignment.top;
+    style.textLineSpacing = 10.0;
+    var firstMsgCh1 = new GUIObject(new WndRect(20, 50, 200, 200), "Child 1 of first message.", style);
+
     style.bgColour = new Vector3(1.0, 0.0, 0.0);
-    var firstMsgCh2 = new GUIObject(new WndRect(400, 80, 100, 100), "Child 2 of first message.", style);
+    style.fontSize = 10;
+    style.textAlignWidth = Alignment.centre;
+    style.textAlignHeight = Alignment.centre;
+    style.textLineSpacing = 5.0;
+    var firstMsgCh2 = new GUIObject(new WndRect(30, 30, 100, 100), "Child 2 of first message.", style);
+
     style.bgColour = new Vector3(0.0, 1.0, 1.0);
+    style.fontSize = 12;
+    style.textLineSpacing = 0.0;
     var secondMsg = new GUIObject(new WndRect(99999, 999999, 100, 100), "Second message", style);
 
     firstMsg.AddChild(firstMsgCh1);
     firstMsgCh1.AddChild(firstMsgCh2);
     hud.AddGUIObject(firstMsg);
     hud.AddGUIObject(secondMsg);
-    */
 
     GUINetwork.AddSystem(hud, false);
     GUINetwork.SetActive(hud.name, true);

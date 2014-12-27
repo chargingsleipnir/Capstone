@@ -373,16 +373,17 @@ var GL = {
 
         var guiSystems = GUINetwork.GetActiveSystems();
 
+        // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
         for(var sys in guiSystems) {
-
-            /* This shader is very specific to gui text, having no matrices, and with textures*/
-            shdr = EM.assets.shaderPrograms['guiText'];
-            this.ctx.useProgram(shdr.program);
-
             for(var j = 0; j < guiSystems[sys].textBlocks.length; j++) {
 
+                /******************* TEXT BLOCKS *************************/
+
+                /* This shader is very specific to gui text, having no matrices, and with textures*/
+                shdr = EM.assets.shaderPrograms['guiText'];
                 buff = guiSystems[sys].textBlocks[j].bufferData;
 
+                this.ctx.useProgram(shdr.program);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
                 // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
@@ -403,9 +404,9 @@ var GL = {
 
                 // Unbind buffers after use
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-            }
 
-            for(var j = 0; j < guiSystems[sys].boxMdls.length; j++) {
+
+                /******************* TEXT BOXES *************************/
 
                 shdr = guiSystems[sys].boxMdls[j].shaderData;
                 buff = guiSystems[sys].boxMdls[j].bufferData;

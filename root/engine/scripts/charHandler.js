@@ -4,26 +4,39 @@
 
 /********** Build text for rendering **********/
 
-function StaticCharBlock(strBlock, charW, charH, lineSpace, alignW) {
+function StaticCharBlock(strBlock, charW, charH, marginW, marginH, maxW, maxH, lineSpace, alignW, alignH) {
     var w = charW || 0.05,
         h = charH || 0.05;
 
     var x = 0.0;
     var y = 0.0;
 
-    console.log(alignW);
-
     var posCoords = [];
     var texCoords = [];
 
+    var greatestWidth = 0.0;
+    var blockHeight = strBlock.length * (charH + lineSpace);
+
     var count = 0;
     for (var i = 0; i < strBlock.length; i++) { // array of strings
+
+        var lineW = strBlock[i].length * charW;
+        if (greatestWidth < lineW) greatestWidth = lineW;
+
         for (var j = 0; j < strBlock[i].length; j++) { // char array
-            posCoords = posCoords.concat(this.ShiftedPosCoords(x+(j*w), y-(i*h), w, h));
+            x = (j*w) - (lineW*alignW) + marginW;
+            y = (i*h) + (i * lineSpace) + marginH;
+            posCoords = posCoords.concat(this.ShiftedPosCoords(x, -y, w, h));
             texCoords = texCoords.concat(this.GetTexCoords(strBlock[i][j]));
             count+= 6;
         }
-        y -= lineSpace;
+    }
+
+    // After alignment, put all verts back into their proper rect space
+    // Make changes to affect extra style attributes, like killing off the last line space
+    for (var i = 0; i < posCoords.length; i+=2) {
+        posCoords[i] += (maxW * alignW);
+        posCoords[i+1] -= (maxH * alignH) - (blockHeight * alignH) + (lineSpace * alignH);
     }
 
     return {

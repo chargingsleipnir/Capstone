@@ -96,27 +96,25 @@ GUIObject.prototype = {
         TextUtils.CreateBoundTextBlock(this.msg, this.style.fontSize, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
 
         // Convert sizes to NDC space
-        var fontSizeW = WndUtils.WndX_To_GLNDCX(this.style.fontSize),
-            fontSizeH = WndUtils.WndY_To_GLNDCY(this.style.fontSize),
-            marginW = WndUtils.WndX_To_GLNDCX(this.style.margin),
-            marginH = WndUtils.WndY_To_GLNDCY(this.style.margin),
-            lineSpacing = WndUtils.WndY_To_GLNDCY(this.style.textLineSpacing);
-
-        var charBlockModel = new StaticCharBlock(msgBlock, fontSizeW, fontSizeH, lineSpacing, this.style.textAlignWidth);
+        var charBlockModel = new StaticCharBlock(
+            msgBlock,
+            WndUtils.WndX_To_GLNDCX(this.style.fontSize),
+            WndUtils.WndY_To_GLNDCY(this.style.fontSize),
+            WndUtils.WndX_To_GLNDCX(this.style.margin),
+            WndUtils.WndY_To_GLNDCY(this.style.margin),
+            WndUtils.WndX_To_GLNDCX(maxWidthPX),
+            WndUtils.WndY_To_GLNDCY(maxHeightPX),
+            WndUtils.WndY_To_GLNDCY(this.style.textLineSpacing),
+            this.style.textAlignWidth,
+            this.style.textAlignHeight
+        );
 
         // Set text block's pos to that defined in the rect
-
-        //this.style.margin
-        //this.style.textAlignHeight
-
-        /*
-        for(var i = 0; i < charBlockModel.posCoords.length; i+= 3) {
-            // Add width and subtract height because the model is built from the centre out,
-            // while the rects measure from the top-left to the bottom-right.
-            charBlockModel.posCoords[i] += (x + radialW);
-            charBlockModel.posCoords[i+1] += (y - radialH);
+        for(var i = 0; i < charBlockModel.posCoords.length; i+= 2) {
+            // The text is built from top-left to bottom-right, so this works as-is.
+            charBlockModel.posCoords[i] += x;
+            charBlockModel.posCoords[i+1] += y;
         }
-        */
 
         // Build text
         this.strObjHdl = new StringDisplayHandler(charBlockModel);
