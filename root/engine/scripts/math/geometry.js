@@ -427,12 +427,41 @@ WndRect.prototype = {
         /// </signature>
         return new Vector2(this.w / 2, this.h / 2);
     },
+    GetMinCorner: function() {
+        /// <signature>
+        ///  <summary>Get the vector representing the highest valued corner</summary>
+        ///  <returns type="Vector2" />
+        /// </signature>
+        return new Vector2(this.x, this.y);
+    },
     GetMaxCorner: function() {
         /// <signature>
         ///  <summary>Get the vector representing the highest valued corner</summary>
         ///  <returns type="Vector2" />
         /// </signature>
         return new Vector2(this.x + this.w, this.y + this.h);
+    },
+    ContainsWndRect: function(wndRect) {
+        /// <signature>
+        ///  <summary>Returns false if there is no collision, otherwise returns a Vector3 with the depth of collision into each dimension</summary>
+        ///  <param name="box" type="AABB"></param>
+        ///  <returns type="false or Vector3" />
+        /// </signature>
+
+        var out = new Vector2(0.0, 0.0);
+        var thisMax = this.GetMaxCorner();
+        var thatMax = wndRect.GetMaxCorner();
+
+        if(wndRect.x < this.x)
+            out.x += wndRect.x - this.x;
+        else if(thatMax.x > thisMax.x)
+            out.x += thatMax.x - thisMax.x;
+        if(wndRect.y < this.y)
+            out.y += wndRect.y - this.y;
+        else if(thatMax.y > thisMax.y)
+            out.y += thatMax.y - thisMax.y;
+
+        return out;
     }
 };
 

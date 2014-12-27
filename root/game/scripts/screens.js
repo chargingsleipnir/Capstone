@@ -251,7 +251,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     /******************************** GOOD TIME TO MAKE A HUD *************************************************/
 
-    var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth - 20, GM.wndHeight - 20), "in-game HUD");
+    var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth - 40, GM.wndHeight - 40), "in-game HUD");
 
     var style = new MsgBoxStyle();
     style.fontSize = 30;
@@ -262,8 +262,18 @@ function Screen_Title(ScreenChangeCallback) {
     style.bgTexture = null;
     style.bgColour = new Vector3(0.0, 1.0, 0.0);
 
-    var firstMsg = new GUIObject(new Rect(20, 20, 300, 300), "Looky at me. I made my own font.", style);
+    var firstMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
+    style.bgColour = new Vector3(0.0, 0.0, 1.0);
+    var firstMsgCh1 = new GUIObject(new WndRect(20, 20, 200, 200), "Child 1 of first message.", style);
+    style.bgColour = new Vector3(1.0, 0.0, 0.0);
+    var firstMsgCh2 = new GUIObject(new WndRect(400, 80, 100, 100), "Child 2 of first message.", style);
+    style.bgColour = new Vector3(0.0, 1.0, 1.0);
+    var secondMsg = new GUIObject(new WndRect(99999, 999999, 100, 100), "Second message", style);
+
+    firstMsg.AddChild(firstMsgCh1);
+    firstMsgCh1.AddChild(firstMsgCh2);
     hud.AddGUIObject(firstMsg);
+    hud.AddGUIObject(secondMsg);
 
     GUINetwork.AddSystem(hud, false);
     GUINetwork.SetActive(hud.name, true);

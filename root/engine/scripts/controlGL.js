@@ -373,15 +373,15 @@ var GL = {
 
         var guiSystems = GUINetwork.GetActiveSystems();
 
-        for(var i = 0; i < guiSystems.length; i++) {
+        for(var sys in guiSystems) {
 
             /* This shader is very specific to gui text, having no matrices, and with textures*/
             shdr = EM.assets.shaderPrograms['guiText'];
             this.ctx.useProgram(shdr.program);
 
-            for(var j = 0; j < guiSystems[i].textBlocks.length; j++) {
+            for(var j = 0; j < guiSystems[sys].textBlocks.length; j++) {
 
-                buff = guiSystems[i].textBlocks[j].bufferData;
+                buff = guiSystems[sys].textBlocks[j].bufferData;
 
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
@@ -397,7 +397,7 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                 this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].textBlocks[j].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_tint, guiSystems[sys].textBlocks[j].colourTint.GetData());
 
                 this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 
@@ -405,10 +405,10 @@ var GL = {
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
             }
 
-            for(var j = 0; j < guiSystems[i].boxMdls.length; j++) {
+            for(var j = 0; j < guiSystems[sys].boxMdls.length; j++) {
 
-                shdr = guiSystems[i].boxMdls[j].shaderData;
-                buff = guiSystems[i].boxMdls[j].bufferData;
+                shdr = guiSystems[sys].boxMdls[j].shaderData;
+                buff = guiSystems[sys].boxMdls[j].bufferData;
 
                 this.ctx.useProgram(shdr.program);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
@@ -428,7 +428,7 @@ var GL = {
                     }
                 }
 
-                this.ctx.uniform3fv(shdr.u_tint, guiSystems[i].boxMdls[j].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_tint, guiSystems[sys].boxMdls[j].colourTint.GetData());
 
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                 this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);

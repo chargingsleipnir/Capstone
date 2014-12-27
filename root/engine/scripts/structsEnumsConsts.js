@@ -69,16 +69,28 @@ function ControlScheme() {
     this.yawLeft;
     this.yawRight;
 }
-function MsgBoxStyle() {
-    this.fontSize;
-    this.fontColour;
-    this.textMaxWidth;
-    this.textAlignWidth;
-    this.textAlignHeight;
-    this.textLineSpacing;
-    this.bgTexture;
-    this.bgColour;
-    this.bgAlpha;
+function MsgBoxStyle(style) {
+    this.fontSize = 10.0;
+    this.fontColour = new Vector3();
+    this.textMaxWidth = 100;
+    this.textAlignWidth = Alignment.centre;
+    this.textAlignHeight = Alignment.centre;
+    this.textLineSpacing = 0.0;
+    this.bgTexture = null;
+    this.bgColour = new Vector3();
+    this.bgAlpha = 1.0;
+
+    if(style) {
+        this.fontSize = style.fontSize;
+        this.fontColour = style.fontColour.GetCopy();
+        this.textMaxWidth = style.textMaxWidth;
+        this.textAlignWidth = style.textAlignWidth;
+        this.textAlignHeight = style.textAlignHeight;
+        this.textLineSpacing = style.textLineSpacing;
+        this.bgTexture = style.bgTexture;
+        this.bgColour = style.bgColour.GetCopy();
+        this.bgAlpha = style.bgAlpha;
+    }
 }
 
 var Time = {

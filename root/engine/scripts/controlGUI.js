@@ -12,10 +12,10 @@ function GUIObject(wndRect, msg, style) {
     ///  <param name="depth" type="int">Defines overlap position relative to other elements within this system</param>
     ///  <param name="style" type="MsgBoxStyle Object">A struct of various styke details that can be applied to this message box</param>
     /// </signature>
-    this.rectLocal = wndRect;
-    this.posGlobal = new Vector2();
+    this.rectLocal = wndRect.GetCopy();
+    this.rectGlobal = new WndRect();
     this.msg = msg;
-    this.style = style;
+    this.style = new MsgBoxStyle(style);
     this.children = [];
 
     /* Might be able to create a range of depth within the NDC, and in front
@@ -31,28 +31,48 @@ GUIObject.prototype = {
         /// </signature>
         this.children.push(guiObject);
     },
-    UpdatePos: function(parentPos) {
-        this.posGlobal.SetValues(
-            this.rectLocal.x + parentPos.x,
-            this.rectLocal.y + parentPos.y
-        )
+    UpdateGlobalRect: function(parentRect) {
+        // Dimensions are checked to make sure parenting is upheld
+        if(this.rectLocal.w > parentRect.w) {
+            this.rectLocal.w = parentRect.w;
+        }
+        if(this.rectLocal.h > parentRect.h) {
+            this.rectLocal.h = parentRect.h;
+        }
+
+        this.rectGlobal.SetValues(
+            this.rectLocal.x + parentRect.x,
+            this.rectLocal.y + parentRect.y,
+            this.rectLocal.w,
+            this.rectLocal.h
+        );
+
+        var contDiff = parentRect.ContainsWndRect(this.rectGlobal);
+        if(!contDiff.GetMagSqr() == 0) {
+
+            this.rectGlobal.x -= contDiff.x;
+            this.rectGlobal.y -= contDiff.y;
+        }
     },
     InstantiateDisplay: function() {
         /********* BOX ***********/
 
         // Convert sizes to account for NDC of viewport, -1 to 1
-        var w = WndUtils.WndX_To_GLNDCX(this.rectLocal.w),
-            h = WndUtils.WndY_To_GLNDCY(this.rectLocal.h),
-            x = WndUtils.WndX_To_GLNDCX(this.posGlobal.x),
-            y = WndUtils.WndY_To_GLNDCY(this.posGlobal.y) * -1;
+        var radialW = WndUtils.WndX_To_GLNDCX(this.rectLocal.w) / 2,
+            radialH = WndUtils.WndY_To_GLNDCY(this.rectLocal.h) / 2,
+            x = WndUtils.WndX_To_GLNDCX(this.rectGlobal.x) - 1,
+            y = (WndUtils.WndY_To_GLNDCY(this.rectGlobal.y) - 1) * -1;
 
-        var boxModel = new Primitives.Rect(new Vector2(w, h));
+        // Divide
+        var boxModel = new Primitives.Rect(new Vector2(radialW, radialH));
         var posCoords = boxModel.vertices.byMesh.posCoords;
         // Set box' pos to that defined in the rect
 
         for(var i = 0; i < posCoords.length; i+= 3) {
-            posCoords[i] += x;
-            posCoords[i+1] += y;
+            // Add width and subtract height because the model is built from the centre out,
+            // while the rects measure from the top-left to the bottom-right.
+            posCoords[i] += (x + radialW);
+            posCoords[i+1] += (y - radialH);
         }
 
         this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
@@ -60,7 +80,6 @@ GUIObject.prototype = {
             this.boxHdl.colourTint.SetCopy(this.style.bgColour);
         if(this.style.bgTexture)
             this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
-
 
         /********* TEXT ***********/
 
@@ -98,7 +117,7 @@ GUISystem.prototype = {
         ///  <summary>Add GUI objects or roots of objects, to be a part of this systems. Objects are updated and their visuals prepared when added</summary>
         ///  <param name="guiObj" type="GUIObject"></param>
         /// </signature>
-        guiObj.UpdatePos(new Vector2(this.sysRect.x, this.sysRect.y));
+        guiObj.UpdateGlobalRect(this.sysRect);
         guiObj.InstantiateDisplay();
 
         // Traverse added tree
@@ -107,7 +126,7 @@ GUISystem.prototype = {
             for (var i = 0; i < parent.children.length; i++) {
                 /* First Update all position information to create accurately placed models.
                 * This must be done here to pass parent-to-child information */
-                parent.children[i].UpdatePos(parent.posGlobal);
+                parent.children[i].UpdateGlobalRect(parent.rectGlobal);
                 parent.children[i].InstantiateDisplay();
 
                 TraverseTree(parent.children[i]);
