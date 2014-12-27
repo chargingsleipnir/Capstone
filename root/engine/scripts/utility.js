@@ -264,99 +264,24 @@ var ModelUtils = {
 };
 
 var TextUtils = {
-    GetTexCoords: function(char) {
-        // For textures, specify row and col from bottom-left to top-right
-        var eigth = 0.125;
-        function GetCoordsByIndex(row, col) {
-            return [
-                row * eigth, (col+1) * eigth,
-                row * eigth, col * eigth,
-                (row+1) * eigth, col * eigth,
-
-                row * eigth, (col+1) * eigth,
-                (row+1) * eigth, col * eigth,
-                (row+1) * eigth, (col+1) * eigth
-            ];
-        }
-
-        switch (char) {
-            case 'A': return GetCoordsByIndex(0, 7) ;
-            case 'B': return GetCoordsByIndex(1, 7) ;
-            case 'C': return GetCoordsByIndex(2, 7) ;
-            case 'D': return GetCoordsByIndex(3, 7) ;
-            case 'E': return GetCoordsByIndex(4, 7) ;
-            case 'F': return GetCoordsByIndex(5, 7) ;
-            case 'G': return GetCoordsByIndex(6, 7) ;
-            case 'H': return GetCoordsByIndex(7, 7) ;
-            case 'I': return GetCoordsByIndex(0, 6) ;
-            case 'J': return GetCoordsByIndex(1, 6) ;
-            case 'K': return GetCoordsByIndex(2, 6) ;
-            case 'L': return GetCoordsByIndex(3, 6) ;
-            case 'M': return GetCoordsByIndex(4, 6) ;
-            case 'N': return GetCoordsByIndex(5, 6) ;
-            case 'O': return GetCoordsByIndex(6, 6) ;
-            case 'P': return GetCoordsByIndex(7, 6) ;
-            case 'Q': return GetCoordsByIndex(0, 5) ;
-            case 'R': return GetCoordsByIndex(1, 5) ;
-            case 'S': return GetCoordsByIndex(2, 5) ;
-            case 'T': return GetCoordsByIndex(3, 5) ;
-            case 'U': return GetCoordsByIndex(4, 5) ;
-            case 'V': return GetCoordsByIndex(5, 5) ;
-            case 'W': return GetCoordsByIndex(6, 5) ;
-            case 'X': return GetCoordsByIndex(7, 5) ;
-            case 'Y': return GetCoordsByIndex(0, 4) ;
-            case 'Z': return GetCoordsByIndex(1, 4) ;
-            case '0': return GetCoordsByIndex(2, 4) ;
-            case '1': return GetCoordsByIndex(3, 4) ;
-            case '2': return GetCoordsByIndex(4, 4) ;
-            case '3': return GetCoordsByIndex(5, 4) ;
-            case '4': return GetCoordsByIndex(6, 4) ;
-            case '5': return GetCoordsByIndex(7, 4) ;
-            case '6': return GetCoordsByIndex(0, 3) ;
-            case '7': return GetCoordsByIndex(1, 3) ;
-            case '8': return GetCoordsByIndex(2, 3) ;
-            case '9': return GetCoordsByIndex(3, 3) ;
-            case '.': return GetCoordsByIndex(4, 3) ;
-            case ' ': return GetCoordsByIndex(5, 3) ;
-            case 'a': return GetCoordsByIndex(6, 3) ;
-            case 'b': return GetCoordsByIndex(7, 3) ;
-            case 'c': return GetCoordsByIndex(0, 2) ;
-            case 'd': return GetCoordsByIndex(1, 2) ;
-            case 'e': return GetCoordsByIndex(2, 2) ;
-            case 'f': return GetCoordsByIndex(3, 2) ;
-            case 'g': return GetCoordsByIndex(4, 2) ;
-            case 'h': return GetCoordsByIndex(5, 2) ;
-            case 'i': return GetCoordsByIndex(6, 2) ;
-            case 'j': return GetCoordsByIndex(7, 2) ;
-            case 'k': return GetCoordsByIndex(0, 1) ;
-            case 'l': return GetCoordsByIndex(1, 1) ;
-            case 'm': return GetCoordsByIndex(2, 1) ;
-            case 'n': return GetCoordsByIndex(3, 1) ;
-            case 'o': return GetCoordsByIndex(4, 1) ;
-            case 'p': return GetCoordsByIndex(5, 1) ;
-            case 'q': return GetCoordsByIndex(6, 1) ;
-            case 'r': return GetCoordsByIndex(7, 1) ;
-            case 's': return GetCoordsByIndex(0, 0) ;
-            case 't': return GetCoordsByIndex(1, 0) ;
-            case 'u': return GetCoordsByIndex(2, 0) ;
-            case 'v': return GetCoordsByIndex(3, 0) ;
-            case 'w': return GetCoordsByIndex(4, 0) ;
-            case 'x': return GetCoordsByIndex(5, 0) ;
-            case 'y': return GetCoordsByIndex(6, 0) ;
-            case 'z': return GetCoordsByIndex(7, 0) ;
-        }
-    },
     MeasureText: function(string, fontSizeW) {
         return string.length * fontSizeW;
     },
     CreateBoundTextBlock: function(string, fontSize, lineSpacing, maxW, maxH, outArray) {
         var strToParse = string.replace("\n", " ");
+
         var charMax = (maxW / fontSize);
-        charMax = Math.ceil(charMax);
+        charMax = Math.round(charMax);
+
         var lineToAdd = '';
         var lastSpaceIdx = 0;
 
-        while(true) {
+        var maxLines = maxH / (fontSize + lineSpacing);
+        maxLines = Math.round(maxLines);
+        var numLines = 0;
+
+        while(numLines < maxLines) {
+            numLines++;
             // max line of text that could be used
             var fullLine = strToParse.substr(0, charMax);
 
@@ -385,13 +310,16 @@ var TextUtils = {
                     }
                     lineToAdd = strToParse.slice(0, charMax);
                 }
-                else
-                    lineToAdd = strToParse.substr(0, lastSpaceIdx);
+                else {
+                    // Subtract 1 to eliminate the space that was found, making right-alignment possible
+                    lineToAdd = strToParse.substr(0, lastSpaceIdx-1);
+                }
                 outArray.push(lineToAdd);
             }
 
             strToParse = strToParse.slice(lastSpaceIdx);
         }
+        console.log(outArray);
     }
 };
 

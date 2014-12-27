@@ -257,10 +257,11 @@ function Screen_Title(ScreenChangeCallback) {
     style.fontSize = 20;
     style.fontColour = new Vector3(1.0, 0.0, 0.0);
     style.textMaxWidth = 60;
-    style.textAlignWidth = Alignment.centre;
+    style.textAlignWidth = Alignment.right;
     style.textAlignHeight = Alignment.bottom;
     style.bgTexture = null;
     style.bgColour = new Vector3(0.0, 1.0, 0.0);
+    style.textLineSpacing = 15.0;
     style.margin = 1.0;
 
     var firstMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);

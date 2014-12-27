@@ -78,37 +78,48 @@ GUIObject.prototype = {
 
         this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
         this.boxHdl.colourTint.SetCopy(this.style.bgColour);
-        if(this.style.bgTexture)
+        if(this.style.bgTexture) {
             this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
-
-
+        }
 
         /****************** TEXT ********************/
 
-        //style.fontSize = 30;
-        //style.textMaxWidth = 60;
-        //style.textAlignWidth = Alignment.centre;
-        //style.textAlignHeight = Alignment.bottom;
-        // margin = 1.0
-
-        /*
-        console.log(this.msg.length);
-        console.log(this.style.fontSize * this.msg.length);
-        console.log(this.style.fontSize * this.style.textMaxWidth);
-        console.log(this.rectLocal.w);
-        */
-
+        // Get the exact dimensions of the text to be displayed
         var maxHeightPX = this.rectLocal.h - this.style.margin * 2;
         var maxWidthPX = this.style.fontSize * this.style.textMaxWidth - this.style.margin * 2;
-        if(this.rectLocal.w < maxWidthPX) maxWidthPX = this.rectLocal.w - this.style.margin * 2;
+        if(this.rectLocal.w < maxWidthPX || this.style.textMaxWidth == 0) {
+            maxWidthPX = this.rectLocal.w - this.style.margin * 2;
+        }
 
+        // Turn given message into block of text within given restrictions
         var msgBlock = [];
         TextUtils.CreateBoundTextBlock(this.msg, this.style.fontSize, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
 
-        var fsW = this.style.fontSize ? WndUtils.WndX_To_GLNDCX(this.style.fontSize) : 0.01 * (GM.wndWidth / GM.wndHeight),
-            fsH = this.style.fontSize ? WndUtils.WndY_To_GLNDCY(this.style.fontSize) : 0.01;
+        // Convert sizes to NDC space
+        var fontSizeW = WndUtils.WndX_To_GLNDCX(this.style.fontSize),
+            fontSizeH = WndUtils.WndY_To_GLNDCY(this.style.fontSize),
+            marginW = WndUtils.WndX_To_GLNDCX(this.style.margin),
+            marginH = WndUtils.WndY_To_GLNDCY(this.style.margin),
+            lineSpacing = WndUtils.WndY_To_GLNDCY(this.style.textLineSpacing);
 
-        this.strObjHdl = new StringDisplayHandler(new StaticCharBlock(this.msg, new Vector2(fsW, fsH)));
+        var charBlockModel = new StaticCharBlock(msgBlock, fontSizeW, fontSizeH, lineSpacing, this.style.textAlignWidth);
+
+        // Set text block's pos to that defined in the rect
+
+        //this.style.margin
+        //this.style.textAlignHeight
+
+        /*
+        for(var i = 0; i < charBlockModel.posCoords.length; i+= 3) {
+            // Add width and subtract height because the model is built from the centre out,
+            // while the rects measure from the top-left to the bottom-right.
+            charBlockModel.posCoords[i] += (x + radialW);
+            charBlockModel.posCoords[i+1] += (y - radialH);
+        }
+        */
+
+        // Build text
+        this.strObjHdl = new StringDisplayHandler(charBlockModel);
         this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
     },
     Update: function() {

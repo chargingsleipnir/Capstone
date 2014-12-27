@@ -110,7 +110,7 @@ var BoundingShapes = { sphere: 0, aabb: 1 };
 var Planes = { left: 0, right: 1, bottom: 2, top: 3, far: 4, near: 5 };
 var MoveMethod = { input: 0, physics: 1, script: 2 };
 var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
-var Alignment = { left: 0, centre: 1, right: 2, bottom: 3, top: 4 };
+var Alignment = { left: -1, centre: 0, right: 1, bottom: -1, top: 1 };
 
 var KeyMap = {
     Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, CapsLock: 20, Esc: 27,

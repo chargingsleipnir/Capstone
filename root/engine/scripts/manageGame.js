@@ -23,10 +23,10 @@ var GM = {
         GL.Initialize(canvasWebGL.getContext('webgl'));
         GL.CreateShaderPrograms(EM.assets.shaderStrings, EM.assets.shaderPrograms);
 
-        this.rootObj = new GameObject("Root", Labels.none);
-
+        // Have 2D context just cause... no use in this engine right now.
         TwoD.Initialize(canvas2D.getContext('2d'));
-        GUI.InitializeCanvas();
+
+        this.rootObj = new GameObject("Root", Labels.none);
 
         // Get and use GL canvas window sizing
         var canvasStyles = window.getComputedStyle(canvasWebGL, null);
