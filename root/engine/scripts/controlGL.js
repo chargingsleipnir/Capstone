@@ -105,7 +105,7 @@ var GL = {
             drawType = this.ctx.DYNAMIC_DRAW;
 
         // Get appropriate set of verts based on whether or not indices can/will be used
-        bufferData.numVerts = vertData.posCoords.length / 3;
+        bufferData.numVerts = vertData.count;
         if (vertData.indices) {
             // Create and populate EABO
             bufferData.EABO = this.ctx.createBuffer();
@@ -387,7 +387,7 @@ var GL = {
 
                 // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
                 this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 2, this.ctx.FLOAT, false, 0, 0);
 
                 // ALWAYS HAS TEXTURES
                 this.ctx.enableVertexAttribArray(shdr.a_TexCoord);

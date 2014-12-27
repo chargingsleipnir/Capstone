@@ -55,7 +55,8 @@ GUIObject.prototype = {
         }
     },
     InstantiateDisplay: function() {
-        /********* BOX ***********/
+
+        /****************** BOX ********************/
 
         // Convert sizes to account for NDC of viewport, -1 to 1
         var radialW = WndUtils.WndX_To_GLNDCX(this.rectLocal.w) / 2,
@@ -76,19 +77,39 @@ GUIObject.prototype = {
         }
 
         this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
-        if(this.style.bgColour)
-            this.boxHdl.colourTint.SetCopy(this.style.bgColour);
+        this.boxHdl.colourTint.SetCopy(this.style.bgColour);
         if(this.style.bgTexture)
             this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
 
-        /********* TEXT ***********/
+
+
+        /****************** TEXT ********************/
+
+        //style.fontSize = 30;
+        //style.textMaxWidth = 60;
+        //style.textAlignWidth = Alignment.centre;
+        //style.textAlignHeight = Alignment.bottom;
+        // margin = 1.0
+
+        /*
+        console.log(this.msg.length);
+        console.log(this.style.fontSize * this.msg.length);
+        console.log(this.style.fontSize * this.style.textMaxWidth);
+        console.log(this.rectLocal.w);
+        */
+
+        var maxHeightPX = this.rectLocal.h - this.style.margin * 2;
+        var maxWidthPX = this.style.fontSize * this.style.textMaxWidth - this.style.margin * 2;
+        if(this.rectLocal.w < maxWidthPX) maxWidthPX = this.rectLocal.w - this.style.margin * 2;
+
+        var msgBlock = [];
+        TextUtils.CreateBoundTextBlock(this.msg, this.style.fontSize, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
 
         var fsW = this.style.fontSize ? WndUtils.WndX_To_GLNDCX(this.style.fontSize) : 0.01 * (GM.wndWidth / GM.wndHeight),
             fsH = this.style.fontSize ? WndUtils.WndY_To_GLNDCY(this.style.fontSize) : 0.01;
 
-        this.strObjHdl = new StringDisplayHandler(new StringLine(this.msg, new Vector2(fsW/2.0, fsH/2.0)));
-        if(this.style.fontColour)
-            this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
+        this.strObjHdl = new StringDisplayHandler(new StaticCharBlock(this.msg, new Vector2(fsW, fsH)));
+        this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
     },
     Update: function() {
         for (var i = 0; i < this.children.length; i++) {
@@ -201,45 +222,3 @@ var GUINetwork = (function() {
         }
     }
 })();
-
-
-
-/********** Build text for rendering **********/
-
-function StringLine(string, charRadii) {
-    var w, h;
-    if(charRadii) {
-        w = charRadii.x;
-        h = charRadii.y;
-    }
-    else {
-        w = h = 1.0;
-    }
-
-    function ShiftedPosCoords(shift) {
-        return [
-            -w + shift, h, 0.0,
-            -w + shift, -h, 0.0,
-            w + shift, -h, 0.0,
-            -w + shift, h, 0.0,
-            w + shift, -h, 0.0,
-            w + shift, h, 0.0
-        ];
-    }
-
-    var posCoords = [];
-    var texCoords = [];
-
-    for (var i = 0; i < string.length; i++) {
-        posCoords = posCoords.concat(ShiftedPosCoords(i*w*2));
-        texCoords = texCoords.concat(SpecialUtils.GetTexCoords(string[i]));
-    }
-
-    return {
-        count: string.length * 6,
-        posCoords: posCoords,
-        colElems: [],
-        texCoords: texCoords,
-        normAxes: []
-    };
-}

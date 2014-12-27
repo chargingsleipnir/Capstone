@@ -92,7 +92,7 @@ function GUIBoxHandler(boxVerts) {
 GUIBoxHandler.prototype = {
     SetTexture: function(texture, texFilter) {
         this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
-        this.shaderData = EM.assets.shaderPrograms['guiText'];
+        this.shaderData = EM.assets.shaderPrograms['guiBoxTintTex'];
     }
 };
 

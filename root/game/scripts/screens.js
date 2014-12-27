@@ -254,15 +254,20 @@ function Screen_Title(ScreenChangeCallback) {
     var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth - 40, GM.wndHeight - 40), "in-game HUD");
 
     var style = new MsgBoxStyle();
-    style.fontSize = 30;
+    style.fontSize = 20;
     style.fontColour = new Vector3(1.0, 0.0, 0.0);
     style.textMaxWidth = 60;
     style.textAlignWidth = Alignment.centre;
     style.textAlignHeight = Alignment.bottom;
     style.bgTexture = null;
     style.bgColour = new Vector3(0.0, 1.0, 0.0);
+    style.margin = 1.0;
 
     var firstMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
+
+    hud.AddGUIObject(firstMsg);
+
+    /*
     style.bgColour = new Vector3(0.0, 0.0, 1.0);
     var firstMsgCh1 = new GUIObject(new WndRect(20, 20, 200, 200), "Child 1 of first message.", style);
     style.bgColour = new Vector3(1.0, 0.0, 0.0);
@@ -274,6 +279,7 @@ function Screen_Title(ScreenChangeCallback) {
     firstMsgCh1.AddChild(firstMsgCh2);
     hud.AddGUIObject(firstMsg);
     hud.AddGUIObject(secondMsg);
+    */
 
     GUINetwork.AddSystem(hud, false);
     GUINetwork.SetActive(hud.name, true);

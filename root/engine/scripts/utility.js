@@ -263,7 +263,7 @@ var ModelUtils = {
     }
 };
 
-var SpecialUtils = {
+var TextUtils = {
     GetTexCoords: function(char) {
         // For textures, specify row and col from bottom-left to top-right
         var eigth = 0.125;
@@ -344,6 +344,53 @@ var SpecialUtils = {
             case 'x': return GetCoordsByIndex(5, 0) ;
             case 'y': return GetCoordsByIndex(6, 0) ;
             case 'z': return GetCoordsByIndex(7, 0) ;
+        }
+    },
+    MeasureText: function(string, fontSizeW) {
+        return string.length * fontSizeW;
+    },
+    CreateBoundTextBlock: function(string, fontSize, lineSpacing, maxW, maxH, outArray) {
+        var strToParse = string.replace("\n", " ");
+        var charMax = (maxW / fontSize);
+        charMax = Math.ceil(charMax);
+        var lineToAdd = '';
+        var lastSpaceIdx = 0;
+
+        while(true) {
+            // max line of text that could be used
+            var fullLine = strToParse.substr(0, charMax);
+
+            // For the final line
+            if(fullLine.length < charMax) {
+                outArray.push(fullLine);
+                break;
+            }
+
+            // Use full line if next char is a space
+            if(strToParse.charAt(charMax) == ' ') {
+                outArray.push(fullLine);
+                lastSpaceIdx = charMax + 1;
+            }
+            else {
+                // Otherwise find the last space and use everything up to there
+                lastSpaceIdx = fullLine.lastIndexOf(' ') + 1;
+                // Comes up zero if there are no more spaces\
+                if (lastSpaceIdx == 0) {
+                    // This means there's no other space detected just because the word is too long
+                    if(strToParse.length >= charMax)
+                        lastSpaceIdx = charMax;
+                    else {
+                        outArray.push(strToParse.slice(0, charMax));
+                        break;
+                    }
+                    lineToAdd = strToParse.slice(0, charMax);
+                }
+                else
+                    lineToAdd = strToParse.substr(0, lastSpaceIdx);
+                outArray.push(lineToAdd);
+            }
+
+            strToParse = strToParse.slice(lastSpaceIdx);
         }
     }
 };

@@ -79,6 +79,7 @@ function MsgBoxStyle(style) {
     this.bgTexture = null;
     this.bgColour = new Vector3();
     this.bgAlpha = 1.0;
+    this.margin = 0.5;
 
     if(style) {
         this.fontSize = style.fontSize;
@@ -90,6 +91,7 @@ function MsgBoxStyle(style) {
         this.bgTexture = style.bgTexture;
         this.bgColour = style.bgColour.GetCopy();
         this.bgAlpha = style.bgAlpha;
+        this.margin = style.margin;
     }
 }
 
