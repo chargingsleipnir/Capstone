@@ -47,7 +47,7 @@ var EM = {
             ['questionBlock', 'engine/assets/images/questionBlock.jpg'],
             ['lava', 'engine/assets/images/lavaTexture.jpg'],
             ['ice', 'engine/assets/images/iceTexture.jpg'],
-            ['characterMapLarge', 'engine/assets/images/characterMapLarge.jpg']
+            ['fontMapPurpBlue', 'engine/assets/images/fontMap1.png']
         ];
         // JSON ASSETS
         var modelNamesFilepaths = [

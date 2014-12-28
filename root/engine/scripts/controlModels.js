@@ -102,7 +102,7 @@ function StringDisplayHandler(stringLine) {
     GL.CreateBufferObjects(stringLine, this.bufferData, true);
 
     this.colourTint = new Vector3();
-    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['characterMapLarge'], TextureFilters.nearest);
+    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['fontMapPurpBlue'], TextureFilters.nearest);
 }
 StringDisplayHandler.prototype = {
     RewriteVerts: function(vertArray) {

@@ -377,35 +377,6 @@ var GL = {
         for(var sys in guiSystems) {
             for(var j = 0; j < guiSystems[sys].textBlocks.length; j++) {
 
-                /******************* TEXT BLOCKS *************************/
-
-                /* This shader is very specific to gui text, having no matrices, and with textures*/
-                shdr = EM.assets.shaderPrograms['guiText'];
-                buff = guiSystems[sys].textBlocks[j].bufferData;
-
-                this.ctx.useProgram(shdr.program);
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                this.ctx.vertexAttribPointer(shdr.a_Pos, 2, this.ctx.FLOAT, false, 0, 0);
-
-                // ALWAYS HAS TEXTURES
-                this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-
-                this.ctx.activeTexture(this.ctx.TEXTURE0);
-                this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                this.ctx.uniform1i(shdr.u_Sampler, 0);
-
-                this.ctx.uniform3fv(shdr.u_tint, guiSystems[sys].textBlocks[j].colourTint.GetData());
-
-                this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
-
-                // Unbind buffers after use
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-
-
                 /******************* TEXT BOXES *************************/
 
                 shdr = guiSystems[sys].boxMdls[j].shaderData;
@@ -436,6 +407,35 @@ var GL = {
 
                 // Unbind buffers after use
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+
+
+                /******************* TEXT BLOCKS *************************/
+
+                /* This shader is very specific to gui text, having no matrices, and with textures*/
+                shdr = EM.assets.shaderPrograms['guiText'];
+                buff = guiSystems[sys].textBlocks[j].bufferData;
+
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 2, this.ctx.FLOAT, false, 0, 0);
+
+                // ALWAYS HAS TEXTURES
+                this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+
+                this.ctx.activeTexture(this.ctx.TEXTURE0);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                this.ctx.uniform1i(shdr.u_Sampler, 0);
+
+                this.ctx.uniform3fv(shdr.u_tint, guiSystems[sys].textBlocks[j].colourTint.GetData());
+
+                this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
             }
         }
     }

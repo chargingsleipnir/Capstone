@@ -319,7 +319,6 @@ var TextUtils = {
 
             strToParse = strToParse.slice(lastSpaceIdx);
         }
-        console.log(outArray);
     }
 };
 
