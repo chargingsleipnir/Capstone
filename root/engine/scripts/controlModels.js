@@ -99,8 +99,13 @@ GUIBoxHandler.prototype = {
 function StringDisplayHandler(stringLine) {
     this.bufferData = new BufferData();
 
-    GL.CreateBufferObjects(stringLine, this.bufferData, false);
+    GL.CreateBufferObjects(stringLine, this.bufferData, true);
 
     this.colourTint = new Vector3();
     this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['characterMapLarge'], TextureFilters.nearest);
 }
+StringDisplayHandler.prototype = {
+    RewriteVerts: function(vertArray) {
+        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    }
+};

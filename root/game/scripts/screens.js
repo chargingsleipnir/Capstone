@@ -263,31 +263,30 @@ function Screen_Title(ScreenChangeCallback) {
     style.bgColour = new Vector3(0.0, 0.6, 0.0);
     style.textLineSpacing = 15.0;
     style.margin = 5.0;
-    var firstMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
+    var greenMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
+    hud.AddGUIObject(greenMsg);
 
     style.bgColour = new Vector3(0.0, 0.0, 1.0);
     style.fontSize = 15;
     style.textAlignWidth = Alignment.left;
     style.textAlignHeight = Alignment.top;
     style.textLineSpacing = 10.0;
-    var firstMsgCh1 = new GUIObject(new WndRect(20, 50, 200, 200), "Child 1 of first message.", style);
+    var blueMsg = new GUIObject(new WndRect(2000, 50, 200, 200), "Test message box", style);
+    hud.AddGUIObject(blueMsg);
 
     style.bgColour = new Vector3(1.0, 0.0, 0.0);
-    style.fontSize = 10;
+    style.fontSize = 15;
     style.textAlignWidth = Alignment.centre;
     style.textAlignHeight = Alignment.centre;
     style.textLineSpacing = 5.0;
-    var firstMsgCh2 = new GUIObject(new WndRect(30, 30, 100, 100), "Child 2 of first message.", style);
+    var redMsg = new GUIObject(new WndRect(30, 600, 100, 100), "Another test message box. I need to make a better font...", style);
+    hud.AddGUIObject(redMsg);
 
     style.bgColour = new Vector3(0.0, 1.0, 1.0);
-    style.fontSize = 12;
+    style.fontSize = 20;
     style.textLineSpacing = 0.0;
-    var secondMsg = new GUIObject(new WndRect(99999, 999999, 100, 100), "Second message", style);
-
-    firstMsg.AddChild(firstMsgCh1);
-    firstMsgCh1.AddChild(firstMsgCh2);
-    hud.AddGUIObject(firstMsg);
-    hud.AddGUIObject(secondMsg);
+    var aquaMsg = new GUIObject(new WndRect(redMsg.rectLocal.x + redMsg.rectLocal.w + 30 , redMsg.rectLocal.y, 200, 100), "Size", style);
+    hud.AddGUIObject(aquaMsg);
 
     GUINetwork.AddSystem(hud, false);
     GUINetwork.SetActive(hud.name, true);
@@ -328,6 +327,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     var angle = 0.01;
     var waveringValue = 0.0;
+    var timer = 0.0;
     this.Update = function() {
 
         if(launch.pressed){
@@ -342,6 +342,10 @@ function Screen_Title(ScreenChangeCallback) {
         skyBox.trfmLocal.Rotate(VEC3_FWD, angle);
         disc.trfmLocal.Rotate(VEC3_RIGHT, angle * 20.0);
         disc.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, 0.0);
+
+        timer += Time.delta_Milli;
+
+        aquaMsg.UpdateMsg(timer.toString());
 
         // if button pressed
         //var nextScreen = new Screen_InGame();

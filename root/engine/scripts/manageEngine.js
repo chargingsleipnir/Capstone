@@ -9,6 +9,18 @@ var EM = {
     PreLoad: function (Callback) {
         console.log("ENGINE STARTUP");
 
+        /********* Load other components *********/
+
+        function InitEngineComponents() {
+
+            // The font map is not dynamic - very specific to spritesheet I made.
+            FontMap.Initialize();
+
+            Callback();
+        }
+
+        /********* Load external files *********/
+
         // SHADERS
         var shaderNamesFilepaths = [
             ['test', 'engine/assets/shaders/test.vshdr', 'engine/assets/shaders/test.fshdr'],
@@ -44,7 +56,7 @@ var EM = {
 
         var that = this;
         function LoadModels() {
-            FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
+            FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, InitEngineComponents);
         }
         function LoadTextures() {
             FileUtils.LoadTextures(textureNamesFilepaths, that.assets.textures, LoadModels);

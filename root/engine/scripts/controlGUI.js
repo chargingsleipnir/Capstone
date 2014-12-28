@@ -13,24 +13,15 @@ function GUIObject(wndRect, msg, style) {
     ///  <param name="style" type="MsgBoxStyle Object">A struct of various styke details that can be applied to this message box</param>
     /// </signature>
     this.rectLocal = wndRect.GetCopy();
-    this.rectGlobal = new WndRect();
+    this.rectGlobal = wndRect.GetCopy();
     this.msg = msg;
     this.style = new MsgBoxStyle(style);
-    this.children = [];
 
     /* Might be able to create a range of depth within the NDC, and in front
      * of everything else being affected by transformations. Maybe convert the
      * "depth" to a range of 0.00 to -0.10 */
 }
 GUIObject.prototype = {
-    AddChild: function(guiObject) {
-        /// <signature>
-        ///  <summary>Add a gameObject as a child of the caller</summary>
-        ///  <param name="guiObject" type="GUIObject"></param>
-        ///  <returns type="void" />
-        /// </signature>
-        this.children.push(guiObject);
-    },
     UpdateGlobalRect: function(parentRect) {
         // Dimensions are checked to make sure parenting is upheld
         if(this.rectLocal.w > parentRect.w) {
@@ -96,7 +87,7 @@ GUIObject.prototype = {
         TextUtils.CreateBoundTextBlock(this.msg, this.style.fontSize, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
 
         // Convert sizes to NDC space
-        var charBlockModel = new StaticCharBlock(
+        this.charBlockModel = new StaticCharBlock(
             msgBlock,
             WndUtils.WndX_To_GLNDCX(this.style.fontSize),
             WndUtils.WndY_To_GLNDCY(this.style.fontSize),
@@ -110,20 +101,25 @@ GUIObject.prototype = {
         );
 
         // Set text block's pos to that defined in the rect
-        for(var i = 0; i < charBlockModel.posCoords.length; i+= 2) {
+        for(var i = 0; i < this.charBlockModel.posCoords.length; i+= 2) {
             // The text is built from top-left to bottom-right, so this works as-is.
-            charBlockModel.posCoords[i] += x;
-            charBlockModel.posCoords[i+1] += y;
+            this.charBlockModel.posCoords[i] += x;
+            this.charBlockModel.posCoords[i+1] += y;
         }
 
+        this.numChars = this.charBlockModel.count/6;
+
         // Build text
-        this.strObjHdl = new StringDisplayHandler(charBlockModel);
+        this.strObjHdl = new StringDisplayHandler(this.charBlockModel);
         this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
     },
-    Update: function() {
-        for (var i = 0; i < this.children.length; i++) {
-            this.children[i].Update();
+    UpdateMsg: function(msg) {
+
+        var newVerts = this.charBlockModel.posCoords;
+        for(var i = 0; i < this.numChars; i++) {
+            newVerts = newVerts.concat(FontMap.texCoords[msg[i] || ' ']);
         }
+        this.strObjHdl.RewriteVerts(newVerts);
     }
 };
 
@@ -137,7 +133,6 @@ function GUISystem(wndRect, name) {
     /// </signature>
     this.sysRect = wndRect;
     this.name = name;
-    this.rootObjs = [];
     this.boxMdls = [];
     this.textBlocks = [];
 }
@@ -149,29 +144,8 @@ GUISystem.prototype = {
         /// </signature>
         guiObj.UpdateGlobalRect(this.sysRect);
         guiObj.InstantiateDisplay();
-
-        // Traverse added tree
-        var that = this;
-        function TraverseTree(parent) {
-            for (var i = 0; i < parent.children.length; i++) {
-                /* First Update all position information to create accurately placed models.
-                * This must be done here to pass parent-to-child information */
-                parent.children[i].UpdateGlobalRect(parent.rectGlobal);
-                parent.children[i].InstantiateDisplay();
-
-                TraverseTree(parent.children[i]);
-            }
-            // Then get the created models
-            that.boxMdls.push(parent.boxHdl);
-            that.textBlocks.push(parent.strObjHdl);
-        }
-        TraverseTree(guiObj);
-
-        this.rootObjs.push(guiObj);
-    },
-    Update: function() {
-        for(var i = 0; i < this.rootObjs.length; i++)
-            this.rootObjs[i].Update();
+        this.boxMdls.push(guiObj.boxHdl);
+        this.textBlocks.push(guiObj.strObjHdl);
     }
 };
 
