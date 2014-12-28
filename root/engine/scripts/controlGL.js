@@ -60,7 +60,7 @@ var GL = {
             programData.a_Norm = ctx.getAttribLocation(program, 'a_Norm');
 
             // Uniforms will return uniform object, null if not found
-            programData.u_tint = ctx.getUniformLocation(program, "u_Tint");
+            programData.u_Tint = ctx.getUniformLocation(program, "u_Tint");
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
             programData.u_Alpha = ctx.getUniformLocation(program, "u_Alpha");
             // MATERIALS
@@ -148,8 +148,8 @@ var GL = {
         //this.ctx.bufferSubData(this.ctx.ELEMENT_ARRAY_BUFFER, 0, new Uint16Array(indices));
         this.ctx.bufferData(this.ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.ctx.STATIC_DRAW);
     },
-    CreateTextureObject: function(texture, texFilter) {
-        var texID = this.ctx.createTexture();
+    CreateTextureObject: function(texture, texFilter, outTexID) {
+        var texID = outTexID ? outTexID : this.ctx.createTexture();
         this.ctx.bindTexture(this.ctx.TEXTURE_2D, texID);
         this.ctx.pixelStorei(this.ctx.UNPACK_FLIP_Y_WEBGL, true);
         this.ctx.texImage2D(this.ctx.TEXTURE_2D, 0, this.ctx.RGBA, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, texture);
@@ -265,7 +265,7 @@ var GL = {
                     mtxMVP = GM.models[i].mtxModel.GetMultiply(mtxVP);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
                 }
-                this.ctx.uniform3fv(shdr.u_tint, GM.models[i].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, GM.models[i].colourTint.GetData());
 
                 // Draw calls
                 if (buff.EABO) {
@@ -316,7 +316,7 @@ var GL = {
                     // SEND UP UNIFORMS
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
                     //this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].mtxModel.data);
-                    this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].colourTint.GetData());
+                    this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].colourTint.GetData());
 
                     // Draw calls
                     if (buff.EABO) {
@@ -358,7 +358,7 @@ var GL = {
 
                     // SEND UP UNIFORMS
                     this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-                    this.ctx.uniform3fv(shdr.u_tint, dispObjs[i].colourTint.GetData());
+                    this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].colourTint.GetData());
 
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                     this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -400,7 +400,8 @@ var GL = {
                     }
                 }
 
-                this.ctx.uniform3fv(shdr.u_tint, guiSystems[sys].boxMdls[j].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].boxMdls[j].colourTint.GetData());
+                this.ctx.uniform1f(shdr.u_Alpha, guiSystems[sys].boxMdls[j].alpha);
 
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                 this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -430,7 +431,7 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                 this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                this.ctx.uniform3fv(shdr.u_tint, guiSystems[sys].textBlocks[j].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].textBlocks[j].colourTint.GetData());
 
                 this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 

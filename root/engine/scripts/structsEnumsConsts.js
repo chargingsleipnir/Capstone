@@ -22,7 +22,7 @@ function ShaderProgramData() {
     this.a_TexCoord;
     this.a_Norm;
 
-    this.u_tint;
+    this.u_Tint;
     this.u_Sampler;
     this.u_Alpha;
 
@@ -70,7 +70,8 @@ function ControlScheme() {
     this.yawRight;
 }
 function MsgBoxStyle(style) {
-    this.fontSize = 10.0;
+    // This is height in px. Width will be 2/3 this value
+    this.fontSize = 20.0;
     this.fontColour = new Vector3();
     this.textMaxWidth = 100;
     this.textAlignWidth = Alignment.centre;
@@ -80,6 +81,7 @@ function MsgBoxStyle(style) {
     this.bgColour = new Vector3();
     this.bgAlpha = 1.0;
     this.margin = 0.5;
+    this.bold = false;
 
     if(style) {
         this.fontSize = style.fontSize;
@@ -92,6 +94,7 @@ function MsgBoxStyle(style) {
         this.bgColour = style.bgColour.GetCopy();
         this.bgAlpha = style.bgAlpha;
         this.margin = style.margin;
+        this.bold = style.bold;
     }
 }
 

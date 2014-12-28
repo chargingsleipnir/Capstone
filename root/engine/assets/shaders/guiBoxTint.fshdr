@@ -1,8 +1,9 @@
 precision mediump float;
 
 uniform vec3 u_Tint;
+uniform float u_Alpha;
 
 void main()
 {
-	gl_FragColor = vec4(u_Tint, 1.0);
+	gl_FragColor = vec4(u_Tint, u_Alpha);
 }

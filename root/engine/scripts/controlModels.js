@@ -88,6 +88,7 @@ function GUIBoxHandler(boxVerts) {
 
     this.shaderData = EM.assets.shaderPrograms['guiBoxTint'];
     this.colourTint = new Vector3();
+    this.alpha = 1.0;
 }
 GUIBoxHandler.prototype = {
     SetTexture: function(texture, texFilter) {
@@ -102,10 +103,13 @@ function StringDisplayHandler(stringLine) {
     GL.CreateBufferObjects(stringLine, this.bufferData, true);
 
     this.colourTint = new Vector3();
-    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['fontMapPurpBlue'], TextureFilters.nearest);
+    this.bufferData.texID = GL.CreateTextureObject(EM.assets.textures['fontMapBasic'], TextureFilters.nearest);
 }
 StringDisplayHandler.prototype = {
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    },
+    UseBoldTexture: function() {
+        GL.CreateTextureObject(EM.assets.textures['fontMapBasicBold'], TextureFilters.nearest, this.bufferData.texID);
     }
 };

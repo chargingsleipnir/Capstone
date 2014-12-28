@@ -267,16 +267,16 @@ var TextUtils = {
     MeasureText: function(string, fontSizeW) {
         return string.length * fontSizeW;
     },
-    CreateBoundTextBlock: function(string, fontSize, lineSpacing, maxW, maxH, outArray) {
+    CreateBoundTextBlock: function(string, charW, charH, lineSpacing, maxW, maxH, outArray) {
         var strToParse = string.replace("\n", " ");
 
-        var charMax = (maxW / fontSize);
+        var charMax = (maxW / charW);
         charMax = Math.round(charMax);
 
         var lineToAdd = '';
         var lastSpaceIdx = 0;
 
-        var maxLines = maxH / (fontSize + lineSpacing);
+        var maxLines = maxH / (charH + lineSpacing);
         maxLines = Math.round(maxLines);
         var numLines = 0;
 

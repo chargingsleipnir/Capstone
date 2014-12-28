@@ -255,7 +255,7 @@ function Screen_Title(ScreenChangeCallback) {
 
     var style = new MsgBoxStyle();
     style.fontSize = 20;
-    style.fontColour = new Vector3(1.0, 1.0, 0.0);
+    style.fontColour = new Vector3(1.0, 1.0, 1.0);
     style.textMaxWidth = 60;
     style.textAlignWidth = Alignment.right;
     style.textAlignHeight = Alignment.bottom;
@@ -263,28 +263,39 @@ function Screen_Title(ScreenChangeCallback) {
     style.bgColour = new Vector3(0.0, 0.25, 0.0);
     style.textLineSpacing = 15.0;
     style.margin = 5.0;
+    style.bgAlpha = 0.8;
+    style.bold = true;
     var greenMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
     hud.AddGUIObject(greenMsg);
 
     style.bgColour = new Vector3(0.0, 0.0, 0.25);
-    style.fontSize = 20;
+    style.fontSize = 30;
     style.textAlignWidth = Alignment.left;
     style.textAlignHeight = Alignment.top;
     style.textLineSpacing = 10.0;
+    style.bold = false;
     var blueMsg = new GUIObject(new WndRect(2000, 50, 200, 200), "Test message box", style);
     hud.AddGUIObject(blueMsg);
 
-    style.bgColour = new Vector3(0.25, 0.0, 0.0);
+    style.bgColour = new Vector3(0.0, 0.0, 0.0);
+    style.fontColour = new Vector3(0.0, 0.0, 0.0);
     style.fontSize = 15;
     style.textAlignWidth = Alignment.centre;
     style.textAlignHeight = Alignment.centre;
     style.textLineSpacing = 5.0;
+    style.bgAlpha = 1.0;
+    style.bold = true;
+    style.bgTexture = EM.assets.textures['questionBlock'];
     var redMsg = new GUIObject(new WndRect(30, 600, 100, 100), "Another test message box. I need to make a better font...", style);
     hud.AddGUIObject(redMsg);
 
-    style.bgColour = new Vector3(0.0, 0.25, 0.25);
+    style.bgColour = new Vector3(0.0, 0.0, 0.0);
+    style.fontColour = new Vector3(1.0, 1.0, 1.0);
     style.fontSize = 30;
     style.textLineSpacing = 0.0;
+    style.bgAlpha = 0.5;
+    style.bgTexture = EM.assets.textures['purply'];
+    style.bold = false;
     var aquaMsg = new GUIObject(new WndRect(redMsg.rectLocal.x + redMsg.rectLocal.w + 30 , redMsg.rectLocal.y, 200, 100), "Size", style);
     hud.AddGUIObject(aquaMsg);
 

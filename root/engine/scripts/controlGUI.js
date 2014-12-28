@@ -69,28 +69,33 @@ GUIObject.prototype = {
 
         this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
         this.boxHdl.colourTint.SetCopy(this.style.bgColour);
+        this.boxHdl.alpha = this.style.bgAlpha;
         if(this.style.bgTexture) {
             this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
         }
 
         /****************** TEXT ********************/
 
+        // Adjust font width to good (readable) proportion
+        var charW = this.style.fontSize * (2/3),
+            charH = this.style.fontSize;
+
         // Get the exact dimensions of the text to be displayed
         var maxHeightPX = this.rectLocal.h - this.style.margin * 2;
-        var maxWidthPX = this.style.fontSize * this.style.textMaxWidth - this.style.margin * 2;
+        var maxWidthPX = charW * this.style.textMaxWidth - this.style.margin * 2;
         if(this.rectLocal.w < maxWidthPX || this.style.textMaxWidth == 0) {
             maxWidthPX = this.rectLocal.w - this.style.margin * 2;
         }
 
         // Turn given message into block of text within given restrictions
         var msgBlock = [];
-        TextUtils.CreateBoundTextBlock(this.msg, this.style.fontSize, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
+        TextUtils.CreateBoundTextBlock(this.msg, charW, charH, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
 
         // Convert sizes to NDC space
         this.charBlockModel = new StaticCharBlock(
             msgBlock,
-            WndUtils.WndX_To_GLNDCX(this.style.fontSize),
-            WndUtils.WndY_To_GLNDCY(this.style.fontSize),
+            WndUtils.WndX_To_GLNDCX(charW),
+            WndUtils.WndY_To_GLNDCY(charH),
             WndUtils.WndX_To_GLNDCX(this.style.margin),
             WndUtils.WndY_To_GLNDCY(this.style.margin),
             WndUtils.WndX_To_GLNDCX(maxWidthPX),
@@ -112,6 +117,8 @@ GUIObject.prototype = {
         // Build text
         this.strObjHdl = new StringDisplayHandler(this.charBlockModel);
         this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
+        if(this.style.bold)
+            this.strObjHdl.UseBoldTexture();
     },
     UpdateMsg: function(msg) {
 
