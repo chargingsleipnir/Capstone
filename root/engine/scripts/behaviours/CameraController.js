@@ -11,7 +11,7 @@ function CameraController(trfm) {
 
     // Control camera
     var camRegName = "First Person Controller";
-    Input.RegisterObject(camRegName, true);
+    Input.RegisterControlScheme(camRegName, true);
 
     this.ctrl.moveLeft = Input.CreateInputController(camRegName, KeyMap.A);
     this.ctrl.moveRight = Input.CreateInputController(camRegName, KeyMap.D);

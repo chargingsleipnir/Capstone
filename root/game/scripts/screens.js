@@ -331,7 +331,7 @@ function Screen_Title(ScreenChangeCallback) {
     balls[0].camera.SetControlsActive(true);
 
     var physicsTestName = "PhysicsTest";
-    Input.RegisterObject(physicsTestName, true);
+    Input.RegisterControlScheme(physicsTestName, true);
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var launchForce = new Vector3(0.0, 0.0, -250.0);
 

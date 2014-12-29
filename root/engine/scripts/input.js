@@ -25,50 +25,50 @@ var Input = (function() {
     };
 
     return {
-        RegisterObject: function(objectName, active)
+        RegisterControlScheme: function(name, active)
         {
             /// <signature>
             ///  <summary>Store a distinct instance to recieve input</summary>
-            ///  <param name="objectName" type="string">A unique string, the name of the object to be affected by input</param>
+            ///  <param name="name" type="string">A unique string, the name of the object to be affected by input</param>
             ///  <param name="active" type="bool">Whether or not this object is currently requiring input</param>
             ///  <returns type="void" />
             /// </signature>
             if(active)
-                activeRegistry[objectName] = {};
+                activeRegistry[name] = {};
             else
-                inactiveRegistry[objectName] = {};
+                inactiveRegistry[name] = {};
         },
-        UnRegisterObject: function(objectName)
+        UnRegisterControlScheme: function(name)
         {
             /// <signature>
             ///  <summary>Remove a distinct instance from recieving input</summary>
-            ///  <param name="objectName" type="string">The unique string name given to the object</param>
+            ///  <param name="name" type="string">The unique string name given to the object</param>
             ///  <returns type="void" />
             /// </signature>
-            if (objectName in activeRegistry)
-                delete activeRegistry[objectName];
-            else if (objectName in inactiveRegistry)
-                delete inactiveRegistry[objectName];
+            if (name in activeRegistry)
+                delete activeRegistry[name];
+            else if (name in inactiveRegistry)
+                delete inactiveRegistry[name];
             else
                 throw ("No object by that name to unregister");
         },
-        SetActive: function(objectName, beActive)
+        SetActive: function(name, beActive)
         {
             /// <signature>
             ///  <summary>Set active status of object to recieve input</summary>
-            ///  <param name="objectName" type="string">The unique string name given to the object</param>
+            ///  <param name="name" type="string">The unique string name given to the object</param>
             ///  <param name="beActive" type="bool">Whether or not this object is to recieve input</param>
             ///  <returns type="void" />
             /// </signature>
-            if (!(objectName in activeRegistry) && !(objectName in inactiveRegistry))
+            if (!(name in activeRegistry) && !(name in inactiveRegistry))
                 throw ("No object by that name to change active status");
-            else if (objectName in activeRegistry && beActive == false) {
-                inactiveRegistry[objectName] = activeRegistry[objectName];
-                delete activeRegistry[objectName];
+            else if (name in activeRegistry && beActive == false) {
+                inactiveRegistry[name] = activeRegistry[name];
+                delete activeRegistry[name];
             }
-            else if (objectName in inactiveRegistry && beActive) {
-                activeRegistry[objectName] = inactiveRegistry[objectName];
-                delete inactiveRegistry[objectName];
+            else if (name in inactiveRegistry && beActive) {
+                activeRegistry[name] = inactiveRegistry[name];
+                delete inactiveRegistry[name];
             }
             else
                 throw ("Object is already where you want it");
@@ -84,10 +84,10 @@ var Input = (function() {
             for (var o in inactiveRegistry)
                 console.log('Inactive: ' + o + ' : ' + inactiveRegistry[o]);
         },
-        CreateInputController: function(objectName, inputCode) {
+        CreateInputController: function(name, inputCode) {
             /// <signature>
             ///  <summary>Add specific input to an object</summary>
-            ///  <param name="objectName" type="string">The unique string name given to the object</param>
+            ///  <param name="name" type="string">The unique string name given to the object</param>
             ///  <param name="input" type="decimal">Use the global object keyMap to get exact key codes</param>
             ///  <returns type="bool" />
             /// </signature>
@@ -96,14 +96,14 @@ var Input = (function() {
                 Release: function() { this.pressed = false; }
             }
 
-            if (objectName in activeRegistry) {
-                activeRegistry[objectName][inputCode] = {
+            if (name in activeRegistry) {
+                activeRegistry[name][inputCode] = {
                     boolToChange: keyController,
                     readyLoop: true
                 };
             }
-            else if (objectName in inactiveRegistry) {
-                inactiveRegistry[objectName][inputCode] = {
+            else if (name in inactiveRegistry) {
+                inactiveRegistry[name][inputCode] = {
                     boolToChange: keyController,
                     readyLoop: true
                 };
@@ -113,18 +113,18 @@ var Input = (function() {
 
             return keyController;
         },
-        RemoveInputCall: function(objectName, input)
+        RemoveInputCall: function(name, input)
         {
             /// <signature>
             ///  <summary>Remove a certain input call from an object</summary>
-            ///  <param name="objectName" type="string">The unique string name given to the object</param>
+            ///  <param name="name" type="string">The unique string name given to the object</param>
             ///  <param name="input" type="decimal">Use the global object keyMap to get exact key code to remove</param>
             ///  <returns type="void" />
             /// </signature>
-            if (objectName in activeRegistry)
-                delete activeRegistry[objectName][input];
-            else if (objectName in inactiveRegistry)
-                delete inactiveRegistry[objectName][input];
+            if (name in activeRegistry)
+                delete activeRegistry[name][input];
+            else if (name in inactiveRegistry)
+                delete inactiveRegistry[name][input];
             else
                 throw ("No object by that name to remove callback");
         }

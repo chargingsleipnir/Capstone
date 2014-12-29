@@ -219,6 +219,8 @@ var GL = {
         var mtxMVP;
 
         //var frustumTestCount = 0;
+        //var scene = SceneNetwork.GetActiveScene();
+        //for (var i = 0; i < scene.models.length; i++)
         for (var i = 0; i < GM.models.length; i++)
         {
             if (GM.models[i].active && GM.frustum.IntersectsSphere(GM.models[i].drawSphere))
