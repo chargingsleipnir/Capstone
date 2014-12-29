@@ -22,9 +22,6 @@ function RigidBody(trfm, modelRadius) {
     this.axisOfRotation = new Vector3();
     this.inertiaTensorInv = new Matrix3();
     this.radiusToPt = new Vector3();
-
-    if(DM.GetActive())
-        DM.AddRayCast(new RayCastHandler(new Primitives.Ray()), this.trfm.pos, this.velFinal);
 }
 RigidBody.prototype = {
     SetMass: function(mass) {

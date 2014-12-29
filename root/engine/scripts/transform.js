@@ -12,9 +12,6 @@ function Transform(space) {
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();
 
-    if(DM.GetActive() && space == Space.global)
-        DM.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(), new AAShapeData3D()), this);
-
     this.active = false;
     this.space = space;
 }

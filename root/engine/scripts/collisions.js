@@ -16,14 +16,6 @@ function CollisionBody(shapeData, trfm) {
     // Sphere set as standard
     //this.activeShape = this.sphere;
 
-    if(DM.GetActive()) {
-        var sphereShell = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
-        //var aabbShell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
-        sphereShell.MakeWireFrame();
-        sphereShell.colourTint.SetValues(1.0, 1.0, 0.0);
-
-        DM.AddBoundingShell(sphereShell, this.trfm, BoundingShapes.sphere);
-    }
     // Intentionally left this blank to bypass condition checks
     //this.SetBoundingShape();
 

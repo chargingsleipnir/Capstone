@@ -13,26 +13,32 @@ function BuildScene2(scene, playerObj, skyBoxObj) {
     arrow.AddComponent(Components.modelHandler);
     heart.AddComponent(Components.modelHandler);
 
-    arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
-    heart.trfmLocal.SetPosVec3(new Vector3(3.5, 0.5, -1.0));
-
     arrow.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
     heart.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
 
     arrow.AddComponent(Components.collisionBody);
     heart.AddComponent(Components.collisionBody);
 
+    playerObj.AddChild(arrow);
+    playerObj.AddChild(heart);
+
     var angle = 0.01;
     var waveringValue = 0.0;
 
-    var resetBtn;
     var ctrlSchemeName = "In-game menu control";
+    Input.RegisterControlScheme(ctrlSchemeName, false);
+    var resetBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Esc);
 
     function Start() {
-        Input.RegisterControlScheme(ctrlSchemeName, true);
-        resetBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Esc);
+        playerObj.trfmLocal.SetPosAxes(0.0, 1.0, -5.0);
+        playerObj.trfmLocal.orient.SetIdentity();
+        playerObj.trfmLocal.scale.SetOne();
+        arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
+        heart.trfmLocal.SetPosVec3(new Vector3(3.5, 0.5, -1.0));
 
-        console.log("Level 1 started");
+        angle = 0.01;
+        waveringValue = 0.0;
+        Input.SetActive(ctrlSchemeName, true);
     }
 
     function Update() {
@@ -44,14 +50,13 @@ function BuildScene2(scene, playerObj, skyBoxObj) {
         skyBoxObj.trfmLocal.Rotate(VEC3_FWD, angle);
 
         if(resetBtn.pressed) {
-            Input.UnRegisterControlScheme(ctrlSchemeName);
+            resetBtn.Release();
+            Input.SetActive(ctrlSchemeName, false);
             SceneNetwork.SetActive("Title Screen");
         }
     }
 
-    playerObj.AddChild(arrow);
-    playerObj.AddChild(heart);
-    scene.Render(arrow.mdlHdlr);
-    scene.Render(heart.mdlHdlr);
+    scene.Add(arrow);
+    scene.Add(heart);
     scene.SetCallbacks(Start, Update);
 }

@@ -106,11 +106,6 @@ GameObject.prototype = {
         // Make sure the correct set of vertices are being centred.
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
-
-        if(DM.GetActive()) {
-            var axesLengths = this.shape.radii.GetScaleByVec(this.trfmGlobal.scale.SetScaleByNum(1.25));
-            DM.ReplaceOrientModel(new ModelHandler(new Primitives.OrientAxes(axesLengths), this.shape), this.trfmGlobal);
-        }
     },
     Update: function(trfmParent) {
         /// <signature>

@@ -33,23 +33,22 @@ function BuildScene1(scene) {
 
     titleScreen.AddGUIObject(title);
     titleScreen.AddGUIObject(titleMsg);
+    GUINetwork.AddSystem(titleScreen, false);
 
-    var nextSceneBtn;
     var ctrlSchemeName = "Title screen transition";
+    Input.RegisterControlScheme(ctrlSchemeName, false);
+    var nextSceneBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Enter);
 
     function Start() {
-        Input.RegisterControlScheme(ctrlSchemeName, true);
-        nextSceneBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Enter);
-
-        GUINetwork.AddSystem(titleScreen, true);
-
-        console.log("Title screen started");
+        GUINetwork.SetActive(titleScreen.name, true);
+        Input.SetActive(ctrlSchemeName, true);
     }
 
     function Update() {
         if(nextSceneBtn.pressed) {
-            Input.UnRegisterControlScheme(ctrlSchemeName);
-            GUINetwork.RemoveSystem(titleScreen.name);
+            nextSceneBtn.Release();
+            GUINetwork.SetActive(titleScreen.name, false);
+            Input.SetActive(ctrlSchemeName, false);
             SceneNetwork.SetActive("Level 1");
         }
     }

@@ -219,9 +219,10 @@ var GL = {
         var mtxMVP;
 
         //var frustumTestCount = 0;
-        //var scene = SceneNetwork.GetActiveScene();
-        //for (var i = 0; i < scene.models.length; i++)
-        for (var i = 0; i < GM.models.length; i++)
+        var scene = SceneNetwork.GetActiveScene();
+
+        for (var i = 0; i < scene.models.length; i++)
+        //for (var i = 0; i < GM.models.length; i++)
         {
             if (GM.models[i].active && GM.frustum.IntersectsSphere(GM.models[i].drawSphere))
             {
@@ -287,11 +288,16 @@ var GL = {
 
         /******************* DEBUG DRAWING *************************/
 
-        if (DM.GetActive()) {
+        if (DebugManager.active) {
 
             // Debug models
-            var dispObjs = DM.GetDispObjs.OrientAxes();
-            dispObjs = dispObjs.concat(DM.GetDispObjs.BoundingShells());
+            var dispObjs = [];
+            if(DebugManager.dispOrientAxes) {
+                dispObjs = scene.debug.dispObjs.orientAxes.models;
+            }
+            if(DebugManager.dispShells)
+                dispObjs = dispObjs.concat(scene.debug.dispObjs.shells.models);
+
             for (var i = 0; i < dispObjs.length; i++)
             {
                 if(dispObjs[i].active && GM.frustum.IntersectsSphere(dispObjs[i].drawSphere))
@@ -338,35 +344,36 @@ var GL = {
 
 
             // Ray casts
-            dispObjs = DM.GetDispObjs.RayCasts();
+            if(DebugManager.dispRays) {
+                dispObjs = scene.debug.dispObjs.rayCasts.rays;
 
-            shdr = EL.assets.shaderPrograms['ray'];
-            this.ctx.useProgram(shdr.program);
+                shdr = EL.assets.shaderPrograms['ray'];
+                this.ctx.useProgram(shdr.program);
 
-            for (var i = 0; i < dispObjs.length; i++)
-            {
-                if(dispObjs[i].active) {
+                for (var i = 0; i < dispObjs.length; i++) {
+                    if (dispObjs[i].active) {
 
-                    buff = dispObjs[i].bufferData;
+                        buff = dispObjs[i].bufferData;
 
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+                        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
-                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                        // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                        this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                        this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
 
-                    this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                        this.ctx.enableVertexAttribArray(shdr.a_Col);
+                        this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
-                    // SEND UP UNIFORMS
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-                    this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].colourTint.GetData());
+                        // SEND UP UNIFORMS
+                        this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+                        this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].colourTint.GetData());
 
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                        this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
 
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                        // Unbind buffers after use
+                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                    }
                 }
             }
         }

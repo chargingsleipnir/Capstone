@@ -13,10 +13,11 @@ function Scene(name) {
     this.paused = false;
 
     this.rootObj;
-    //this.rootObj = new GameObject("Root", Labels.none);
+    this.rootObj = new GameObject("Root", Labels.none);
     //this.rootObj.AddComponent(Components.camera);
     //this.rootObj.camera.SetControlsActive(true);
 
+    this.debug = new DebugHandler();
     this.models = [];
 
     this.lighting = {
@@ -37,19 +38,31 @@ function Scene(name) {
     this.LoopCall = function() {};
 }
 Scene.prototype = {
-    AddToRoot: function(gameObject) {
-        /// <signature>
-        ///  <summary>Add game objects or root objects, to be a child of the root object of this system</summary>
-        ///  <param name="gameObject" type="GameObject"></param>
-        /// </signature>
-        this.rootObj.AddChild(gameObject);
-    },
-    Render: function(modelHandler) {
+    Add: function(gameObject) {
         /// <signature>
         ///  <summary>Add model handle to render model as part of this scene</summary>
-        ///  <param name="modelHandler" type="ModelHandler"></param>
+        ///  <param name="gameObject" type="GameObject"></param>
         /// </signature>
-        this.models.push(modelHandler);
+        if(!gameObject.parent)
+            this.rootObj.AddChild(gameObject);
+        if(gameObject.mdlHdlr)
+            this.models.push(gameObject.mdlHdlr);
+
+        if(DebugManager.active) {
+            var axesLengths = gameObject.shape.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
+            this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.shape), gameObject.trfmGlobal);
+
+            if(gameObject.collider) {
+                var sphereShell = new ModelHandler(new Primitives.IcoSphere(1, gameObject.collider.sphere.radius), gameObject.collider.shapeData);
+                //var aabbShell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
+                sphereShell.MakeWireFrame();
+                sphereShell.colourTint.SetValues(1.0, 1.0, 0.0);
+                this.debug.AddBoundingShell(sphereShell, gameObject.collider.trfm, BoundingShapes.sphere);
+            }
+            if(gameObject.rigidBody) {
+                this.debug.AddRayCast(new RayCastHandler(new Primitives.Ray()), gameObject.rigidBody.trfm.pos, gameObject.rigidBody.velFinal);
+            }
+        }
     },
     SetCallbacks: function(InitCallback, LoopCallback) {
         this.InitCall = InitCallback;
@@ -58,6 +71,7 @@ Scene.prototype = {
     Update: function() {
         if(!this.paused) {
             this.rootObj.Update(this.rootObj.trfmLocal);
+            this.debug.Update();
             this.LoopCall();
         }
     }
@@ -68,14 +82,14 @@ Scene.prototype = {
 var SceneNetwork = (function() {
 
     var scenes = {};
+    var activeScene = new Scene("null scene");
 
     return {
-        activeScene: new Scene("null scene"),
         AddScene: function(scene, setActive) {
             scenes[scene.name] = scene;
             if(setActive) {
-                this.activeScene = scene;
-                this.activeScene.InitCall();
+                activeScene = scene;
+                activeScene.InitCall();
             }
         },
         RemoveScene: function(sceneName) {
@@ -85,19 +99,19 @@ var SceneNetwork = (function() {
                 throw ("No scene by that name to remove");
         },
         SetActive: function(sceneName) {
-            if (this.activeScene.name == sceneName) {
+            if (activeScene.name == sceneName) {
                 throw(sceneName + " is already active.");
             }
             else if (sceneName in scenes) {
-                this.activeScene = scenes[sceneName];
+                activeScene = scenes[sceneName];
                 console.log("Switched scene to: " + sceneName);
-                this.activeScene.InitCall();
+                activeScene.InitCall();
             }
             else
                 throw ("No scene by that name to make active");
         },
         GetActiveScene: function() {
-            return this.activeScene;
+            return activeScene;
         },
         ListScenes: function() {
             for (var scene in scenes)
@@ -114,9 +128,8 @@ var SceneNetwork = (function() {
                 Time.fps = 1000 / time_Delta;
 
                 // Updating Game World and Draw Calls
-                this.activeScene.Update();
+                activeScene.Update();
                 CollisionNetwork.Update();
-                DM.Update();
                 GL.RenderScene();
             }
             LoopGame();

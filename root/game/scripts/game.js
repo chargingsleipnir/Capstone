@@ -27,10 +27,8 @@ function BuildGame() {
 
     // Level 1 with player and internal objects
     var level1 = new Scene("Level 1");
-    level1.AddToRoot(player);
-    level1.AddToRoot(skyBox);
-    level1.Render(player.mdlHdlr);
-    level1.Render(skyBox.mdlHdlr);
+    level1.Add(player);
+    level1.Add(skyBox);
     BuildScene2(level1, player, skyBox);
     SceneNetwork.AddScene(level1, false);
 

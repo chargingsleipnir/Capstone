@@ -65,10 +65,20 @@ var Input = (function() {
             else if (name in activeRegistry && beActive == false) {
                 inactiveRegistry[name] = activeRegistry[name];
                 delete activeRegistry[name];
+                // reset all key to ready state
+                for (var o in inactiveRegistry[name]) {
+                    inactiveRegistry[name][o].boolToChange.pressed = false;
+                    inactiveRegistry[name][o].readyLoop = true;
+                }
             }
             else if (name in inactiveRegistry && beActive) {
                 activeRegistry[name] = inactiveRegistry[name];
                 delete inactiveRegistry[name];
+                // reset all key to ready state
+                for (var o in inactiveRegistry[name]) {
+                    inactiveRegistry[name][o].boolToChange.pressed = false;
+                    inactiveRegistry[name][o].readyLoop = true;
+                }
             }
             else
                 throw ("Object is already where you want it");

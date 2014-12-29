@@ -16,11 +16,11 @@
     <script type="text/javascript" src="engine/scripts/glContext.js"></script>
     <script type="text/javascript" src="engine/scripts/transform.js"></script>
     <script type="text/javascript" src="engine/scripts/charHandler.js"></script>
-    <script type="text/javascript" src="engine/scripts/sceneManager.js"></script>
     <script type="text/javascript" src="engine/scripts/guiManager.js"></script>
     <script type="text/javascript" src="engine/scripts/camera.js"></script>
     <script type="text/javascript" src="engine/scripts/modelHandlers.js"></script>
     <script type="text/javascript" src="engine/scripts/gameObject.js"></script>
+    <script type="text/javascript" src="engine/scripts/sceneManager.js"></script>
     <script type="text/javascript" src="engine/scripts/gameManager.js"></script>
     <script type="text/javascript" src="engine/scripts/2DContext.js"></script>
     <script type="text/javascript" src="engine/scripts/physics.js"></script>
@@ -53,12 +53,11 @@
                 ['disc', 'game/assets/models/GameObjects_Disc.json']
             ];
 
-            DM.SetActive(true);
-            DM.ToDisplay(true, true, true, false, false);
+            DebugManager.SetFullActive(true);
 
             // Initialize the Game Manager, passing the canvas to do much of the startup
             GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
-            GM.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, Run);
+            GM.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, BuildGame);
         }
 
         function Run() {
