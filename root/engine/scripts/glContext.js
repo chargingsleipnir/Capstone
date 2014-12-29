@@ -338,7 +338,7 @@ var GL = {
             // Ray casts
             dispObjs = DM.GetDispObjs.RayCasts();
 
-            shdr = EM.assets.shaderPrograms['ray'];
+            shdr = EL.assets.shaderPrograms['ray'];
             this.ctx.useProgram(shdr.program);
 
             for (var i = 0; i < dispObjs.length; i++)
@@ -413,7 +413,7 @@ var GL = {
                 /******************* TEXT BLOCKS *************************/
 
                 /* This shader is very specific to gui text, having no matrices, and with textures*/
-                shdr = EM.assets.shaderPrograms['guiText'];
+                shdr = EL.assets.shaderPrograms['guiText'];
                 buff = guiSystems[sys].textBlocks[j].bufferData;
 
                 this.ctx.useProgram(shdr.program);

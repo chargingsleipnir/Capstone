@@ -146,7 +146,7 @@ function GUISystem(wndRect, name) {
 GUISystem.prototype = {
     AddGUIObject: function(guiObj) {
         /// <signature>
-        ///  <summary>Add GUI objects or roots of objects, to be a part of this systems. Objects are updated and their visuals prepared when added</summary>
+        ///  <summary>Add GUI objects to be a part of this systems. Objects are updated and their visuals prepared when added</summary>
         ///  <param name="guiObj" type="GUIObject"></param>
         /// </signature>
         guiObj.UpdateGlobalRect(this.sysRect);
@@ -162,11 +162,6 @@ var GUINetwork = (function() {
 
     var activeSystems = {};
     var inactiveSystems = {};
-
-    this.msgBoxes = {
-        boxMdls: [],
-        textBlocks: []
-    };
 
     return {
         AddSystem: function(system, setActive) {
@@ -205,10 +200,6 @@ var GUINetwork = (function() {
                 console.log('Active: ' + o + ' : ' + activeSystems[o]);
             for (var o in inactiveSystems)
                 console.log('Inactive: ' + o + ' : ' + inactiveSystems[o]);
-        },
-        Update: function() {
-            for(var sys in activeSystems)
-                activeSystems[sys].Update();
         }
     }
 })();

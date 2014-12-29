@@ -252,11 +252,11 @@ var ModelUtils = {
 
         var matches = [];
         // Find best match - eliminate those shaders that DO have attributes we DON'T want
-        for (var shdr in EM.assets.shaderPrograms) {
-            if (!colour && EM.assets.shaderPrograms[shdr].a_Col != -1) continue;
-            if (!texture && EM.assets.shaderPrograms[shdr].a_TexCoord != -1) continue;
-            if (!light && EM.assets.shaderPrograms[shdr].a_Norm != -1) continue;
-            matches.push(EM.assets.shaderPrograms[shdr]);
+        for (var shdr in EL.assets.shaderPrograms) {
+            if (!colour && EL.assets.shaderPrograms[shdr].a_Col != -1) continue;
+            if (!texture && EL.assets.shaderPrograms[shdr].a_TexCoord != -1) continue;
+            if (!light && EL.assets.shaderPrograms[shdr].a_Norm != -1) continue;
+            matches.push(EL.assets.shaderPrograms[shdr]);
         }
         // Return the last match, for now.
         return matches[matches.length - 1];
@@ -271,13 +271,13 @@ var TextUtils = {
         var strToParse = string.replace("\n", " ");
 
         var charMax = (maxW / charW);
-        charMax = Math.round(charMax);
+        charMax = Math.floor(charMax);
 
         var lineToAdd = '';
         var lastSpaceIdx = 0;
 
         var maxLines = maxH / (charH + lineSpacing);
-        maxLines = Math.round(maxLines);
+        maxLines = Math.floor(maxLines);
         var numLines = 0;
 
         while(numLines < maxLines) {

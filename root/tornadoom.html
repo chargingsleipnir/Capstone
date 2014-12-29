@@ -10,20 +10,21 @@
     <script type="text/javascript" src="engine/scripts/math/geometry.js"></script>
     <script type="text/javascript" src="engine/scripts/structsEnumsConsts.js"></script>
     <script type="text/javascript" src="engine/scripts/utility.js"></script>
-    <script type="text/javascript" src="engine/scripts/manageDebug.js"></script>
-    <script type="text/javascript" src="engine/scripts/manageEngine.js"></script>
+    <script type="text/javascript" src="engine/scripts/debugManager.js"></script>
+    <script type="text/javascript" src="engine/scripts/enginePreloader.js"></script>
     <script type="text/javascript" src="engine/scripts/primitiveShapes.js"></script>
-    <script type="text/javascript" src="engine/scripts/controlGL.js"></script>
+    <script type="text/javascript" src="engine/scripts/glContext.js"></script>
     <script type="text/javascript" src="engine/scripts/transform.js"></script>
     <script type="text/javascript" src="engine/scripts/charHandler.js"></script>
-    <script type="text/javascript" src="engine/scripts/controlGUI.js"></script>
+    <script type="text/javascript" src="engine/scripts/sceneManager.js"></script>
+    <script type="text/javascript" src="engine/scripts/guiManager.js"></script>
     <script type="text/javascript" src="engine/scripts/camera.js"></script>
-    <script type="text/javascript" src="engine/scripts/controlModels.js"></script>
+    <script type="text/javascript" src="engine/scripts/modelHandlers.js"></script>
     <script type="text/javascript" src="engine/scripts/gameObject.js"></script>
-    <script type="text/javascript" src="engine/scripts/manageGame.js"></script>
-    <script type="text/javascript" src="engine/scripts/controlTwoD.js"></script>
-    <script type="text/javascript" src="engine/scripts/controlPhysics.js"></script>
-    <script type="text/javascript" src="engine/scripts/controlCollisions.js"></script>
+    <script type="text/javascript" src="engine/scripts/gameManager.js"></script>
+    <script type="text/javascript" src="engine/scripts/2DContext.js"></script>
+    <script type="text/javascript" src="engine/scripts/physics.js"></script>
+    <script type="text/javascript" src="engine/scripts/collisions.js"></script>
     <script type="text/javascript" src="engine/scripts/input.js"></script>
     <script type="text/javascript" src="engine/scripts/behaviours/CameraController.js"></script>
     <script type="text/javascript" src="engine/scripts/behaviours/FPController.js"></script>
@@ -31,14 +32,14 @@
     <script type="text/javascript" src="game/scripts/screens.js"></script>
     <script type="text/javascript" src="game/scripts/behaviours/impulseBalls.js"></script>
 </head>
-<body onload="EM.PreLoad(Initialize)">
+<body onload="EL.PreLoad(Initialize)">
     <canvas id="canvasWebGL" width="1500" height="800"></canvas>
     <canvas id="canvas2D" width="1500" height="800"></canvas>
     <script id="main">
         /* Entry point for engine user.
         * This function must be called by
         * the body's onload function within
-        * EM.PreLoad(). */
+        * EL.PreLoad(). */
         function Initialize() {
             var textureNamesFilepaths = [
                 ['discSurface', 'game/assets/images/discSurface.png']

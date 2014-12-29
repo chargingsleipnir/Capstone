@@ -1,5 +1,5 @@
 
-var EM = {
+var EL = {
     assets: {
         shaderStrings: [],
         shaderPrograms: {},

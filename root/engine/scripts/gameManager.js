@@ -21,7 +21,7 @@ var GM = {
 
         // get webGL context - use it to create shader programs
         GL.Initialize(canvasWebGL.getContext('webgl'));
-        GL.CreateShaderPrograms(EM.assets.shaderStrings, EM.assets.shaderPrograms);
+        GL.CreateShaderPrograms(EL.assets.shaderStrings, EL.assets.shaderPrograms);
 
         // Have 2D context just cause... no use in this engine right now.
         TwoD.Initialize(canvas2D.getContext('2d'));

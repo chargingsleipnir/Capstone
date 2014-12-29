@@ -5,11 +5,8 @@
 /********** Build text for rendering **********/
 
 function StaticCharBlock(strBlock, charW, charH, marginW, marginH, maxW, maxH, lineSpace, alignW, alignH) {
-    var w = charW || 0.05,
-        h = charH || 0.05;
-
-    var x = 0.0;
-    var y = 0.0;
+    var x = 0.0,
+        y = 0.0;
 
     var posCoords = [];
     var texCoords = [];
@@ -20,13 +17,13 @@ function StaticCharBlock(strBlock, charW, charH, marginW, marginH, maxW, maxH, l
     var count = 0;
     for (var i = 0; i < strBlock.length; i++) { // array of strings
 
-        var lineW = strBlock[i].length * w;
+        var lineW = strBlock[i].length * charW;
         if (greatestWidth < lineW) greatestWidth = lineW;
 
         for (var j = 0; j < strBlock[i].length; j++) { // char array
-            x = (j*w) - (lineW*alignW) + marginW;
-            y = (i*h) + (i * lineSpace) + marginH;
-            posCoords = posCoords.concat(this.ShiftedPosCoords(x, -y, w, h));
+            x = (j * (charW)) - (lineW*alignW) + marginW;
+            y = (i * charH) + (i * lineSpace) + marginH;
+            posCoords = posCoords.concat(this.ShiftedPosCoords(x, -y, charW, charH));
             texCoords = texCoords.concat(FontMap.texCoords[strBlock[i][j]]);
             count+= 6;
         }
@@ -149,11 +146,11 @@ var FontMap = {
         this.texCoords['<'] = GetCoordsByIndex(6, 2);
         this.texCoords['>'] = GetCoordsByIndex(7, 2);
         this.texCoords['/'] = GetCoordsByIndex(8, 2);
-        this.texCoords['\\'] = GetCoordsByIndex(9, 2); // May cause problems
+        this.texCoords['\\'] = GetCoordsByIndex(9, 2);
         this.texCoords[';'] = GetCoordsByIndex(10, 2);
         this.texCoords[':'] = GetCoordsByIndex(11, 2);
-        this.texCoords['\''] = GetCoordsByIndex(0, 1); // May cause problems
-        this.texCoords['\"'] = GetCoordsByIndex(1, 1); // May cause problems
+        this.texCoords['\''] = GetCoordsByIndex(0, 1);
+        this.texCoords['\"'] = GetCoordsByIndex(1, 1);
         this.texCoords['['] = GetCoordsByIndex(2, 1);
         this.texCoords[']'] = GetCoordsByIndex(3, 1);
         this.texCoords['{'] = GetCoordsByIndex(4, 1);
@@ -161,11 +158,11 @@ var FontMap = {
         this.texCoords['('] = GetCoordsByIndex(6, 1);
         this.texCoords[')'] = GetCoordsByIndex(7, 1);
         this.texCoords['|'] = GetCoordsByIndex(8, 1);
-        this.texCoords['&'] = GetCoordsByIndex(9, 1); // May cause problems
+        this.texCoords['&'] = GetCoordsByIndex(9, 1);
         this.texCoords['+'] = GetCoordsByIndex(10, 1);
         this.texCoords['-'] = GetCoordsByIndex(11, 1);
-        this.texCoords['='] = GetCoordsByIndex(0, 0); // May cause problems
-        this.texCoords['_'] = GetCoordsByIndex(1, 0); // May cause problems
+        this.texCoords['='] = GetCoordsByIndex(0, 0);
+        this.texCoords['_'] = GetCoordsByIndex(1, 0);
         this.texCoords['*'] = GetCoordsByIndex(2, 0);
         this.texCoords['^'] = GetCoordsByIndex(3, 0);
         this.texCoords['%'] = GetCoordsByIndex(4, 0);

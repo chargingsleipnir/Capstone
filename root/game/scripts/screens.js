@@ -1,5 +1,4 @@
-﻿var Screens = { test: 0, title: 1, inGame: 2, gameOver: 3 };
-
+﻿
 function Screen_Test(ScreenChangeCallback)
 {
     // Might not be necessary?
@@ -201,7 +200,7 @@ function Screen_Title(ScreenChangeCallback) {
     zeroPointAxes.SetModel(Primitives.axesZeroPoints);
     grid.SetModel(Primitives.grid);
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));
-    testCube.SetModel(EM.assets.models['dimensionBox']);
+    testCube.SetModel(EL.assets.models['dimensionBox']);
     disc.SetModel(GM.assets.models['disc']);
     cube.SetModel(new Primitives.Cube(new Vector3(1.5, 3.0, 4.5), true));
 
@@ -211,15 +210,15 @@ function Screen_Title(ScreenChangeCallback) {
     zeroPointAxes.AddComponent(Components.modelHandler);
     grid.AddComponent(Components.modelHandler);
     skyBox.AddComponent(Components.modelHandler);
-    skyBox.mdlHdlr.SetTexture(EM.assets.textures['starfield'], TextureFilters.nearest);
+    skyBox.mdlHdlr.SetTexture(EL.assets.textures['starfield'], TextureFilters.nearest);
     testCube.AddComponent(Components.modelHandler);
-    testCube.mdlHdlr.SetTexture(EM.assets.textures['logo'], TextureFilters.linear);
+    testCube.mdlHdlr.SetTexture(EL.assets.textures['logo'], TextureFilters.linear);
     disc.AddComponent(Components.modelHandler);
     disc.mdlHdlr.SetTexture(GM.assets.textures['discSurface'], TextureFilters.linear);
     disc.AddComponent(Components.collisionBody);
     //disc.collider.SetBoundingShape(BoundingShapes.aabb);
     cube.AddComponent(Components.modelHandler);
-    cube.mdlHdlr.SetTexture(EM.assets.textures['questionBlock'], TextureFilters.linear);
+    cube.mdlHdlr.SetTexture(EL.assets.textures['questionBlock'], TextureFilters.linear);
 
     // Set starting transformations
     arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
@@ -254,7 +253,7 @@ function Screen_Title(ScreenChangeCallback) {
     var hud = new GUISystem(new WndRect(20, 20, GM.wndWidth - 40, GM.wndHeight - 40), "in-game HUD");
 
     var style = new MsgBoxStyle();
-    style.fontSize = 20;
+    style.fontSize = 30;
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
     style.textMaxWidth = 60;
     style.textAlignWidth = Alignment.right;
@@ -264,17 +263,17 @@ function Screen_Title(ScreenChangeCallback) {
     style.textLineSpacing = 15.0;
     style.margin = 5.0;
     style.bgAlpha = 0.8;
-    style.bold = true;
-    var greenMsg = new GUIObject(new WndRect(0, 0, 300, 300), "Looky at me. I made my own font.", style);
+    style.bold = false;
+    var greenMsg = new GUIObject(new WndRect(0, 0, 300, 300), "$100 is 16% if the #stupid amount of tuition we pay!! Write devinodin@gmail.com", style);
     hud.AddGUIObject(greenMsg);
 
     style.bgColour = new Vector3(0.0, 0.0, 0.25);
-    style.fontSize = 30;
+    style.fontSize = 25;
     style.textAlignWidth = Alignment.left;
     style.textAlignHeight = Alignment.top;
     style.textLineSpacing = 10.0;
     style.bold = false;
-    var blueMsg = new GUIObject(new WndRect(2000, 50, 200, 200), "Test message box", style);
+    var blueMsg = new GUIObject(new WndRect(2000, 50, 200, 200), "Does this work?? \\\\Show me \"escaped\" characters", style);
     hud.AddGUIObject(blueMsg);
 
     style.bgColour = new Vector3(0.0, 0.0, 0.0);
@@ -285,7 +284,7 @@ function Screen_Title(ScreenChangeCallback) {
     style.textLineSpacing = 5.0;
     style.bgAlpha = 1.0;
     style.bold = true;
-    style.bgTexture = EM.assets.textures['questionBlock'];
+    style.bgTexture = EL.assets.textures['questionBlock'];
     var redMsg = new GUIObject(new WndRect(30, 600, 100, 100), "Another test message box. I need to make a better font...", style);
     hud.AddGUIObject(redMsg);
 
@@ -294,7 +293,7 @@ function Screen_Title(ScreenChangeCallback) {
     style.fontSize = 30;
     style.textLineSpacing = 0.0;
     style.bgAlpha = 0.5;
-    style.bgTexture = EM.assets.textures['purply'];
+    style.bgTexture = EL.assets.textures['purply'];
     style.bold = false;
     var aquaMsg = new GUIObject(new WndRect(redMsg.rectLocal.x + redMsg.rectLocal.w + 30 , redMsg.rectLocal.y, 200, 100), "Size", style);
     hud.AddGUIObject(aquaMsg);
