@@ -1,17 +1,10 @@
 ﻿
-var GM = {
-    wndWidth: 0,
-    wndHeight: 0,
-    mtxProj: new Matrix4(),
+var GameMngr = {
     assets: {
         textures: {},
         models: {}
     },
-    LoopCall: function(){},
-    activeCam: null,
-    frustum: null,
-    rootObj: null,
-    models: [],
+    UserUpdate: function() {},
     Initialize: function(canvasWebGL, canvas2D) {
         /// <signature>
         ///  <summary>Start up of the game world</summary>
@@ -19,28 +12,10 @@ var GM = {
         /// </signature>
         console.log("GAME STARTUP");
 
-        // get webGL context - use it to create shader programs
+        // get webGL context
         GL.Initialize(canvasWebGL.getContext('webgl'));
-        GL.CreateShaderPrograms(EL.assets.shaderStrings, EL.assets.shaderPrograms);
-
-        // Have 2D context just cause... no use in this engine right now.
+        ViewMngr.Initialize(canvasWebGL);
         TwoD.Initialize(canvas2D.getContext('2d'));
-
-        this.rootObj = new GameObject("Root", Labels.none);
-
-        // Get and use GL canvas window sizing
-        var canvasStyles = window.getComputedStyle(canvasWebGL, null);
-        this.wndWidth = parseFloat(canvasStyles.width);
-        this.wndHeight = parseFloat(canvasStyles.height);
-
-        // Instantiate frustum and projection matrix together
-        this.frustum = new Frustum(this.mtxProj, 45.0, this.wndWidth / this.wndHeight, 0.1, 200.0);
-
-        // Set up initial camera
-        this.rootObj.AddComponent(Components.camera);
-        this.rootObj.camera.SetControlsActive(true);
-
-        GL.ReshapeWindow(this.wndWidth, this.wndHeight);
     },
     LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, Callback) {
         var that = this;
@@ -48,20 +23,6 @@ var GM = {
             FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
         }
         FileUtils.LoadTextures(textureNamesFilepaths, this.assets.textures, LoadModels);
-    },
-    Update: function() {
-        this.rootObj.Update(this.rootObj.trfmLocal);
-        CollisionNetwork.Update();
-    },
-    SetActiveCamera: function(camera) {
-        if(this.activeCam)
-            this.activeCam.active = false;
-
-        camera.active = true;
-        this.activeCam = camera;
-    },
-    SetLoopCallback: function(Callback) {
-        this.LoopCall = Callback;
     },
     BeginLoop: function() {
         var time_LastFrame;
@@ -73,9 +34,11 @@ var GM = {
             time_LastFrame = time_ThisFrame;
             Time.delta_Milli = time_Delta / 1000;
             Time.fps = 1000 / time_Delta;
-            that.LoopCall(Time.delta_Milli);
+
             // Updating Game World and Draw Calls
-            that.Update();
+            SceneMngr.Update();
+            CollisionNetwork.Update();
+            that.UserUpdate();
             GL.RenderScene();
         }
         LoopGame();

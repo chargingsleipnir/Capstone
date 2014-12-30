@@ -1,5 +1,5 @@
 
-var DebugManager = {
+var DebugMngr = {
     active: false,
     dispOrientAxes: false,
     dispShells: false,
@@ -51,12 +51,12 @@ DebugHandler.prototype =  {
         this.dispObjs.rayCasts.slopes.push(slope);
     },
     Update: function () {
-        if(DebugManager.active) {
-            if(DebugManager.dispOrientAxes) {
+        if(DebugMngr.active) {
+            if(DebugMngr.dispOrientAxes) {
                 for (var i = 0; i < this.dispObjs.orientAxes.models.length; i++)
                     this.dispObjs.orientAxes.models[i].UpdateModelViewControl(this.dispObjs.orientAxes.trfms[i]);
             }
-            if(DebugManager.dispShells) {
+            if(DebugMngr.dispShells) {
                 for (var i = 0; i < this.dispObjs.shells.models.length; i++) {
                     if(this.dispObjs.shells.shapes[i] == BoundingShapes.sphere) {
                         var radius = this.dispObjs.shells.trfms[i].GetLargestScaleValue();
@@ -66,7 +66,7 @@ DebugHandler.prototype =  {
                     this.dispObjs.shells.models[i].UpdateModelViewControl(this.dispObjs.shells.trfms[i]);
                 }
             }
-            if(DebugManager.dispRays) {
+            if(DebugMngr.dispRays) {
                 for (var i = 0; i < this.dispObjs.rayCasts.rays.length; i++) {
                     var newVertData = this.dispObjs.rayCasts.pos[i].GetData();
                     newVertData = newVertData.concat(this.dispObjs.rayCasts.pos[i].GetAdd(this.dispObjs.rayCasts.slopes[i]).GetData());

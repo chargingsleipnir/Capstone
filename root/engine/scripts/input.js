@@ -94,6 +94,9 @@ var Input = (function() {
             for (var o in inactiveRegistry)
                 console.log('Inactive: ' + o + ' : ' + inactiveRegistry[o]);
         },
+        CheckRegistry: function(name) {
+            return (name in activeRegistry || name in inactiveRegistry);
+        },
         CreateInputController: function(name, inputCode) {
             /// <signature>
             ///  <summary>Add specific input to an object</summary>

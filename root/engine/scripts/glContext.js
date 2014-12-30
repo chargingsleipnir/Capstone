@@ -13,6 +13,8 @@ var GL = {
         this.ctx.enable(this.ctx.BLEND);
         this.ctx.blendFunc(this.ctx.SRC_ALPHA, this.ctx.ONE_MINUS_SRC_ALPHA);
         this.ctx.lineWidth(3);
+
+        this.CreateShaderPrograms(EL.assets.shaderStrings, EL.assets.shaderPrograms);
     },
     ReshapeWindow: function(width, height) {
         this.ctx.viewport(0.0, 0.0, width, height);
@@ -215,22 +217,21 @@ var GL = {
         // Clear the scene for new draw call
         this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
 
-        var mtxVP = GM.activeCam.mtxCam.GetMultiply(GM.mtxProj);
+        var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
         var mtxMVP;
 
         //var frustumTestCount = 0;
-        var scene = SceneNetwork.GetActiveScene();
+        var scene = SceneMngr.GetActiveScene();
 
         for (var i = 0; i < scene.models.length; i++)
-        //for (var i = 0; i < GM.models.length; i++)
         {
-            if (GM.models[i].active && GM.frustum.IntersectsSphere(GM.models[i].drawSphere))
+            if (scene.models[i].active && ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere))
             {
                 //frustumTestCount++;
 
                 // These just allow everything to be better read
-                shdr = GM.models[i].shaderData;
-                buff = GM.models[i].bufferData;
+                shdr = scene.models[i].shaderData;
+                buff = scene.models[i].bufferData;
 
                 // USE PROGRAM AND VBO
                 this.ctx.useProgram(shdr.program);
@@ -261,22 +262,22 @@ var GL = {
                     /* If there's lighting, than the model and view-proj matrices
                      * are sent up independently. The lighting calculations require
                      * holding onto the verts modified from the model-matrix. */
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, GM.models[i].mtxModel.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, scene.models[i].mtxModel.data);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
                 }
                 else {
-                    mtxMVP = GM.models[i].mtxModel.GetMultiply(mtxVP);
+                    mtxMVP = scene.models[i].mtxModel.GetMultiply(mtxVP);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
                 }
-                this.ctx.uniform3fv(shdr.u_Tint, GM.models[i].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, scene.models[i].colourTint.GetData());
 
                 // Draw calls
                 if (buff.EABO) {
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(GM.models[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                    this.ctx.drawElements(scene.models[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
                 }
                 else {
-                    this.ctx.drawArrays(GM.models[i].drawMethod, 0, buff.numVerts);
+                    this.ctx.drawArrays(scene.models[i].drawMethod, 0, buff.numVerts);
                 }
 
                 // Unbind buffers after use
@@ -288,19 +289,19 @@ var GL = {
 
         /******************* DEBUG DRAWING *************************/
 
-        if (DebugManager.active) {
+        if (DebugMngr.active) {
 
             // Debug models
             var dispObjs = [];
-            if(DebugManager.dispOrientAxes) {
+            if(DebugMngr.dispOrientAxes) {
                 dispObjs = scene.debug.dispObjs.orientAxes.models;
             }
-            if(DebugManager.dispShells)
+            if(DebugMngr.dispShells)
                 dispObjs = dispObjs.concat(scene.debug.dispObjs.shells.models);
 
             for (var i = 0; i < dispObjs.length; i++)
             {
-                if(dispObjs[i].active && GM.frustum.IntersectsSphere(dispObjs[i].drawSphere))
+                if(dispObjs[i].active && ViewMngr.frustum.IntersectsSphere(dispObjs[i].drawSphere))
                 {
                     //frustumTestCount++;
 
@@ -344,7 +345,7 @@ var GL = {
 
 
             // Ray casts
-            if(DebugManager.dispRays) {
+            if(DebugMngr.dispRays) {
                 dispObjs = scene.debug.dispObjs.rayCasts.rays;
 
                 shdr = EL.assets.shaderPrograms['ray'];

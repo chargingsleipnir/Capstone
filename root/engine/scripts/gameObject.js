@@ -52,11 +52,8 @@ GameObject.prototype = {
             this.components.push(this.camera);
         }
         else if (component == Components.modelHandler) {
-            if(this.model) {
+            if(this.model)
                 this.mdlHdlr = new ModelHandler(this.model, this.shape);
-                // Add controller to draw call;
-                GM.models.push(this.mdlHdlr);
-            }
         }
         else if (component == Components.rigidBody) {
             this.rigidBody = new RigidBody(this.trfmLocal, this.shape.radius);

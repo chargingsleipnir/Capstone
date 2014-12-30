@@ -41,15 +41,15 @@ CollisionBody.prototype = {
     /* Restricting ability to choose from various shapes for now, while I implement partitioning and phase systems.
     SetBoundingShape: function(shape) {
 
-        var index = GM.models.indexOf(this.activeFrame);
+        var index = GameMngr.models.indexOf(this.activeFrame);
 
         if (shape == BoundingShapes.aabb) {
             this.activeShape = this.aabb;
-            GM.models[index] = this.activeFrame = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
+            GameMngr.models[index] = this.activeFrame = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
         }
         else if (shape == BoundingShapes.sphere) {
             this.activeShape = this.sphere;
-            GM.models[index] = this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
+            GameMngr.models[index] = this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
         }
         this.activeFrame.MakeWireFrame();
         this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);

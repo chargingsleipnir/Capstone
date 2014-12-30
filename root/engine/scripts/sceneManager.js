@@ -12,10 +12,7 @@ function Scene(name) {
     this.name = name;
     this.paused = false;
 
-    this.rootObj;
     this.rootObj = new GameObject("Root", Labels.none);
-    //this.rootObj.AddComponent(Components.camera);
-    //this.rootObj.camera.SetControlsActive(true);
 
     this.debug = new DebugHandler();
     this.models = [];
@@ -36,6 +33,7 @@ function Scene(name) {
 
     this.InitCall = function() {};
     this.LoopCall = function() {};
+    this.ExitCall = function() {};
 }
 Scene.prototype = {
     Add: function(gameObject) {
@@ -43,12 +41,12 @@ Scene.prototype = {
         ///  <summary>Add model handle to render model as part of this scene</summary>
         ///  <param name="gameObject" type="GameObject"></param>
         /// </signature>
-        if(!gameObject.parent)
+        if(!gameObject.parent || gameObject.parent.name == "Root")
             this.rootObj.AddChild(gameObject);
         if(gameObject.mdlHdlr)
             this.models.push(gameObject.mdlHdlr);
 
-        if(DebugManager.active) {
+        if(DebugMngr.active) {
             var axesLengths = gameObject.shape.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
             this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.shape), gameObject.trfmGlobal);
 
@@ -64,9 +62,10 @@ Scene.prototype = {
             }
         }
     },
-    SetCallbacks: function(InitCallback, LoopCallback) {
+    SetCallbacks: function(InitCallback, LoopCallback, ExitCallback) {
         this.InitCall = InitCallback;
         this.LoopCall = LoopCallback;
+        this.ExitCall = ExitCallback;
     },
     Update: function() {
         if(!this.paused) {
@@ -79,7 +78,7 @@ Scene.prototype = {
 
 /********** Network that controls which scene to update and draw ************/
 
-var SceneNetwork = (function() {
+var SceneMngr = (function() {
 
     var scenes = {};
     var activeScene = new Scene("null scene");
@@ -88,6 +87,7 @@ var SceneNetwork = (function() {
         AddScene: function(scene, setActive) {
             scenes[scene.name] = scene;
             if(setActive) {
+                activeScene.ExitCall();
                 activeScene = scene;
                 activeScene.InitCall();
             }
@@ -103,6 +103,7 @@ var SceneNetwork = (function() {
                 throw(sceneName + " is already active.");
             }
             else if (sceneName in scenes) {
+                activeScene.ExitCall();
                 activeScene = scenes[sceneName];
                 console.log("Switched scene to: " + sceneName);
                 activeScene.InitCall();
@@ -117,22 +118,8 @@ var SceneNetwork = (function() {
             for (var scene in scenes)
                 console.log('Scene: ' + scene + ' : ' + scenes[scene]);
         },
-        BeginLoop: function() {
-            var time_LastFrame;
-            function LoopGame() {
-                requestAnimationFrame(LoopGame);
-                var time_ThisFrame = new Date().getTime();
-                var time_Delta = time_ThisFrame - (time_LastFrame || time_ThisFrame);
-                time_LastFrame = time_ThisFrame;
-                Time.delta_Milli = time_Delta / 1000;
-                Time.fps = 1000 / time_Delta;
-
-                // Updating Game World and Draw Calls
-                activeScene.Update();
-                CollisionNetwork.Update();
-                GL.RenderScene();
-            }
-            LoopGame();
+        Update: function() {
+            activeScene.Update();
         }
     }
 })();

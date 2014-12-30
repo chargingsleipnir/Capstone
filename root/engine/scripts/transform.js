@@ -16,6 +16,15 @@ function Transform(space) {
     this.space = space;
 }
 Transform.prototype = {
+    ToDefault: function() {
+        this.pos.SetZero();
+        this.orient.SetIdentity();
+        this.scale.SetOne();
+        this.dirFwd.SetCopy(VEC3_FWD);
+        this.dirUp.SetCopy(VEC3_UP);
+        this.dirRight.SetCopy(VEC3_RIGHT);
+        this.active = true;
+    },
     GetLargestScaleValue: function() {
         if (this.scale.x > this.scale.y && this.scale.x > this.scale.z)
             return this.scale.x;

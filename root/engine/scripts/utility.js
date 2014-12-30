@@ -324,9 +324,9 @@ var TextUtils = {
 
 var WndUtils = {
     WndX_To_GLNDCX: function(wndX) {
-        return wndX / (0.5 * GM.wndWidth);
+        return wndX / (0.5 * ViewMngr.wndWidth);
     },
     WndY_To_GLNDCY: function(wndY) {
-        return wndY / (0.5 * GM.wndHeight);
+        return wndY / (0.5 * ViewMngr.wndHeight);
     }
 };

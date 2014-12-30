@@ -3,7 +3,7 @@
  */
 
 function BuildScene1(scene) {
-    var titleScreen = new GUISystem(new WndRect(0, 0, GM.wndWidth, GM.wndHeight), "Title screen");
+    var titleScreen = new GUISystem(new WndRect(0, 0, ViewMngr.wndWidth, ViewMngr.wndHeight), "Title screen");
 
     var style = new MsgBoxStyle();
     style.fontSize = 50;
@@ -47,11 +47,14 @@ function BuildScene1(scene) {
     function Update() {
         if(nextSceneBtn.pressed) {
             nextSceneBtn.Release();
-            GUINetwork.SetActive(titleScreen.name, false);
-            Input.SetActive(ctrlSchemeName, false);
-            SceneNetwork.SetActive("Level 1");
+            SceneMngr.SetActive("Basic Testbed");
         }
     }
 
-    scene.SetCallbacks(Start, Update);
+    function End() {
+        GUINetwork.SetActive(titleScreen.name, false);
+        Input.SetActive(ctrlSchemeName, false);
+    }
+
+    scene.SetCallbacks(Start, Update, End);
 }

@@ -162,59 +162,62 @@ function Camera(trfmObj) {
     this.trfm = new Transform(Space.local);
     this.trfm.pos.SetCopy(this.trfmObj.pos);
 
+    this.hasKeyCtrl = false;
+
     this.mtxCam = new Matrix4();
 
-    GM.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
-    GM.SetActiveCamera(this);
+    ViewMngr.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
 }
 Camera.prototype = {
-    RunGUI: function() {
-        /*
-        this.obj.SetModel(new Primitives.Rect(new Vector2(0.1, 0.1)));
-        this.obj.AddComponent(Components.modelHandler);
-        this.obj.mdlHdlr.SetTexture(TwoD.GetCanvas());
-        this.obj.mdlHdlr.colourTint.SetValues(1.0, 0.0, 1.0);
-        //GM.rootObj.AddChild(this.obj);
-        */
+    ToDefaultOrientation: function() {
+        this.trfm.ToDefault();
     },
-    SetControlsActive: function(ctrlActive) {
+    SetControlsActive: function(ctrlSchemeName, ctrlActive) {
+        this.hasKeyCtrl = ctrlActive;
         if(!this.ctrl)
-            this.ctrl = new CameraController(this.trfm);
-
-        this.ctrl.active = ctrlActive;
+            this.ctrl = new CameraController(this.trfm, ctrlSchemeName);
+        else if(ctrlActive)
+            this.ctrl.SetInputActive(true);
+        else
+            this.ctrl.SetInputActive(false);
     },
     Update: function() {
         // Update controls
-        if(this.ctrl)
-            this.ctrl.Update();
+        if(this.active) {
 
-        if (this.active && (this.trfm.IsChanging() || this.trfmObj.IsChanging())) {
+            if (this.hasKeyCtrl) {
+                this.ctrl.Update();
+            }
 
-            /* This same kind of parent-child updating is what makes it at all
-            * valuable to add a camera as a component of a gameObject */
+            if (this.trfm.IsChanging() || this.trfmObj.IsChanging()) {
 
-            var newPos = this.trfm.pos.GetAdd(this.trfmObj.pos);
-            //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
-            /*
-            var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
-            //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
-            var newDirUp.SetCopy(this.trfmLocal.dirUp);
-            //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
-            var newDirRight.SetCopy(this.trfmLocal.dirRight);
-            */
-            // Update game view
-            this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
-            GM.frustum.CalculatePlanes(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+                /* This same kind of parent-child updating is what makes it at all
+                 * valuable to add a camera as a component of a gameObject */
 
-            /* Use these to adjust controls, if set by user, to rotate camera around object.
-             * Allow user to set camera modes...
-             * This is where pushing and popping matrices will come into play!! */
-            //this.mtxCam.SetIdentity();
-            //this.mtxCam.SetTranslateVec3(this.trfmObj.pos);
-            //this.mtxCam.SetRotateAbout(newOrient.GetAxis(), -newOrient.GetAngle());
-            //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
 
-            //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
+                var newPos = this.trfm.pos.GetAdd(this.trfmObj.pos);
+                //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
+                /*
+                 var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
+                 //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
+                 var newDirUp.SetCopy(this.trfmLocal.dirUp);
+                 //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
+                 var newDirRight.SetCopy(this.trfmLocal.dirRight);
+                 */
+                // Update game view
+                this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
+                ViewMngr.frustum.CalculatePlanes(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+
+                /* Use these to adjust controls, if set by user, to rotate camera around object.
+                 * Allow user to set camera modes...
+                 * This is where pushing and popping matrices will come into play!! */
+                //this.mtxCam.SetIdentity();
+                //this.mtxCam.SetTranslateVec3(this.trfmObj.pos);
+                //this.mtxCam.SetRotateAbout(newOrient.GetAxis(), -newOrient.GetAngle());
+                //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
+
+                //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
+            }
         }
     }
 };

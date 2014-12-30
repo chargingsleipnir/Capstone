@@ -17,6 +17,9 @@
     <script type="text/javascript" src="engine/scripts/transform.js"></script>
     <script type="text/javascript" src="engine/scripts/charHandler.js"></script>
     <script type="text/javascript" src="engine/scripts/guiManager.js"></script>
+    <script type="text/javascript" src="engine/scripts/viewManager.js"></script>
+    <script type="text/javascript" src="engine/scripts/input.js"></script>
+    <script type="text/javascript" src="engine/scripts/behaviours/CameraController.js"></script>
     <script type="text/javascript" src="engine/scripts/camera.js"></script>
     <script type="text/javascript" src="engine/scripts/modelHandlers.js"></script>
     <script type="text/javascript" src="engine/scripts/gameObject.js"></script>
@@ -25,8 +28,6 @@
     <script type="text/javascript" src="engine/scripts/2DContext.js"></script>
     <script type="text/javascript" src="engine/scripts/physics.js"></script>
     <script type="text/javascript" src="engine/scripts/collisions.js"></script>
-    <script type="text/javascript" src="engine/scripts/input.js"></script>
-    <script type="text/javascript" src="engine/scripts/behaviours/CameraController.js"></script>
     <script type="text/javascript" src="engine/scripts/behaviours/FPController.js"></script>
     <!---------- Game scripts  ---------->
     <script type="text/javascript" src="game/scripts/screens.js"></script>
@@ -53,21 +54,11 @@
                 ['disc', 'game/assets/models/GameObjects_Disc.json']
             ];
 
-            DebugManager.SetFullActive(true);
+            DebugMngr.SetFullActive(true);
 
             // Initialize the Game Manager, passing the canvas to do much of the startup
-            GM.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
-            GM.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, BuildGame);
-        }
-
-        function Run() {
-            /* From here, user defines whatever codebase they want, and just
-            have to tell the Game Manager what function to loop. */
-            var titleScreen = new Screen_Title();
-            GM.SetLoopCallback(titleScreen.Update);
-
-            /* Begins perpetual loop only, initialized as empty function */
-            GM.BeginLoop();
+            GameMngr.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
+            GameMngr.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, BuildGame);
         }
     </script>
 </body>

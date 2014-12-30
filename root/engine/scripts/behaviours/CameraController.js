@@ -1,5 +1,5 @@
 
-function CameraController(trfm) {
+function CameraController(trfm, ctrlSchemeName) {
     this.trfm = trfm;
 
     this.ctrl = new ControlScheme();
@@ -10,59 +10,58 @@ function CameraController(trfm) {
     this.yawAngle = 0.0;
 
     // Control camera
-    var camRegName = "First Person Controller";
-    Input.RegisterControlScheme(camRegName, true);
+    this.camRegName = ctrlSchemeName;
+    Input.RegisterControlScheme(this.camRegName, true);
 
-    this.ctrl.moveLeft = Input.CreateInputController(camRegName, KeyMap.A);
-    this.ctrl.moveRight = Input.CreateInputController(camRegName, KeyMap.D);
-    this.ctrl.moveDown = Input.CreateInputController(camRegName, KeyMap.Q);
-    this.ctrl.moveUp = Input.CreateInputController(camRegName, KeyMap.E);
-    this.ctrl.moveBack = Input.CreateInputController(camRegName, KeyMap.S);
-    this.ctrl.moveForth = Input.CreateInputController(camRegName, KeyMap.W);
-    this.ctrl.pitchDown = Input.CreateInputController(camRegName, KeyMap.ArrowDown);
-    this.ctrl.pitchUp = Input.CreateInputController(camRegName, KeyMap.ArrowUp);
-    this.ctrl.yawLeft = Input.CreateInputController(camRegName, KeyMap.ArrowLeft);
-    this.ctrl.yawRight = Input.CreateInputController(camRegName, KeyMap.ArrowRight);
-
-    this.active = false;
+    this.ctrl.moveLeft = Input.CreateInputController(this.camRegName, KeyMap.A);
+    this.ctrl.moveRight = Input.CreateInputController(this.camRegName, KeyMap.D);
+    this.ctrl.moveDown = Input.CreateInputController(this.camRegName, KeyMap.Q);
+    this.ctrl.moveUp = Input.CreateInputController(this.camRegName, KeyMap.E);
+    this.ctrl.moveBack = Input.CreateInputController(this.camRegName, KeyMap.S);
+    this.ctrl.moveForth = Input.CreateInputController(this.camRegName, KeyMap.W);
+    this.ctrl.pitchDown = Input.CreateInputController(this.camRegName, KeyMap.ArrowDown);
+    this.ctrl.pitchUp = Input.CreateInputController(this.camRegName, KeyMap.ArrowUp);
+    this.ctrl.yawLeft = Input.CreateInputController(this.camRegName, KeyMap.ArrowLeft);
+    this.ctrl.yawRight = Input.CreateInputController(this.camRegName, KeyMap.ArrowRight);
 }
 CameraController.prototype = {
+    SetInputActive: function(isActive) {
+        Input.SetActive(this.camRegName, isActive);
+    },
     Update: function() {
-        if(this.active) {
-            if (this.ctrl.moveLeft.pressed) {
-                this.trfm.TranslateRight(-this.moveSpeed * Time.delta_Milli);
-            }
-            else if (this.ctrl.moveRight.pressed) {
-                this.trfm.TranslateRight(this.moveSpeed * Time.delta_Milli);
-            }
-            if (this.ctrl.moveUp.pressed) {
-                this.trfm.TranslateUp(this.moveSpeed * Time.delta_Milli);
-            }
-            else if (this.ctrl.moveDown.pressed) {
-                this.trfm.TranslateUp(-this.moveSpeed * Time.delta_Milli);
-            }
-            if (this.ctrl.moveForth.pressed) {
-                this.trfm.TranslateFwd(this.moveSpeed * Time.delta_Milli);
-            }
-            else if (this.ctrl.moveBack.pressed) {
-                this.trfm.TranslateFwd(-this.moveSpeed * Time.delta_Milli);
-            }
-            if (this.ctrl.pitchUp.pressed) {
-                this.trfm.RotateLocalViewX(this.turnSpeed);
-                //this.trfm.Rotate(this.trfm.dirRight, -this.turnSpeed);
-            }
-            else if (this.ctrl.pitchDown.pressed) {
-                this.trfm.RotateLocalViewX(-this.turnSpeed);
-                //this.trfm.Rotate(this.trfm.dirRight, this.turnSpeed);
-            }
-            if (this.ctrl.yawLeft.pressed) {
-                this.trfm.RotateLocalView(VEC3_UP, this.turnSpeed);
-                //this.trfm.Rotate(VEC3_UP, this.turnSpeed);
-            }
-            else if (this.ctrl.yawRight.pressed) {
-                this.trfm.RotateLocalView(VEC3_UP, -this.turnSpeed);
-                //this.trfm.Rotate(VEC3_UP, -this.turnSpeed);
-            }
+        if (this.ctrl.moveLeft.pressed) {
+            this.trfm.TranslateRight(-this.moveSpeed * Time.delta_Milli);
+        }
+        else if (this.ctrl.moveRight.pressed) {
+            this.trfm.TranslateRight(this.moveSpeed * Time.delta_Milli);
+        }
+        if (this.ctrl.moveUp.pressed) {
+            this.trfm.TranslateUp(this.moveSpeed * Time.delta_Milli);
+        }
+        else if (this.ctrl.moveDown.pressed) {
+            this.trfm.TranslateUp(-this.moveSpeed * Time.delta_Milli);
+        }
+        if (this.ctrl.moveForth.pressed) {
+            this.trfm.TranslateFwd(this.moveSpeed * Time.delta_Milli);
+        }
+        else if (this.ctrl.moveBack.pressed) {
+            this.trfm.TranslateFwd(-this.moveSpeed * Time.delta_Milli);
+        }
+        if (this.ctrl.pitchUp.pressed) {
+            this.trfm.RotateLocalViewX(this.turnSpeed);
+            //this.trfm.Rotate(this.trfm.dirRight, -this.turnSpeed);
+        }
+        else if (this.ctrl.pitchDown.pressed) {
+            this.trfm.RotateLocalViewX(-this.turnSpeed);
+            //this.trfm.Rotate(this.trfm.dirRight, this.turnSpeed);
+        }
+        if (this.ctrl.yawLeft.pressed) {
+            this.trfm.RotateLocalView(VEC3_UP, this.turnSpeed);
+            //this.trfm.Rotate(VEC3_UP, this.turnSpeed);
+        }
+        else if (this.ctrl.yawRight.pressed) {
+            this.trfm.RotateLocalView(VEC3_UP, -this.turnSpeed);
+            //this.trfm.Rotate(VEC3_UP, -this.turnSpeed);
         }
     }
 };
