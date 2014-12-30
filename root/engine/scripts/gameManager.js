@@ -37,6 +37,7 @@ var GameMngr = {
 
             // Updating Game World and Draw Calls
             SceneMngr.Update();
+            ParticleForceRegistry.Update();
             CollisionNetwork.Update();
             that.UserUpdate();
             GL.RenderScene();

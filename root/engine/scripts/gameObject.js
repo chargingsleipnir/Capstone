@@ -6,7 +6,7 @@ function GameObject(name, label) {
     this.parent = null;
     this.children = [];
     this.components = [];
-    this.scripts = [];
+    this.loopCalls = [];
 
     this.shape = new AAShapeData3D();
 
@@ -84,14 +84,13 @@ GameObject.prototype = {
         /// </signature>
         this.components = [];
     },
-    AddScript: function(scriptObj) {
+    AddLoopCall: function(Callback) {
         /// <signature>
         ///  <summary>Script must have Initialize(gameObject) and Update() functions</summary>
-        ///  <param name="scriptObj" type="new Object"></param>
+        ///  <param name="Callback" type="function"></param>
         ///  <returns type="void" />
         /// </signature>
-        scriptObj.Initialize(this);
-        this.scripts.push(scriptObj);
+        this.loopCalls.push(Callback);
     },
     SetModel: function(model) {
         /// <signature>
@@ -133,8 +132,8 @@ GameObject.prototype = {
         }
 
         // Scripts first?? Sure...
-        for (var i in this.scripts)
-            this.scripts[i].Update();
+        for (var i in this.loopCalls)
+            this.loopCalls[i]();
 
         for (var i in this.components)
             this.components[i].Update();

@@ -1,24 +1,16 @@
 
-function ImpulseBalls() {
-    this.obj;
-}
-ImpulseBalls.prototype = {
-    Initialize: function(gameObject) {
-        this.obj = gameObject;
+function ImpulseBallBehaviour(gameObj) {
 
-        var that = this;
-        var Cr = 1.0;
-        function CollResponse(c) {
-            var collisionDist = that.obj.collider.sphere.IntersectsSphere(c.sphere);
-            that.obj.rigidBody.CalculateImpulse(c.rigidBody, collisionDist, Cr);
-        }
-
-        this.obj.collider.SetResponseCall(CollResponse);
-
-        this.obj.rigidBody.SetMass(0.5);
-        this.obj.rigidBody.SetInertiaTensor(this.obj.collider.sphere.radius);
-        this.obj.rigidBody.dampening = 0.9;
-    },
-    Update: function() {
+    var Cr = 1.0;
+    function CollResponse(c) {
+        console.log(c);
+        var collisionDist = gameObj.collider.sphere.IntersectsSphere(c.sphere);
+        gameObj.rigidBody.CalculateImpulse(c.rigidBody, collisionDist, Cr);
     }
-};
+
+    gameObj.collider.SetResponseCall(CollResponse);
+
+    gameObj.rigidBody.SetMass(0.5);
+    gameObj.rigidBody.SetInertiaTensor(gameObj.collider.sphere.radius);
+    gameObj.rigidBody.dampening = 0.9;
+}

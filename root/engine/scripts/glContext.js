@@ -258,6 +258,31 @@ var GL = {
                     this.ctx.enableVertexAttribArray(shdr.a_Norm);
                     this.ctx.vertexAttribPointer(shdr.a_Norm, 3, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems + buff.lenTexCoords) * buff.VAOBytes);
 
+                    /*
+                    // Diffuse
+                    gl.uniform3fv(renderers[i].program.u_Diffuse_Color, renderers[i].materials[0].diffuse.color);
+                    // Specular
+                    gl.uniform3fv(renderers[i].program.u_Specular_Color, renderers[i].materials[0].specular.color);
+                    gl.uniform1f(renderers[i].program.u_Specular_Intensity, renderers[i].materials[0].specular.intensity);
+                    //gl.uniform1f(renderers[i].program.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
+                    // Mirror
+                    //gl.uniform3fv(renderers[i].program.u_Mirror_Color, renderers[i].materials[0].mirror.color);
+                    //gl.uniform1f(renderers[i].program.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
+                    //gl.uniform1f(renderers[i].program.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
+                    // Shading
+                    //gl.uniform1f(renderers[i].program.u_Shading_Ambient, renderers[i].materials[0].shading.ambient);
+                    //gl.uniform1f(renderers[i].program.u_Shading_Emit, renderers[i].materials[0].shading.emit);
+                    //gl.uniform1f(renderers[i].program.u_Shading_Translucent, renderers[i].materials[0].shading.translucent);
+                    // Other
+                    gl.uniform1f(renderers[i].program.u_Alpha, renderers[i].materials[0].alpha);
+                    //gl.uniform1f(renderers[i].program.u_Darkness, renderers[i].materials[0].darkness);
+
+                    gl.uniform1f(renderers[i].program.u_Light_Ambient_Brightness, Light_Ambient.intensity);
+                    gl.uniform1f(renderers[i].program.u_Light_Directional_Brightness, Light_Directional.intensity);
+                    gl.uniform3fv(renderers[i].program.u_Light_Directional_Direction, Light_Directional.direction);
+                    gl.uniform1f(renderers[i].program.u_Light_Point_Brightness, Light_Point.intensity);
+                    gl.uniform3fv(renderers[i].program.u_Light_Point_Position, Light_Point.position);
+                    */
 
                     /* If there's lighting, than the model and view-proj matrices
                      * are sent up independently. The lighting calculations require

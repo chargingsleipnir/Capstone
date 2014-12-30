@@ -29,8 +29,13 @@ function BuildScene3(scene, skyBoxObj) {
         //balls[i].collider.SetBoundingShape(BoundingShapes.aabb);
 
         balls[i].AddComponent(Components.rigidBody);
-        balls[i].AddScript(new ImpulseBalls());
+        ImpulseBallBehaviour(balls[i]);
     }
+
+    // Add some springs for extra fun!
+    SpringLoadPull(balls[1], balls[0].rigidBody);
+    SpringLoad(balls[2], balls[1].rigidBody);
+    SpringLoadPush(balls[3], balls[0].rigidBody);
 
     scene.rootObj.AddComponent(Components.camera);
     scene.rootObj.camera.SetControlsActive(scene.name, false);
