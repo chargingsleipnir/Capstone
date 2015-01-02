@@ -15,7 +15,6 @@ TODO
 	x = tcos(t)
 	y = t
 	z = tsin(t)
-11. Add rays to each object, pointing in their local positive axes
 
 BUGS
 

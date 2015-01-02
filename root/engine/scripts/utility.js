@@ -260,6 +260,76 @@ var ModelUtils = {
         }
         // Return the last match, for now.
         return matches[matches.length - 1];
+    },
+    BuildShaderStrings: function(vertData, materials, usesFragLighting) {
+        /// <signature>
+        ///  <summary>Examines the model's data and build the appropriate shader program strings. Only for 3D GameObject models</summary>
+        ///  <param name="vertData" type="object">Vertex data from model, either from entire mesh, or per face</param>
+        ///  <param name="materials" type="object">Material from model</param>
+        ///  <param name="outVshdrStr" type="string">Empty string container to contain the vertex shader</param>
+        ///  <param name="outFshdrStr" type="string">Empty string container to contain the fragment shader</param>
+        ///  <param name="usesFragLighting" type="bool">If false, light data will be calculated in the vertex shader</param>
+        ///  <returns type="void" />
+        /// </signature>
+
+        var vshdrStr, fshdrStr;
+
+        // Decide on shader program here, based on data coming in
+        var colour = vertData.colElems.length > 0,
+            texture = vertData.texCoords.length > 0,
+            light = materials.length > 0;
+
+        var declaration, mainFunc;
+
+
+        /******************** VERTEX SHADER ********************/
+
+        declaration = ShdrLines.attr.pos;
+        declaration += ShdrLines.unif.mtxMVP;
+
+        mainFunc = ShdrLines.prog.start;
+        mainFunc += ShdrLines.prog.pntSize;
+
+        if(colour) {
+        }
+        if(texture) {
+        }
+        if(light) {
+            if(usesFragLighting) {
+
+            }
+        }
+        else {
+            mainFunc += ShdrLines.prog.vertBody.glPos.MVP;
+        }
+        mainFunc += ShdrLines.prog.end;
+
+        vshdrStr = '' + declaration + mainFunc;
+        console.log(vshdrStr);
+
+        /******************** FRAGMENT SHADER ********************/
+
+        declaration = ShdrLines.prec.medF;
+
+        mainFunc = ShdrLines.prog.start;
+        mainFunc += ShdrLines.prog.fragBody.pos;
+
+        if(colour) {
+        }
+        if(texture) {
+        }
+        if(light) {
+            if(usesFragLighting) {
+
+            }
+        }
+        declaration += ShdrLines.unif.tint;
+
+        mainFunc += ShdrLines.prog.end;
+
+        fshdrStr = '' + declaration + mainFunc;
+        console.log("////////////////////////////////////////////////////////////");
+        console.log(fshdrStr);
     }
 };
 

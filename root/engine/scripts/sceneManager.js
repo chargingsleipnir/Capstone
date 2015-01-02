@@ -17,16 +17,19 @@ function Scene(name) {
     this.debug = new DebugHandler();
     this.models = [];
 
-    this.lighting = {
+    this.collisionNetwork = new CollisionNetwork();
+    this.forceRegistry = new ForceRegistry();
+
+    this.light = {
         amb: {
-            int: 0.0
+            bright: 0.0
         },
         dir: {
-            int: 0.0,
+            bright: 0.0,
             dir: new Vector3(1.0, -1.0, 0.0)
         },
         pnt: {
-            int: 0.0,
+            bright: 0.0,
             pos: new Vector3(0.0, 0.5, -0.5)
         }
     };
@@ -45,13 +48,15 @@ Scene.prototype = {
             this.rootObj.AddChild(gameObject);
         if(gameObject.mdlHdlr)
             this.models.push(gameObject.mdlHdlr);
+        if(gameObject.collider)
+            this.collisionNetwork.AddBody(gameObject.collider);
 
         if(DebugMngr.active) {
             var axesLengths = gameObject.shape.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
             this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.shape), gameObject.trfmGlobal);
 
             if(gameObject.collider) {
-                var sphereShell = new ModelHandler(new Primitives.IcoSphere(1, gameObject.collider.sphere.radius), gameObject.collider.shapeData);
+                var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), gameObject.collider.shapeData);
                 //var aabbShell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
                 sphereShell.MakeWireFrame();
                 sphereShell.colourTint.SetValues(1.0, 1.0, 0.0);
@@ -72,6 +77,9 @@ Scene.prototype = {
             this.rootObj.Update(this.rootObj.trfmLocal);
             this.debug.Update();
             this.LoopCall();
+
+            this.collisionNetwork.Update();
+            this.forceRegistry.Update();
         }
     }
 };

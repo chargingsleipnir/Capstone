@@ -31,8 +31,17 @@ function BuildScene1(scene) {
         style
     );
 
+    style.bgAlpha = 1.0;
+    style.bgTexture = EL.assets.textures['lava'];
+    var background = new GUIObject(
+        titleScreen.sysRect,
+        "",
+        style
+    );
+
     titleScreen.AddGUIObject(title);
     titleScreen.AddGUIObject(titleMsg);
+    titleScreen.AddGUIObject(background);
     GUINetwork.AddSystem(titleScreen, false);
 
     var ctrlSchemeName = "Title screen transition";
@@ -47,7 +56,7 @@ function BuildScene1(scene) {
     function Update() {
         if(nextSceneBtn.pressed) {
             nextSceneBtn.Release();
-            SceneMngr.SetActive("Basic Testbed");
+            SceneMngr.SetActive("Basic Testbed with HUD");
         }
     }
 

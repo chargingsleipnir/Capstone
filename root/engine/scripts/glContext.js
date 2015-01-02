@@ -66,8 +66,8 @@ var GL = {
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
             programData.u_Alpha = ctx.getUniformLocation(program, "u_Alpha");
             // MATERIALS
-            programData.u_DiffCol = ctx.getUniformLocation(program, "u_DiffCol");
-            programData.u_DiffInt = ctx.getUniformLocation(program, "u_DiffInt");
+            // Colour is multiplied by intensity immediately, before exporting model. No reason to hold values separately
+            programData.u_DiffColWeight = ctx.getUniformLocation(program, "u_DiffColWeight");
             programData.u_SpecCol = ctx.getUniformLocation(program, "u_SpecCol");
             programData.u_SpecInt = ctx.getUniformLocation(program, "u_SpecInt");
             //ctx.getUniformLocation(program, "u_Specular_Hardness");
@@ -258,37 +258,41 @@ var GL = {
                     this.ctx.enableVertexAttribArray(shdr.a_Norm);
                     this.ctx.vertexAttribPointer(shdr.a_Norm, 3, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems + buff.lenTexCoords) * buff.VAOBytes);
 
-                    /*
                     // Diffuse
-                    gl.uniform3fv(renderers[i].program.u_Diffuse_Color, renderers[i].materials[0].diffuse.color);
+                    // Diff col and int are multiplied before exporting
+                    this.ctx.uniform3fv(shdr.u_DiffColWeight, scene.models[i].mat.diff.colWeight);
                     // Specular
-                    gl.uniform3fv(renderers[i].program.u_Specular_Color, renderers[i].materials[0].specular.color);
-                    gl.uniform1f(renderers[i].program.u_Specular_Intensity, renderers[i].materials[0].specular.intensity);
-                    //gl.uniform1f(renderers[i].program.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
+                    this.ctx.uniform3fv(shdr.u_SpecCol, scene.models[i].mat.spec.col);
+                    this.ctx.uniform1f(shdr.u_SpecInt, scene.models[i].mat.spec.int);
+                    //gl.uniform1f(shdr.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
                     // Mirror
-                    //gl.uniform3fv(renderers[i].program.u_Mirror_Color, renderers[i].materials[0].mirror.color);
-                    //gl.uniform1f(renderers[i].program.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
-                    //gl.uniform1f(renderers[i].program.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
+                    //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
+                    //gl.uniform1f(shdr.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
+                    //gl.uniform1f(shdr.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
                     // Shading
-                    //gl.uniform1f(renderers[i].program.u_Shading_Ambient, renderers[i].materials[0].shading.ambient);
-                    //gl.uniform1f(renderers[i].program.u_Shading_Emit, renderers[i].materials[0].shading.emit);
-                    //gl.uniform1f(renderers[i].program.u_Shading_Translucent, renderers[i].materials[0].shading.translucent);
+                    //gl.uniform1f(shdr.u_Shading_Ambient, renderers[i].materials[0].shading.ambient);
+                    //gl.uniform1f(shdr.u_Shading_Emit, renderers[i].materials[0].shading.emit);
+                    //gl.uniform1f(shdr.u_Shading_Translucent, renderers[i].materials[0].shading.translucent);
                     // Other
-                    gl.uniform1f(renderers[i].program.u_Alpha, renderers[i].materials[0].alpha);
-                    //gl.uniform1f(renderers[i].program.u_Darkness, renderers[i].materials[0].darkness);
+                    this.ctx.uniform1f(shdr.u_Alpha, scene.models[i].mat.alpha);
+                    //gl.uniform1f(shdr.u_Darkness, renderers[i].materials[0].darkness);
 
-                    gl.uniform1f(renderers[i].program.u_Light_Ambient_Brightness, Light_Ambient.intensity);
-                    gl.uniform1f(renderers[i].program.u_Light_Directional_Brightness, Light_Directional.intensity);
-                    gl.uniform3fv(renderers[i].program.u_Light_Directional_Direction, Light_Directional.direction);
-                    gl.uniform1f(renderers[i].program.u_Light_Point_Brightness, Light_Point.intensity);
-                    gl.uniform3fv(renderers[i].program.u_Light_Point_Position, Light_Point.position);
-                    */
+                    this.ctx.uniform1f(shdr.u_AmbBright, scene.light.amb.bright);
+                    this.ctx.uniform1f(shdr.u_DirBright, scene.light.dir.bright);
+                    this.ctx.uniform3fv(shdr.u_DirDir, scene.light.dir.dir.GetData());
+                    this.ctx.uniform1f(shdr.u_PntBright, scene.light.pnt.bright);
+                    this.ctx.uniform3fv(shdr.u_PntPos, scene.light.pnt.pos.GetData());
+                    
 
                     /* If there's lighting, than the model and view-proj matrices
                      * are sent up independently. The lighting calculations require
                      * holding onto the verts modified from the model-matrix. */
                     this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, scene.models[i].mtxModel.data);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+                    // Normal Matrix  GetInvMtx3
+                    var mtxNorm = scene.models[i].mtxModel.GetInvMtx3();
+                    mtxNorm.Transpose();
+                    this.ctx.uniformMatrix3fv(shdr.u_MtxNorm, false, mtxNorm.data);
                 }
                 else {
                     mtxMVP = scene.models[i].mtxModel.GetMultiply(mtxVP);

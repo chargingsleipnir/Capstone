@@ -25,8 +25,6 @@ function CollisionBody(shapeData, trfm) {
     this.DetectionCallback = function(collider){};
     this.ResponseCallback = function(collider){};
     this.rigidBody = new RigidBody(new Transform(), 1.0);
-
-    CollisionNetwork.AddBody(this);  // ?? Not sure how this will work just yet
 }
 CollisionBody.prototype = {
     SetRigidBody: function(rigidBody) {
@@ -82,48 +80,50 @@ CollisionBody.prototype = {
     }
 };
 
-var CollisionNetwork = (function() {
+function CollisionNetwork() {
 
-    var colls = [];
+    this.colls = [];
 
     function Partitioning() {
 
     }
+
     function BroadPhase() {
 
     }
+
     function MidPhase() {
 
     }
+
     function NarrowPhase() {
 
     }
-
-    return {
-        AddBody: function(collisionBody) {
-            colls.push(collisionBody);
-        },
-        RemoveBody: function() {
-        },
-        Update: function() {
-            // I believe this would essentially be the broadphase check
-            for(var i = 0; i < colls.length; i++) {
-                if(colls[i].active) {
-                    for (var j = i + 1; j < colls.length; j++) {
-                        if(colls[j].active) {
-                            var collisionDist = colls[i].sphere.IntersectsSphere(colls[j].sphere);
-                            if(collisionDist) {
-                                if(colls[i].detectOnly || colls[j].detectOnly) {
-                                    colls[i].DetectionCallback(colls[j]);
-                                    colls[j].DetectionCallback(colls[i]);
-                                }
-                                // If they are set to have response, they both must have rigidbodies
-                                else {
-                                    var netVel = colls[i].rigidBody.GetNetVelocity(colls[j].rigidBody);
-                                    if(netVel.GetDot(collisionDist) < 0) {
-                                        colls[i].ResponseCallback(colls[j]);
-                                        colls[j].ResponseCallback(colls[i]);
-                                    }
+}
+CollisionNetwork.prototype = {
+    AddBody: function (collisionBody) {
+        this.colls.push(collisionBody);
+    },
+    RemoveBody: function () {
+    },
+    Update: function () {
+        // I believe this would essentially be the broadphase check
+        for (var i = 0; i < this.colls.length; i++) {
+            if (this.colls[i].active) {
+                for (var j = i + 1; j < this.colls.length; j++) {
+                    if (this.colls[j].active) {
+                        var collisionDist = this.colls[i].sphere.IntersectsSphere(this.colls[j].sphere);
+                        if (collisionDist) {
+                            if (this.colls[i].detectOnly || this.colls[j].detectOnly) {
+                                this.colls[i].DetectionCallback(this.colls[j]);
+                                this.colls[j].DetectionCallback(this.colls[i]);
+                            }
+                            // If they are set to have response, they both must have rigidbodies
+                            else {
+                                var netVel = this.colls[i].rigidBody.GetNetVelocity(this.colls[j].rigidBody);
+                                if (netVel.GetDot(collisionDist) < 0) {
+                                    this.colls[i].ResponseCallback(this.colls[j]);
+                                    this.colls[j].ResponseCallback(this.colls[i]);
                                 }
                             }
                         }
@@ -132,5 +132,4 @@ var CollisionNetwork = (function() {
             }
         }
     }
-}
-)();
+};

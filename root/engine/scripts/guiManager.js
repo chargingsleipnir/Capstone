@@ -55,70 +55,94 @@ GUIObject.prototype = {
             x = WndUtils.WndX_To_GLNDCX(this.rectGlobal.x) - 1,
             y = (WndUtils.WndY_To_GLNDCY(this.rectGlobal.y) - 1) * -1;
 
-        // Divide
-        var boxModel = new Primitives.Rect(new Vector2(radialW, radialH));
-        var posCoords = boxModel.vertices.byMesh.posCoords;
-        // Set box' pos to that defined in the rect
+        if(this.style.bgAlpha) {
+            // Divide
+            var boxModel = new Primitives.Rect(new Vector2(radialW, radialH));
+            var posCoords = boxModel.vertices.byMesh.posCoords;
+            // Set box' pos to that defined in the rect
 
-        for(var i = 0; i < posCoords.length; i+= 3) {
-            // Add width and subtract height because the model is built from the centre out,
-            // while the rects measure from the top-left to the bottom-right.
-            posCoords[i] += (x + radialW);
-            posCoords[i+1] += (y - radialH);
+            for (var i = 0; i < posCoords.length; i += 3) {
+                // Add width and subtract height because the model is built from the centre out,
+                // while the rects measure from the top-left to the bottom-right.
+                posCoords[i] += (x + radialW);
+                posCoords[i + 1] += (y - radialH);
+            }
+
+            this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
+            this.boxHdl.colourTint.SetCopy(this.style.bgColour);
+            this.boxHdl.alpha = this.style.bgAlpha;
+            if (this.style.bgTexture) {
+                this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
+            }
         }
-
-        this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
-        this.boxHdl.colourTint.SetCopy(this.style.bgColour);
-        this.boxHdl.alpha = this.style.bgAlpha;
-        if(this.style.bgTexture) {
-            this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
+        else {
+            this.boxHdl = new GUIBoxHandler({
+                count: 0,
+                posCoords: [],
+                colElems: [],
+                texCoords: [],
+                normAxes: [],
+                indices: []
+            });
         }
 
         /****************** TEXT ********************/
 
-        // Adjust font width to good (readable) proportion
-        var charW = this.style.fontSize * (2/3),
-            charH = this.style.fontSize;
+        if(this.msg) {
 
-        // Get the exact dimensions of the text to be displayed
-        var maxHeightPX = this.rectLocal.h - this.style.margin * 2;
-        var maxWidthPX = charW * this.style.textMaxWidth - this.style.margin * 2;
-        if(this.rectLocal.w < maxWidthPX || this.style.textMaxWidth == 0) {
-            maxWidthPX = this.rectLocal.w - this.style.margin * 2;
+            // Adjust font width to good (readable) proportion
+            var charW = this.style.fontSize * (2 / 3),
+                charH = this.style.fontSize;
+
+            // Get the exact dimensions of the text to be displayed
+            var maxHeightPX = this.rectLocal.h - this.style.margin * 2;
+            var maxWidthPX = charW * this.style.textMaxWidth - this.style.margin * 2;
+            if (this.rectLocal.w < maxWidthPX || this.style.textMaxWidth == 0) {
+                maxWidthPX = this.rectLocal.w - this.style.margin * 2;
+            }
+
+            // Turn given message into block of text within given restrictions
+            var msgBlock = [];
+            TextUtils.CreateBoundTextBlock(this.msg, charW, charH, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
+
+            // Convert sizes to NDC space
+            this.charBlockModel = new StaticCharBlock(
+                msgBlock,
+                WndUtils.WndX_To_GLNDCX(charW),
+                WndUtils.WndY_To_GLNDCY(charH),
+                WndUtils.WndX_To_GLNDCX(this.style.margin),
+                WndUtils.WndY_To_GLNDCY(this.style.margin),
+                WndUtils.WndX_To_GLNDCX(maxWidthPX),
+                WndUtils.WndY_To_GLNDCY(maxHeightPX),
+                WndUtils.WndY_To_GLNDCY(this.style.textLineSpacing),
+                this.style.textAlignWidth,
+                this.style.textAlignHeight
+            );
+
+            // Set text block's pos to that defined in the rect
+            for (var i = 0; i < this.charBlockModel.posCoords.length; i += 2) {
+                // The text is built from top-left to bottom-right, so this works as-is.
+                this.charBlockModel.posCoords[i] += x;
+                this.charBlockModel.posCoords[i + 1] += y;
+            }
+
+            this.numChars = this.charBlockModel.count / 6;
+
+            // Build text
+            this.strObjHdl = new StringDisplayHandler(this.charBlockModel);
+            this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
+            if (this.style.bold)
+                this.strObjHdl.UseBoldTexture();
         }
-
-        // Turn given message into block of text within given restrictions
-        var msgBlock = [];
-        TextUtils.CreateBoundTextBlock(this.msg, charW, charH, this.style.textLineSpacing, maxWidthPX, maxHeightPX, msgBlock);
-
-        // Convert sizes to NDC space
-        this.charBlockModel = new StaticCharBlock(
-            msgBlock,
-            WndUtils.WndX_To_GLNDCX(charW),
-            WndUtils.WndY_To_GLNDCY(charH),
-            WndUtils.WndX_To_GLNDCX(this.style.margin),
-            WndUtils.WndY_To_GLNDCY(this.style.margin),
-            WndUtils.WndX_To_GLNDCX(maxWidthPX),
-            WndUtils.WndY_To_GLNDCY(maxHeightPX),
-            WndUtils.WndY_To_GLNDCY(this.style.textLineSpacing),
-            this.style.textAlignWidth,
-            this.style.textAlignHeight
-        );
-
-        // Set text block's pos to that defined in the rect
-        for(var i = 0; i < this.charBlockModel.posCoords.length; i+= 2) {
-            // The text is built from top-left to bottom-right, so this works as-is.
-            this.charBlockModel.posCoords[i] += x;
-            this.charBlockModel.posCoords[i+1] += y;
+        else {
+            this.strObjHdl = new StringDisplayHandler({
+                    count: 0,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+            });
         }
-
-        this.numChars = this.charBlockModel.count/6;
-
-        // Build text
-        this.strObjHdl = new StringDisplayHandler(this.charBlockModel);
-        this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
-        if(this.style.bold)
-            this.strObjHdl.UseBoldTexture();
     },
     UpdateMsg: function(msg) {
 

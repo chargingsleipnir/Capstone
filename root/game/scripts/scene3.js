@@ -6,7 +6,6 @@ function BuildScene3(scene, skyBoxObj) {
 
     var grid = new GameObject('grid', Labels.productionEnvironment);
     grid.SetModel(Primitives.grid);
-    grid.AddComponent(Components.modelHandler);
     grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
 
     var balls = [];
@@ -20,7 +19,6 @@ function BuildScene3(scene, skyBoxObj) {
     for(var i = 0; i < 4; i++) {
         balls[i] = new GameObject('physics test ball', Labels.testObject);
         balls[i].SetModel(new Primitives.IcoSphere(2, 1));
-        balls[i].AddComponent(Components.modelHandler);
         balls[i].mdlHdlr.MakeWireFrame();
         balls[i].mdlHdlr.colourTint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
         balls[i].trfmLocal.SetPosVec3(startPositions[i]);
@@ -33,9 +31,9 @@ function BuildScene3(scene, skyBoxObj) {
     }
 
     // Add some springs for extra fun!
-    SpringLoadPull(balls[1], balls[0].rigidBody);
-    SpringLoad(balls[2], balls[1].rigidBody);
-    SpringLoadPush(balls[3], balls[0].rigidBody);
+    SpringLoadPull(scene, balls[3].rigidBody, balls[0].rigidBody);
+    SpringLoad(scene, balls[2].rigidBody, balls[1].rigidBody);
+    SpringLoadPush(scene, balls[1].rigidBody, balls[0].rigidBody);
 
     scene.rootObj.AddComponent(Components.camera);
     scene.rootObj.camera.SetControlsActive(scene.name, false);
@@ -48,8 +46,6 @@ function BuildScene3(scene, skyBoxObj) {
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var gotoTitle = Input.CreateInputController(physicsTestName, KeyMap.Enter);
     var launchForce = new Vector3(0.0, 0.0, -250.0);
-
-    var angle = 0.01;
 
     function Start() {
         Input.SetActive(physicsTestName, true);
@@ -67,10 +63,8 @@ function BuildScene3(scene, skyBoxObj) {
         }
         if(gotoTitle.pressed) {
             gotoTitle.Release();
-            SceneMngr.SetActive("Title Screen");
+            SceneMngr.SetActive("Light and blend testing");
         }
-
-        skyBoxObj.trfmLocal.Rotate(VEC3_FWD, angle);
     }
 
     function End() {
@@ -81,7 +75,7 @@ function BuildScene3(scene, skyBoxObj) {
             balls[i].rigidBody.velFinal.SetZero();
         }
 
-        //ViewMngr.activeCam.ToDefaultOrientation();
+        ViewMngr.activeCam.ToDefaultOrientation();
         Input.SetActive(physicsTestName, false);
     }
 

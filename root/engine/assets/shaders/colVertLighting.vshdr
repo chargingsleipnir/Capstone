@@ -6,7 +6,7 @@ uniform mat4 u_MtxM;
 uniform mat4 u_MtxVP;
 uniform mat3 u_MtxNorm;
 
-uniform vec3 u_DiffCol;
+uniform vec3 u_DiffColWeight;
 uniform vec3 u_SpecCol;
 uniform float u_SpecInt;
 //uniform float u_Specular_Hardness;
@@ -38,7 +38,7 @@ void main()
 	vec3 specularColorWeighting = vec3(0.0, 0.0, 0.0);
 	float specularBrightness = 0.0;
 
-	vec3 ambientColor = u_DiffCol * u_AmbBright;
+	vec3 ambientColor = u_DiffColWeight * u_AmbBright;
 	vec3 directionalColor = vec3(0.0, 0.0, 0.0);
 	vec3 pointColor = vec3(0.0, 0.0, 0.0);
 
@@ -54,7 +54,7 @@ void main()
 
 		directional_Weighting = max(dot(trfmNorm, u_DirDir), 0.0) * u_DirBright;
 
-		directionalColor = (u_DiffCol * directional_Weighting) +
+		directionalColor = (u_DiffColWeight * directional_Weighting) +
 						   (specularColorWeighting * directional_Weighting);
 	}
 	if(u_PntBright > 0.0)
@@ -66,7 +66,7 @@ void main()
 
 		point_Weighting = max(dot(trfmNorm, light_Point_Direction), 0.0) * u_PntBright;
 
-		pointColor = (u_DiffCol * point_Weighting) +
+		pointColor = (u_DiffColWeight * point_Weighting) +
 					 (specularColorWeighting * point_Weighting);
 	}
 

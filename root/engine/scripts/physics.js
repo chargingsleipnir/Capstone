@@ -94,7 +94,7 @@ RigidBody.prototype = {
 
 /*************************** MANAGE AND IMPLEMENT VARIOUS TYPES OF FORCES ****************************************/
 
-var ParticleForceGenerators = {
+var ForceGenerators = {
     Gravity: function(gravity)
     {
         /// <signature>
@@ -267,8 +267,11 @@ var ParticleForceGenerators = {
     }
 };
 
-var ParticleForceRegistry = {
-    registry: [],
+function ForceRegistry() {
+    this.registry = []
+
+}
+ForceRegistry.prototype = {
     Add: function(particle, forceGenerator) {
         this.registry.push({
             particle: particle,

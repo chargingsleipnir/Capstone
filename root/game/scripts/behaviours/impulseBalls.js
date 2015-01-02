@@ -3,7 +3,6 @@ function ImpulseBallBehaviour(gameObj) {
 
     var Cr = 1.0;
     function CollResponse(c) {
-        console.log(c);
         var collisionDist = gameObj.collider.sphere.IntersectsSphere(c.sphere);
         gameObj.rigidBody.CalculateImpulse(c.rigidBody, collisionDist, Cr);
     }

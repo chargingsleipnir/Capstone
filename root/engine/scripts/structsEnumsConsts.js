@@ -26,8 +26,7 @@ function ShaderProgramData() {
     this.u_Sampler;
     this.u_Alpha;
 
-    this.u_DiffCol;
-    this.u_DiffInt;
+    this.u_DiffColWeight;
     this.u_SpecCol;
     this.u_SpecInt;
 
@@ -105,7 +104,7 @@ var Time = {
 
 /***** ENUMS *****/
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
-var Components = { camera: 0, modelHandler: 1, collisionBody: 2, rigidBody: 3 };
+var Components = { camera: 0, collisionBody: 1, rigidBody: 2 };
 var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4 };
 var GUILabels = { container: 0, msg: 1, btn: 2 };
 var Space = { local: 0, global: 1 };
@@ -141,3 +140,60 @@ var VEC3_LEFT = new Vector3(-1.0, 0.0, 0.0);
 var VEC3_RIGHT = new Vector3(1.0, 0.0, 0.0);
 var VEC3_DOWN = new Vector3(0.0, -1.0, 0.0);
 var VEC3_UP = new Vector3(0.0, 1.0, 0.0);
+
+var ShdrLines = {
+    prec: {
+        medF: "precision mediump float;\n\n"
+    },
+    attr: {
+        pos: "attribute vec3 a_Pos;\n",
+        col: "attribute vec4 a_Col;\n",
+        tex: "attribute vec2 a_TexCoord;\n",
+        norm: "attribute vec4 a_Norm;\n"
+    },
+    vary: {
+        pos: "varying vec3 v_Pos;\n",
+        col: "varying vec4 v_Col;\n",
+        tex: "varying vec2 v_TexCoord;\n",
+        norm: "varying vec4 v_TrfmNorm;\n",
+        sendPos: "v_Pos = u_MtxM * vec4(a_Pos, 1.0);\n",
+        sendCol: "v_Col = a_Col;\n",
+        sendTex: "v_TexCoord = a_TexCoord;\n",
+        sendNorm: "v_TrfmNorm = u_MtxNorm * a_Norm;\n"
+    },
+    unif: {
+        mtxM: "uniform mat4 u_MtxM;\n",
+        mtxVP: "uniform mat4 u_MtxVP;\n",
+        mtxMVP: "uniform mat4 u_MtxMVP;\n",
+        mtxNorm: "uniform mat3 u_MtxNorm;\n",
+        tint: "uniform vec3 u_Tint;\n",
+        alpha: "uniform float u_Alpha;\n",
+        sampler: "uniform sampler2D u_Sampler;\n",
+        lighting: "uniform vec3 u_DiffColWeight;\n" +
+            "uniform vec3 u_SpecCol;\n" +
+            "uniform float u_SpecInt,\n\n" +
+            "uniform float u_AmbBright;\n" +
+            "uniform float u_DirBright;\n" +
+            "uniform vec3 u_DirDir;\n" +
+            "uniform float u_PntBright;\n" +
+            "uniform vec3 u_PntPos;\n\n"
+    },
+    prog: {
+        start: "void main()\n" + "{\n",
+        pntSize: "gl_PointSize = 5.0;\n",
+        vertBody: {
+            glPos: {
+                MVP: "gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);\n",
+                Split: "vec4 modelPosition = u_MtxM * vec4(a_Pos, 1.0);\n" +
+                "gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);\n"
+            }
+        },
+        fragBody: {
+            pos: "gl_FragColor = vec4(u_Tint, 1.0);\n",
+            col: "gl_FragColor = vec4(v_Col.xyz + u_Tint, v_Col.a);\n",
+            tex: "vec4 texColour = texture2D(u_Sampler, vec2(v_TexCoord.s, v_TexCoord.t));\n" +
+                "gl_FragColor = vec4(texColour.rgb + u_Tint, texColour.a);\n"
+        },
+        end: "}"
+    }
+};

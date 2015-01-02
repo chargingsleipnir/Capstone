@@ -484,6 +484,39 @@ var Primitives = {
         },
         drawMethod: DrawMethods.lines
     },
+    Circle: function(radius, numVerts) {
+
+        var posCoords = [0.0, 0.0, 0.0];
+        var angle = (360 / numVerts) * DEG_TO_RAD;
+        for(var i = 0; i < numVerts; i++) {
+            posCoords = posCoords.concat([radius * Math.cos(angle * i), radius * Math.sin(angle * i), 0.0]);
+        }
+        posCoords = posCoords.concat([1.0, 0.0, 0.0]);
+
+        return {
+            name: "Circle",
+            numTris: numVerts,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: numVerts + 2,
+                    posCoords: posCoords,
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: [],
+                    indices: []
+                },
+                byFaces: {
+                    count: 0,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.triangleFan
+        }
+    },
     Rect: function (radii) {
         var w, h;
         if(radii) {

@@ -51,10 +51,6 @@ GameObject.prototype = {
             this.camera = new Camera(this.trfmGlobal);
             this.components.push(this.camera);
         }
-        else if (component == Components.modelHandler) {
-            if(this.model)
-                this.mdlHdlr = new ModelHandler(this.model, this.shape);
-        }
         else if (component == Components.rigidBody) {
             this.rigidBody = new RigidBody(this.trfmLocal, this.shape.radius);
             if(this.collider)
@@ -102,6 +98,8 @@ GameObject.prototype = {
         // Make sure the correct set of vertices are being centred.
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
+
+        this.mdlHdlr = new ModelHandler(this.model, this.shape);
     },
     Update: function(trfmParent) {
         /// <signature>

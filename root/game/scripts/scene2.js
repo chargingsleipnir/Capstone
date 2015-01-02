@@ -2,7 +2,10 @@
  * Created by Devin on 2014-12-29.
  */
 
-function BuildScene2(scene, playerObj, skyBoxObj) {
+function BuildScene2(scene, playerObj) {
+
+    scene.light.dir.bright = 1.0;
+    scene.light.dir.dir.SetValues(1.0, -1.0, 1.0);
 
     var arrow = new GameObject('arrow', Labels.testObject);
     var heart = new GameObject('heart', Labels.testObject);
@@ -16,12 +19,7 @@ function BuildScene2(scene, playerObj, skyBoxObj) {
     testCube.SetModel(EL.assets.models['dimensionBox']);
     cube.SetModel(new Primitives.Cube(new Vector3(1.5, 3.0, 4.5), true));
 
-    arrow.AddComponent(Components.modelHandler);
-    heart.AddComponent(Components.modelHandler);
-    zeroPointAxes.AddComponent(Components.modelHandler);
-    testCube.AddComponent(Components.modelHandler);
     testCube.mdlHdlr.SetTexture(EL.assets.textures['logo'], TextureFilters.linear);
-    cube.AddComponent(Components.modelHandler);
     cube.mdlHdlr.SetTexture(EL.assets.textures['questionBlock'], TextureFilters.linear);
 
     arrow.trfmLocal.SetPosAxes(5.5, 1.0, -2.5);
@@ -96,7 +94,6 @@ function BuildScene2(scene, playerObj, skyBoxObj) {
     scene.rootObj.AddComponent(Components.camera);
     scene.rootObj.camera.SetControlsActive(scene.name, true);
 
-    var angle = 0.01;
     var waveringValue = 0.0;
     var timer = 0.0;
 
@@ -115,11 +112,10 @@ function BuildScene2(scene, playerObj, skyBoxObj) {
     }
 
     function Update() {
-        waveringValue += angle;
+        waveringValue += 0.01;
 
         playerObj.trfmLocal.Rotate(VEC3_RIGHT, angle * 20.0);
         playerObj.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, 0.0);
-        skyBoxObj.trfmLocal.Rotate(VEC3_FWD, angle);
 
         timer += Time.delta_Milli;
         aquaMsg.UpdateMsg(timer.toString());

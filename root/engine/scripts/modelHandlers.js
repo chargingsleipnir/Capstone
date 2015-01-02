@@ -10,6 +10,8 @@ function ModelHandler(model, shapeData) {
     // Get the appropriate shader for the model given
     this.shaderData = ModelUtils.AssignShaderProgram(this.vertData, model.materials);
 
+    this.mat = model.materials[0];
+
     // Get draw method.
     if(model.hasOwnProperty('drawMethod'))
         this.drawMethod = GL.GetDrawMethod(model.drawMethod);

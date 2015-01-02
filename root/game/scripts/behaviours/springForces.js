@@ -2,29 +2,26 @@
  * Created by Devin on 2014-12-30.
  */
 
-function SpringLoad(gameObj, anchorRB) {
+function SpringLoad(scene, gameObjRB, anchorRB) {
 
-    var particleBody = gameObj.rigidBody;
-    particleBody.SetMass(2.0);
-    particleBody.dampening = 0.95;
-    ParticleForceRegistry.Add(particleBody, new ParticleForceGenerators.Spring(anchorRB, 3.0, 4.0));
+    gameObjRB.SetMass(2.0);
+    gameObjRB.dampening = 0.95;
+    scene.forceRegistry.Add(gameObjRB, new ForceGenerators.Gravity(VEC3_GRAVITY));
+    scene.forceRegistry.Add(gameObjRB, new ForceGenerators.Spring(anchorRB, 3.0, 4.0));
 }
 
-function SpringLoadPush(gameObj, anchorRB) {
+function SpringLoadPush(scene, gameObjRB, anchorRB) {
 
-    var particleBody = gameObj.rigidBody;
-    particleBody.SetMass(2.0);
-    particleBody.dampening = 0.95;
+    gameObjRB.SetMass(2.0);
+    gameObjRB.dampening = 0.95;
 
-    ParticleForceRegistry.Add(particleBody, new ParticleForceGenerators.Spring_PushOnly(anchorRB, 5.0, 10.0));
+    scene.forceRegistry.Add(gameObjRB, new ForceGenerators.Spring_PushOnly(anchorRB, 2.0, 5.0));
 }
 
-function SpringLoadPull(gameObj, anchorRB) {
+function SpringLoadPull(scene, gameObjRB, anchorRB) {
 
-    var particleBody = gameObj.rigidBody;
-    particleBody.SetMass(2.0);
-    particleBody.dampening = 0.95;
+    gameObjRB.SetMass(2.0);
+    gameObjRB.dampening = 0.95;
 
-    ParticleForceRegistry.Add(particleBody, new ParticleForceGenerators.Gravity(VEC3_GRAVITY));
-    ParticleForceRegistry.Add(particleBody, new ParticleForceGenerators.Spring_PullOnly(anchorRB, 1.0, 0.5));
+    scene.forceRegistry.Add(gameObjRB, new ForceGenerators.Spring_PullOnly(anchorRB, 1.0, 10.0));
 }
