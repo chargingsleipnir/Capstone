@@ -8,10 +8,10 @@ function BuildScene4(scene) {
     scene.rootObj.camera.SetControlsActive(scene.name, true);
 
     scene.light.amb.bright = 0.25;
-    scene.light.dir.bright = 0.75;
+    scene.light.dir.bright = 0.0;
     scene.light.dir.dir.SetValues(1.0, -1.0, -1.0);
-    scene.light.pnt.bright = 0.0;
-    scene.light.pnt.pos.SetValues(5.0, 3.0, -3.0);
+    scene.light.pnt.bright = 0.5;
+    scene.light.pnt.pos.SetValues(0.0, 1.0, 3.0);
 
     // Testing with shader creation on the fly
 
@@ -38,6 +38,11 @@ function BuildScene4(scene) {
     litObj.mdlHdlr.tint.SetValues(1.0, 1.0, 1.0);
     litObj.trfmLocal.SetPosAxes(5.0, 0.0, -5.0);
 
+    var floor = new GameObject('floor', Labels.none);
+    floor.SetModel(GameMngr.assets.models['floor']);
+    floor.mdlHdlr.tint.SetValues(1.0, 1.0, 1.0);
+    floor.trfmLocal.SetPosAxes(0.0, -1.5, 0.0);
+
     // End testing
 
     var lightTestScene = "LightTestScene";
@@ -47,6 +52,7 @@ function BuildScene4(scene) {
     function Start() {
         Input.SetActive(lightTestScene, true);
         ViewMngr.SetActiveCamera(scene.rootObj.camera);
+        ViewMngr.activeCam.trfm.SetPosAxes(0.0, 0.0, 7.5);
         DebugMngr.SetFullActive(false);
     }
 
@@ -57,7 +63,12 @@ function BuildScene4(scene) {
             SceneMngr.SetActive("Title Screen");
         }
 
-        litObj.trfmLocal.Rotate(VEC3_UP, angle);
+        angle += 0.25;
+        if(angle > 360.0)
+            angle = 0.0;
+
+        litObj.trfmLocal.Rotate(VEC3_UP, 1.0);
+        scene.light.pnt.pos.SetValues(Math.sin(angle * DEG_TO_RAD) * 10.0, 2.0, -5.0 + Math.cos(angle * DEG_TO_RAD) * 10.0);
     }
 
     function End() {
@@ -72,5 +83,6 @@ function BuildScene4(scene) {
     scene.Add(texOnlyObj);
     scene.Add(colTexObj);
     scene.Add(litObj);
+    scene.Add(floor);
     scene.SetCallbacks(Start, Update, End);
 }
