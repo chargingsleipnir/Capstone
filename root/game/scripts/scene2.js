@@ -4,9 +4,6 @@
 
 function BuildScene2(scene, playerObj) {
 
-    scene.light.dir.bright = 1.0;
-    scene.light.dir.dir.SetValues(1.0, -1.0, 1.0);
-
     var arrow = new GameObject('arrow', Labels.testObject);
     var heart = new GameObject('heart', Labels.testObject);
     var zeroPointAxes = new GameObject('zeroPointAxes', Labels.productionEnvironment);
@@ -26,9 +23,9 @@ function BuildScene2(scene, playerObj) {
     heart.trfmLocal.SetPosVec3(new Vector3(4.0, 0.5, -1.0));
     cube.trfmLocal.SetPosVec3(new Vector3(-10.5, 0.0, -20.0));
 
-    arrow.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
-    heart.mdlHdlr.colourTint.SetValues(-0.2, 0.3, 0.5);
-    cube.mdlHdlr.colourTint.SetValues(0.0, 0.5, 0.5);
+    arrow.mdlHdlr.tint.SetValues(-0.2, 0.3, 0.5);
+    heart.mdlHdlr.tint.SetValues(-0.2, 0.3, 0.5);
+    cube.mdlHdlr.tint.SetValues(0.0, 0.5, 0.5);
 
     arrow.AddComponent(Components.collisionBody);
     heart.AddComponent(Components.collisionBody);

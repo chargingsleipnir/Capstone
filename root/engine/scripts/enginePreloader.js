@@ -28,6 +28,7 @@ var EL = {
             ['guiBoxTint', 'engine/assets/shaders/guiBoxTint.vshdr', 'engine/assets/shaders/guiBoxTint.fshdr'],
             ['guiBoxTintTex', 'engine/assets/shaders/guiBoxTintTex.vshdr', 'engine/assets/shaders/guiBoxTintTex.fshdr'],
             ['guiText', 'engine/assets/shaders/guiText.vshdr', 'engine/assets/shaders/guiText.fshdr'],
+            /*
             ['col', 'engine/assets/shaders/col.vshdr', 'engine/assets/shaders/col.fshdr'],
             ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr'],
             ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr'],
@@ -39,6 +40,7 @@ var EL = {
             ['texLightFrag', 'engine/assets/shaders/texFragLighting.vshdr', 'engine/assets/shaders/texFragLighting.fshdr'],
             ['colTexLightVert', 'engine/assets/shaders/colTexVertLighting.vshdr', 'engine/assets/shaders/colTexVertLighting.fshdr'],
             ['colTexLightFrag', 'engine/assets/shaders/colTexFragLighting.vshdr', 'engine/assets/shaders/colTexFragLighting.fshdr'],
+            */
         ];
         // TEXTURE ASSETS
         var textureNamesFilepaths = [
@@ -53,7 +55,8 @@ var EL = {
         ];
         // JSON ASSETS
         var modelNamesFilepaths = [
-            ['dimensionBox', 'engine/assets/models/DimensionTest_PositiveCube.json']
+            ['dimensionBox', 'engine/assets/models/DimensionTest_PositiveCube.json'],
+            ['litUpCube', 'engine/assets/models/LightTestModels_MatCube.json']
         ];
 
         var that = this;

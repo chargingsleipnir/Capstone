@@ -69,7 +69,7 @@ GUIObject.prototype = {
             }
 
             this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
-            this.boxHdl.colourTint.SetCopy(this.style.bgColour);
+            this.boxHdl.tint.SetCopy(this.style.bgColour);
             this.boxHdl.alpha = this.style.bgAlpha;
             if (this.style.bgTexture) {
                 this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
@@ -130,7 +130,7 @@ GUIObject.prototype = {
 
             // Build text
             this.strObjHdl = new StringDisplayHandler(this.charBlockModel);
-            this.strObjHdl.colourTint.SetCopy(this.style.fontColour);
+            this.strObjHdl.tint.SetCopy(this.style.fontColour);
             if (this.style.bold)
                 this.strObjHdl.UseBoldTexture();
         }

@@ -161,6 +161,7 @@ function Camera(trfmObj) {
     this.trfmObj = trfmObj;
     this.trfm = new Transform(Space.local);
     this.trfm.pos.SetCopy(this.trfmObj.pos);
+    this.posGbl = this.trfm.pos;
 
     this.hasKeyCtrl = false;
 
@@ -195,7 +196,7 @@ Camera.prototype = {
                  * valuable to add a camera as a component of a gameObject */
 
 
-                var newPos = this.trfm.pos.GetAdd(this.trfmObj.pos);
+                this.posGbl = this.trfm.pos.GetAdd(this.trfmObj.pos);
                 //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
                 /*
                  var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
@@ -205,8 +206,8 @@ Camera.prototype = {
                  var newDirRight.SetCopy(this.trfmLocal.dirRight);
                  */
                 // Update game view
-                this.mtxCam.SetOrientation(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
-                ViewMngr.frustum.CalculatePlanes(newPos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+                this.mtxCam.SetOrientation(this.posGbl, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
+                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
 
                 /* Use these to adjust controls, if set by user, to rotate camera around object.
                  * Allow user to set camera modes...

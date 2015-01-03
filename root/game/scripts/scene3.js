@@ -20,7 +20,7 @@ function BuildScene3(scene, skyBoxObj) {
         balls[i] = new GameObject('physics test ball', Labels.testObject);
         balls[i].SetModel(new Primitives.IcoSphere(2, 1));
         balls[i].mdlHdlr.MakeWireFrame();
-        balls[i].mdlHdlr.colourTint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
+        balls[i].mdlHdlr.tint.SetValues(Math.sin(i), Math.cos(i), Math.tan(i));
         balls[i].trfmLocal.SetPosVec3(startPositions[i]);
 
         balls[i].AddComponent(Components.collisionBody);

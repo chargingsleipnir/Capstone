@@ -487,11 +487,15 @@ var Primitives = {
     Circle: function(radius, numVerts) {
 
         var posCoords = [0.0, 0.0, 0.0];
+        var indices = [0];
+
         var angle = (360 / numVerts) * DEG_TO_RAD;
         for(var i = 0; i < numVerts; i++) {
             posCoords = posCoords.concat([radius * Math.cos(angle * i), radius * Math.sin(angle * i), 0.0]);
+            indices.push(i + 1);
         }
-        posCoords = posCoords.concat([1.0, 0.0, 0.0]);
+        // Refer back to index 1, [1, 0, 0], to close circle
+        indices.push(1);
 
         return {
             name: "Circle",
@@ -499,12 +503,12 @@ var Primitives = {
             materials: [],
             vertices: {
                 byMesh: {
-                    count: numVerts + 2,
+                    count: numVerts + 1,
                     posCoords: posCoords,
                     colElems: [],
                     texCoords: [],
                     normAxes: [],
-                    indices: []
+                    indices: indices
                 },
                 byFaces: {
                     count: 0,
@@ -561,6 +565,60 @@ var Primitives = {
                         0.0, 0.0
                     ],
                     normAxes: normals,
+                    indices: [
+                        0, 1, 2,
+                        0, 2, 3
+                    ]
+                },
+                byFaces: {
+                    count: 6,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.triangles
+        }
+    },
+    RectTextured: function (radii) {
+        var w, h;
+        if(radii) {
+            w = radii.x;
+            h = radii.y;
+        }
+        else {
+            w = h = 1.0;
+        }
+
+        var posCoords = [
+            -w, h, 0.0,
+            -w, -h, 0.0,
+            w, -h, 0.0,
+            w, h, 0.0
+        ];
+
+        return {
+            name: "Rect",
+            numTris: 2,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: 4,
+                    posCoords: posCoords,
+                    colElems: [],
+                    texCoords: [
+                        /* This is inconsistent with order of indices,
+                         but seems to be the only way it works...??? */
+                        0.0, 1.0,
+                        0.0, 0.0,
+                        1.0, 0.0,
+
+                        1.0, 1.0,
+                        1.0, 0.0,
+                        0.0, 0.0
+                    ],
+                    normAxes: [],
                     indices: [
                         0, 1, 2,
                         0, 2, 3

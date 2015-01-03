@@ -50,7 +50,7 @@ CollisionBody.prototype = {
             GameMngr.models[index] = this.activeFrame = new ModelHandler(new Primitives.IcoSphere(1, this.sphere.radius), this.shapeData);
         }
         this.activeFrame.MakeWireFrame();
-        this.activeFrame.colourTint.SetValues(1.0, 1.0, 0.0);
+        this.activeFrame.tint.SetValues(1.0, 1.0, 0.0);
 
         // DO A DM.REPLACEMODEL...
     },

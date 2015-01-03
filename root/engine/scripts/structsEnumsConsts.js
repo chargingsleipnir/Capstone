@@ -35,6 +35,7 @@ function ShaderProgramData() {
     this.u_DirDir;
     this.u_PntBright;
     this.u_PntPos;
+    this.u_CamPos;
 
     this.u_MtxM;
     this.u_MtxVP;
@@ -147,19 +148,21 @@ var ShdrLines = {
     },
     attr: {
         pos: "attribute vec3 a_Pos;\n",
-        col: "attribute vec4 a_Col;\n",
+        col: "attribute vec3 a_Col;\n",
         tex: "attribute vec2 a_TexCoord;\n",
-        norm: "attribute vec4 a_Norm;\n"
+        norm: "attribute vec3 a_Norm;\n"
     },
     vary: {
-        pos: "varying vec3 v_Pos;\n",
-        col: "varying vec4 v_Col;\n",
+        pos: "varying vec4 v_Pos;\n",
+        col: "varying vec3 v_Col;\n",
         tex: "varying vec2 v_TexCoord;\n",
-        norm: "varying vec4 v_TrfmNorm;\n",
+        norm: "varying vec3 v_TrfmNorm;\n",
+        light: "varying vec3 v_LightWeight;\n",
         sendPos: "v_Pos = u_MtxM * vec4(a_Pos, 1.0);\n",
         sendCol: "v_Col = a_Col;\n",
         sendTex: "v_TexCoord = a_TexCoord;\n",
-        sendNorm: "v_TrfmNorm = u_MtxNorm * a_Norm;\n"
+        sendNorm: "v_TrfmNorm = u_MtxNorm * a_Norm;\n",
+        sendLight: "v_LightWeight = ambCol + dirCol + pntCol;\n"
     },
     unif: {
         mtxM: "uniform mat4 u_MtxM;\n",
@@ -171,28 +174,62 @@ var ShdrLines = {
         sampler: "uniform sampler2D u_Sampler;\n",
         lighting: "uniform vec3 u_DiffColWeight;\n" +
             "uniform vec3 u_SpecCol;\n" +
-            "uniform float u_SpecInt,\n\n" +
+            "uniform float u_SpecInt;\n\n" +
             "uniform float u_AmbBright;\n" +
             "uniform float u_DirBright;\n" +
             "uniform vec3 u_DirDir;\n" +
             "uniform float u_PntBright;\n" +
-            "uniform vec3 u_PntPos;\n\n"
+            "uniform vec3 u_PntPos;\n\n",
+        camPos: "uniform vec3 u_CamPos;\n"
     },
-    prog: {
+    main: {
         start: "void main()\n" + "{\n",
         pntSize: "gl_PointSize = 5.0;\n",
-        vertBody: {
-            glPos: {
-                MVP: "gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);\n",
-                Split: "vec4 modelPosition = u_MtxM * vec4(a_Pos, 1.0);\n" +
-                "gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);\n"
-            }
+        glPos: {
+            MVP: "gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);\n",
+            Split: "gl_Position = u_MtxVP * v_Pos;\n"
         },
-        fragBody: {
-            pos: "gl_FragColor = vec4(u_Tint, 1.0);\n",
-            col: "gl_FragColor = vec4(v_Col.xyz + u_Tint, v_Col.a);\n",
-            tex: "vec4 texColour = texture2D(u_Sampler, vec2(v_TexCoord.s, v_TexCoord.t));\n" +
-                "gl_FragColor = vec4(texColour.rgb + u_Tint, texColour.a);\n"
+        texCol: "vec4 texColour = texture2D(u_Sampler, vec2(v_TexCoord.s, v_TexCoord.t));\n",
+        normalizeNorm: "vec3 normal = normalize(v_TrfmNorm);\n",
+        lighting: "float dirWeight = 0.0;\n" +
+            "float pntWeight = 0.0;\n" +
+            "\n" +
+            "vec3 specColWeight = vec3(0.0, 0.0, 0.0);\n" +
+            "float specBright = 0.0;\n" +
+            "\n" +
+            "vec3 ambCol = u_DiffColWeight * u_AmbBright;\n" +
+            "vec3 dirCol = vec3(0.0, 0.0, 0.0);\n" +
+            "vec3 pntCol = vec3(0.0, 0.0, 0.0);\n" +
+            "\n" +
+            "vec3 eyeDir = normalize(u_CamPos - v_Pos.xyz);\n" +
+            "vec3 reflDir = vec3(0.0, 0.0, 0.0);\n" +
+            "\n" +
+            "if(u_DirBright > 0.0) {\n" +
+            "reflDir = reflect(-u_DirDir, v_TrfmNorm);\n" +
+            "specBright = pow(max(dot(reflDir, eyeDir), 0.0), u_SpecInt);\n" +
+            "specColWeight = u_SpecCol * specBright;\n" +
+            "\n" +
+            "dirWeight = max(dot(v_TrfmNorm, u_DirDir), 0.0) * u_DirBright;\n" +
+            "\n" +
+            "dirCol = (u_DiffColWeight * dirWeight) + (specColWeight * dirWeight);\n}\n" +
+            "\n" +
+            "if(u_PntBright > 0.0) {\n" +
+            "vec3 pntDir = normalize(u_PntPos - v_Pos.xyz);\n" +
+            "reflDir = reflect(-pntDir, v_TrfmNorm);\n" +
+            "specBright = pow(max(dot(reflDir, eyeDir), 0.0), u_SpecInt);\n" +
+            "specColWeight = u_SpecCol * specBright;\n" +
+            "\n" +
+            "pntWeight = max(dot(v_TrfmNorm, pntDir), 0.0) * u_PntBright;\n" +
+            "\n" +
+            "pntCol = (u_DiffColWeight * pntWeight) + (specColWeight * pntWeight);\n}\n" +
+            "\n",
+        glFrag: {
+            start: "gl_FragColor = vec4(",
+            tint: "u_Tint",
+            col: " + v_Col",
+            tex: " + texColour.rgb",
+            light: " * v_LightWeight",
+            end: ", 1.0);\n"
         },
         end: "}"
     }

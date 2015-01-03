@@ -84,6 +84,8 @@ var GL = {
             programData.u_DirDir = ctx.getUniformLocation(program, "u_DirDir");
             programData.u_PntBright = ctx.getUniformLocation(program, "u_PntBright");
             programData.u_PntPos = ctx.getUniformLocation(program, "u_PntPos");
+            // For proper specular angling
+            programData.u_CamPos = ctx.getUniformLocation(program, "u_CamPos");
             // MATRICES
             programData.u_MtxM = ctx.getUniformLocation(program, "u_MtxM");
             programData.u_MtxVP = ctx.getUniformLocation(program, "u_MtxVP");
@@ -93,9 +95,14 @@ var GL = {
             return programData;
         }
 
-        // Load each program and map it to the string name given
-        for (var i = 0; i < shaderStrings.length; i++)
-            container[shaderStrings[i].name] = CreateProgram(shaderStrings[i].vert, shaderStrings[i].frag);
+        if(container) {
+            // Load each program and map it to the string name given
+            for (var i = 0; i < shaderStrings.length; i++)
+                container[shaderStrings[i].name] = CreateProgram(shaderStrings[i].vert, shaderStrings[i].frag);
+        }
+        else {
+            return CreateProgram(shaderStrings.vert, shaderStrings.frag);
+        }
     },
     CreateBufferObjects: function(vertData, bufferData, isDynamic) {
         /// <signature>
@@ -279,9 +286,10 @@ var GL = {
 
                     this.ctx.uniform1f(shdr.u_AmbBright, scene.light.amb.bright);
                     this.ctx.uniform1f(shdr.u_DirBright, scene.light.dir.bright);
-                    this.ctx.uniform3fv(shdr.u_DirDir, scene.light.dir.dir.GetData());
+                    this.ctx.uniform3fv(shdr.u_DirDir, scene.light.dir.dir.GetNegative().GetData());
                     this.ctx.uniform1f(shdr.u_PntBright, scene.light.pnt.bright);
                     this.ctx.uniform3fv(shdr.u_PntPos, scene.light.pnt.pos.GetData());
+                    this.ctx.uniform3fv(shdr.u_CamPos, ViewMngr.activeCam.posGbl.GetData());
                     
 
                     /* If there's lighting, than the model and view-proj matrices
@@ -298,7 +306,7 @@ var GL = {
                     mtxMVP = scene.models[i].mtxModel.GetMultiply(mtxVP);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
                 }
-                this.ctx.uniform3fv(shdr.u_Tint, scene.models[i].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, scene.models[i].tint.GetData());
 
                 // Draw calls
                 if (buff.EABO) {
@@ -354,7 +362,7 @@ var GL = {
                     // SEND UP UNIFORMS
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
                     //this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].mtxModel.data);
-                    this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].colourTint.GetData());
+                    this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].tint.GetData());
 
                     // Draw calls
                     if (buff.EABO) {
@@ -396,7 +404,7 @@ var GL = {
 
                         // SEND UP UNIFORMS
                         this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-                        this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].colourTint.GetData());
+                        this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].tint.GetData());
 
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                         this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -439,7 +447,7 @@ var GL = {
                     }
                 }
 
-                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].boxMdls[j].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].boxMdls[j].tint.GetData());
                 this.ctx.uniform1f(shdr.u_Alpha, guiSystems[sys].boxMdls[j].alpha);
 
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
@@ -470,7 +478,7 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                 this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].textBlocks[j].colourTint.GetData());
+                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].textBlocks[j].tint.GetData());
 
                 this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 

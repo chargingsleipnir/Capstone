@@ -101,6 +101,14 @@ GameObject.prototype = {
 
         this.mdlHdlr = new ModelHandler(this.model, this.shape);
     },
+    SetModelAlt: function(model) {
+        this.model = model;
+        // Make sure the correct set of vertices are being centred.
+        var vertData = ModelUtils.SelectVAOData(this.model.vertices);
+        this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
+
+        this.mdlHdlr = new ModelHandler(this.model, this.shape, true);
+    },
     Update: function(trfmParent) {
         /// <signature>
         ///  <summary>Update all components, children, and their children</summary>

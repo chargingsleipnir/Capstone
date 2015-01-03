@@ -261,7 +261,7 @@ var ModelUtils = {
         // Return the last match, for now.
         return matches[matches.length - 1];
     },
-    BuildShaderStrings: function(vertData, materials, usesFragLighting) {
+    BuildShaderProgram: function(vertData, materials, usesFragLighting) {
         /// <signature>
         ///  <summary>Examines the model's data and build the appropriate shader program strings. Only for 3D GameObject models</summary>
         ///  <param name="vertData" type="object">Vertex data from model, either from entire mesh, or per face</param>
@@ -279,57 +279,125 @@ var ModelUtils = {
             texture = vertData.texCoords.length > 0,
             light = materials.length > 0;
 
-        var declaration, mainFunc;
+        var declaration, mainFunc, fragColour;
 
 
         /******************** VERTEX SHADER ********************/
 
         declaration = ShdrLines.attr.pos;
-        declaration += ShdrLines.unif.mtxMVP;
 
-        mainFunc = ShdrLines.prog.start;
-        mainFunc += ShdrLines.prog.pntSize;
+        mainFunc = ShdrLines.main.start;
+        mainFunc += ShdrLines.main.pntSize;
+
+        // Switch(true), case colour: case texture: ...
 
         if(colour) {
+            declaration += ShdrLines.attr.col;
+            declaration += ShdrLines.vary.col;
+
+            mainFunc += ShdrLines.vary.sendCol;
         }
         if(texture) {
-        }
-        if(light) {
-            if(usesFragLighting) {
+            declaration += ShdrLines.attr.tex;
+            declaration += ShdrLines.vary.tex;
 
-            }
+            mainFunc += ShdrLines.vary.sendTex;
+        }
+        if(!light) {
+            declaration += ShdrLines.unif.mtxMVP;
+            mainFunc += ShdrLines.main.glPos.MVP;
         }
         else {
-            mainFunc += ShdrLines.prog.vertBody.glPos.MVP;
+            declaration += ShdrLines.attr.norm;
+
+            if(!usesFragLighting) {
+
+                declaration += ShdrLines.vary.light;
+                declaration += ShdrLines.unif.lighting;
+                declaration += ShdrLines.unif.camPos;
+
+                mainFunc += "vec4 " + ShdrLines.vary.sendPos;
+                mainFunc += ShdrLines.main.glPos.Split;
+                mainFunc += "vec3 " + ShdrLines.vary.sendNorm;
+                mainFunc += ShdrLines.main.lighting;
+                mainFunc += ShdrLines.vary.sendLight;
+            }
+            else {
+                declaration += ShdrLines.vary.pos;
+                declaration += ShdrLines.vary.norm;
+
+                mainFunc += ShdrLines.vary.sendPos;
+                mainFunc += ShdrLines.main.glPos.Split;
+                mainFunc += ShdrLines.vary.sendNorm;
+            }
+
+
+            declaration += ShdrLines.unif.mtxM;
+            declaration += ShdrLines.unif.mtxVP;
+            declaration += ShdrLines.unif.mtxNorm;
         }
-        mainFunc += ShdrLines.prog.end;
+
+        mainFunc += ShdrLines.main.end;
 
         vshdrStr = '' + declaration + mainFunc;
-        console.log(vshdrStr);
+        //console.log("////////////////////////////////////////////////////////////");
+        //console.log(vshdrStr);
 
         /******************** FRAGMENT SHADER ********************/
 
         declaration = ShdrLines.prec.medF;
 
-        mainFunc = ShdrLines.prog.start;
-        mainFunc += ShdrLines.prog.fragBody.pos;
+        mainFunc = ShdrLines.main.start;
+
+        fragColour = ShdrLines.main.glFrag.start;
+        fragColour += "(" + ShdrLines.main.glFrag.tint;
 
         if(colour) {
+            declaration += ShdrLines.vary.col;
+
+            fragColour += ShdrLines.main.glFrag.col;
         }
         if(texture) {
-        }
-        if(light) {
-            if(usesFragLighting) {
+            declaration += ShdrLines.vary.tex;
+            declaration += ShdrLines.unif.sampler;
 
-            }
+            mainFunc += ShdrLines.main.texCol;
+
+            fragColour += ShdrLines.main.glFrag.tex;
         }
+        if(!light) {
+            fragColour += ")" + ShdrLines.main.glFrag.end;
+        }
+        else {
+            if(!usesFragLighting) {
+                declaration += ShdrLines.vary.light;
+            }
+
+            else {
+                declaration += ShdrLines.vary.pos;
+                declaration += ShdrLines.vary.norm;
+                declaration += ShdrLines.unif.lighting;
+                declaration += ShdrLines.unif.camPos;
+
+                mainFunc += ShdrLines.main.normalizeNorm;
+                mainFunc += ShdrLines.main.lighting.replace("v_TrfmNorm", "normal");
+                mainFunc += "vec3 " + ShdrLines.vary.sendLight;
+            }
+            fragColour += ")";
+            fragColour += ShdrLines.main.glFrag.light;
+            fragColour += ShdrLines.main.glFrag.end;
+        }
+
         declaration += ShdrLines.unif.tint;
 
-        mainFunc += ShdrLines.prog.end;
+        mainFunc += fragColour;
+        mainFunc += ShdrLines.main.end;
 
         fshdrStr = '' + declaration + mainFunc;
-        console.log("////////////////////////////////////////////////////////////");
-        console.log(fshdrStr);
+        //console.log("---------------------");
+        //console.log(fshdrStr);
+
+        return GL.CreateShaderPrograms(new ShaderFilePair('', vshdrStr, fshdrStr));
     }
 };
 

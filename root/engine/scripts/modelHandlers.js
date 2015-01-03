@@ -7,10 +7,17 @@ function ModelHandler(model, shapeData) {
     // Create Buffer
     this.bufferData = new BufferData();
     GL.CreateBufferObjects(this.vertData, this.bufferData, false);
-    // Get the appropriate shader for the model given
-    this.shaderData = ModelUtils.AssignShaderProgram(this.vertData, model.materials);
 
-    this.mat = model.materials[0];
+    this.shaderData = ModelUtils.BuildShaderProgram(this.vertData, model.materials, true);
+
+    if(model.materials[0]) {
+        this.mat = model.materials[0];
+        //this.tint = new Vector4(0.0, 0.0, 0.0, model.materials[0].alpha);
+    }
+    else {
+        //this.tint = new Vector4();
+    }
+    this.tint = new Vector3();
 
     // Get draw method.
     if(model.hasOwnProperty('drawMethod'))
@@ -20,7 +27,6 @@ function ModelHandler(model, shapeData) {
 
     this.active = true;
     this.mtxModel = new Matrix4();
-    this.colourTint = new Vector3();
 
     // This is specifically set this way for frustum culling. No need to be more dynamic
     this.drawSphere = new Sphere(shapeData.centre, shapeData.radius);
@@ -75,7 +81,7 @@ function RayCastHandler(rayVerts) {
     GL.CreateBufferObjects(rayVerts, this.bufferData, true);
 
     this.active = true;
-    this.colourTint = new Vector3();
+    this.tint = new Vector3();
 }
 RayCastHandler.prototype = {
     RewriteVerts: function(vertArray) {
@@ -89,7 +95,7 @@ function GUIBoxHandler(boxVerts) {
     GL.CreateBufferObjects(boxVerts, this.bufferData, false);
 
     this.shaderData = EL.assets.shaderPrograms['guiBoxTint'];
-    this.colourTint = new Vector3();
+    this.tint = new Vector3();
     this.alpha = 1.0;
 }
 GUIBoxHandler.prototype = {
@@ -104,7 +110,7 @@ function StringDisplayHandler(stringLine) {
 
     GL.CreateBufferObjects(stringLine, this.bufferData, true);
 
-    this.colourTint = new Vector3();
+    this.tint = new Vector3();
     this.bufferData.texID = GL.CreateTextureObject(EL.assets.textures['fontMapBasic'], TextureFilters.nearest);
 }
 StringDisplayHandler.prototype = {
