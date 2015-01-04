@@ -726,11 +726,33 @@ Vector4.prototype = {
         ///  <param name="y" type="decimal"></param>
         ///  <param name="z" type="decimal"></param>
         ///  <param name="w" type="decimal"></param>
-        ///  <returns type="Vectorw" />
+        ///  <returns type="Vector4" />
         /// </signature>
         this.x = x;
         this.y = y;
         this.z = z;
+        this.w = w;
+        return this;
+    },
+    SetVec3: function(x, y, z) {
+        /// <signature>
+        ///  <summary>Set x, y, z components</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="Vector4" />
+        /// </signature>
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        return this;
+    },
+    SetW: function(w) {
+        /// <signature>
+        ///  <summary>Set w components</summary>
+        ///  <param name="w" type="decimal"></param>
+        ///  <returns type="Vector4" />
+        /// </signature>
         this.w = w;
         return this;
     },

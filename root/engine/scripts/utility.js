@@ -350,7 +350,7 @@ var ModelUtils = {
         mainFunc = ShdrLines.main.start;
 
         fragColour = ShdrLines.main.glFrag.start;
-        fragColour += "(" + ShdrLines.main.glFrag.tint;
+        fragColour += "(" + ShdrLines.main.glFrag.tintCol;
 
         if(colour) {
             declaration += ShdrLines.vary.col;
@@ -363,10 +363,10 @@ var ModelUtils = {
 
             mainFunc += ShdrLines.main.texCol;
 
-            fragColour += ShdrLines.main.glFrag.tex;
+            fragColour += ShdrLines.main.glFrag.texCol;
         }
         if(!light) {
-            fragColour += ")" + ShdrLines.main.glFrag.end;
+            fragColour += ")";
         }
         else {
             if(!usesFragLighting) {
@@ -385,8 +385,12 @@ var ModelUtils = {
             }
             fragColour += ")";
             fragColour += ShdrLines.main.glFrag.light;
-            fragColour += ShdrLines.main.glFrag.end;
         }
+
+        fragColour += ShdrLines.main.glFrag.alphaStart;
+        if(texture)
+            fragColour += ShdrLines.main.glFrag.texA;
+        fragColour += ShdrLines.main.glFrag.end;
 
         declaration += ShdrLines.unif.tint;
 

@@ -32,8 +32,9 @@ var GameMngr = {
             var time_ThisFrame = new Date().getTime();
             var time_Delta = time_ThisFrame - (time_LastFrame || time_ThisFrame);
             time_LastFrame = time_ThisFrame;
-            Time.delta_Milli = time_Delta / 1000;
+            Time.deltaMilli = time_Delta / 1000;
             Time.fps = 1000 / time_Delta;
+            Time.counter += Time.deltaMilli;
 
             // Updating Game World and Draw Calls
             SceneMngr.Update();

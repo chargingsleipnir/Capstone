@@ -76,15 +76,15 @@ RigidBody.prototype = {
 
         // LINEAR UPDATE
         this.velInitial.SetCopy(this.velFinal);
-        //this.trfm.TranslateVec(this.velFinal.GetScaleByNum(Time.delta_Milli));
-        this.trfm.TranslateVec((this.velInitial.GetScaleByNum(Time.delta_Milli)).SetAddScaled(this.acc, 0.5 * (Time.delta_Milli * Time.delta_Milli)));
+        //this.trfm.TranslateVec(this.velFinal.GetScaleByNum(Time.deltaMilli));
+        this.trfm.TranslateVec((this.velInitial.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
 
         this.acc.SetZero();
         this.acc.SetAddScaled(this.forceAccum, this.massInv);
         this.forceAccum.SetZero();
 
-        this.velFinal.SetCopy(this.velInitial.GetAddScaled(this.acc, Time.delta_Milli));
-        this.velFinal.SetScaleByNum(Math.pow(this.dampening, Time.delta_Milli));
+        this.velFinal.SetCopy(this.velInitial.GetAddScaled(this.acc, Time.deltaMilli));
+        this.velFinal.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
 
         if(this.velFinal.GetMagSqr() < INFINITESIMAL)
             this.velFinal.SetZero();
@@ -229,10 +229,10 @@ var ForceGenerators = {
                 return;
 
             var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(particle.velFinal.GetScaleByNum(1.0 / gamma));
-            var target = pos.GetScaleByNum(Math.cos(gamma * Time.delta_Milli)).SetAdd(c.GetScaleByNum(Math.sin(gamma * Time.delta_Milli)));
-            target.SetScaleByNum(Math.exp(-0.5 * Time.delta_Milli * dampening));
+            var target = pos.GetScaleByNum(Math.cos(gamma * Time.deltaMilli)).SetAdd(c.GetScaleByNum(Math.sin(gamma * Time.deltaMilli)));
+            target.SetScaleByNum(Math.exp(-0.5 * Time.deltaMilli * dampening));
 
-            var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.delta_Milli * Time.delta_Milli)).SetSubtract(particle.velFinal.GetScaleByNum(Time.delta_Milli));
+            var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(particle.velFinal.GetScaleByNum(Time.deltaMilli));
 
             particle.AddForce(accel * particle.GetMass());
         }

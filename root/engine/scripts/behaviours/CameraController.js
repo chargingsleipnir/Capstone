@@ -30,22 +30,22 @@ CameraController.prototype = {
     },
     Update: function() {
         if (this.ctrl.moveLeft.pressed) {
-            this.trfm.TranslateRight(-this.moveSpeed * Time.delta_Milli);
+            this.trfm.TranslateRight(-this.moveSpeed * Time.deltaMilli);
         }
         else if (this.ctrl.moveRight.pressed) {
-            this.trfm.TranslateRight(this.moveSpeed * Time.delta_Milli);
+            this.trfm.TranslateRight(this.moveSpeed * Time.deltaMilli);
         }
         if (this.ctrl.moveUp.pressed) {
-            this.trfm.TranslateUp(this.moveSpeed * Time.delta_Milli);
+            this.trfm.TranslateUp(this.moveSpeed * Time.deltaMilli);
         }
         else if (this.ctrl.moveDown.pressed) {
-            this.trfm.TranslateUp(-this.moveSpeed * Time.delta_Milli);
+            this.trfm.TranslateUp(-this.moveSpeed * Time.deltaMilli);
         }
         if (this.ctrl.moveForth.pressed) {
-            this.trfm.TranslateFwd(this.moveSpeed * Time.delta_Milli);
+            this.trfm.TranslateFwd(this.moveSpeed * Time.deltaMilli);
         }
         else if (this.ctrl.moveBack.pressed) {
-            this.trfm.TranslateFwd(-this.moveSpeed * Time.delta_Milli);
+            this.trfm.TranslateFwd(-this.moveSpeed * Time.deltaMilli);
         }
         if (this.ctrl.pitchUp.pressed) {
             this.trfm.RotateLocalViewX(this.turnSpeed);

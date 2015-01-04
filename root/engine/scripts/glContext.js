@@ -64,7 +64,6 @@ var GL = {
             // Uniforms will return uniform object, null if not found
             programData.u_Tint = ctx.getUniformLocation(program, "u_Tint");
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
-            programData.u_Alpha = ctx.getUniformLocation(program, "u_Alpha");
             // MATERIALS
             // Colour is multiplied by intensity immediately, before exporting model. No reason to hold values separately
             programData.u_DiffColWeight = ctx.getUniformLocation(program, "u_DiffColWeight");
@@ -306,7 +305,7 @@ var GL = {
                     mtxMVP = scene.models[i].mtxModel.GetMultiply(mtxVP);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
                 }
-                this.ctx.uniform3fv(shdr.u_Tint, scene.models[i].tint.GetData());
+                this.ctx.uniform4fv(shdr.u_Tint, scene.models[i].tint.GetData());
 
                 // Draw calls
                 if (buff.EABO) {
@@ -361,8 +360,7 @@ var GL = {
 
                     // SEND UP UNIFORMS
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
-                    //this.ctx.uniformMatrix4fv(shdr.u_MtxModel, false, dispObjs[i].mtxModel.data);
-                    this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].tint.GetData());
+                    this.ctx.uniform4fv(shdr.u_Tint, dispObjs[i].tint.GetData());
 
                     // Draw calls
                     if (buff.EABO) {
@@ -404,7 +402,7 @@ var GL = {
 
                         // SEND UP UNIFORMS
                         this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-                        this.ctx.uniform3fv(shdr.u_Tint, dispObjs[i].tint.GetData());
+                        this.ctx.uniform4fv(shdr.u_Tint, dispObjs[i].tint.GetData());
 
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                         this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -420,6 +418,9 @@ var GL = {
 
         var guiSystems = GUINetwork.GetActiveSystems();
 
+        /* Disable depth testing to ensure proper message structure. Always draw the text immediately after the box
+         * to ensure the two stay together, and the user must add their guiObjects in the order they want them to overlap. */
+        this.ctx.disable(this.ctx.DEPTH_TEST);
         // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
         for(var sys in guiSystems) {
             for(var j = 0; j < guiSystems[sys].textBlocks.length; j++) {
@@ -447,8 +448,7 @@ var GL = {
                     }
                 }
 
-                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].boxMdls[j].tint.GetData());
-                this.ctx.uniform1f(shdr.u_Alpha, guiSystems[sys].boxMdls[j].alpha);
+                this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].boxMdls[j].tint.GetData());
 
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                 this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -478,7 +478,7 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                 this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                this.ctx.uniform3fv(shdr.u_Tint, guiSystems[sys].textBlocks[j].tint.GetData());
+                this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].textBlocks[j].tint.GetData());
 
                 this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 
@@ -486,5 +486,6 @@ var GL = {
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
             }
         }
+        this.ctx.enable(this.ctx.DEPTH_TEST);
     }
 };

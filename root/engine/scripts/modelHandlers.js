@@ -12,12 +12,11 @@ function ModelHandler(model, shapeData) {
 
     if(model.materials[0]) {
         this.mat = model.materials[0];
-        //this.tint = new Vector4(0.0, 0.0, 0.0, model.materials[0].alpha);
+        this.tint = new Vector4(0.0, 0.0, 0.0, model.materials[0].alpha);
     }
     else {
-        //this.tint = new Vector4();
+        this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
     }
-    this.tint = new Vector3();
 
     // Get draw method.
     if(model.hasOwnProperty('drawMethod'))
@@ -35,6 +34,12 @@ function ModelHandler(model, shapeData) {
     this.indices = model.vertices.byMesh.indices;
 }
 ModelHandler.prototype = {
+    SetTintRGB: function(r, g, b) {
+        this.tint.SetVec3(r, g, b);
+    },
+    SetTintAlpha: function(a) {
+        this.tint.SetW(a);
+    },
     SetTexture: function(texture, texFilter) {
         this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
     },
@@ -81,9 +86,15 @@ function RayCastHandler(rayVerts) {
     GL.CreateBufferObjects(rayVerts, this.bufferData, true);
 
     this.active = true;
-    this.tint = new Vector3();
+    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
 }
 RayCastHandler.prototype = {
+    SetTintRGB: function(r, g, b) {
+        this.tint.SetVec3(r, g, b);
+    },
+    SetTintAlpha: function(a) {
+        this.tint.SetW(a);
+    },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     }
@@ -95,10 +106,15 @@ function GUIBoxHandler(boxVerts) {
     GL.CreateBufferObjects(boxVerts, this.bufferData, false);
 
     this.shaderData = EL.assets.shaderPrograms['guiBoxTint'];
-    this.tint = new Vector3();
-    this.alpha = 1.0;
+    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
 }
 GUIBoxHandler.prototype = {
+    SetTintRGB: function(r, g, b) {
+        this.tint.SetVec3(r, g, b);
+    },
+    SetTintAlpha: function(a) {
+        this.tint.SetW(a);
+    },
     SetTexture: function(texture, texFilter) {
         this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
         this.shaderData = EL.assets.shaderPrograms['guiBoxTintTex'];
@@ -110,10 +126,16 @@ function StringDisplayHandler(stringLine) {
 
     GL.CreateBufferObjects(stringLine, this.bufferData, true);
 
-    this.tint = new Vector3();
+    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
     this.bufferData.texID = GL.CreateTextureObject(EL.assets.textures['fontMapBasic'], TextureFilters.nearest);
 }
 StringDisplayHandler.prototype = {
+    SetTintRGB: function(r, g, b) {
+        this.tint.SetVec3(r, g, b);
+    },
+    SetTintAlpha: function(a) {
+        this.tint.SetW(a);
+    },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     },

@@ -11,6 +11,7 @@ function BuildScene1(scene) {
     style.textMaxWidth = 200;
     style.textAlignWidth = Alignment.centre;
     style.textAlignHeight = Alignment.centre;
+    style.fontAlpha = 0.75;
     style.bgColour = new Vector3(1.0, 1.0, 1.0);
     style.margin = 20.0;
     style.bgAlpha = 1.0;
@@ -21,6 +22,8 @@ function BuildScene1(scene) {
         style
     );
 
+    style.fontAlpha = 0.0;
+    style.bgAlpha = 0.0;
     style.bgColour = new Vector3(0.0, 0.0, 0.0);
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
     style.fontSize = 30;
@@ -39,16 +42,22 @@ function BuildScene1(scene) {
         style
     );
 
+    titleScreen.AddGUIObject(background);
     titleScreen.AddGUIObject(title);
     titleScreen.AddGUIObject(titleMsg);
-    titleScreen.AddGUIObject(background);
+
     GUINetwork.AddSystem(titleScreen, false);
 
     var ctrlSchemeName = "Title screen transition";
     Input.RegisterControlScheme(ctrlSchemeName, false);
     var nextSceneBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Enter);
 
+    var fadingIn;
+
     function Start() {
+        titleMsg.boxHdl.SetTintAlpha(0.0);
+        titleMsg.strHdl.SetTintAlpha(0.0);
+        fadingIn = true;
         GUINetwork.SetActive(titleScreen.name, true);
         Input.SetActive(ctrlSchemeName, true);
     }
@@ -58,6 +67,10 @@ function BuildScene1(scene) {
             nextSceneBtn.Release();
             SceneMngr.SetActive("Basic Testbed with HUD");
         }
+        if(fadingIn)
+            if(titleMsg.FadeBackground(0.01) >= 1.0 && titleMsg.FadeMsg(0.01) >= 1.0)
+                fadingIn = false;
+
     }
 
     function End() {

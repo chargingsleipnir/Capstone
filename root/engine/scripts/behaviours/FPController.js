@@ -32,22 +32,22 @@ FPController.prototype = {
     Update: function() {
 
         if(this.ctrl.moveLeft.pressed) {
-            this.obj.trfmLocal.TranslateRight(-this.moveSpeed * Time.delta_Milli);
+            this.obj.trfmLocal.TranslateRight(-this.moveSpeed * Time.deltaMilli);
         }
         else if(this.ctrl.moveRight.pressed) {
-            this.obj.trfmLocal.TranslateRight(this.moveSpeed * Time.delta_Milli);
+            this.obj.trfmLocal.TranslateRight(this.moveSpeed * Time.deltaMilli);
         }
         if(this.ctrl.moveUp.pressed) {
-            this.obj.trfmLocal.TranslateUp(this.moveSpeed * Time.delta_Milli);
+            this.obj.trfmLocal.TranslateUp(this.moveSpeed * Time.deltaMilli);
         }
         else if(this.ctrl.moveDown.pressed) {
-            this.obj.trfmLocal.TranslateUp(-this.moveSpeed * Time.delta_Milli);
+            this.obj.trfmLocal.TranslateUp(-this.moveSpeed * Time.deltaMilli);
         }
         if(this.ctrl.moveForth.pressed) {
-            this.obj.trfmLocal.TranslateFwd(this.moveSpeed * Time.delta_Milli);
+            this.obj.trfmLocal.TranslateFwd(this.moveSpeed * Time.deltaMilli);
         }
         else if(this.ctrl.moveBack.pressed) {
-            this.obj.trfmLocal.TranslateFwd(-this.moveSpeed * Time.delta_Milli);
+            this.obj.trfmLocal.TranslateFwd(-this.moveSpeed * Time.deltaMilli);
         }
         if(this.ctrl.pitchUp.pressed) {
             this.obj.trfmLocal.RotateLocalViewX(this.turnSpeed);

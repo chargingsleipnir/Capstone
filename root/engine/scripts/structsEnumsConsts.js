@@ -24,7 +24,6 @@ function ShaderProgramData() {
 
     this.u_Tint;
     this.u_Sampler;
-    this.u_Alpha;
 
     this.u_DiffColWeight;
     this.u_SpecCol;
@@ -73,6 +72,7 @@ function MsgBoxStyle(style) {
     // This is height in px. Width will be 2/3 this value
     this.fontSize = 20.0;
     this.fontColour = new Vector3();
+    this.fontAlpha = 1.0;
     this.textMaxWidth = 100;
     this.textAlignWidth = Alignment.centre;
     this.textAlignHeight = Alignment.centre;
@@ -86,6 +86,7 @@ function MsgBoxStyle(style) {
     if(style) {
         this.fontSize = style.fontSize;
         this.fontColour = style.fontColour.GetCopy();
+        this.fontAlpha = style.fontAlpha;
         this.textMaxWidth = style.textMaxWidth;
         this.textAlignWidth = style.textAlignWidth;
         this.textAlignHeight = style.textAlignHeight;
@@ -99,13 +100,14 @@ function MsgBoxStyle(style) {
 }
 
 var Time = {
-    delta_Milli: 0.0,
+    deltaMilli: 0.0,
+    counter: 0.0,
     fps: 0.0
 };
 
 /***** ENUMS *****/
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
-var Components = { camera: 0, collisionBody: 1, rigidBody: 2 };
+var Components = { camera: 0, collisionBody: 1, rigidBody: 2, particleSystem: 3 };
 var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4 };
 var GUILabels = { container: 0, msg: 1, btn: 2 };
 var Space = { local: 0, global: 1 };
@@ -169,8 +171,7 @@ var ShdrLines = {
         mtxVP: "uniform mat4 u_MtxVP;\n",
         mtxMVP: "uniform mat4 u_MtxMVP;\n",
         mtxNorm: "uniform mat3 u_MtxNorm;\n",
-        tint: "uniform vec3 u_Tint;\n",
-        alpha: "uniform float u_Alpha;\n",
+        tint: "uniform vec4 u_Tint;\n",
         sampler: "uniform sampler2D u_Sampler;\n",
         lighting: "uniform vec3 u_DiffColWeight;\n" +
             "uniform vec3 u_SpecCol;\n" +
@@ -225,11 +226,13 @@ var ShdrLines = {
             "\n",
         glFrag: {
             start: "gl_FragColor = vec4(",
-            tint: "u_Tint",
+            tintCol: "u_Tint.rgb",
             col: " + v_Col",
-            tex: " + texColour.rgb",
+            texCol: " + texColour.rgb",
+            texA: " + texColour.a",
             light: " * v_LightWeight",
-            end: ", 1.0);\n"
+            alphaStart: ", u_Tint.a",
+            end: ");\n"
         },
         end: "}"
     }

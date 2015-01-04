@@ -23,9 +23,9 @@ function BuildScene2(scene, playerObj) {
     heart.trfmLocal.SetPosVec3(new Vector3(4.0, 0.5, -1.0));
     cube.trfmLocal.SetPosVec3(new Vector3(-10.5, 0.0, -20.0));
 
-    arrow.mdlHdlr.tint.SetValues(-0.2, 0.3, 0.5);
-    heart.mdlHdlr.tint.SetValues(-0.2, 0.3, 0.5);
-    cube.mdlHdlr.tint.SetValues(0.0, 0.5, 0.5);
+    arrow.mdlHdlr.SetTintRGB(-0.2, 0.3, 0.5);
+    heart.mdlHdlr.SetTintRGB(-0.2, 0.3, 0.5);
+    cube.mdlHdlr.SetTintRGB(0.0, 0.5, 0.5);
 
     arrow.AddComponent(Components.collisionBody);
     heart.AddComponent(Components.collisionBody);
@@ -114,7 +114,7 @@ function BuildScene2(scene, playerObj) {
         playerObj.trfmLocal.Rotate(VEC3_RIGHT, angle * 20.0);
         playerObj.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, 0.0);
 
-        timer += Time.delta_Milli;
+        timer += Time.deltaMilli;
         aquaMsg.UpdateMsg(timer.toString());
 
         if(resetBtn.pressed) {

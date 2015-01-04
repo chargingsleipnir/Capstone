@@ -45,6 +45,13 @@ function BuildGame() {
     SceneMngr.AddScene(lightTest, false);
 
 
+    // Various particle systems being used.
+    var particleTest = new Scene("Particle system testing");
+    particleTest.Add(skyBox);
+    BuildScene5(particleTest);
+    SceneMngr.AddScene(particleTest, false);
+
+
     var angle = 0.01;
     function GameUpdate() {
         skyBox.trfmLocal.Rotate(VEC3_FWD, angle);

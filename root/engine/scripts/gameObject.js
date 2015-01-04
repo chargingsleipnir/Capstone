@@ -63,6 +63,10 @@ GameObject.prototype = {
                 this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.collider);
         }
+        else if (component == Components.particleSystem) {
+            this.ptclSys = new ParticleSystem(this.trfmGlobal, this.shape.radius);
+            this.components.push(this.ptclSys);
+        }
     },
     RemoveComponent: function(name) {
         /// <signature>

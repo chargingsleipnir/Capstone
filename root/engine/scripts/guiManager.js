@@ -55,36 +55,24 @@ GUIObject.prototype = {
             x = WndUtils.WndX_To_GLNDCX(this.rectGlobal.x) - 1,
             y = (WndUtils.WndY_To_GLNDCY(this.rectGlobal.y) - 1) * -1;
 
-        if(this.style.bgAlpha) {
-            // Divide
-            var boxModel = new Primitives.Rect(new Vector2(radialW, radialH));
-            var posCoords = boxModel.vertices.byMesh.posCoords;
-            // Set box' pos to that defined in the rect
+        // Divide
+        var boxModel = new Primitives.Rect(new Vector2(radialW, radialH));
+        var posCoords = boxModel.vertices.byMesh.posCoords;
+        // Set box' pos to that defined in the rect
 
-            for (var i = 0; i < posCoords.length; i += 3) {
-                // Add width and subtract height because the model is built from the centre out,
-                // while the rects measure from the top-left to the bottom-right.
-                posCoords[i] += (x + radialW);
-                posCoords[i + 1] += (y - radialH);
-            }
+        for (var i = 0; i < posCoords.length; i += 3) {
+            // Add width and subtract height because the model is built from the centre out,
+            // while the rects measure from the top-left to the bottom-right.
+            posCoords[i] += (x + radialW);
+            posCoords[i + 1] += (y - radialH);
+        }
 
-            this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
-            this.boxHdl.tint.SetCopy(this.style.bgColour);
-            this.boxHdl.alpha = this.style.bgAlpha;
-            if (this.style.bgTexture) {
-                this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
-            }
+        this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
+        this.boxHdl.tint.SetAxisAngle(this.style.bgColour, this.style.bgAlpha);
+        if (this.style.bgTexture) {
+            this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
         }
-        else {
-            this.boxHdl = new GUIBoxHandler({
-                count: 0,
-                posCoords: [],
-                colElems: [],
-                texCoords: [],
-                normAxes: [],
-                indices: []
-            });
-        }
+
 
         /****************** TEXT ********************/
 
@@ -129,13 +117,13 @@ GUIObject.prototype = {
             this.numChars = this.charBlockModel.count / 6;
 
             // Build text
-            this.strObjHdl = new StringDisplayHandler(this.charBlockModel);
-            this.strObjHdl.tint.SetCopy(this.style.fontColour);
+            this.strHdl = new StringDisplayHandler(this.charBlockModel);
+            this.strHdl.tint.SetAxisAngle(this.style.fontColour, this.style.fontAlpha);
             if (this.style.bold)
-                this.strObjHdl.UseBoldTexture();
+                this.strHdl.UseBoldTexture();
         }
         else {
-            this.strObjHdl = new StringDisplayHandler({
+            this.strHdl = new StringDisplayHandler({
                     count: 0,
                     posCoords: [],
                     colElems: [],
@@ -150,7 +138,15 @@ GUIObject.prototype = {
         for(var i = 0; i < this.numChars; i++) {
             newVerts = newVerts.concat(FontMap.texCoords[msg[i] || ' ']);
         }
-        this.strObjHdl.RewriteVerts(newVerts);
+        this.strHdl.RewriteVerts(newVerts);
+    },
+    FadeBackground: function(incr) {
+        this.boxHdl.tint.w += incr;
+        return this.boxHdl.tint.w;
+    },
+    FadeMsg: function(incr) {
+        this.strHdl.tint.w += incr;
+        return this.strHdl.tint.w;
     }
 };
 
@@ -176,7 +172,7 @@ GUISystem.prototype = {
         guiObj.UpdateGlobalRect(this.sysRect);
         guiObj.InstantiateDisplay();
         this.boxMdls.push(guiObj.boxHdl);
-        this.textBlocks.push(guiObj.strObjHdl);
+        this.textBlocks.push(guiObj.strHdl);
     }
 };
 
