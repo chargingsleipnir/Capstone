@@ -159,24 +159,24 @@ function Camera(trfmObj) {
     this.active = false;
 
     this.trfmObj = trfmObj;
-    this.trfm = new Transform(Space.local);
-    this.trfm.pos.SetCopy(this.trfmObj.pos);
-    this.posGbl = this.trfm.pos;
+    this.trfmAxes = new TransformAxes();
+    this.trfmAxes.pos.SetCopy(this.trfmObj.pos);
+    this.posGbl = this.trfmAxes.pos;
 
     this.hasKeyCtrl = false;
 
     this.mtxCam = new Matrix4();
 
-    ViewMngr.frustum.CalculatePlanes(this.trfm.pos, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+    ViewMngr.frustum.CalculatePlanes(this.trfmAxes.pos, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
 }
 Camera.prototype = {
     ToDefaultOrientation: function() {
-        this.trfm.ToDefault();
+        this.trfmAxes.SetDefault();
     },
     SetControlsActive: function(ctrlSchemeName, ctrlActive) {
         this.hasKeyCtrl = ctrlActive;
         if(!this.ctrl)
-            this.ctrl = new CameraController(this.trfm, ctrlSchemeName);
+            this.ctrl = new CameraController(this.trfmAxes, ctrlSchemeName);
         else if(ctrlActive)
             this.ctrl.SetInputActive(true);
         else
@@ -190,24 +190,24 @@ Camera.prototype = {
                 this.ctrl.Update();
             }
 
-            if (this.trfm.IsChanging() || this.trfmObj.IsChanging()) {
+            if (this.trfmAxes.IsChanging() || this.trfmObj.IsChanging()) {
 
                 /* This same kind of parent-child updating is what makes it at all
                  * valuable to add a camera as a component of a gameObject */
 
 
-                this.posGbl = this.trfm.pos.GetAdd(this.trfmObj.pos);
+                this.posGbl = this.trfmAxes.pos.GetAdd(this.trfmObj.pos);
                 //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
                 /*
-                 var newDirFwd.SetCopy(this.trfmLocal.dirFwd);
-                 //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
-                 var newDirUp.SetCopy(this.trfmLocal.dirUp);
-                 //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
-                 var newDirRight.SetCopy(this.trfmLocal.dirRight);
+                 var newDirFwd.SetCopy(this.trfmLocal.fwd);
+                 //this.trfmGlobal.fwd.Add(trfmParent.fwd);
+                 var newDirUp.SetCopy(this.trfmLocal.up);
+                 //this.trfmGlobal.up.Add(trfmParent.up);
+                 var newDirRight.SetCopy(this.trfmLocal.right);
                  */
                 // Update game view
-                this.mtxCam.SetOrientation(this.posGbl, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight, Space.global);
-                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfm.dirFwd, this.trfm.dirUp, this.trfm.dirRight);
+                this.mtxCam.SetOrientation(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
+                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
 
                 /* Use these to adjust controls, if set by user, to rotate camera around object.
                  * Allow user to set camera modes...

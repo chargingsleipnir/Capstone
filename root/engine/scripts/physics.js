@@ -67,7 +67,7 @@ RigidBody.prototype = {
     },
     Update: function() {
         // ROTATIONAL UPDATE
-        //this.axisOfRotation = this.trfm.dirUp.GetCross(this.velFinal);
+        //this.axisOfRotation = this.trfm.up.GetCross(this.velFinal);
         //this.axisOfRotation.SetNormalized();
         //this.velAngularMag = this.velFinal.GetMag() / this.modelRadius;
         //this.velAngularDir = this.axisOfRotation.SetScaleByNum(this.velAngularMag);

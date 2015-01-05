@@ -1,6 +1,6 @@
 
-function CameraController(trfm, ctrlSchemeName) {
-    this.trfm = trfm;
+function CameraController(trfmAxes, ctrlSchemeName) {
+    this.trfmAxes = trfmAxes;
 
     this.ctrl = new ControlScheme();
     this.moveSpeed = 10;
@@ -30,37 +30,37 @@ CameraController.prototype = {
     },
     Update: function() {
         if (this.ctrl.moveLeft.pressed) {
-            this.trfm.TranslateRight(-this.moveSpeed * Time.deltaMilli);
+            this.trfmAxes.TranslateRight(-this.moveSpeed * Time.deltaMilli);
         }
         else if (this.ctrl.moveRight.pressed) {
-            this.trfm.TranslateRight(this.moveSpeed * Time.deltaMilli);
+            this.trfmAxes.TranslateRight(this.moveSpeed * Time.deltaMilli);
         }
         if (this.ctrl.moveUp.pressed) {
-            this.trfm.TranslateUp(this.moveSpeed * Time.deltaMilli);
+            this.trfmAxes.TranslateUp(this.moveSpeed * Time.deltaMilli);
         }
         else if (this.ctrl.moveDown.pressed) {
-            this.trfm.TranslateUp(-this.moveSpeed * Time.deltaMilli);
+            this.trfmAxes.TranslateUp(-this.moveSpeed * Time.deltaMilli);
         }
         if (this.ctrl.moveForth.pressed) {
-            this.trfm.TranslateFwd(this.moveSpeed * Time.deltaMilli);
+            this.trfmAxes.TranslateFwd(this.moveSpeed * Time.deltaMilli);
         }
         else if (this.ctrl.moveBack.pressed) {
-            this.trfm.TranslateFwd(-this.moveSpeed * Time.deltaMilli);
+            this.trfmAxes.TranslateFwd(-this.moveSpeed * Time.deltaMilli);
         }
         if (this.ctrl.pitchUp.pressed) {
-            this.trfm.RotateLocalViewX(this.turnSpeed);
-            //this.trfm.Rotate(this.trfm.dirRight, -this.turnSpeed);
+            this.trfmAxes.RotateLocalViewX(this.turnSpeed);
+            //this.trfm.Rotate(this.trfm.right, -this.turnSpeed);
         }
         else if (this.ctrl.pitchDown.pressed) {
-            this.trfm.RotateLocalViewX(-this.turnSpeed);
-            //this.trfm.Rotate(this.trfm.dirRight, this.turnSpeed);
+            this.trfmAxes.RotateLocalViewX(-this.turnSpeed);
+            //this.trfm.Rotate(this.trfm.right, this.turnSpeed);
         }
         if (this.ctrl.yawLeft.pressed) {
-            this.trfm.RotateLocalView(VEC3_UP, this.turnSpeed);
+            this.trfmAxes.RotateLocalView(VEC3_UP, this.turnSpeed);
             //this.trfm.Rotate(VEC3_UP, this.turnSpeed);
         }
         else if (this.ctrl.yawRight.pressed) {
-            this.trfm.RotateLocalView(VEC3_UP, -this.turnSpeed);
+            this.trfmAxes.RotateLocalView(VEC3_UP, -this.turnSpeed);
             //this.trfm.Rotate(VEC3_UP, -this.turnSpeed);
         }
     }

@@ -59,7 +59,7 @@ function BuildScene4(scene) {
     function Start() {
         Input.SetActive(lightTestScene, true);
         ViewMngr.SetActiveCamera(scene.rootObj.camera);
-        ViewMngr.activeCam.trfm.SetPosAxes(0.0, 0.0, 7.5);
+        ViewMngr.activeCam.trfmAxes.SetPosAxes(0.0, 0.0, 7.5);
         DebugMngr.SetFullActive(false);
     }
 
@@ -79,8 +79,6 @@ function BuildScene4(scene) {
     }
 
     function End() {
-        DebugMngr.SetFullActive(true);
-
         ViewMngr.activeCam.ToDefaultOrientation();
         Input.SetActive(lightTestScene, false);
     }

@@ -4,25 +4,21 @@ function Transform(space) {
     this.pos = new Vector3();
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
-    this.dirFwd = (new Vector3()).SetCopy(VEC3_FWD);
-    this.dirUp = (new Vector3()).SetCopy(VEC3_UP);
-    this.dirRight = (new Vector3()).SetCopy(VEC3_RIGHT);
 
     //this.offsetPos = Vector3.CreateZero();
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();
 
+    this.mtx = new Matrix4();
+
     this.active = false;
     this.space = space;
 }
 Transform.prototype = {
-    ToDefault: function() {
+    SetDefault: function() {
         this.pos.SetZero();
         this.orient.SetIdentity();
         this.scale.SetOne();
-        this.dirFwd.SetCopy(VEC3_FWD);
-        this.dirUp.SetCopy(VEC3_UP);
-        this.dirRight.SetCopy(VEC3_RIGHT);
         this.active = true;
     },
     GetLargestScaleValue: function() {
@@ -75,61 +71,7 @@ Transform.prototype = {
         this.pos.SetAdd(translation);
         this.active = true;
     },
-    TranslateFwd: function(speed) {
-        /// <signature>
-        ///  <summary>Move position forward by amount given</summary>
-        ///  <param name="speed" type="decimal"></param>
-        ///  <returns type="void" />
-        /// </signature>
-        this.pos.SetAdd(this.dirFwd.GetScaleByNum(speed));
-        this.active = true;
-    },
-    TranslateUp: function(speed) {
-        /// <signature>
-        ///  <summary>Move position forward by amount given</summary>
-        ///  <param name="speed" type="decimal"></param>
-        ///  <returns type="void" />
-        /// </signature>
-        this.pos.SetAdd(this.dirUp.GetScaleByNum(speed));
-        this.active = true;
-    },
-    TranslateRight: function(speed) {
-        /// <signature>
-        ///  <summary>Move position forward by amount given</summary>
-        ///  <param name="speed" type="decimal"></param>
-        ///  <returns type="void" />
-        /// </signature>
-        this.pos.SetAdd(this.dirRight.GetScaleByNum(speed));
-        this.active = true;
-    },
-    RotateLocalView: function(axis, thetaDeg) {
-        /// <signature>
-        ///  <summary>SetOrientation around the given axis by degree specified</summary>
-        ///  <param name="thetaDeg" type="decimal"></param>
-        ///  <param name="axis" type="Vector3"></param>
-        ///  <returns type="void" />
-        /// </signature>
-        this.dirFwd.SetRotated(thetaDeg, axis);
-        this.dirUp.SetRotated(thetaDeg, axis);
-        this.dirRight.SetRotated(thetaDeg, axis);
-        this.active = true;
-    },
-    RotateLocalViewX: function(thetaDeg) {
-        this.dirFwd.SetRotated(thetaDeg, this.dirRight);
-        this.dirUp.SetRotated(thetaDeg, this.dirRight);
-        this.active = true;
-    },
-    RotateLocalViewY: function(thetaDeg) {
-        this.dirFwd.SetRotated(thetaDeg, this.dirUp);
-        this.dirRight.SetRotated(thetaDeg, this.dirUp);
-        this.active = true;
-    },
-    RotateLocalViewZ: function(thetaDeg) {
-        this.dirUp.SetRotated(thetaDeg, this.dirFwd);
-        this.dirRight.SetRotated(thetaDeg, this.dirFwd);
-        this.active = true;
-    },
-    SetOrient: function(quat) {
+    SetRotation: function(quat) {
         this.orient.SetCopy(quat);
         this.active = true;
     },
@@ -202,15 +144,142 @@ Transform.prototype = {
         /* Accurate representation of directions, but forces use of
         quaternions for everything, which causes too many problems*/
         /*
-        this.dirFwd = this.orient.GetMultiplyVec3(VEC3_FWD);
-        this.dirUp = this.orient.GetMultiplyVec3(VEC3_UP);
-        this.dirRight = this.orient.GetMultiplyVec3(VEC3_RIGHT);
+        this.fwd = this.orient.GetMultiplyVec3(VEC3_FWD);
+        this.up = this.orient.GetMultiplyVec3(VEC3_UP);
+        this.right = this.orient.GetMultiplyVec3(VEC3_RIGHT);
         */
 
         if (this.active) {
+
             if(this.space == Space.local)
                 this.active = false;
+            else {
+                this.mtx.SetIdentity();
+                this.mtx.SetTranslateVec3(this.pos);
+                this.mtx.SetRotateAbout(this.orient.GetAxis(), this.orient.GetAngle());
+                this.mtx.SetScaleVec3(this.scale);
+            }
 
+            return true;
+        }
+        return false;
+    }
+};
+
+
+function TransformAxes() {
+    this.pos = new Vector3();
+    this.fwd = (new Vector3()).SetCopy(VEC3_FWD);
+    this.up = (new Vector3()).SetCopy(VEC3_UP);
+    this.right = (new Vector3()).SetCopy(VEC3_RIGHT);
+    this.active;
+}
+TransformAxes.prototype = {
+    SetDefault: function() {
+        this.pos.SetZero();
+        this.fwd.SetCopy(VEC3_FWD);
+        this.up.SetCopy(VEC3_UP);
+        this.right.SetCopy(VEC3_RIGHT);
+    },
+    SetPosAxes: function(x, y, z) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.x = x;
+        this.pos.y = y;
+        this.pos.z = z;
+        this.active = true;
+    },
+    SetPosVec3: function(pos) {
+        /// <signature>
+        ///  <summary>Set a new position</summary>
+        ///  <param name="position" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetCopy(pos);
+        this.active = true;
+    },
+    TranslateAxes: function(x, y, z) {
+        ///  <summary>Move position by amount given</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.x += x;
+        this.pos.y += y;
+        this.pos.z += z;
+        this.active = true;
+    },
+    TranslateVec: function(translation) {
+        /// <signature>
+        ///  <summary>Move position by amount given</summary>
+        ///  <param name="translation" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(translation);
+        this.active = true;
+    },
+    TranslateFwd: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.fwd.GetScaleByNum(speed));
+        this.active = true;
+    },
+    TranslateUp: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.up.GetScaleByNum(speed));
+        this.active = true;
+    },
+    TranslateRight: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.right.GetScaleByNum(speed));
+        this.active = true;
+    },
+    RotateLocalView: function(axis, thetaDeg) {
+        /// <signature>
+        ///  <summary>SetOrientation around the given axis by degree specified</summary>
+        ///  <param name="thetaDeg" type="decimal"></param>
+        ///  <param name="axis" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.fwd.SetRotated(thetaDeg, axis);
+        this.up.SetRotated(thetaDeg, axis);
+        this.right.SetRotated(thetaDeg, axis);
+        this.active = true;
+    },
+    RotateLocalViewX: function(thetaDeg) {
+        this.fwd.SetRotated(thetaDeg, this.right);
+        this.up.SetRotated(thetaDeg, this.right);
+        this.active = true;
+    },
+    RotateLocalViewY: function(thetaDeg) {
+        this.fwd.SetRotated(thetaDeg, this.up);
+        this.right.SetRotated(thetaDeg, this.up);
+        this.active = true;
+    },
+    RotateLocalViewZ: function(thetaDeg) {
+        this.up.SetRotated(thetaDeg, this.fwd);
+        this.right.SetRotated(thetaDeg, this.fwd);
+        this.active = true;
+    },
+    IsChanging: function() {
+        if (this.active) {
+            this.active = false;
             return true;
         }
         return false;

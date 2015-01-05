@@ -16,6 +16,9 @@ function BuildGame() {
     skyBox.mdlHdlr.SetTexture(EL.assets.textures['starfield'], TextureFilters.nearest);
     skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
 
+    var zeroPointAxes = new GameObject('zeroPointAxes', Labels.productionEnvironment);
+    zeroPointAxes.SetModel(Primitives.axesZeroPoints);
+
 
     // Title screen just has gui elements
     var title = new Scene("Title Screen");
@@ -27,6 +30,7 @@ function BuildGame() {
     var guiTest = new Scene("Basic Testbed with HUD");
     guiTest.Add(player);
     guiTest.Add(skyBox);
+    guiTest.Add(zeroPointAxes);
     BuildScene2(guiTest, player);
     SceneMngr.AddScene(guiTest, false);
 
@@ -48,6 +52,7 @@ function BuildGame() {
     // Various particle systems being used.
     var particleTest = new Scene("Particle system testing");
     particleTest.Add(skyBox);
+    particleTest.Add(zeroPointAxes);
     BuildScene5(particleTest);
     SceneMngr.AddScene(particleTest, false);
 

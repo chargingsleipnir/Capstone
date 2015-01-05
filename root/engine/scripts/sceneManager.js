@@ -16,6 +16,7 @@ function Scene(name) {
 
     this.debug = new DebugHandler();
     this.models = [];
+    this.ptclSystems = [];
 
     this.collisionNetwork = new CollisionNetwork();
     this.forceRegistry = new ForceRegistry();
@@ -50,13 +51,15 @@ Scene.prototype = {
             this.models.push(gameObject.mdlHdlr);
         if(gameObject.collider)
             this.collisionNetwork.AddBody(gameObject.collider);
+        if(gameObject.ptclSys)
+            this.ptclSystems.push(gameObject.ptclSys);
 
         if(DebugMngr.active) {
             var axesLengths = gameObject.shape.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
-            this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.shape), gameObject.trfmGlobal);
+            this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.trfmGlobal, gameObject.shape));
 
             if(gameObject.collider) {
-                var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), gameObject.collider.shapeData);
+                var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), new Transform(Space.global), gameObject.collider.shapeData);
                 //var aabbShell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);

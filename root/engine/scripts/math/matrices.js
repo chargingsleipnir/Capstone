@@ -841,8 +841,8 @@ Matrix4.prototype = {
         /// <signature>
         ///  <summary>Create matrix oriented by directional control</summary>
         ///  <param name="pos" type="Vector3">Location of viewer</param>
-        ///  <param name="dirFwd" type="Vector3">Normalized View direction</param>
-        ///  <param name="dirUp" type="Vector3">Normalized Vector 90 degrees to dirFwd, to control roll</param>
+        ///  <param name="fwd" type="Vector3">Normalized View direction</param>
+        ///  <param name="up" type="Vector3">Normalized Vector 90 degrees to fwd, to control roll</param>
         ///  <param name="space" type="enum">Determines if orientation is local or global</param>
         ///  <returns type="Matrix4" />
         /// </signature>
@@ -867,8 +867,8 @@ Matrix4.prototype = {
         /// <signature>
         ///  <summary>Create matrix oriented by directional control</summary>
         ///  <param name="pos" type="Vector3">Location of viewer</param>
-        ///  <param name="dirFwd" type="Vector3">Normalized View direction</param>
-        ///  <param name="dirUp" type="Vector3">Normalized Vector 90 degrees to dirFwd, to control roll</param>
+        ///  <param name="fwd" type="Vector3">Normalized View direction</param>
+        ///  <param name="up" type="Vector3">Normalized Vector 90 degrees to fwd, to control roll</param>
         ///  <returns type="Matrix4" />
         /// </signature>
         var dirSide = dirFwd.GetCross(dirUp);

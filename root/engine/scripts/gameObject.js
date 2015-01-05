@@ -64,7 +64,7 @@ GameObject.prototype = {
             this.components.push(this.collider);
         }
         else if (component == Components.particleSystem) {
-            this.ptclSys = new ParticleSystem(this.trfmGlobal, this.shape.radius);
+            this.ptclSys = new ParticleSystem(this.trfmGlobal.mtx);
             this.components.push(this.ptclSys);
         }
     },
@@ -103,15 +103,8 @@ GameObject.prototype = {
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
 
-        this.mdlHdlr = new ModelHandler(this.model, this.shape);
-    },
-    SetModelAlt: function(model) {
-        this.model = model;
-        // Make sure the correct set of vertices are being centred.
-        var vertData = ModelUtils.SelectVAOData(this.model.vertices);
-        this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
-
-        this.mdlHdlr = new ModelHandler(this.model, this.shape, true);
+        this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.shape);
+        this.components.push(this.mdlHdlr);
     },
     Update: function(trfmParent) {
         /// <signature>
@@ -126,19 +119,10 @@ GameObject.prototype = {
 
             // Update global to pass to children
             this.trfmGlobal.SetPosVec3(this.trfmLocal.pos.GetAdd(trfmParent.pos));
-            this.trfmGlobal.SetOrient(this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient));
+            this.trfmGlobal.SetRotation(this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient));
             this.trfmGlobal.SetScaleVec3(this.trfmLocal.scale.GetScaleByVec(trfmParent.scale));
 
-            this.trfmGlobal.dirFwd.SetCopy(this.trfmLocal.dirFwd);
-            //this.trfmGlobal.dirFwd.Add(trfmParent.dirFwd);
-            this.trfmGlobal.dirUp.SetCopy(this.trfmLocal.dirUp);
-            //this.trfmGlobal.dirUp.Add(trfmParent.dirUp);
-            this.trfmGlobal.dirRight.SetCopy(this.trfmLocal.dirRight);
-
             this.trfmGlobal.IsChanging();
-
-            if (this.mdlHdlr)
-                this.mdlHdlr.UpdateModelViewControl(this.trfmGlobal);
         }
 
         // Scripts first?? Sure...

@@ -6,13 +6,11 @@ function BuildScene2(scene, playerObj) {
 
     var arrow = new GameObject('arrow', Labels.testObject);
     var heart = new GameObject('heart', Labels.testObject);
-    var zeroPointAxes = new GameObject('zeroPointAxes', Labels.productionEnvironment);
     var testCube = new GameObject('test cube', Labels.testObject);
     var cube = new GameObject('primitive cube', Labels.testObject);
 
     arrow.SetModel(Primitives.arrow);
     heart.SetModel(Primitives.heart);
-    zeroPointAxes.SetModel(Primitives.axesZeroPoints);
     testCube.SetModel(EL.assets.models['dimensionBox']);
     cube.SetModel(new Primitives.Cube(new Vector3(1.5, 3.0, 4.5), true));
 
@@ -100,7 +98,7 @@ function BuildScene2(scene, playerObj) {
 
     function Start() {
         ViewMngr.SetActiveCamera(scene.rootObj.camera);        
-        ViewMngr.activeCam.trfm.SetPosAxes(2.0, 3.0, 15.0);
+        ViewMngr.activeCam.trfmAxes.SetPosAxes(2.0, 3.0, 15.0);
         playerObj.trfmLocal.SetPosAxes(10.0, 5.0, -5.0);
         GUINetwork.SetActive(hud.name, true);
         angle = 0.01;
@@ -113,6 +111,8 @@ function BuildScene2(scene, playerObj) {
 
         playerObj.trfmLocal.Rotate(VEC3_RIGHT, angle * 20.0);
         playerObj.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, 0.0);
+
+        testCube.trfmLocal.ScaleAxes(Math.sin(waveringValue)  / 100, Math.sin(waveringValue) / 100, Math.sin(waveringValue) / 100);
 
         timer += Time.deltaMilli;
         aquaMsg.UpdateMsg(timer.toString());
@@ -127,6 +127,7 @@ function BuildScene2(scene, playerObj) {
         playerObj.trfmLocal.SetPosAxes(0.0, 1.0, -5.0);
         playerObj.trfmLocal.orient.SetIdentity();
         playerObj.trfmLocal.scale.SetOne();
+        testCube.trfmLocal.scale.SetOne();
         arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
         heart.trfmLocal.SetPosVec3(new Vector3(3.5, 0.5, -1.0));
 
@@ -137,7 +138,6 @@ function BuildScene2(scene, playerObj) {
 
     scene.Add(arrow);
     scene.Add(heart);
-    scene.Add(zeroPointAxes);
     scene.Add(testCube);
     scene.Add(cube);
     scene.SetCallbacks(Start, Update, End);

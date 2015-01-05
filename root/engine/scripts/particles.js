@@ -3,51 +3,214 @@
  */
 
 function ParticlePoint() {
+    // Physics
+    this.startPos = new Vector3();
     this.pos = new Vector3();
     this.vel = new Vector3();
     this.acc = new Vector3();
-    // Degree value for range of random velocity direction
     this.coneRange = 45.0;
-    this.dampening = 0.0;
-    this.lifeTime = 3.0;
-    this.counter = 0.0;
-    this.isAlive = true;
-
+    this.dampening = 1.0;
+    // Duration
+    this.travelTime = 3.0;
+    this.countDown = 3.0;
+    this.isAlive = false;
+    // Effects
     this.colour = new Vector3();
     this.alpha = 1.0;
 }
 ParticlePoint.prototype = {
-    SetFadeRate: function(endAlpha, fromTimePct) {
-
-    },
     Update: function() {
         if(this.isAlive) {
             this.vel.SetAddScaled(this.acc, Time.deltaMilli);
             this.vel.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
             this.pos.SetAdd(this.vel.GetScaleByNum(Time.deltaMilli));
 
-            this.counter += Time.deltaMilli;
-            if(this.counter >= this.lifeTime)
-                this.isAlive = false;
+            this.countDown -= Time.deltaMilli;
+            if(this.countDown < 0.0)
+                this.Reset();
         }
     },
     Reset: function() {
-        // Retain and use initial values set by user somehow
+        this.pos.SetCopy(this.startPos);
+        this.countDown = this.travelTime;
+    }
+};
+
+function ParticlePointField(ptclCount, lifeSpan, staggerRate, fieldLife, sysRevive, startDist, direction, rangeDeg) {
+    this.ptclCount = ptclCount || 10;
+    this.ptclTravelTime = lifeSpan || 5.0;
+    this.staggerRate = staggerRate || 0.5;
+
+    // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
+    this.fieldLifeTime = fieldLife || 20.0;
+    this.counter = 0.0;
+    this.active = true;
+    this.deadPtcls = this.ptclCount;
+
+    // Using changing looping functions
+    this.Callback = this.Launch;
+
+    // Containers for drawing
+    this.ptcls = [];
+    var ptclVerts = {
+        count: this.ptclCount,
+        posCoords: [],
+        colElems: [],
+        texCoords: [],
+        normAxes: []
+    };
+
+    // Instantiate particles
+    for(var i = 0; i < this.ptclCount; i++) {
+        var randX = Math.random(),
+            randY = Math.random(),
+            randZ = Math.random();
+        this.ptcls.push(new ParticlePoint());
+
+        this.ptcls[i].travelTime = this.ptclTravelTime;
+        this.ptcls[i].countDown = this.staggerRate * i;
+        this.ptcls[i].pos.SetValues(0.0, 999.0, 0.0);
+        this.ptcls[i].vel.SetValues((randX*2) - 1, (randY*2) - 1, (randZ*2) - 1);
+
+        ptclVerts.posCoords = ptclVerts.posCoords.concat(this.ptcls[i].pos.GetData());
+        ptclVerts.colElems = ptclVerts.colElems.concat([randX, randY, randZ]);
+    }
+
+    this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
+}
+ParticlePointField.prototype = {
+    DefinePtcl: function(speed, acceleration, dampening, ptclLife) {
+        for(var i = 0; i < this.ptclCount; i++) {
+            this.ptcls[i].acc.SetCopy(acceleration);
+            this.ptcls[i].dampening = dampening;
+        }
+    },
+    DefinePtclColourRange: function(colour1, colour2) {
+
+    },
+    DefinePtclFade: function(endAlpha, fromTime) {
+
+    },
+    CheckEnd: function() {
+        this.fieldLifeTime -= Time.deltaMilli;
+        if(this.fieldLifeTime <= 0)
+            this.Callback = this.Terminate;
+    },
+    Launch: function() {
+        /* This loop function is implemented to allow each particle field to slowly stagger
+         * in, update, and stagger out all of it's particles, so they don't all have to arrive
+         * or disappear at the same time. */
+        var newPosCoords = [];
+
+        if(this.deadPtcls > 0) {
+            for (var i = 0; i < this.ptcls.length; i++) {
+                // This will stagger them out accordingly,
+                // as pre-set in constructor
+                if(this.ptcls[i].isAlive == false) {
+                    this.ptcls[i].countDown -= Time.deltaMilli;
+                    if(this.ptcls[i].countDown <= 0) {
+                        this.ptcls[i].isAlive = true;
+                        this.deadPtcls--;
+                        this.ptcls[i].Reset();
+                    }
+                }
+                else {
+                    this.ptcls[i].Update();
+                }
+                newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
+            }
+            this.fieldHdlr.RewriteVerts(newPosCoords);
+        }
+        else {
+            this.Callback = this.Update;
+        }
+        this.CheckEnd();
+    },
+    Update: function() {
+        /* This loop function is implemented to allow each particle field to slowly stagger
+         * in, update, and stagger out all of it's particles, so they don't all have to arrive
+         * or disappear at the same time. */
+        var newPosCoords = [];
+        for (var i = 0; i < this.ptcls.length; i++) {
+            this.ptcls[i].Update();
+            newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
+        }
+        this.fieldHdlr.RewriteVerts(newPosCoords);
+        this.CheckEnd();
+    },
+    Terminate: function() {
+        /* This loop function is implemented to allow each particle field to slowly stagger
+         * in, update, and stagger out all of it's particles, so they don't all have to arrive
+         * or disappear at the same time. */
+        var newPosCoords = [];
+
+        if(this.deadPtcls < this.ptcls.length) {
+            for (var i = 0; i < this.ptcls.length; i++) {
+                if(this.ptcls[i].isAlive) {
+                    this.ptcls[i].Update();
+                    // This condition is met on during each particle's reset.
+                    if (this.ptcls[i].countDown >= this.ptcls[i].travelTime - Time.deltaMilli) {
+                        this.ptcls[i].isAlive = false;
+                        this.ptcls[i].pos.SetValues(0.0, 999.0, 0.0);
+                        this.deadPtcls++;
+                    }
+                }
+                newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
+            }
+            this.fieldHdlr.RewriteVerts(newPosCoords);
+        }
+        else
+            return -1;
+    }
+};
+
+
+function ParticleSystem(trfmObjMtx) {
+    //this.trfmObj = trfmObj;
+    this.mtxModel = trfmObjMtx;
+
+    this.runningFields = [];
+    this.ptclFields = {};
+}
+ParticleSystem.prototype = {
+    AddField: function(field, name) {
+        this.ptclFields[name] = field;
+    },
+    RemoveField: function(name) {
+        var index = this.ptclFields.indexOf(this.ptclFields[name]);
+        if(index != -1) {
+            this.runningFields.splice(index, 1);
+            delete this.ptclFields[name];
+        }
+    },
+    RunField: function(name) {
+        this.runningFields.push(this.ptclFields[name]);
+    },
+    GetRunningPtclFields: function() {
+        return this.runningFields;
+    },
+    Update: function() {
+        for (var i = this.runningFields.length - 1; i >= 0; i--) {
+            if(this.runningFields[i].Callback() == -1) {
+                this.runningFields.splice(i, 1);
+            }
+        }
     }
 };
 
 
 
-function ParticleLine() {
-
-}
-function ParticleImage(texture) {
-    this.tex = texture;
-}
 
 
 
-function ParticleSystem(trfmObj, radiusObj) {
+
+
+
+
+
+
+
+function ParticleLineField(trfmObj, radiusObj) {
     this.trfmObj = trfmObj;
     this.radiusObj = radiusObj;
     this.trfm = new Transform(Space.local);
@@ -57,7 +220,42 @@ function ParticleSystem(trfmObj, radiusObj) {
     this.sysLifeTime = 20.0;
     this.ptcls = [];
 }
-ParticleSystem.prototype = {
+ParticleLineField.prototype = {
+    AddParticle: function(particle) {
+        this.ptcls.push(particle);
+    },
+    SetStartDist: function(scalar) {
+        // Scaled amount from obj radius,
+        // thus allowing user to say 1 for the outer sphere's edge, or zero from dead centre
+        var dist = this.radiusObj * scalar;
+    },
+    Update: function() {
+
+        for (var i = 0; i < this.ptcls.length; i++) {
+            if(this.ptcls[i].isAlive) {
+                this.ptcls[i].Update();
+            }
+            else {
+                // ?? Easier then destroying and recreating
+                // But what about the end of the systems' life? Just keep them dead (and set alpha zero) then...
+                this.ptcls[i].Reset();
+            }
+        }
+    }
+};
+
+
+function ParticleShapeField(trfmObj, radiusObj) {
+    this.trfmObj = trfmObj;
+    this.radiusObj = radiusObj;
+    this.trfm = new Transform(Space.local);
+    this.trfm.pos.SetCopy(this.trfmObj.pos);
+
+    this.count = 10;
+    this.sysLifeTime = 20.0;
+    this.ptcls = [];
+}
+ParticleShapeField.prototype = {
     AddParticle: function(particle) {
         this.ptcls.push(particle);
     },

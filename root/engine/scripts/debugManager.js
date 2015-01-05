@@ -15,8 +15,7 @@ var DebugMngr = {
 function DebugHandler() {
     this.dispObjs = {
         orientAxes: {
-            models: [],
-            trfms: []
+            models: []
         },
         // objDirAxes ??
         shells: {
@@ -32,13 +31,8 @@ function DebugHandler() {
     };
 }
 DebugHandler.prototype =  {
-    AddOrientAxes: function(model, trfm) {
+    AddOrientAxes: function(model) {
         this.dispObjs.orientAxes.models.push(model);
-        this.dispObjs.orientAxes.trfms.push(trfm);
-    },
-    ReplaceOrientModel: function(newModel, refTrfm) {
-        var index = this.dispObjs.orientAxes.trfms.indexOf(refTrfm);
-        this.dispObjs.orientAxes.models[index] = newModel;
     },
     AddBoundingShell: function(model, trfm, shape) {
         this.dispObjs.shells.models.push(model);
@@ -54,16 +48,17 @@ DebugHandler.prototype =  {
         if(DebugMngr.active) {
             if(DebugMngr.dispOrientAxes) {
                 for (var i = 0; i < this.dispObjs.orientAxes.models.length; i++)
-                    this.dispObjs.orientAxes.models[i].UpdateModelViewControl(this.dispObjs.orientAxes.trfms[i]);
+                    this.dispObjs.orientAxes.models[i].Update();
             }
             if(DebugMngr.dispShells) {
                 for (var i = 0; i < this.dispObjs.shells.models.length; i++) {
+                    this.dispObjs.shells.models[i].trfm.SetPosVec3(this.dispObjs.shells.trfms[i].pos);
                     if(this.dispObjs.shells.shapes[i] == BoundingShapes.sphere) {
                         var radius = this.dispObjs.shells.trfms[i].GetLargestScaleValue();
-                        this.dispObjs.shells.trfms[i].scale.SetValues(radius, radius, radius);
+                        this.dispObjs.shells.models[i].trfm.SetScaleAxes(radius, radius, radius);
                     }
-
-                    this.dispObjs.shells.models[i].UpdateModelViewControl(this.dispObjs.shells.trfms[i]);
+                    this.dispObjs.shells.models[i].trfm.IsChanging();
+                    this.dispObjs.shells.models[i].Update();
                 }
             }
             if(DebugMngr.dispRays) {

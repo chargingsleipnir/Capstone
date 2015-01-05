@@ -51,19 +51,19 @@ FPController.prototype = {
         }
         if(this.ctrl.pitchUp.pressed) {
             this.obj.trfmLocal.RotateLocalViewX(this.turnSpeed);
-            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, -this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.right, -this.turnSpeed);
         }
         else if(this.ctrl.pitchDown.pressed) {
             this.obj.trfmLocal.RotateLocalViewX(-this.turnSpeed);
-            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirRight, this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.right, this.turnSpeed);
         }
         if(this.ctrl.yawLeft.pressed) {
             this.obj.trfmLocal.RotateLocalView(VEC3_UP, this.turnSpeed);
-            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.up, this.turnSpeed);
         }
         else if(this.ctrl.yawRight.pressed) {
             this.obj.trfmLocal.RotateLocalView(VEC3_UP, -this.turnSpeed);
-            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.dirUp, -this.turnSpeed);
+            //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.up, -this.turnSpeed);
         }
     }
 };

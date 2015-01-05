@@ -229,6 +229,7 @@ var GL = {
         //var frustumTestCount = 0;
         var scene = SceneMngr.GetActiveScene();
 
+        /******************* GameObject Models *************************/
         for (var i = 0; i < scene.models.length; i++)
         {
             if (scene.models[i].active && ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere))
@@ -322,6 +323,55 @@ var GL = {
                 this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
+
+        /******************* GameObject Particle Systems *************************/
+        //var fieldCount = 0;
+        for (var i = 0; i < scene.ptclSystems.length; i++)
+        {
+            // Always pull the active fields, as they could add and drop quite often
+            var ptclFields = scene.ptclSystems[i].GetRunningPtclFields();
+            for (var j = 0; j < ptclFields.length; j++)
+            {
+                if(ptclFields[j].fieldHdlr.active) {
+                    //fieldCount++;
+                    // These just allow everything to be better read
+                    shdr = ptclFields[j].fieldHdlr.shaderData;
+                    buff = ptclFields[j].fieldHdlr.bufferData;
+
+                    // USE PROGRAM AND VBO
+                    this.ctx.useProgram(shdr.program);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                    this.ctx.enableVertexAttribArray(shdr.a_Col);
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                    if (shdr.a_TexCoord != -1) {
+                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+                        if (buff.texID) {
+                            this.ctx.activeTexture(this.ctx.TEXTURE0);
+                            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                            this.ctx.uniform1i(shdr.u_Sampler, 0);
+                        }
+                    }
+
+                    mtxMVP = scene.ptclSystems[i].mtxModel.GetMultiply(mtxVP);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
+                    this.ctx.uniform4fv(shdr.u_Tint, ptclFields[j].fieldHdlr.tint.GetData());
+
+                    this.ctx.drawArrays(ptclFields[j].fieldHdlr.drawMethod, 0, buff.numVerts);
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
+                }
+            }
+        }
+        //console.log(fieldCount);
 
         /******************* DEBUG DRAWING *************************/
 

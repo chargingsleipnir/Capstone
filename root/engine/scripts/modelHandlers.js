@@ -1,5 +1,7 @@
 ﻿
-function ModelHandler(model, shapeData) {
+/******************* MODELS *************************/
+
+function ModelHandler(model, trfm, shapeData) {
     // Decide whether to draw with Elements or not
     this.vertData = ModelUtils.SelectVAOData(model.vertices);
     this.shapeData = shapeData;
@@ -25,10 +27,11 @@ function ModelHandler(model, shapeData) {
         this.drawMethod = GL.GetDrawMethod(DrawMethods.triangles);
 
     this.active = true;
-    this.mtxModel = new Matrix4();
+    this.mtxModel = trfm.mtx;
 
     // This is specifically set this way for frustum culling. No need to be more dynamic
     this.drawSphere = new Sphere(shapeData.centre, shapeData.radius);
+    this.trfm = trfm;
 
     // Hold just indices for now, so as to rewrite if necessary, to create wire frames
     this.indices = model.vertices.byMesh.indices;
@@ -66,19 +69,42 @@ ModelHandler.prototype = {
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     },
-    UpdateModelViewControl: function(trfm) {
-        //this.mtxModel.SetOrientation(trfm.pos, trfm.dirFwd, trfm.dirUp, trfm.dirRight, Space.local);
-
-        this.mtxModel.SetIdentity();
-        this.mtxModel.SetTranslateVec3(trfm.pos);
-        this.mtxModel.SetRotateAbout(trfm.orient.GetAxis(), trfm.orient.GetAngle());
-        this.mtxModel.SetScaleVec3(trfm.scale);
-
+    Update: function() {
         // Keep bounding sphere updated for accurate frustum culling
-        this.drawSphere.pos.SetCopy(trfm.pos);
-        this.drawSphere.radius = this.shapeData.radius * trfm.GetLargestScaleValue();
+        this.drawSphere.pos.SetCopy(this.trfm.pos);
+        this.drawSphere.radius = this.shapeData.radius * this.trfm.GetLargestScaleValue();
     }
 };
+
+
+
+/******************* PARTICLE FIELD HANDLER *************************/
+
+function PtclFieldHandler(pntVerts, drawMethod) {
+    // Create Buffer
+    this.bufferData = new BufferData();
+    GL.CreateBufferObjects(pntVerts, this.bufferData, true);
+
+    this.drawMethod = GL.GetDrawMethod(drawMethod);
+    this.shaderData = ModelUtils.BuildShaderProgram(pntVerts, []);
+
+    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
+    this.active = true;
+}
+PtclFieldHandler.prototype = {
+    SetTintRGB: function(r, g, b) {
+        this.tint.SetVec3(r, g, b);
+    },
+    SetTintAlpha: function(a) {
+        this.tint.SetW(a);
+    },
+    RewriteVerts: function(vertArray) {
+        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    }
+};
+
+
+/******************* RAYS *************************/
 
 function RayCastHandler(rayVerts) {
     // Create Buffer
@@ -100,6 +126,9 @@ RayCastHandler.prototype = {
     }
 };
 
+
+
+/******************* GUI ELEMENTS *************************/
 
 function GUIBoxHandler(boxVerts) {
     this.bufferData = new BufferData();
