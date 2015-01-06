@@ -99,6 +99,36 @@ function MsgBoxStyle(style) {
     }
 }
 
+function PtclEffects(effects) {
+    this.travelTime = 5.0;
+    this.staggerRate = 0.0;
+    this.startDist = 0.0;
+    this.dir = new Vector3(0.0, 1.0, 0.0);
+    this.range = 90.0;
+    this.speed = 1.0;
+    this.acc = new Vector3();
+    this.dampening = 1.0;
+    this.colourBtm = new Vector3();
+    this.colourTop = new Vector3(1.0, 1.0, 1.0);
+    this.alphaStart = 1.0;
+    this.alphaEnd = 1.0;
+
+    if(effects) {
+        this.travelTime = effects.travelTime;
+        this.staggerRate = effects.staggerRate;
+        this.startDist = effects.startDist;
+        this.dir = effects.dir.GetCopy();
+        this.range = effects.range;
+        this.speed = effects.speed;
+        this.acc = effects.acc.GetCopy();
+        this.dampening = effects.dampening;
+        this.colourBtm = effects.colourBtm.GetCopy();
+        this.colourTop = effects.colourTop.GetCopy();
+        this.alphaStart = effects.alphaStart;
+        this.alphaEnd = effects.alphaEnd;
+    }
+}
+
 var Time = {
     deltaMilli: 0.0,
     counter: 0.0,

@@ -357,6 +357,10 @@ Vector3.prototype = {
         /// </signature>
         return new Vector3(-this.x, -this.y, -this.z);
     },
+    GetOrthoAxis: function() {
+        var diffVec = new Vector3(this.z, -this.x, this.y);
+        return this.GetCross(diffVec).SetNormalized();
+    },
     SetAdd: function(vec3) {
         /// <signature>
         ///  <summary>Add the passed vector to this</summary>
@@ -646,15 +650,17 @@ Vector3.prototype = {
         ///  <returns type="Vector3" />
         /// </signature>
         var norm = axis.GetNormalized();
+
         var angle = thetaDeg * DEG_TO_RAD;
         var s = Math.sin(angle),
             c = Math.cos(angle);
+
 
         var last = (norm.GetCross(this)).GetScaleByNum(s);
         var middle = norm.GetScaleByNum(this.GetDot(norm) * (1.0 - c));
         var first = this.GetScaleByNum(c);
 
-        return this.GetCopy(first.SetAdd(middle.SetAdd(last)));
+        return first.SetAdd(middle.SetAdd(last));
     }
 };
 /*

@@ -2,17 +2,19 @@
  * Created by Devin on 2015-01-03.
  */
 
-function ParticlePoint() {
+function ParticlePoint(travelTime, countDown) {
     // Physics
     this.startPos = new Vector3();
-    this.pos = new Vector3();
+    this.startVel = new Vector3();
+    this.startAcc = new Vector3();
+    this.pos = new Vector3(0.0, 999.0, 0.0);
     this.vel = new Vector3();
     this.acc = new Vector3();
     this.coneRange = 45.0;
     this.dampening = 1.0;
     // Duration
-    this.travelTime = 3.0;
-    this.countDown = 3.0;
+    this.travelTime = travelTime;
+    this.countDown = countDown;
     this.isAlive = false;
     // Effects
     this.colour = new Vector3();
@@ -32,18 +34,19 @@ ParticlePoint.prototype = {
     },
     Reset: function() {
         this.pos.SetCopy(this.startPos);
+        this.vel.SetCopy(this.startVel);
+        this.acc.SetCopy(this.startAcc);
         this.countDown = this.travelTime;
     }
 };
 
-function ParticlePointField(ptclCount, lifeSpan, staggerRate, fieldLife, sysRevive, startDist, direction, rangeDeg) {
+function ParticlePointField(ptclCount, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
-    this.ptclTravelTime = lifeSpan || 5.0;
-    this.staggerRate = staggerRate || 0.5;
+    this.fieldLifeTime = fieldLife || 20.0;
+
+    this.effects = new PtclEffects(effects);
 
     // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
-    this.fieldLifeTime = fieldLife || 20.0;
-    this.counter = 0.0;
     this.active = true;
     this.deadPtcls = this.ptclCount;
 
@@ -61,25 +64,35 @@ function ParticlePointField(ptclCount, lifeSpan, staggerRate, fieldLife, sysRevi
     };
 
     // Instantiate particles
+    this.effects.dir.SetNormalized();
     for(var i = 0; i < this.ptclCount; i++) {
         var randX = Math.random(),
             randY = Math.random(),
             randZ = Math.random();
-        this.ptcls.push(new ParticlePoint());
+        this.ptcls.push(new ParticlePoint(this.effects.travelTime, effects.staggerRate * i ));
 
-        this.ptcls[i].travelTime = this.ptclTravelTime;
-        this.ptcls[i].countDown = this.staggerRate * i;
-        this.ptcls[i].pos.SetValues(0.0, 999.0, 0.0);
-        this.ptcls[i].vel.SetValues((randX*2) - 1, (randY*2) - 1, (randZ*2) - 1);
+        var randConeAngle = (effects.range / 2.0) * ((randX*2) - 1);
+        var randRotAngle = 360 * randY;
+        var randDir = this.effects.dir.GetRotated(randConeAngle, this.effects.dir.GetOrthoAxis());
+        randDir.SetRotated(randRotAngle, this.effects.dir);
+
+        this.ptcls[i].startPos.SetCopy(randDir.GetScaleByNum(this.effects.startDist));
+        this.ptcls[i].startVel.SetCopy(randDir.GetScaleByNum(this.effects.speed));
+        this.ptcls[i].startAcc.SetCopy(this.effects.acc);
+        this.ptcls[i].dampening = this.effects.dampening;
 
         ptclVerts.posCoords = ptclVerts.posCoords.concat(this.ptcls[i].pos.GetData());
-        ptclVerts.colElems = ptclVerts.colElems.concat([randX, randY, randZ]);
+        ptclVerts.colElems = ptclVerts.colElems.concat([
+            (this.effects.colourTop.x - this.effects.colourBtm.x) * randX + this.effects.colourBtm.x,
+            (this.effects.colourTop.y - this.effects.colourBtm.y) * randY + this.effects.colourBtm.y,
+            (this.effects.colourTop.z - this.effects.colourBtm.z) * randZ + this.effects.colourBtm.z
+        ]);
     }
 
     this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
 }
 ParticlePointField.prototype = {
-    DefinePtcl: function(speed, acceleration, dampening, ptclLife) {
+    DefinePtcl: function(speed, acceleration, dampening) {
         for(var i = 0; i < this.ptclCount; i++) {
             this.ptcls[i].acc.SetCopy(acceleration);
             this.ptcls[i].dampening = dampening;

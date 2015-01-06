@@ -8,16 +8,26 @@ function BuildScene5(scene) {
     scene.rootObj.camera.SetControlsActive(scene.name, true);
 
 
+    var effects = new PtclEffects();
+    effects.travelTime = 7.0;
+    effects.staggerRate = 0.1;
+    effects.startDist = 0.0;
+    effects.dir = new Vector3(0.0, 1.0, 0.0);
+    effects.range = 60.0;
+    effects.speed = 5.0;
+    effects.acc = new Vector3(0.0, -2.0, 0.0);
+    effects.dampening = 1.0;
+    effects.colourBtm = new Vector3(0.0, 1.0, 0.5);
+    effects.colourTop = new Vector3(1.0, 1.0, 1.0);
+    effects.alphaStart = 1.0;
+    effects.alphaEnd = 1.0;
 
+    var simplePtField = new ParticlePointField(100, 30.0, effects);
 
     var ptclObj1 = new GameObject('Particle Object 1', Labels.testObject);
     ptclObj1.AddComponent(Components.particleSystem);
     ptclObj1.trfmLocal.SetPosAxes(1.0, 1.0, 0.0);
-
-    var simplePtField = new ParticlePointField(50, 10.0, 0.2, 30.0);
     ptclObj1.ptclSys.AddField(simplePtField, "Point Sphere");
-
-
 
 
 
