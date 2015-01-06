@@ -2,7 +2,7 @@
  * Created by Devin on 2015-01-03.
  */
 
-function ParticlePoint(travelTime, countDown) {
+function ParticleSimple(travelTime, countDown) {
     // Physics
     this.startPos = new Vector3();
     this.startVel = new Vector3();
@@ -10,22 +10,26 @@ function ParticlePoint(travelTime, countDown) {
     this.pos = new Vector3(0.0, 999.0, 0.0);
     this.vel = new Vector3();
     this.acc = new Vector3();
-    this.coneRange = 45.0;
     this.dampening = 1.0;
     // Duration
     this.travelTime = travelTime;
     this.countDown = countDown;
     this.isAlive = false;
     // Effects
-    this.colour = new Vector3();
-    this.alpha = 1.0;
+    this.tailPos = this.pos.GetCopy();
+    this.tailLength = 0.0;
 }
-ParticlePoint.prototype = {
+ParticleSimple.prototype = {
     Update: function() {
         if(this.isAlive) {
             this.vel.SetAddScaled(this.acc, Time.deltaMilli);
             this.vel.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
             this.pos.SetAdd(this.vel.GetScaleByNum(Time.deltaMilli));
+
+            if(this.tailLength > 0) {
+                var dir = this.vel.GetNormalized();
+                this.tailPos = this.pos.GetSubtract(dir.SetScaleByNum(this.tailLength));
+            }
 
             this.countDown -= Time.deltaMilli;
             if(this.countDown < 0.0)
@@ -36,19 +40,20 @@ ParticlePoint.prototype = {
         this.pos.SetCopy(this.startPos);
         this.vel.SetCopy(this.startVel);
         this.acc.SetCopy(this.startAcc);
+        this.tailPos.SetCopy(this.startPos);
         this.countDown = this.travelTime;
     }
 };
 
-function ParticlePointField(ptclCount, fieldLife, effects) {
+function ParticleFieldSimple(ptclCount, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
     this.fieldLifeTime = fieldLife || 20.0;
-
-    this.effects = new PtclEffects(effects);
+    this.counter = this.fieldLifeTime;
 
     // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
-    this.active = true;
+    this.active = false;
     this.deadPtcls = this.ptclCount;
+    this.stagger = effects.staggerRate;
 
     // Using changing looping functions
     this.Callback = this.Launch;
@@ -64,40 +69,54 @@ function ParticlePointField(ptclCount, fieldLife, effects) {
     };
 
     // Instantiate particles
-    this.effects.dir.SetNormalized();
+    var dir = effects.dir.GetNormalized();
     for(var i = 0; i < this.ptclCount; i++) {
         var randX = Math.random(),
             randY = Math.random(),
             randZ = Math.random();
-        this.ptcls.push(new ParticlePoint(this.effects.travelTime, effects.staggerRate * i ));
+        this.ptcls.push(new ParticleSimple(effects.travelTime, effects.staggerRate * i ));
 
         var randConeAngle = (effects.range / 2.0) * ((randX*2) - 1);
         var randRotAngle = 360 * randY;
-        var randDir = this.effects.dir.GetRotated(randConeAngle, this.effects.dir.GetOrthoAxis());
-        randDir.SetRotated(randRotAngle, this.effects.dir);
+        var randDir = dir.GetRotated(randConeAngle, dir.GetOrthoAxis());
+        randDir.SetRotated(randRotAngle, dir);
 
-        this.ptcls[i].startPos.SetCopy(randDir.GetScaleByNum(this.effects.startDist));
-        this.ptcls[i].startVel.SetCopy(randDir.GetScaleByNum(this.effects.speed));
-        this.ptcls[i].startAcc.SetCopy(this.effects.acc);
-        this.ptcls[i].dampening = this.effects.dampening;
+        this.ptcls[i].startPos.SetCopy(randDir.GetScaleByNum(effects.startDist));
+        this.ptcls[i].startVel.SetCopy(randDir.GetScaleByNum(effects.speed));
+        this.ptcls[i].startAcc.SetCopy(effects.acc);
+        this.ptcls[i].dampening = effects.dampening;
+
+        var ptclColour = [
+            (effects.colourTop.x - effects.colourBtm.x) * randX + effects.colourBtm.x,
+            (effects.colourTop.y - effects.colourBtm.y) * randY + effects.colourBtm.y,
+            (effects.colourTop.z - effects.colourBtm.z) * randZ + effects.colourBtm.z
+        ];
 
         ptclVerts.posCoords = ptclVerts.posCoords.concat(this.ptcls[i].pos.GetData());
-        ptclVerts.colElems = ptclVerts.colElems.concat([
-            (this.effects.colourTop.x - this.effects.colourBtm.x) * randX + this.effects.colourBtm.x,
-            (this.effects.colourTop.y - this.effects.colourBtm.y) * randY + this.effects.colourBtm.y,
-            (this.effects.colourTop.z - this.effects.colourBtm.z) * randZ + this.effects.colourBtm.z
-        ]);
+        ptclVerts.colElems = ptclVerts.colElems.concat(ptclColour);
+
+        if(effects.lineLength > 0) {
+            this.ptcls[i].tailLength = effects.lineLength;
+            ptclVerts.posCoords = ptclVerts.posCoords.concat(this.ptcls[i].tailPos.GetData());
+            ptclVerts.colElems = ptclVerts.colElems.concat(ptclColour);
+        }
     }
 
-    this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
+    if(effects.lineLength <= 0)
+        this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
+    else
+        this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.lines);
 }
-ParticlePointField.prototype = {
+ParticleFieldSimple.prototype = {
     DefinePtclFade: function(endAlpha, fromTime) {
 
     },
+    Run: function() {
+        this.active = true;
+    },
     CheckEnd: function() {
-        this.fieldLifeTime -= Time.deltaMilli;
-        if(this.fieldLifeTime <= 0)
+        this.counter -= Time.deltaMilli;
+        if(this.counter <= 0)
             this.Callback = this.Terminate;
     },
     Launch: function() {
@@ -122,6 +141,8 @@ ParticlePointField.prototype = {
                     this.ptcls[i].Update();
                 }
                 newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
+                if(this.ptcls[i].tailLength > 0)
+                    newPosCoords = newPosCoords.concat(this.ptcls[i].tailPos.GetData());
             }
             this.fieldHdlr.RewriteVerts(newPosCoords);
         }
@@ -138,6 +159,8 @@ ParticlePointField.prototype = {
         for (var i = 0; i < this.ptcls.length; i++) {
             this.ptcls[i].Update();
             newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
+            if(this.ptcls[i].tailLength > 0)
+                newPosCoords = newPosCoords.concat(this.ptcls[i].tailPos.GetData());
         }
         this.fieldHdlr.RewriteVerts(newPosCoords);
         this.CheckEnd();
@@ -156,15 +179,25 @@ ParticlePointField.prototype = {
                     if (this.ptcls[i].countDown >= this.ptcls[i].travelTime - Time.deltaMilli) {
                         this.ptcls[i].isAlive = false;
                         this.ptcls[i].pos.SetValues(0.0, 999.0, 0.0);
+                        this.ptcls[i].tailPos.SetValues(0.0, 999.0, 0.0);
                         this.deadPtcls++;
                     }
                 }
                 newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
+                if(this.ptcls[i].tailLength > 0)
+                    newPosCoords = newPosCoords.concat(this.ptcls[i].tailPos.GetData());
             }
             this.fieldHdlr.RewriteVerts(newPosCoords);
         }
-        else
-            return -1;
+        else {
+            // Reset things
+            this.Callback = this.Launch;
+            this.counter = this.fieldLifeTime;
+            for (var i = 0; i < this.ptcls.length; i++) {
+                this.ptcls[i].countDown = this.stagger * i;
+            }
+            this.active = false;
+        }
     }
 };
 
@@ -173,30 +206,25 @@ function ParticleSystem(trfmObjMtx) {
     //this.trfmObj = trfmObj;
     this.mtxModel = trfmObjMtx;
 
-    this.runningFields = [];
-    this.ptclFields = {};
+    this.ptclFields = [];
 }
 ParticleSystem.prototype = {
-    AddField: function(field, name) {
-        this.ptclFields[name] = field;
+    AddField: function(field) {
+        this.ptclFields.push(field);
     },
-    RemoveField: function(name) {
-        var index = this.ptclFields.indexOf(this.ptclFields[name]);
+    RemoveField: function(field) {
+        var index = this.ptclFields.indexOf(field);
         if(index != -1) {
-            this.runningFields.splice(index, 1);
-            delete this.ptclFields[name];
+            this.ptclFields.splice(index, 1);
         }
-    },
-    RunField: function(name) {
-        this.runningFields.push(this.ptclFields[name]);
     },
     GetRunningPtclFields: function() {
-        return this.runningFields;
+        return this.ptclFields;
     },
     Update: function() {
-        for (var i = this.runningFields.length - 1; i >= 0; i--) {
-            if(this.runningFields[i].Callback() == -1) {
-                this.runningFields.splice(i, 1);
+        for (var i = this.ptclFields.length - 1; i >= 0; i--) {
+            if(this.ptclFields[i].active) {
+                this.ptclFields[i].Callback();
             }
         }
     }
@@ -205,48 +233,6 @@ ParticleSystem.prototype = {
 
 
 
-
-
-
-
-
-
-
-
-
-function ParticleLineField(trfmObj, radiusObj) {
-    this.trfmObj = trfmObj;
-    this.radiusObj = radiusObj;
-    this.trfm = new Transform(Space.local);
-    this.trfm.pos.SetCopy(this.trfmObj.pos);
-
-    this.count = 10;
-    this.sysLifeTime = 20.0;
-    this.ptcls = [];
-}
-ParticleLineField.prototype = {
-    AddParticle: function(particle) {
-        this.ptcls.push(particle);
-    },
-    SetStartDist: function(scalar) {
-        // Scaled amount from obj radius,
-        // thus allowing user to say 1 for the outer sphere's edge, or zero from dead centre
-        var dist = this.radiusObj * scalar;
-    },
-    Update: function() {
-
-        for (var i = 0; i < this.ptcls.length; i++) {
-            if(this.ptcls[i].isAlive) {
-                this.ptcls[i].Update();
-            }
-            else {
-                // ?? Easier then destroying and recreating
-                // But what about the end of the systems' life? Just keep them dead (and set alpha zero) then...
-                this.ptcls[i].Reset();
-            }
-        }
-    }
-};
 
 
 function ParticleShapeField(trfmObj, radiusObj) {

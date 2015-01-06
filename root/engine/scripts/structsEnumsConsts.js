@@ -110,6 +110,7 @@ function PtclEffects(effects) {
     this.dampening = 1.0;
     this.colourBtm = new Vector3();
     this.colourTop = new Vector3(1.0, 1.0, 1.0);
+    this.lineLength = 0.0;
     this.alphaStart = 1.0;
     this.alphaEnd = 1.0;
 
@@ -124,6 +125,7 @@ function PtclEffects(effects) {
         this.dampening = effects.dampening;
         this.colourBtm = effects.colourBtm.GetCopy();
         this.colourTop = effects.colourTop.GetCopy();
+        this.lineLength = effects.lineLength;
         this.alphaStart = effects.alphaStart;
         this.alphaEnd = effects.alphaEnd;
     }

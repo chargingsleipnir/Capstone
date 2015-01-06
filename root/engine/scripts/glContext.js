@@ -332,7 +332,7 @@ var GL = {
             var ptclFields = scene.ptclSystems[i].GetRunningPtclFields();
             for (var j = 0; j < ptclFields.length; j++)
             {
-                if(ptclFields[j].fieldHdlr.active) {
+                if(ptclFields[j].active) {
                     //fieldCount++;
                     // These just allow everything to be better read
                     shdr = ptclFields[j].fieldHdlr.shaderData;

@@ -36,9 +36,9 @@ var DebugMngr = {
     frameRateCapture: 0,
     counter: 0,
     Update: function() {
-        if(this.active) {
+        if(this.frameRateMsg != null) {
             this.counter += Time.deltaMilli;
-            if (this.counter > 0.5) {
+            if (this.counter > 0.25) {
                 this.counter = 0.0;
                 this.frameRateCapture = Time.fps;
             }

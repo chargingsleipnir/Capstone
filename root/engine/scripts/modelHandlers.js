@@ -89,7 +89,6 @@ function PtclFieldHandler(pntVerts, drawMethod) {
     this.shaderData = ModelUtils.BuildShaderProgram(pntVerts, []);
 
     this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
-    this.active = true;
 }
 PtclFieldHandler.prototype = {
     SetTintRGB: function(r, g, b) {

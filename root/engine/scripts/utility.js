@@ -289,8 +289,6 @@ var ModelUtils = {
         mainFunc = ShdrLines.main.start;
         mainFunc += ShdrLines.main.pntSize;
 
-        // Switch(true), case colour: case texture: ...
-
         if(colour) {
             declaration += ShdrLines.attr.col;
             declaration += ShdrLines.vary.col;
