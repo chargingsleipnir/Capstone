@@ -9,6 +9,41 @@ var DebugMngr = {
             this.active = this.dispOrientAxes = this.dispShells = this.dispRays = true;
         else
             this.active = this.dispOrientAxes = this.dispShells = this.dispRays = false;
+    },
+    Initialize: function() {
+        if(this.active) {
+            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 220, 20, 200, 100), "Performance Data");
+
+            var style = new MsgBoxStyle();
+            style.fontSize = 20;
+            style.fontColour = new Vector3(1.0, 1.0, 1.0);
+            style.textMaxWidth = 0;
+            style.textAlignWidth = Alignment.left;
+            style.textAlignHeight = Alignment.top;
+            style.bgTexture = null;
+            style.bgColour = new Vector3(0.0, 0.0, 0.0);
+            style.textLineSpacing = 0.0;
+            style.margin = 5.0;
+            style.bgAlpha = 0.25;
+            style.bold = false;
+            this.frameRateMsg = new GUIObject(new WndRect(0, 0, 200, 30), "FrameRt", style);
+            performanceData.AddGUIObject(this.frameRateMsg);
+
+            GUINetwork.AddSystem(performanceData, true);
+        }
+    },
+    frameRateMsg: null,
+    frameRateCapture: 0,
+    counter: 0,
+    Update: function() {
+        if(this.active) {
+            this.counter += Time.deltaMilli;
+            if (this.counter > 0.5) {
+                this.counter = 0.0;
+                this.frameRateCapture = Time.fps;
+            }
+            this.frameRateMsg.UpdateMsg("FPS: " + this.frameRateCapture.toString());
+        }
     }
 };
 

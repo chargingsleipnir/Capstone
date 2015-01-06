@@ -92,15 +92,6 @@ function ParticlePointField(ptclCount, fieldLife, effects) {
     this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
 }
 ParticlePointField.prototype = {
-    DefinePtcl: function(speed, acceleration, dampening) {
-        for(var i = 0; i < this.ptclCount; i++) {
-            this.ptcls[i].acc.SetCopy(acceleration);
-            this.ptcls[i].dampening = dampening;
-        }
-    },
-    DefinePtclColourRange: function(colour1, colour2) {
-
-    },
     DefinePtclFade: function(endAlpha, fromTime) {
 
     },

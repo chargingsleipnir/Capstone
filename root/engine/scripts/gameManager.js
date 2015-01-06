@@ -16,6 +16,7 @@ var GameMngr = {
         GL.Initialize(canvasWebGL.getContext('webgl'));
         ViewMngr.Initialize(canvasWebGL);
         TwoD.Initialize(canvas2D.getContext('2d'));
+        DebugMngr.Initialize();
     },
     LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, Callback) {
         var that = this;
@@ -38,6 +39,7 @@ var GameMngr = {
 
             // Updating Game World and Draw Calls
             SceneMngr.Update();
+            DebugMngr.Update();
             that.UserUpdate();
             GL.RenderScene();
         }
