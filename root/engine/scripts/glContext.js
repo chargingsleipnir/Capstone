@@ -370,7 +370,7 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
             }
-            var trails = scene.ptclSystems[i].GetTrails();
+            var trails = scene.ptclSystems[i].GetTails();
             shdr = EL.assets.shaderPrograms['ray'];
             this.ctx.useProgram(shdr.program);
             for (var j = 0; j < trails.length; j++)

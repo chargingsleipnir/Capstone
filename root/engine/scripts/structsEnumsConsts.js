@@ -99,7 +99,7 @@ function MsgBoxStyle(style) {
     }
 }
 
-function PtclEffects(effects) {
+function PtclFieldEffects(effects) {
     this.travelTime = 5.0;
     this.staggerRate = 0.0;
     this.startDist = 0.0;
@@ -131,6 +131,14 @@ function PtclEffects(effects) {
     }
 }
 
+function FlatTailEffects() {
+    this.colour = new Vector3();
+    this.thickness = 1.0;
+    this.axis = Axes.y;
+    this.alphaStart = 1.0;
+    this.alphaEnd = 1.0;
+}
+
 var Time = {
     deltaMilli: 0.0,
     counter: 0.0,
@@ -148,6 +156,7 @@ var Planes = { left: 0, right: 1, bottom: 2, top: 3, far: 4, near: 5 };
 var MoveMethod = { input: 0, physics: 1, script: 2 };
 var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
 var Alignment = { left: 0, centre: 0.5, right: 1, bottom: 1, top: 0 };
+var Axes = { x: 0, y: 1, z: 2 };
 
 var KeyMap = {
     Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, CapsLock: 20, Esc: 27,

@@ -11,7 +11,7 @@ function BuildScene5(scene) {
     ptclObj1.AddComponent(Components.particleSystem);
     ptclObj1.trfmLocal.SetPosAxes(0.0, 0.0, 0.0);
 
-    var effects = new PtclEffects();
+    var effects = new PtclFieldEffects();
     effects.travelTime = 7.0;
     effects.staggerRate = 0.1;
     effects.startDist = 0.0;
@@ -25,6 +25,7 @@ function BuildScene5(scene) {
     effects.lineLength = 0.0;
     effects.alphaStart = 1.0;
     effects.alphaEnd = 1.0;
+
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
 
     effects.travelTime = 7.0;
@@ -40,12 +41,23 @@ function BuildScene5(scene) {
     effects.lineLength = 0.3;
     effects.alphaStart = 1.0;
     effects.alphaEnd = 1.0;
+
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
+
 
     var ptclObj2 = new GameObject('Particle Object 2', Labels.testObject);
     ptclObj2.SetModel(Primitives.arrow);
     ptclObj2.AddComponent(Components.particleSystem);
-    ptclObj2.ptclSys.AddTrail(150, 30, new Vector3(1.0, 1.0, 1.0));
+
+    var tailEffects = new FlatTailEffects();
+    tailEffects.colour = new Vector3(1.0, 1.0, 0.0);
+    tailEffects.thickness = 0.3;
+    tailEffects.axis = Axes.z;
+    tailEffects.alphaStart = 1.0;
+    tailEffects.alphaEnd = 1.0;
+
+    ptclObj2.ptclSys.AddTail(150, 30, tailEffects);
+
 
     var ctrlName = "ParticleTestScene";
     Input.RegisterControlScheme(ctrlName, false);
@@ -77,7 +89,7 @@ function BuildScene5(scene) {
             fireGatling.Release();
         }
         if(leaveTrail.pressed) {
-            ptclObj2.ptclSys.Runtrail(0);
+            ptclObj2.ptclSys.RunTail(0);
             leaveTrail.Release();
         }
 

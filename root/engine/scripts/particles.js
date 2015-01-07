@@ -198,14 +198,22 @@ ParticleFieldSimple.prototype = {
     }
 };
 
-function ParticleTrail(trfmObj, ptclCount, fieldLife, colour) {
+function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
     this.trfm = trfmObj;
     this.ptclCount = ptclCount || 10;
     this.fieldLifeTime = fieldLife || 20.0;
     this.counter = this.fieldLifeTime;
 
-    // Height effect - much can be done with this. Add a twist?
-    this.radialHeight = 0.25;
+    /*
+    tailEffects.axis = Axes.x;
+    */
+    this.axis = new Vector3();
+    if(effects.axis == Axes.x)
+        this.axis.x = effects.thickness / 2;
+    else if(effects.axis == Axes.y)
+        this.axis.y = effects.thickness / 2;
+    else if(effects.axis == Axes.z)
+        this.axis.z = effects.thickness / 2;
 
     // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
     this.active = false;
@@ -216,12 +224,12 @@ function ParticleTrail(trfmObj, ptclCount, fieldLife, colour) {
     this.posCoords = [];
     var colElems = [];
     for(var i = 0; i < this.ptclCount; i++) {
-        this.posCoords.push(this.trfm.pos.x);
-        this.posCoords.push(this.trfm.pos.y + this.radialHeight);
-        this.posCoords.push(this.trfm.pos.z);
-        this.radialHeight = -this.radialHeight;
+        this.posCoords.push(this.trfm.pos.x + this.axis.x);
+        this.posCoords.push(this.trfm.pos.y + this.axis.y);
+        this.posCoords.push(this.trfm.pos.z + this.axis.z);
+        this.axis.SetNegative();
 
-        colElems = colElems.concat(colour.GetData());
+        colElems = colElems.concat(effects.colour.GetData());
     }
 
     var ptclVerts = {
@@ -234,7 +242,7 @@ function ParticleTrail(trfmObj, ptclCount, fieldLife, colour) {
 
     this.trailHdlr = new RayCastHandler(ptclVerts);
 }
-ParticleTrail.prototype = {
+FlatTail.prototype = {
     CheckEnd: function() {
         this.counter -= Time.deltaMilli;
         if(this.counter <= 0)
@@ -243,10 +251,10 @@ ParticleTrail.prototype = {
     Launch: function() {
         this.posCoords = [];
         for(var i = 0; i < this.ptclCount; i++) {
-            this.posCoords.push(this.trfm.pos.x);
-            this.posCoords.push(this.trfm.pos.y + this.radialHeight);
-            this.posCoords.push(this.trfm.pos.z);
-            this.radialHeight = -this.radialHeight;
+            this.posCoords.push(this.trfm.pos.x + this.axis.x);
+            this.posCoords.push(this.trfm.pos.y + this.axis.y);
+            this.posCoords.push(this.trfm.pos.z + this.axis.z);
+            this.axis.SetNegative();
         }
         this.trailHdlr.RewriteVerts(this.posCoords);
 
@@ -259,9 +267,13 @@ ParticleTrail.prototype = {
         this.posCoords.pop();
         this.posCoords.pop();
         this.posCoords.pop();
-        this.posCoords.unshift(this.trfm.pos.x, this.trfm.pos.y + this.radialHeight, this.trfm.pos.z);
+        this.posCoords.unshift(
+            this.trfm.pos.x + this.axis.x,
+            this.trfm.pos.y + this.axis.y,
+            this.trfm.pos.z + this.axis.z
+        );
         this.trailHdlr.RewriteVerts(this.posCoords);
-        this.radialHeight = -this.radialHeight;
+        this.axis.SetNegative();
         this.CheckEnd();
     },
     Terminate: function() {
@@ -285,14 +297,14 @@ function ParticleSystem(trfmObj) {
     this.mtxModel = trfmObj.mtx;
 
     this.simpleFields = [];
-    this.trails = [];
+    this.tails = [];
 }
 ParticleSystem.prototype = {
     AddSimpleField: function(ptclCount, fieldLife, effects) {
         this.simpleFields.push(new ParticleFieldSimple(ptclCount, fieldLife, effects));
     },
-    AddTrail: function(ptclCount, fieldLife, colour) {
-        this.trails.push(new ParticleTrail(this.trfmObj, ptclCount, fieldLife, colour));
+    AddTail: function(ptclCount, fieldLife, effects) {
+        this.tails.push(new FlatTail(this.trfmObj, ptclCount, fieldLife, effects));
     },
     RemoveField: function(field) {
         var index = this.simpleFields.indexOf(field);
@@ -303,14 +315,14 @@ ParticleSystem.prototype = {
     RunField: function(index) {
         this.simpleFields[index].active = true;
     },
-    Runtrail: function(index) {
-        this.trails[index].active = true;
+    RunTail: function(index) {
+        this.tails[index].active = true;
     },
     GetSimpleFields: function() {
         return this.simpleFields;
     },
-    GetTrails: function() {
-        return this.trails;
+    GetTails: function() {
+        return this.tails;
     },
     Update: function() {
         for (var i = this.simpleFields.length - 1; i >= 0; i--) {
@@ -318,9 +330,9 @@ ParticleSystem.prototype = {
                 this.simpleFields[i].Callback();
             }
         }
-        for (var i = this.trails.length - 1; i >= 0; i--) {
-            if (this.trails[i].active) {
-                this.trails[i].Callback();
+        for (var i = this.tails.length - 1; i >= 0; i--) {
+            if (this.tails[i].active) {
+                this.tails[i].Callback();
             }
         }
     }
