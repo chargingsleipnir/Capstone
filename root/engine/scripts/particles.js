@@ -111,9 +111,6 @@ ParticleFieldSimple.prototype = {
     DefinePtclFade: function(endAlpha, fromTime) {
 
     },
-    Run: function() {
-        this.active = true;
-    },
     CheckEnd: function() {
         this.counter -= Time.deltaMilli;
         if(this.counter <= 0)
@@ -201,30 +198,129 @@ ParticleFieldSimple.prototype = {
     }
 };
 
+function ParticleTrail(trfmObj, ptclCount, fieldLife, colour) {
+    this.trfm = trfmObj;
+    this.ptclCount = ptclCount || 10;
+    this.fieldLifeTime = fieldLife || 20.0;
+    this.counter = this.fieldLifeTime;
 
-function ParticleSystem(trfmObjMtx) {
-    //this.trfmObj = trfmObj;
-    this.mtxModel = trfmObjMtx;
+    // Height effect - much can be done with this. Add a twist?
+    this.radialHeight = 0.25;
 
-    this.ptclFields = [];
+    // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
+    this.active = false;
+
+    // Using changing looping functions
+    this.Callback = this.Launch;
+
+    this.posCoords = [];
+    var colElems = [];
+    for(var i = 0; i < this.ptclCount; i++) {
+        this.posCoords.push(this.trfm.pos.x);
+        this.posCoords.push(this.trfm.pos.y + this.radialHeight);
+        this.posCoords.push(this.trfm.pos.z);
+        this.radialHeight = -this.radialHeight;
+
+        colElems = colElems.concat(colour.GetData());
+    }
+
+    var ptclVerts = {
+        count: this.ptclCount,
+        posCoords: this.posCoords,
+        colElems: colElems,
+        texCoords: [],
+        normAxes: []
+    };
+
+    this.trailHdlr = new RayCastHandler(ptclVerts);
 }
-ParticleSystem.prototype = {
-    AddField: function(field) {
-        this.ptclFields.push(field);
+ParticleTrail.prototype = {
+    CheckEnd: function() {
+        this.counter -= Time.deltaMilli;
+        if(this.counter <= 0)
+            this.Callback = this.Terminate;
     },
-    RemoveField: function(field) {
-        var index = this.ptclFields.indexOf(field);
-        if(index != -1) {
-            this.ptclFields.splice(index, 1);
+    Launch: function() {
+        this.posCoords = [];
+        for(var i = 0; i < this.ptclCount; i++) {
+            this.posCoords.push(this.trfm.pos.x);
+            this.posCoords.push(this.trfm.pos.y + this.radialHeight);
+            this.posCoords.push(this.trfm.pos.z);
+            this.radialHeight = -this.radialHeight;
         }
-    },
-    GetRunningPtclFields: function() {
-        return this.ptclFields;
+        this.trailHdlr.RewriteVerts(this.posCoords);
+
+        this.Callback = this.Update;
     },
     Update: function() {
-        for (var i = this.ptclFields.length - 1; i >= 0; i--) {
-            if(this.ptclFields[i].active) {
-                this.ptclFields[i].Callback();
+        /* This loop function is implemented to allow each particle field to slowly stagger
+         * in, update, and stagger out all of it's particles, so they don't all have to arrive
+         * or disappear at the same time. */
+        this.posCoords.pop();
+        this.posCoords.pop();
+        this.posCoords.pop();
+        this.posCoords.unshift(this.trfm.pos.x, this.trfm.pos.y + this.radialHeight, this.trfm.pos.z);
+        this.trailHdlr.RewriteVerts(this.posCoords);
+        this.radialHeight = -this.radialHeight;
+        this.CheckEnd();
+    },
+    Terminate: function() {
+        this.posCoords = [];
+        for(var i = 0; i < this.ptclCount; i++) {
+            this.posCoords.push(this.trfm.pos.x);
+            this.posCoords.push(999.0);
+            this.posCoords.push(this.trfm.pos.z);
+        }
+        this.trailHdlr.RewriteVerts(this.posCoords);
+
+        this.Callback = this.Launch;
+        this.counter = this.fieldLifeTime;
+        this.active = false;
+    }
+};
+
+
+function ParticleSystem(trfmObj) {
+    this.trfmObj = trfmObj;
+    this.mtxModel = trfmObj.mtx;
+
+    this.simpleFields = [];
+    this.trails = [];
+}
+ParticleSystem.prototype = {
+    AddSimpleField: function(ptclCount, fieldLife, effects) {
+        this.simpleFields.push(new ParticleFieldSimple(ptclCount, fieldLife, effects));
+    },
+    AddTrail: function(ptclCount, fieldLife, colour) {
+        this.trails.push(new ParticleTrail(this.trfmObj, ptclCount, fieldLife, colour));
+    },
+    RemoveField: function(field) {
+        var index = this.simpleFields.indexOf(field);
+        if(index != -1) {
+            this.simpleFields.splice(index, 1);
+        }
+    },
+    RunField: function(index) {
+        this.simpleFields[index].active = true;
+    },
+    Runtrail: function(index) {
+        this.trails[index].active = true;
+    },
+    GetSimpleFields: function() {
+        return this.simpleFields;
+    },
+    GetTrails: function() {
+        return this.trails;
+    },
+    Update: function() {
+        for (var i = this.simpleFields.length - 1; i >= 0; i--) {
+            if(this.simpleFields[i].active) {
+                this.simpleFields[i].Callback();
+            }
+        }
+        for (var i = this.trails.length - 1; i >= 0; i--) {
+            if (this.trails[i].active) {
+                this.trails[i].Callback();
             }
         }
     }

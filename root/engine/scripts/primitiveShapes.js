@@ -1012,7 +1012,6 @@ var Primitives = {
         normals = [];
         var texCoords = [];
         var r = 1.0;
-        var texBound = 0.75;
         var pivotPoint = [0, 0, 1];
         for (var i = 0; i < vertPositions.length; i++) {
             for (var j = 0; j < vertPositions[i].length; j++) {

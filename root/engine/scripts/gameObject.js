@@ -64,7 +64,7 @@ GameObject.prototype = {
             this.components.push(this.collider);
         }
         else if (component == Components.particleSystem) {
-            this.ptclSys = new ParticleSystem(this.trfmGlobal.mtx);
+            this.ptclSys = new ParticleSystem(this.trfmGlobal);
             this.components.push(this.ptclSys);
         }
     },
