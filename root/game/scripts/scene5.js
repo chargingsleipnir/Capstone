@@ -7,6 +7,10 @@ function BuildScene5(scene) {
     scene.rootObj.AddComponent(Components.camera);
     scene.rootObj.camera.SetControlsActive(scene.name, true);
 
+
+    //////////////////////////////////
+
+
     var ptclObj1 = new GameObject('Particle Object 1', Labels.testObject);
     ptclObj1.AddComponent(Components.particleSystem);
     ptclObj1.trfmLocal.SetPosAxes(0.0, 0.0, 0.0);
@@ -45,6 +49,9 @@ function BuildScene5(scene) {
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
 
 
+    //////////////////////////////////
+
+
     var ptclObj2 = new GameObject('Particle Object 2', Labels.testObject);
     ptclObj2.SetModel(Primitives.arrow);
     ptclObj2.AddComponent(Components.particleSystem);
@@ -52,11 +59,42 @@ function BuildScene5(scene) {
     var tailEffects = new FlatTailEffects();
     tailEffects.colour = new Vector3(1.0, 1.0, 0.0);
     tailEffects.thickness = 0.3;
-    tailEffects.axis = Axes.z;
+    tailEffects.axis = Axes.y;
     tailEffects.alphaStart = 1.0;
     tailEffects.alphaEnd = 1.0;
 
-    ptclObj2.ptclSys.AddTail(150, 30, tailEffects);
+    ptclObj2.ptclSys.AddTail(101, 30, tailEffects);
+
+
+    //////////////////////////////////
+
+
+    var ptclObj3 = new GameObject('Particle Object 3', Labels.testObject);
+    ptclObj3.trfmLocal.SetPosAxes(0.0, 10.0, 0.0);
+    ptclObj3.SetModel(new Primitives.IcoSphere(2, 3));
+    ptclObj3.mdlHdlr.SetTexture(EL.assets.textures['ice'], TextureFilters.linear);
+    ptclObj3.AddComponent(Components.particleSystem);
+
+    effects.travelTime = 7.0;
+    effects.staggerRate = 0.2;
+    effects.startDist = 5.0;
+    effects.dir = new Vector3(1.0, 1.0, -1.0);
+    effects.range = 5.0;
+    effects.speed = 10.0;
+    effects.acc = new Vector3(-4.0, -2.0, 2.0);
+    effects.dampening = 1.0;
+    effects.colourBtm = new Vector3(1.0, 0.0, 1.0);
+    effects.colourTop = new Vector3(1.0, 1.0, 1.0);
+    effects.alphaStart = 1.0;
+    effects.alphaEnd = 1.0;
+    effects.texture = EL.assets.textures['star'];
+    effects.rotAngDeg = 15.0;
+    effects.size = 1.0;
+
+    ptclObj3.ptclSys.AddTexField(30, 30, effects);
+
+
+    //////////////////////////////////
 
 
     var ctrlName = "ParticleTestScene";
@@ -109,5 +147,6 @@ function BuildScene5(scene) {
 
     scene.Add(ptclObj1);
     scene.Add(ptclObj2);
+    scene.Add(ptclObj3);
     scene.SetCallbacks(Start, Update, End);
 }

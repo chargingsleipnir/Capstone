@@ -99,7 +99,7 @@ function MsgBoxStyle(style) {
     }
 }
 
-function PtclFieldEffects(effects) {
+function PtclFieldEffects() {
     this.travelTime = 5.0;
     this.staggerRate = 0.0;
     this.startDist = 0.0;
@@ -113,24 +113,10 @@ function PtclFieldEffects(effects) {
     this.lineLength = 0.0;
     this.alphaStart = 1.0;
     this.alphaEnd = 1.0;
-
-    if(effects) {
-        this.travelTime = effects.travelTime;
-        this.staggerRate = effects.staggerRate;
-        this.startDist = effects.startDist;
-        this.dir = effects.dir.GetCopy();
-        this.range = effects.range;
-        this.speed = effects.speed;
-        this.acc = effects.acc.GetCopy();
-        this.dampening = effects.dampening;
-        this.colourBtm = effects.colourBtm.GetCopy();
-        this.colourTop = effects.colourTop.GetCopy();
-        this.lineLength = effects.lineLength;
-        this.alphaStart = effects.alphaStart;
-        this.alphaEnd = effects.alphaEnd;
-    }
+    this.texture = EL.assets.textures['star'];
+    this.rotAngDeg = 15.0;
+    this.size = 1.0;
 }
-
 function FlatTailEffects() {
     this.colour = new Vector3();
     this.thickness = 1.0;
