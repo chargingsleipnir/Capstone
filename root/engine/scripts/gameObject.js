@@ -122,7 +122,7 @@ GameObject.prototype = {
             this.trfmGlobal.SetRotation(this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient));
             this.trfmGlobal.SetScaleVec3(this.trfmLocal.scale.GetScaleByVec(trfmParent.scale));
 
-            this.trfmGlobal.IsChanging();
+            //this.trfmGlobal.IsChanging();
         }
 
         // Scripts first?? Sure...

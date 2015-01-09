@@ -481,7 +481,6 @@ FlatTail.prototype = {
 
 function ParticleSystem(trfmObj) {
     this.trfmObj = trfmObj;
-    this.mtxModel = trfmObj.mtx;
 
     this.simpleFields = [];
     this.tails = [];
@@ -514,6 +513,9 @@ ParticleSystem.prototype = {
     },
     GetTails: function() {
         return this.tails;
+    },
+    GetTexFields: function() {
+        return this.texFields;
     },
     Update: function() {
         for (var i = this.simpleFields.length - 1; i >= 0; i--) {

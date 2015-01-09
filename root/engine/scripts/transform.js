@@ -9,8 +9,6 @@ function Transform(space) {
     //this.offsetRot = Vector3.CreateZero();
     //this.offsetScale = Vector3.CreateOne();
 
-    this.mtx = new Matrix4();
-
     this.active = false;
     this.space = space;
 }
@@ -153,12 +151,6 @@ Transform.prototype = {
 
             if(this.space == Space.local)
                 this.active = false;
-            else {
-                this.mtx.SetIdentity();
-                this.mtx.SetTranslateVec3(this.pos);
-                this.mtx.SetRotateAbout(this.orient.GetAxis(), this.orient.GetAngle());
-                this.mtx.SetScaleVec3(this.scale);
-            }
 
             return true;
         }

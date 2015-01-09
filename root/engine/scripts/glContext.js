@@ -213,6 +213,7 @@ var GL = {
                 return this.ctx.TRIANGLES;
         }
     },
+    mtxModel: new Matrix4(),
     RenderScene: function() {
         /// <signature>
         ///  <summary>Render every object in the scene</summary>
@@ -224,7 +225,6 @@ var GL = {
         this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
 
         var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
-        var mtxMVP;
 
         //var frustumTestCount = 0;
         var scene = SceneMngr.GetActiveScene();
@@ -235,6 +235,11 @@ var GL = {
             if (scene.models[i].active && ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere))
             {
                 //frustumTestCount++;
+
+                this.mtxModel.SetIdentity();
+                this.mtxModel.SetTranslateVec3(scene.models[i].trfm.pos);
+                this.mtxModel.SetRotateAbout(scene.models[i].trfm.orient.GetAxis(), scene.models[i].trfm.orient.GetAngle());
+                this.mtxModel.SetScaleVec3(scene.models[i].trfm.scale);
 
                 // These just allow everything to be better read
                 shdr = scene.models[i].shaderData;
@@ -295,16 +300,16 @@ var GL = {
                     /* If there's lighting, than the model and view-proj matrices
                      * are sent up independently. The lighting calculations require
                      * holding onto the verts modified from the model-matrix. */
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, scene.models[i].mtxModel.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, this.mtxModel.data);
                     this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
                     // Normal Matrix  GetInvMtx3
-                    var mtxNorm = scene.models[i].mtxModel.GetInvMtx3();
+                    var mtxNorm = this.mtxModel.GetInvMtx3();
                     mtxNorm.Transpose();
                     this.ctx.uniformMatrix3fv(shdr.u_MtxNorm, false, mtxNorm.data);
                 }
                 else {
-                    mtxMVP = scene.models[i].mtxModel.GetMultiply(mtxVP);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
+                    this.mtxModel.SetMultiply(mtxVP);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
                 }
                 this.ctx.uniform4fv(shdr.u_Tint, scene.models[i].tint.GetData());
 
@@ -330,6 +335,13 @@ var GL = {
         {
             // Always pull the active fields, as they could add and drop quite often
             var simpleFields = scene.ptclSystems[i].GetSimpleFields();
+
+            this.mtxModel.SetIdentity();
+            this.mtxModel.SetTranslateVec3(scene.ptclSystems[i].trfmObj.pos);
+            this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.orient.GetAxis(), scene.ptclSystems[i].trfmObj.orient.GetAngle());
+            this.mtxModel.SetScaleVec3(scene.ptclSystems[i].trfmObj.scale);
+            this.mtxModel.SetMultiply(mtxVP);
+
             for (var j = 0; j < simpleFields.length; j++)
             {
                 if(simpleFields[j].active) {
@@ -349,18 +361,7 @@ var GL = {
                     this.ctx.enableVertexAttribArray(shdr.a_Col);
                     this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
-                    if (shdr.a_TexCoord != -1) {
-                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-                        if (buff.texID) {
-                            this.ctx.activeTexture(this.ctx.TEXTURE0);
-                            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                            this.ctx.uniform1i(shdr.u_Sampler, 0);
-                        }
-                    }
-
-                    mtxMVP = scene.ptclSystems[i].mtxModel.GetMultiply(mtxVP);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
                     this.ctx.uniform4fv(shdr.u_Tint, simpleFields[j].fieldHdlr.tint.GetData());
 
                     this.ctx.drawArrays(simpleFields[j].fieldHdlr.drawMethod, 0, buff.numVerts);
@@ -401,6 +402,51 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
             }
+            // Always pull the active fields, as they could add and drop quite often
+            var textureFields = scene.ptclSystems[i].GetTexFields();
+            //shdr = EL.assets.shaderPrograms['ray']; // Define what this is
+            this.ctx.useProgram(shdr.program);
+            for (var j = 0; j < textureFields.length; j++)
+            {
+                if(textureFields[j].active) {
+                    //fieldCount++;
+
+                    for (var k = 0; k < textureFields[j].ptcls.length; k++) {
+
+                        buff = textureFields[j].ptcls[k].fieldHdlr.bufferData;
+
+                        // USE PROGRAM AND VBO
+                        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                        this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                        this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                        this.ctx.enableVertexAttribArray(shdr.a_Col);
+                        this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+
+                        this.ctx.activeTexture(this.ctx.TEXTURE0);
+                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                        this.ctx.uniform1i(shdr.u_Sampler, 0);
+
+                        // Need to account for individual particle transformations
+                        // Should look like offset transformations
+                        // Full system is already done. This just needs to undue rotation now. Possible?
+                        //this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.orient.GetAxis(), -scene.ptclSystems[i].trfmObj.orient.GetAngle());
+
+                        this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
+                        this.ctx.uniform4fv(shdr.u_Tint, simpleFields[j].fieldHdlr.tint.GetData());
+
+                        this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
+
+                        // Unbind buffers after use
+                        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
+                    }
+                }
+            }
         }
         //console.log(fieldCount);
 
@@ -437,10 +483,14 @@ var GL = {
                         this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
                     }
 
-                    mtxMVP = dispObjs[i].mtxModel.GetMultiply(mtxVP);
+                    this.mtxModel.SetIdentity();
+                    this.mtxModel.SetTranslateVec3(dispObjs[i].trfm.pos);
+                    this.mtxModel.SetRotateAbout(dispObjs[i].trfm.orient.GetAxis(), dispObjs[i].trfm.orient.GetAngle());
+                    this.mtxModel.SetScaleVec3(dispObjs[i].trfm.scale);
+                    this.mtxModel.SetMultiply(mtxVP);
 
                     // SEND UP UNIFORMS
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxMVP.data);
+                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
                     this.ctx.uniform4fv(shdr.u_Tint, dispObjs[i].tint.GetData());
 
                     // Draw calls

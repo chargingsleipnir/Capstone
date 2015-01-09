@@ -27,7 +27,6 @@ function ModelHandler(model, trfm, shapeData) {
         this.drawMethod = GL.GetDrawMethod(DrawMethods.triangles);
 
     this.active = true;
-    this.mtxModel = trfm.mtx;
 
     // This is specifically set this way for frustum culling. No need to be more dynamic
     this.drawSphere = new Sphere(shapeData.centre, shapeData.radius);
@@ -99,6 +98,27 @@ PtclFieldHandler.prototype = {
     },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    }
+};
+
+function TexPtclFieldHandler(vertData, trfm, texture, texFilter) {
+    // Create Buffer
+    this.bufferData = new BufferData();
+    GL.CreateBufferObjects(this.vertData, this.bufferData, false);
+
+    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
+    this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
+
+    this.active = true;
+
+    this.trfm = trfm;
+}
+TexPtclFieldHandler.prototype = {
+    SetTintRGB: function(r, g, b) {
+        this.tint.SetVec3(r, g, b);
+    },
+    SetTintAlpha: function(a) {
+        this.tint.SetW(a);
     }
 };
 

@@ -69,6 +69,7 @@ function BuildScene5(scene) {
     //////////////////////////////////
 
 
+    /*
     var ptclObj3 = new GameObject('Particle Object 3', Labels.testObject);
     ptclObj3.trfmLocal.SetPosAxes(0.0, 10.0, 0.0);
     ptclObj3.SetModel(new Primitives.IcoSphere(2, 3));
@@ -92,6 +93,7 @@ function BuildScene5(scene) {
     effects.size = 1.0;
 
     ptclObj3.ptclSys.AddTexField(30, 30, effects);
+    */
 
 
     //////////////////////////////////
@@ -147,6 +149,6 @@ function BuildScene5(scene) {
 
     scene.Add(ptclObj1);
     scene.Add(ptclObj2);
-    scene.Add(ptclObj3);
+    //scene.Add(ptclObj3);
     scene.SetCallbacks(Start, Update, End);
 }
