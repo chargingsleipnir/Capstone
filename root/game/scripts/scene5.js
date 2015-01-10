@@ -69,7 +69,6 @@ function BuildScene5(scene) {
     //////////////////////////////////
 
 
-    /*
     var ptclObj3 = new GameObject('Particle Object 3', Labels.testObject);
     ptclObj3.trfmLocal.SetPosAxes(0.0, 10.0, 0.0);
     ptclObj3.SetModel(new Primitives.IcoSphere(2, 3));
@@ -77,7 +76,7 @@ function BuildScene5(scene) {
     ptclObj3.AddComponent(Components.particleSystem);
 
     effects.travelTime = 7.0;
-    effects.staggerRate = 0.2;
+    effects.staggerRate = 0.3;
     effects.startDist = 5.0;
     effects.dir = new Vector3(1.0, 1.0, -1.0);
     effects.range = 5.0;
@@ -93,7 +92,6 @@ function BuildScene5(scene) {
     effects.size = 1.0;
 
     ptclObj3.ptclSys.AddTexField(30, 30, effects);
-    */
 
 
     //////////////////////////////////
@@ -105,6 +103,7 @@ function BuildScene5(scene) {
     var fireStream = Input.CreateInputController(ctrlName, KeyMap.Z);
     var fireGatling = Input.CreateInputController(ctrlName, KeyMap.X);
     var leaveTrail = Input.CreateInputController(ctrlName, KeyMap.C);
+    var fireStars = Input.CreateInputController(ctrlName, KeyMap.V);
 
     function Start() {
         Input.SetActive(ctrlName, true);
@@ -132,6 +131,10 @@ function BuildScene5(scene) {
             ptclObj2.ptclSys.RunTail(0);
             leaveTrail.Release();
         }
+        if(fireStars.pressed) {
+            ptclObj3.ptclSys.RunTexField(0);
+            fireStars.Release();
+        }
 
         angle += 0.25;
         if(angle > 360.0)
@@ -149,6 +152,6 @@ function BuildScene5(scene) {
 
     scene.Add(ptclObj1);
     scene.Add(ptclObj2);
-    //scene.Add(ptclObj3);
+    scene.Add(ptclObj3);
     scene.SetCallbacks(Start, Update, End);
 }

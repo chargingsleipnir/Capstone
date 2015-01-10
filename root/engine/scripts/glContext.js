@@ -404,25 +404,22 @@ var GL = {
             }
             // Always pull the active fields, as they could add and drop quite often
             var textureFields = scene.ptclSystems[i].GetTexFields();
-            //shdr = EL.assets.shaderPrograms['ray']; // Define what this is
+            shdr = EL.assets.shaderPrograms['tex'];
             this.ctx.useProgram(shdr.program);
             for (var j = 0; j < textureFields.length; j++)
             {
                 if(textureFields[j].active) {
                     //fieldCount++;
 
-                    for (var k = 0; k < textureFields[j].ptcls.length; k++) {
+                    for (var k = 0; k < textureFields[j].ptclHdlrs.length; k++) {
 
-                        buff = textureFields[j].ptcls[k].fieldHdlr.bufferData;
+                        buff = textureFields[j].ptclHdlrs[k].bufferData;
 
                         // USE PROGRAM AND VBO
                         this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
                         this.ctx.enableVertexAttribArray(shdr.a_Pos);
                         this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                        this.ctx.enableVertexAttribArray(shdr.a_Col);
-                        this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
                         this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
                         this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
@@ -436,8 +433,19 @@ var GL = {
                         // Full system is already done. This just needs to undue rotation now. Possible?
                         //this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.orient.GetAxis(), -scene.ptclSystems[i].trfmObj.orient.GetAngle());
 
-                        this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
-                        this.ctx.uniform4fv(shdr.u_Tint, simpleFields[j].fieldHdlr.tint.GetData());
+                        var mtxPtcl = new Matrix4();
+
+                        mtxPtcl.SetOrientation(
+                            textureFields[j].ptclHdlrs[k].trfm.pos,
+                            ViewMngr.activeCam.trfmAxes.fwd,
+                            ViewMngr.activeCam.trfmAxes.up,
+                            ViewMngr.activeCam.trfmAxes.right,
+                            Space.local);
+
+                        mtxPtcl.SetMultiply(this.mtxModel);
+
+                        this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxPtcl.data);
+                        this.ctx.uniform4fv(shdr.u_Tint, textureFields[j].ptclHdlrs[k].tint.GetData());
 
                         this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 

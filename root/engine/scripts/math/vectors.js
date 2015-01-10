@@ -358,7 +358,7 @@ Vector3.prototype = {
         return new Vector3(-this.x, -this.y, -this.z);
     },
     GetOrthoAxis: function() {
-        var diffVec = new Vector3(this.z, -this.x, this.y);
+        var diffVec = new Vector3(-this.z, -this.x, this.y);
         return this.GetCross(diffVec).SetNormalized();
     },
     SetAdd: function(vec3) {

@@ -23,15 +23,19 @@ var EL = {
 
         // SHADERS
         var shaderNamesFilepaths = [
+            // Specialty shaders
             ['test', 'engine/assets/shaders/test.vshdr', 'engine/assets/shaders/test.fshdr'],
             ['ray', 'engine/assets/shaders/ray.vshdr', 'engine/assets/shaders/ray.fshdr'],
             ['guiBoxTint', 'engine/assets/shaders/guiBoxTint.vshdr', 'engine/assets/shaders/guiBoxTint.fshdr'],
             ['guiBoxTintTex', 'engine/assets/shaders/guiBoxTintTex.vshdr', 'engine/assets/shaders/guiBoxTintTex.fshdr'],
             ['guiText', 'engine/assets/shaders/guiText.vshdr', 'engine/assets/shaders/guiText.fshdr'],
+            // Made here specifically for textured particles
+            ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr']
+
             /*
             ['col', 'engine/assets/shaders/col.vshdr', 'engine/assets/shaders/col.fshdr'],
-            ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr'],
-            ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr'],
+
+            ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr']
             ['lightVert', 'engine/assets/shaders/vertLighting.vshdr', 'engine/assets/shaders/vertLighting.fshdr'],
             ['lightFrag', 'engine/assets/shaders/fragLighting.vshdr', 'engine/assets/shaders/fragLighting.fshdr'],
             ['colLightVert', 'engine/assets/shaders/colVertLighting.vshdr', 'engine/assets/shaders/colVertLighting.fshdr'],
@@ -50,6 +54,7 @@ var EL = {
             ['lava', 'engine/assets/images/lavaTexture.jpg'],
             ['ice', 'engine/assets/images/iceTexture.jpg'],
             ['purply', 'engine/assets/images/purplePlanet.jpg'],
+            ['star', 'engine/assets/images/star.gif'],
             ['fontMapBasic', 'engine/assets/images/FontSheetBasic.png'],
             ['fontMapBasicBold', 'engine/assets/images/FontSheetBasicBold.png']
         ];

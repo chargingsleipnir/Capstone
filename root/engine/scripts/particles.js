@@ -203,12 +203,11 @@ ParticleFieldSimple.prototype = {
 
 /******************************** Texture Particles *****************************************/
 
-function ParticleTextured(travelTime, countDown, radius) {
+function ParticleTextured(travelTime, countDown) {
     // Physics
     this.startPos = new Vector3();
     this.startVel = new Vector3();
     this.startAcc = new Vector3();
-    this.pos = new Vector3(0.0, 999.0, 0.0);
     this.vel = new Vector3();
     this.acc = new Vector3();
     this.dampening = 1.0;
@@ -218,14 +217,14 @@ function ParticleTextured(travelTime, countDown, radius) {
     this.isAlive = false;
 
     this.trfm = new Transform(Space.global);
-    this.ptclHdlr = new ModelHandler(new Primitives.Rect(new Vector2(radius, radius)), this.trfm);
+    this.trfm.SetPosAxes(0.0, 999.0, 0.0);
 }
 ParticleTextured.prototype = {
     Update: function() {
         if(this.isAlive) {
             this.vel.SetAddScaled(this.acc, Time.deltaMilli);
             this.vel.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
-            this.pos.SetAdd(this.vel.GetScaleByNum(Time.deltaMilli));
+            this.trfm.TranslateVec(this.vel.GetScaleByNum(Time.deltaMilli));
 
             this.countDown -= Time.deltaMilli;
             if(this.countDown < 0.0)
@@ -233,15 +232,14 @@ ParticleTextured.prototype = {
         }
     },
     Reset: function() {
-        this.pos.SetCopy(this.startPos);
+        this.trfm.SetPosVec3(this.startPos);
         this.vel.SetCopy(this.startVel);
         this.acc.SetCopy(this.startAcc);
-        this.tailPos.SetCopy(this.startPos);
         this.countDown = this.travelTime;
     }
 };
 
-function ParticleFieldTextures(trfmObj, ptclCount, fieldLife, effects) {
+function ParticleFieldTextures(ptclCount, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
     this.fieldLifeTime = fieldLife || 20.0;
     this.counter = this.fieldLifeTime;
@@ -262,13 +260,36 @@ function ParticleFieldTextures(trfmObj, ptclCount, fieldLife, effects) {
      * They'll need the same kind of gameobject parent trfm calculations to maintain their relativeity.
      */
 
-    // Do something to check for "shape" in handler, because there's no point in sending one, as it would be super wasteful to
-    // dp frustum culling of these tiny 6-vertex particles.
+    var r = effects.size / 2;
+    var ptclVerts = {
+        count: 6,
+        posCoords: [
+            -r, r, 0.0,
+            -r, -r, 0.0,
+            r, -r, 0.0,
+
+            -r, r, 0.0,
+            r, -r, 0.0,
+            r, r, 0.0
+        ],
+        colElems: [],
+        texCoords: [
+            0.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0,
+
+            0.0, 1.0,
+            1.0, 0.0,
+            1.0, 1.0
+        ],
+        normAxes: []
+    };
 
     // Using changing looping functions
     this.Callback = this.Launch;
 
     this.ptcls = [];
+    this.ptclHdlrs = [];
 
     // Instantiate particles
     var dir = effects.dir.GetNormalized();
@@ -276,7 +297,9 @@ function ParticleFieldTextures(trfmObj, ptclCount, fieldLife, effects) {
         var randX = Math.random(),
             randY = Math.random(),
             randZ = Math.random();
-        this.ptcls.push(new ParticleTextured(effects.travelTime, effects.staggerRate * i, effects.size/2 ));
+
+        // Particle that will be updated with physics
+        this.ptcls.push(new ParticleTextured(effects.travelTime, effects.staggerRate * i));
 
         var randConeAngle = (effects.range / 2.0) * ((randX*2) - 1);
         var randRotAngle = 360 * randY;
@@ -287,6 +310,20 @@ function ParticleFieldTextures(trfmObj, ptclCount, fieldLife, effects) {
         this.ptcls[i].startVel.SetCopy(randDir.GetScaleByNum(effects.speed));
         this.ptcls[i].startAcc.SetCopy(effects.acc);
         this.ptcls[i].dampening = effects.dampening;
+
+        // Particle handler for drawing
+        this.ptclHdlrs.push(new TexPtclFieldHandler(
+            ptclVerts,
+            this.ptcls[i].trfm,
+            effects.texture,
+            TextureFilters.linear
+        ));
+
+        this.ptclHdlrs[i].SetTintRGB(
+            (effects.colourTop.x - effects.colourBtm.x) * randX + effects.colourBtm.x,
+            (effects.colourTop.y - effects.colourBtm.y) * randY + effects.colourBtm.y,
+            (effects.colourTop.z - effects.colourBtm.z) * randZ + effects.colourBtm.z
+        );
     }
 }
 ParticleFieldTextures.prototype = {
@@ -302,8 +339,6 @@ ParticleFieldTextures.prototype = {
         /* This loop function is implemented to allow each particle field to slowly stagger
          * in, update, and stagger out all of it's particles, so they don't all have to arrive
          * or disappear at the same time. */
-        var newPosCoords = [];
-
         if(this.deadPtcls > 0) {
             for (var i = 0; i < this.ptcls.length; i++) {
                 // This will stagger them out accordingly,
@@ -319,11 +354,7 @@ ParticleFieldTextures.prototype = {
                 else {
                     this.ptcls[i].Update();
                 }
-                newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
-                if(this.ptcls[i].tailLength > 0)
-                    newPosCoords = newPosCoords.concat(this.ptcls[i].tailPos.GetData());
             }
-            this.fieldHdlr.RewriteVerts(newPosCoords);
         }
         else {
             this.Callback = this.Update;
@@ -334,22 +365,15 @@ ParticleFieldTextures.prototype = {
         /* This loop function is implemented to allow each particle field to slowly stagger
          * in, update, and stagger out all of it's particles, so they don't all have to arrive
          * or disappear at the same time. */
-        var newPosCoords = [];
         for (var i = 0; i < this.ptcls.length; i++) {
             this.ptcls[i].Update();
-            newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
-            if(this.ptcls[i].tailLength > 0)
-                newPosCoords = newPosCoords.concat(this.ptcls[i].tailPos.GetData());
         }
-        this.fieldHdlr.RewriteVerts(newPosCoords);
         this.CheckEnd();
     },
     Terminate: function() {
         /* This loop function is implemented to allow each particle field to slowly stagger
          * in, update, and stagger out all of it's particles, so they don't all have to arrive
          * or disappear at the same time. */
-        var newPosCoords = [];
-
         if(this.deadPtcls < this.ptcls.length) {
             for (var i = 0; i < this.ptcls.length; i++) {
                 if(this.ptcls[i].isAlive) {
@@ -357,16 +381,11 @@ ParticleFieldTextures.prototype = {
                     // This condition is met on during each particle's reset.
                     if (this.ptcls[i].countDown >= this.ptcls[i].travelTime - Time.deltaMilli) {
                         this.ptcls[i].isAlive = false;
-                        this.ptcls[i].pos.SetValues(0.0, 999.0, 0.0);
-                        this.ptcls[i].tailPos.SetValues(0.0, 999.0, 0.0);
+                        this.ptcls[i].trfm.SetPosAxes(0.0, 999.0, 0.0);
                         this.deadPtcls++;
                     }
                 }
-                newPosCoords = newPosCoords.concat(this.ptcls[i].pos.GetData());
-                if(this.ptcls[i].tailLength > 0)
-                    newPosCoords = newPosCoords.concat(this.ptcls[i].tailPos.GetData());
             }
-            this.fieldHdlr.RewriteVerts(newPosCoords);
         }
         else {
             // Reset things
@@ -494,7 +513,7 @@ ParticleSystem.prototype = {
         this.tails.push(new FlatTail(this.trfmObj, ptclCount, fieldLife, effects));
     },
     AddTexField: function(ptclCount, fieldLife, effects) {
-        this.texFields.push(new ParticleFieldTextures(this.trfmObj, ptclCount, fieldLife, effects));
+        this.texFields.push(new ParticleFieldTextures(ptclCount, fieldLife, effects));
     },
     RemoveField: function(field) {
         var index = this.simpleFields.indexOf(field);
@@ -503,10 +522,16 @@ ParticleSystem.prototype = {
         }
     },
     RunField: function(index) {
-        this.simpleFields[index].active = true;
+        if(this.simpleFields[index])
+            this.simpleFields[index].active = true;
     },
     RunTail: function(index) {
-        this.tails[index].active = true;
+        if(this.tails[index])
+            this.tails[index].active = true;
+    },
+    RunTexField: function(index) {
+        if(this.texFields[index])
+            this.texFields[index].active = true;
     },
     GetSimpleFields: function() {
         return this.simpleFields;
@@ -526,6 +551,11 @@ ParticleSystem.prototype = {
         for (var i = this.tails.length - 1; i >= 0; i--) {
             if (this.tails[i].active) {
                 this.tails[i].Callback();
+            }
+        }
+        for (var i = this.texFields.length - 1; i >= 0; i--) {
+            if(this.texFields[i].active) {
+                this.texFields[i].Callback();
             }
         }
     }

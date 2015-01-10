@@ -104,7 +104,7 @@ PtclFieldHandler.prototype = {
 function TexPtclFieldHandler(vertData, trfm, texture, texFilter) {
     // Create Buffer
     this.bufferData = new BufferData();
-    GL.CreateBufferObjects(this.vertData, this.bufferData, false);
+    GL.CreateBufferObjects(vertData, this.bufferData, false);
 
     this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
     this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
