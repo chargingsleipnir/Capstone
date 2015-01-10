@@ -402,6 +402,7 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
             }
+
             // Always pull the active fields, as they could add and drop quite often
             var textureFields = scene.ptclSystems[i].GetTexFields();
             shdr = EL.assets.shaderPrograms['tex'];
@@ -428,16 +429,10 @@ var GL = {
                         this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                         this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                        // Need to account for individual particle transformations
-                        // Should look like offset transformations
-                        // Full system is already done. This just needs to undue rotation now. Possible?
-                        //this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.orient.GetAxis(), -scene.ptclSystems[i].trfmObj.orient.GetAngle());
-
                         var mtxPtcl = new Matrix4();
-
                         mtxPtcl.SetOrientation(
                             textureFields[j].ptclHdlrs[k].trfm.pos,
-                            ViewMngr.activeCam.trfmAxes.fwd,
+                            ViewMngr.activeCam.trfmAxes.fwd.GetNegative(),
                             ViewMngr.activeCam.trfmAxes.up,
                             ViewMngr.activeCam.trfmAxes.right,
                             Space.local);

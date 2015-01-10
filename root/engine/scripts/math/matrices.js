@@ -398,7 +398,7 @@ Matrix4.prototype = {
             r4c1, r4c2, r4c3, r4c4
         ];
     },
-    SetMat3: function(r1c1, r1c2, r1c3, r2c1, r2c2, r2c3, r3c1, r3c2, r3c3) {
+    SetMtx3Elems: function(r1c1, r1c2, r1c3, r2c1, r2c2, r2c3, r3c1, r3c2, r3c3) {
         /// <signature>
         ///  <summary>Set upper-left Matrix3 with row and column components</summary>
         ///  <param name="r1c1, r1c2, r1c3, r2c1, r2c2, r2c3, r3c1, r3c2, r3c3" type="decimals"></param>
@@ -409,7 +409,13 @@ Matrix4.prototype = {
         this.data[8] = r3c1; this.data[9] = r3c2; this.data[10] = r3c3;
         return this;
     },
-    GetMat3: function() {
+    SetMtx3Mtx: function(mtx3) {
+        this.data[0] = mtx3[0]; this.data[1] = mtx3[1]; this.data[2] = mtx3[2];
+        this.data[4] = mtx3[3]; this.data[5] = mtx3[4]; this.data[6] = mtx3[5];
+        this.data[8] = mtx3[6]; this.data[9] = mtx3[7]; this.data[10] = mtx3[8];
+        return this;
+    },
+    GetMtx3: function() {
         /// <signature>
         ///  <summary>Get upper-left Matrix3</summary>
         ///  <returns type="Matrix3" />
@@ -846,7 +852,7 @@ Matrix4.prototype = {
         ///  <param name="space" type="enum">Determines if orientation is local or global</param>
         ///  <returns type="Matrix4" />
         /// </signature>
-        this.SetMat3(
+        this.SetMtx3Elems(
             dirRight.x, dirUp.x, -dirFwd.x,
             dirRight.y, dirUp.y, -dirFwd.y,
             dirRight.z, dirUp.z, -dirFwd.z

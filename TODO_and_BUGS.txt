@@ -22,3 +22,5 @@ BUGS
 2. Objects with many textures - Test how to ensure the right textures end up in the right place.
 4. Continue Fireworks sample
 5. Unless a very good reason for not doing this approaches, make the Particle Force Generators/Registration a part of the ParticlePhysics prototype for each particle
+6. Textured particles do not perfectly emulate camera's rotations. They also need to oppose they rotations of the base object.
+	If they can just be made to always track and turn towards the camera's position... Some Quaternion Lookat()??
