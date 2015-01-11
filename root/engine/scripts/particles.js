@@ -104,8 +104,13 @@ function ParticleFieldSimple(ptclCount, fieldLife, effects) {
         }
     }
 
-    if(effects.lineLength <= 0)
+    if(effects.lineLength <= 0) {
         this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
+        if(effects.texture != null)
+            this.fieldHdlr.SetTexture(effects.texture, TextureFilters.linear);
+
+        this.fieldHdlr.pntSize = effects.size;
+    }
     else
         this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.lines);
 }
@@ -199,206 +204,6 @@ ParticleFieldSimple.prototype = {
         }
     }
 };
-
-
-/******************************** Texture Particles *****************************************/
-
-function ParticleTextured(travelTime, countDown) {
-    // Physics
-    this.startPos = new Vector3();
-    this.startVel = new Vector3();
-    this.startAcc = new Vector3();
-    this.vel = new Vector3();
-    this.acc = new Vector3();
-    this.dampening = 1.0;
-    // Duration
-    this.travelTime = travelTime;
-    this.countDown = countDown;
-    this.isAlive = false;
-
-    this.trfm = new Transform(Space.global);
-    this.trfm.SetPosAxes(0.0, 999.0, 0.0);
-}
-ParticleTextured.prototype = {
-    Update: function() {
-        if(this.isAlive) {
-            this.vel.SetAddScaled(this.acc, Time.deltaMilli);
-            this.vel.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
-            this.trfm.TranslateVec(this.vel.GetScaleByNum(Time.deltaMilli));
-
-            this.countDown -= Time.deltaMilli;
-            if(this.countDown < 0.0)
-                this.Reset();
-        }
-    },
-    Reset: function() {
-        this.trfm.SetPosVec3(this.startPos);
-        this.vel.SetCopy(this.startVel);
-        this.acc.SetCopy(this.startAcc);
-        this.countDown = this.travelTime;
-    }
-};
-
-function ParticleFieldTextures(ptclCount, fieldLife, effects) {
-    this.ptclCount = ptclCount || 10;
-    this.fieldLifeTime = fieldLife || 20.0;
-    this.counter = this.fieldLifeTime;
-
-    // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
-    this.active = false;
-    this.deadPtcls = this.ptclCount;
-    this.stagger = effects.staggerRate;
-
-    /*
-    this.alphaStart = 1.0;
-    this.alphaEnd = 1.0;
-    this.texture = EL.assets.textures['star'];
-    this.rotAngDeg = 15.0;
-    */
-
-    /* I think they'll all need a transform of their own to do everything wanted with them.
-     * They'll need the same kind of gameobject parent trfm calculations to maintain their relativeity.
-     */
-
-    var r = effects.size / 2;
-    var ptclVerts = {
-        count: 6,
-        posCoords: [
-            -r, r, 0.0,
-            -r, -r, 0.0,
-            r, -r, 0.0,
-
-            -r, r, 0.0,
-            r, -r, 0.0,
-            r, r, 0.0
-        ],
-        colElems: [],
-        texCoords: [
-            0.0, 1.0,
-            0.0, 0.0,
-            1.0, 0.0,
-
-            0.0, 1.0,
-            1.0, 0.0,
-            1.0, 1.0
-        ],
-        normAxes: []
-    };
-
-    // Using changing looping functions
-    this.Callback = this.Launch;
-
-    this.ptcls = [];
-    this.ptclHdlrs = [];
-
-    // Instantiate particles
-    var dir = effects.dir.GetNormalized();
-    for(var i = 0; i < this.ptclCount; i++) {
-        var randX = Math.random(),
-            randY = Math.random(),
-            randZ = Math.random();
-
-        // Particle that will be updated with physics
-        this.ptcls.push(new ParticleTextured(effects.travelTime, effects.staggerRate * i));
-
-        var randConeAngle = (effects.range / 2.0) * ((randX*2) - 1);
-        var randRotAngle = 360 * randY;
-        var randDir = dir.GetRotated(randConeAngle, dir.GetOrthoAxis());
-        randDir.SetRotated(randRotAngle, dir);
-
-        this.ptcls[i].startPos.SetCopy(randDir.GetScaleByNum(effects.startDist));
-        this.ptcls[i].startVel.SetCopy(randDir.GetScaleByNum(effects.speed));
-        this.ptcls[i].startAcc.SetCopy(effects.acc);
-        this.ptcls[i].dampening = effects.dampening;
-
-        // Particle handler for drawing
-        this.ptclHdlrs.push(new TexPtclFieldHandler(
-            ptclVerts,
-            this.ptcls[i].trfm,
-            effects.texture,
-            TextureFilters.linear
-        ));
-
-        this.ptclHdlrs[i].SetTintRGB(
-            (effects.colourTop.x - effects.colourBtm.x) * randX + effects.colourBtm.x,
-            (effects.colourTop.y - effects.colourBtm.y) * randY + effects.colourBtm.y,
-            (effects.colourTop.z - effects.colourBtm.z) * randZ + effects.colourBtm.z
-        );
-    }
-}
-ParticleFieldTextures.prototype = {
-    DefinePtclFade: function(endAlpha, fromTime) {
-
-    },
-    CheckEnd: function() {
-        this.counter -= Time.deltaMilli;
-        if(this.counter <= 0)
-            this.Callback = this.Terminate;
-    },
-    Launch: function() {
-        /* This loop function is implemented to allow each particle field to slowly stagger
-         * in, update, and stagger out all of it's particles, so they don't all have to arrive
-         * or disappear at the same time. */
-        if(this.deadPtcls > 0) {
-            for (var i = 0; i < this.ptcls.length; i++) {
-                // This will stagger them out accordingly,
-                // as pre-set in constructor
-                if(this.ptcls[i].isAlive == false) {
-                    this.ptcls[i].countDown -= Time.deltaMilli;
-                    if(this.ptcls[i].countDown <= 0) {
-                        this.ptcls[i].isAlive = true;
-                        this.deadPtcls--;
-                        this.ptcls[i].Reset();
-                    }
-                }
-                else {
-                    this.ptcls[i].Update();
-                }
-            }
-        }
-        else {
-            this.Callback = this.Update;
-        }
-        this.CheckEnd();
-    },
-    Update: function() {
-        /* This loop function is implemented to allow each particle field to slowly stagger
-         * in, update, and stagger out all of it's particles, so they don't all have to arrive
-         * or disappear at the same time. */
-        for (var i = 0; i < this.ptcls.length; i++) {
-            this.ptcls[i].Update();
-        }
-        this.CheckEnd();
-    },
-    Terminate: function() {
-        /* This loop function is implemented to allow each particle field to slowly stagger
-         * in, update, and stagger out all of it's particles, so they don't all have to arrive
-         * or disappear at the same time. */
-        if(this.deadPtcls < this.ptcls.length) {
-            for (var i = 0; i < this.ptcls.length; i++) {
-                if(this.ptcls[i].isAlive) {
-                    this.ptcls[i].Update();
-                    // This condition is met on during each particle's reset.
-                    if (this.ptcls[i].countDown >= this.ptcls[i].travelTime - Time.deltaMilli) {
-                        this.ptcls[i].isAlive = false;
-                        this.ptcls[i].trfm.SetPosAxes(0.0, 999.0, 0.0);
-                        this.deadPtcls++;
-                    }
-                }
-            }
-        }
-        else {
-            // Reset things
-            this.Callback = this.Launch;
-            this.counter = this.fieldLifeTime;
-            for (var i = 0; i < this.ptcls.length; i++) {
-                this.ptcls[i].countDown = this.stagger * i;
-            }
-            this.active = false;
-        }
-    }
-};
-
 
 /******************************** Particle Tail *****************************************/
 
@@ -503,7 +308,6 @@ function ParticleSystem(trfmObj) {
 
     this.simpleFields = [];
     this.tails = [];
-    this.texFields = [];
 }
 ParticleSystem.prototype = {
     AddSimpleField: function(ptclCount, fieldLife, effects) {
@@ -511,9 +315,6 @@ ParticleSystem.prototype = {
     },
     AddTail: function(ptclCount, fieldLife, effects) {
         this.tails.push(new FlatTail(this.trfmObj, ptclCount, fieldLife, effects));
-    },
-    AddTexField: function(ptclCount, fieldLife, effects) {
-        this.texFields.push(new ParticleFieldTextures(ptclCount, fieldLife, effects));
     },
     RemoveField: function(field) {
         var index = this.simpleFields.indexOf(field);
@@ -529,18 +330,11 @@ ParticleSystem.prototype = {
         if(this.tails[index])
             this.tails[index].active = true;
     },
-    RunTexField: function(index) {
-        if(this.texFields[index])
-            this.texFields[index].active = true;
-    },
     GetSimpleFields: function() {
         return this.simpleFields;
     },
     GetTails: function() {
         return this.tails;
-    },
-    GetTexFields: function() {
-        return this.texFields;
     },
     Update: function() {
         for (var i = this.simpleFields.length - 1; i >= 0; i--) {
@@ -551,11 +345,6 @@ ParticleSystem.prototype = {
         for (var i = this.tails.length - 1; i >= 0; i--) {
             if (this.tails[i].active) {
                 this.tails[i].Callback();
-            }
-        }
-        for (var i = this.texFields.length - 1; i >= 0; i--) {
-            if(this.texFields[i].active) {
-                this.texFields[i].Callback();
             }
         }
     }

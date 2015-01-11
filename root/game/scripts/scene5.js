@@ -29,6 +29,7 @@ function BuildScene5(scene) {
     effects.lineLength = 0.0;
     effects.alphaStart = 1.0;
     effects.alphaEnd = 1.0;
+    effects.size = 10.0;
 
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
 
@@ -45,6 +46,7 @@ function BuildScene5(scene) {
     effects.lineLength = 0.3;
     effects.alphaStart = 1.0;
     effects.alphaEnd = 1.0;
+    effects.size = 0.0;
 
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
 
@@ -76,7 +78,7 @@ function BuildScene5(scene) {
     ptclObj3.AddComponent(Components.particleSystem);
 
     effects.travelTime = 7.0;
-    effects.staggerRate = 0.3;
+    effects.staggerRate = 0.1;
     effects.startDist = 5.0;
     effects.dir = new Vector3(1.0, 1.0, -1.0);
     effects.range = 5.0;
@@ -85,13 +87,13 @@ function BuildScene5(scene) {
     effects.dampening = 1.0;
     effects.colourBtm = new Vector3(1.0, 0.0, 1.0);
     effects.colourTop = new Vector3(1.0, 1.0, 1.0);
+    effects.lineLength = 0.0;
     effects.alphaStart = 1.0;
     effects.alphaEnd = 1.0;
     effects.texture = EL.assets.textures['star'];
-    effects.rotAngDeg = 15.0;
-    effects.size = 1.0;
+    effects.size = 64.0;
 
-    ptclObj3.ptclSys.AddTexField(30, 30, effects);
+    ptclObj3.ptclSys.AddSimpleField(100, 30, effects);
 
 
     //////////////////////////////////
@@ -132,7 +134,7 @@ function BuildScene5(scene) {
             leaveTrail.Release();
         }
         if(fireStars.pressed) {
-            ptclObj3.ptclSys.RunTexField(0);
+            ptclObj3.ptclSys.RunField(0);
             fireStars.Release();
         }
 

@@ -64,6 +64,7 @@ var GL = {
             // Uniforms will return uniform object, null if not found
             programData.u_Tint = ctx.getUniformLocation(program, "u_Tint");
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
+            programData.u_PntSize = ctx.getUniformLocation(program, "u_PntSize");
             // MATERIALS
             // Colour is multiplied by intensity immediately, before exporting model. No reason to hold values separately
             programData.u_DiffColWeight = ctx.getUniformLocation(program, "u_DiffColWeight");
@@ -342,15 +343,19 @@ var GL = {
             this.mtxModel.SetScaleVec3(scene.ptclSystems[i].trfmObj.scale);
             this.mtxModel.SetMultiply(mtxVP);
 
+            // Used to shrink point size
+            var dist = ViewMngr.activeCam.posGbl.GetSubtract(scene.ptclSystems[i].trfmObj.pos).GetMag();
+            var distCalc = 1 - (dist / ViewMngr.farCullDist);
+
             for (var j = 0; j < simpleFields.length; j++)
             {
                 if(simpleFields[j].active) {
                     //fieldCount++;
-                    // These just allow everything to be better read
+
+                    // Covers points, lines, and textured points
                     shdr = simpleFields[j].fieldHdlr.shaderData;
                     buff = simpleFields[j].fieldHdlr.bufferData;
 
-                    // USE PROGRAM AND VBO
                     this.ctx.useProgram(shdr.program);
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
@@ -361,8 +366,14 @@ var GL = {
                     this.ctx.enableVertexAttribArray(shdr.a_Col);
                     this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
+                    if(buff.texID) {
+                        this.ctx.activeTexture(this.ctx.TEXTURE0);
+                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                        this.ctx.uniform1i(shdr.u_Sampler, 0);
+                    }
+
+                    this.ctx.uniform1f(shdr.u_PntSize, simpleFields[j].fieldHdlr.pntSize * (distCalc * distCalc * distCalc));
                     this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
-                    this.ctx.uniform4fv(shdr.u_Tint, simpleFields[j].fieldHdlr.tint.GetData());
 
                     this.ctx.drawArrays(simpleFields[j].fieldHdlr.drawMethod, 0, buff.numVerts);
 
@@ -399,55 +410,6 @@ var GL = {
 
                     // Unbind buffers after use
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-                }
-            }
-
-            // Always pull the active fields, as they could add and drop quite often
-            var textureFields = scene.ptclSystems[i].GetTexFields();
-            shdr = EL.assets.shaderPrograms['tex'];
-            this.ctx.useProgram(shdr.program);
-            for (var j = 0; j < textureFields.length; j++)
-            {
-                if(textureFields[j].active) {
-                    //fieldCount++;
-
-                    for (var k = 0; k < textureFields[j].ptclHdlrs.length; k++) {
-
-                        buff = textureFields[j].ptclHdlrs[k].bufferData;
-
-                        // USE PROGRAM AND VBO
-                        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                        this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                        this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-
-                        this.ctx.activeTexture(this.ctx.TEXTURE0);
-                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                        this.ctx.uniform1i(shdr.u_Sampler, 0);
-
-                        var mtxPtcl = new Matrix4();
-                        mtxPtcl.SetOrientation(
-                            textureFields[j].ptclHdlrs[k].trfm.pos,
-                            ViewMngr.activeCam.trfmAxes.fwd.GetNegative(),
-                            ViewMngr.activeCam.trfmAxes.up,
-                            ViewMngr.activeCam.trfmAxes.right,
-                            Space.local);
-
-                        mtxPtcl.SetMultiply(this.mtxModel);
-
-                        this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, mtxPtcl.data);
-                        this.ctx.uniform4fv(shdr.u_Tint, textureFields[j].ptclHdlrs[k].tint.GetData());
-
-                        this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
-
-                        // Unbind buffers after use
-                        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-                    }
                 }
             }
         }
@@ -519,6 +481,8 @@ var GL = {
 
                 shdr = EL.assets.shaderPrograms['ray'];
                 this.ctx.useProgram(shdr.program);
+                // This uniform can come out here because it's common to everything in this shader program
+                this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
 
                 for (var i = 0; i < dispObjs.length; i++) {
                     if (dispObjs[i].active) {
@@ -535,7 +499,7 @@ var GL = {
                         this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
                         // SEND UP UNIFORMS
-                        this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+
                         this.ctx.uniform4fv(shdr.u_Tint, dispObjs[i].tint.GetData());
 
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);

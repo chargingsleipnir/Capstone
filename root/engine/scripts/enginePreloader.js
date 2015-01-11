@@ -29,12 +29,13 @@ var EL = {
             ['guiBoxTint', 'engine/assets/shaders/guiBoxTint.vshdr', 'engine/assets/shaders/guiBoxTint.fshdr'],
             ['guiBoxTintTex', 'engine/assets/shaders/guiBoxTintTex.vshdr', 'engine/assets/shaders/guiBoxTintTex.fshdr'],
             ['guiText', 'engine/assets/shaders/guiText.vshdr', 'engine/assets/shaders/guiText.fshdr'],
-            // Made here specifically for textured particles
-            ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr']
+            ['pntCol', 'engine/assets/shaders/pntCol.vshdr', 'engine/assets/shaders/pntCol.fshdr'],
+            ['pntColTex', 'engine/assets/shaders/pntColTex.vshdr', 'engine/assets/shaders/pntColTex.fshdr'] // Special for textured particles
 
             /*
             ['col', 'engine/assets/shaders/col.vshdr', 'engine/assets/shaders/col.fshdr'],
-
+            ['tex', 'engine/assets/shaders/tex.vshdr', 'engine/assets/shaders/tex.fshdr'],
+            ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr']
             ['colTex', 'engine/assets/shaders/colTex.vshdr', 'engine/assets/shaders/colTex.fshdr']
             ['lightVert', 'engine/assets/shaders/vertLighting.vshdr', 'engine/assets/shaders/vertLighting.fshdr'],
             ['lightFrag', 'engine/assets/shaders/fragLighting.vshdr', 'engine/assets/shaders/fragLighting.fshdr'],

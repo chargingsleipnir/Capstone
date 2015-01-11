@@ -24,6 +24,7 @@ function ShaderProgramData() {
 
     this.u_Tint;
     this.u_Sampler;
+    this.u_PntSize;
 
     this.u_DiffColWeight;
     this.u_SpecCol;
@@ -113,8 +114,7 @@ function PtclFieldEffects() {
     this.lineLength = 0.0;
     this.alphaStart = 1.0;
     this.alphaEnd = 1.0;
-    this.texture = EL.assets.textures['star'];
-    this.rotAngDeg = 15.0;
+    this.texture = null;
     this.size = 1.0;
 }
 function FlatTailEffects() {

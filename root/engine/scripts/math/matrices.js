@@ -867,6 +867,36 @@ Matrix4.prototype = {
             this.data[13] = pos.y;
             this.data[14] = pos.z;
         }
+        this.data[15] = 1.0;
+
+        return this;
+    },
+    SetOrientationMod: function(pos, dirFwd, dirUp, dirRight, space) {
+        /// <signature>
+        ///  <summary>Create matrix oriented by directional control</summary>
+        ///  <param name="pos" type="Vector3">Location of viewer</param>
+        ///  <param name="fwd" type="Vector3">Normalized View direction</param>
+        ///  <param name="up" type="Vector3">Normalized Vector 90 degrees to fwd, to control roll</param>
+        ///  <param name="space" type="enum">Determines if orientation is local or global</param>
+        ///  <returns type="Matrix4" />
+        /// </signature>
+        this.SetMtx3Elems(
+            dirRight.x, dirUp.x, dirFwd.x,
+            dirRight.y, dirUp.y, dirFwd.y,
+            dirRight.z, dirUp.z, dirFwd.z
+        );
+        if (space == Space.global) {
+            this.data[12] = -dirRight.GetDot(pos);
+            this.data[13] = -dirUp.GetDot(pos);
+            this.data[14] = -dirFwd.GetDot(pos);
+        }
+        else {
+            this.data[12] = pos.x;
+            this.data[13] = pos.y;
+            this.data[14] = pos.z;
+        }
+        this.data[15] = 1.0;
+
         return this;
     },
     Orient: function(pos, dirFwd, dirUp) {

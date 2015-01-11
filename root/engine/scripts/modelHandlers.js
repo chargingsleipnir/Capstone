@@ -76,7 +76,6 @@ ModelHandler.prototype = {
 };
 
 
-
 /******************* PARTICLE FIELD HANDLER *************************/
 
 function PtclFieldHandler(pntVerts, drawMethod) {
@@ -85,43 +84,20 @@ function PtclFieldHandler(pntVerts, drawMethod) {
     GL.CreateBufferObjects(pntVerts, this.bufferData, true);
 
     this.drawMethod = GL.GetDrawMethod(drawMethod);
-    this.shaderData = ModelUtils.BuildShaderProgram(pntVerts, []);
 
-    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
+    this.shaderData = EL.assets.shaderPrograms['pntCol'];
+
+    this.pntSize = 5.0;
 }
 PtclFieldHandler.prototype = {
-    SetTintRGB: function(r, g, b) {
-        this.tint.SetVec3(r, g, b);
-    },
-    SetTintAlpha: function(a) {
-        this.tint.SetW(a);
+    SetTexture: function(texture, texFilter) {
+        this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
+        this.shaderData = EL.assets.shaderPrograms['pntColTex'];
     },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     }
 };
-
-function TexPtclFieldHandler(vertData, trfm, texture, texFilter) {
-    // Create Buffer
-    this.bufferData = new BufferData();
-    GL.CreateBufferObjects(vertData, this.bufferData, false);
-
-    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
-    this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
-
-    this.active = true;
-
-    this.trfm = trfm;
-}
-TexPtclFieldHandler.prototype = {
-    SetTintRGB: function(r, g, b) {
-        this.tint.SetVec3(r, g, b);
-    },
-    SetTintAlpha: function(a) {
-        this.tint.SetW(a);
-    }
-};
-
 
 /******************* RAYS *************************/
 

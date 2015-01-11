@@ -8,6 +8,7 @@ var ViewMngr = {
     mtxProj: new Matrix4(),
     activeCam: null,
     frustum: null,
+    farCullDist: 200.0,
     Initialize: function(canvas) {
         // Get and use GL canvas window sizing
         var canvasStyles = window.getComputedStyle(canvas, null);
@@ -15,7 +16,7 @@ var ViewMngr = {
         this.wndHeight = parseFloat(canvasStyles.height);
 
         // Instantiate frustum and projection matrix together
-        this.frustum = new Frustum(this.mtxProj, 45.0, this.wndWidth / this.wndHeight, 0.1, 200.0);
+        this.frustum = new Frustum(this.mtxProj, 45.0, this.wndWidth / this.wndHeight, 0.1, this.farCullDist);
         this.activeCam = new Camera(new Transform(Space.local), true);
 
         GL.ReshapeWindow(this.wndWidth, this.wndHeight);
