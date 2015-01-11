@@ -81,11 +81,11 @@ function BuildScene5(scene) {
     effects.staggerRate = 0.1;
     effects.startDist = 5.0;
     effects.dir = new Vector3(1.0, 1.0, -1.0);
-    effects.range = 5.0;
-    effects.speed = 10.0;
-    effects.acc = new Vector3(-4.0, -2.0, 2.0);
+    effects.range = 360.0;
+    effects.speed = 1.0;
+    effects.acc = new Vector3(0.0, 1.0, 0.0);
     effects.dampening = 1.0;
-    effects.colourBtm = new Vector3(1.0, 0.0, 1.0);
+    effects.colourBtm = new Vector3(1.0, 0.0, 0.0);
     effects.colourTop = new Vector3(1.0, 1.0, 1.0);
     effects.lineLength = 0.0;
     effects.alphaStart = 1.0;

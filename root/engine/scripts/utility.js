@@ -470,3 +470,11 @@ var WndUtils = {
         return wndY / (0.5 * ViewMngr.wndHeight);
     }
 };
+
+var RefUtils = {
+    Swap: function(arr, idx1, idx2) {
+        var temp = arr[idx1];
+        arr[idx1] = arr[idx2];
+        arr[idx2] = temp;
+    }
+};

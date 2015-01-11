@@ -56,6 +56,7 @@ var EL = {
             ['ice', 'engine/assets/images/iceTexture.jpg'],
             ['purply', 'engine/assets/images/purplePlanet.jpg'],
             ['star', 'engine/assets/images/star.png'],
+            ['flower', 'engine/assets/images/flower.png'],
             ['fontMapBasic', 'engine/assets/images/FontSheetBasic.png'],
             ['fontMapBasicBold', 'engine/assets/images/FontSheetBasicBold.png']
         ];
