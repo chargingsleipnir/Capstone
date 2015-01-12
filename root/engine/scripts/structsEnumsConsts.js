@@ -112,17 +112,19 @@ function PtclFieldEffects() {
     this.colourBtm = new Vector3();
     this.colourTop = new Vector3(1.0, 1.0, 1.0);
     this.lineLength = 0.0;
-    this.alphaStart = 1.0;
-    this.alphaEnd = 1.0;
     this.texture = null;
     this.size = 1.0;
+    this.alphaStart = 1.0;
+    this.fadePoint = 0.5;
+    this.alphaEnd = 0.0;
 }
 function FlatTailEffects() {
     this.colour = new Vector3();
     this.thickness = 1.0;
     this.axis = Axes.y;
     this.alphaStart = 1.0;
-    this.alphaEnd = 1.0;
+    this.fadePoint = 0.5;
+    this.alphaEnd = 0.0;
 }
 
 var Time = {
@@ -177,13 +179,13 @@ var ShdrLines = {
     },
     attr: {
         pos: "attribute vec3 a_Pos;\n",
-        col: "attribute vec3 a_Col;\n",
+        col: "attribute vec4 a_Col;\n",
         tex: "attribute vec2 a_TexCoord;\n",
         norm: "attribute vec3 a_Norm;\n"
     },
     vary: {
         pos: "varying vec4 v_Pos;\n",
-        col: "varying vec3 v_Col;\n",
+        col: "varying vec4 v_Col;\n",
         tex: "varying vec2 v_TexCoord;\n",
         norm: "varying vec3 v_TrfmNorm;\n",
         light: "varying vec3 v_LightWeight;\n",
@@ -254,8 +256,9 @@ var ShdrLines = {
         glFrag: {
             start: "gl_FragColor = vec4(",
             tintCol: "u_Tint.rgb",
-            col: " + v_Col",
+            col: " + v_Col.rgb",
             texCol: " + texColour.rgb",
+            colA: " + v_Col.a",
             texA: " + texColour.a",
             light: " * v_LightWeight",
             alphaStart: ", u_Tint.a",

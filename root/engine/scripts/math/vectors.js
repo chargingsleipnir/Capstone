@@ -358,8 +358,10 @@ Vector3.prototype = {
         return new Vector3(-this.x, -this.y, -this.z);
     },
     GetOrthoAxis: function() {
-        var diffVec = new Vector3(-this.z, -this.x, this.y);
-        return this.GetCross(diffVec).SetNormalized();
+        var rotMtx = new Matrix2();
+        rotMtx.SetRotation(90);
+        var rotatedAxis = rotMtx.MultiplyVec2(new Vector2(this.x, this.y));
+        return (new Vector3(rotatedAxis.x, rotatedAxis.y, this.z)).SetNormalized();
     },
     SetAdd: function(vec3) {
         /// <signature>

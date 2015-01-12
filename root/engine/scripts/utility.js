@@ -386,6 +386,8 @@ var ModelUtils = {
         }
 
         fragColour += ShdrLines.main.glFrag.alphaStart;
+        if(colour)
+            fragColour += ShdrLines.main.glFrag.colA;
         if(texture)
             fragColour += ShdrLines.main.glFrag.texA;
         fragColour += ShdrLines.main.glFrag.end;

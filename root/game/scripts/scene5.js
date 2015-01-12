@@ -27,9 +27,10 @@ function BuildScene5(scene) {
     effects.colourBtm = new Vector3(0.5, 0.5, 0.5);
     effects.colourTop = new Vector3(1.0, 1.0, 1.0);
     effects.lineLength = 0.0;
-    effects.alphaStart = 1.0;
-    effects.alphaEnd = 1.0;
     effects.size = 10.0;
+    effects.alphaStart = 1.0;
+    effects.fadePoint = 0.5;
+    effects.alphaEnd = 0.0;
 
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
 
@@ -44,9 +45,14 @@ function BuildScene5(scene) {
     effects.colourBtm = new Vector3(1.0, 1.0, 0.0);
     effects.colourTop = new Vector3(1.0, 1.0, 1.0);
     effects.lineLength = 0.3;
-    effects.alphaStart = 1.0;
-    effects.alphaEnd = 1.0;
     effects.size = 0.0;
+
+    ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
+
+    effects.dir = new Vector3(1.0, -1.0, 1.0);
+    effects.acc = new Vector3(-4.0, 2.0, -2.0);
+    effects.colourBtm = new Vector3(0.0, 1.0, 1.0);
+    effects.colourTop = new Vector3(1.0, 1.0, 1.0);
 
     ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
 
@@ -62,8 +68,9 @@ function BuildScene5(scene) {
     tailEffects.colour = new Vector3(1.0, 1.0, 0.0);
     tailEffects.thickness = 0.3;
     tailEffects.axis = Axes.y;
-    tailEffects.alphaStart = 1.0;
-    tailEffects.alphaEnd = 1.0;
+    tailEffects.alphaStart = 0.75;
+    tailEffects.fadePoint = 0.0;
+    tailEffects.alphaEnd = 0.0;
 
     ptclObj2.ptclSys.AddTail(101, 30, tailEffects);
 
@@ -88,10 +95,8 @@ function BuildScene5(scene) {
     effects.colourBtm = new Vector3(1.0, 0.0, 0.0);
     effects.colourTop = new Vector3(1.0, 1.0, 1.0);
     effects.lineLength = 0.0;
-    effects.alphaStart = 1.0;
-    effects.alphaEnd = 1.0;
     effects.texture = EL.assets.textures['star'];
-    effects.size = 64.0;
+    effects.size = 40.0;
 
     ptclObj3.ptclSys.AddSimpleField(100, 30, effects);
 
@@ -127,6 +132,7 @@ function BuildScene5(scene) {
         }
         if(fireGatling.pressed) {
             ptclObj1.ptclSys.RunField(1);
+            ptclObj1.ptclSys.RunField(2);
             fireGatling.Release();
         }
         if(leaveTrail.pressed) {

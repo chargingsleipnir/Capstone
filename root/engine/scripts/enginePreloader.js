@@ -24,7 +24,6 @@ var EL = {
         // SHADERS
         var shaderNamesFilepaths = [
             // Specialty shaders
-            ['test', 'engine/assets/shaders/test.vshdr', 'engine/assets/shaders/test.fshdr'],
             ['ray', 'engine/assets/shaders/ray.vshdr', 'engine/assets/shaders/ray.fshdr'],
             ['guiBoxTint', 'engine/assets/shaders/guiBoxTint.vshdr', 'engine/assets/shaders/guiBoxTint.fshdr'],
             ['guiBoxTintTex', 'engine/assets/shaders/guiBoxTintTex.vshdr', 'engine/assets/shaders/guiBoxTintTex.fshdr'],

@@ -4,21 +4,24 @@
 
 /******************************** Point and line Particles *****************************************/
 
-function ParticleSimple(travelTime, countDown) {
+function ParticleSimple(travelTime, countDown, startPos, startVel, acc, dampening, colour, alphaStart, fadePoint, alphaEnd) {
     // Physics
-    this.startPos = new Vector3();
-    this.startVel = new Vector3();
-    this.startAcc = new Vector3();
+    this.startPos = startPos;
+    this.startVel = startVel;
+    this.acc = acc;
+    this.dampening = dampening;
     this.pos = new Vector3(0.0, 999.0, 0.0);
     this.vel = new Vector3();
-    this.acc = new Vector3();
-    this.dampening = 1.0;
     // Duration
     this.travelTime = travelTime;
     this.countDown = countDown;
     this.isAlive = false;
     // Effects
-    this.colour = new Vector3();
+    this.colour = new Vector4(colour.x, colour.y, colour.z, alphaStart);
+    this.alphaStart = alphaStart;
+    this.alphaDiff = alphaStart - alphaEnd;
+    this.fadeCountStart = travelTime - (travelTime * fadePoint);
+    this.fadeCounter = this.fadeCountStart;
     this.tailPos = this.pos.GetCopy();
     this.tailLength = 0.0;
 }
@@ -35,6 +38,13 @@ ParticleSimple.prototype = {
             }
 
             this.countDown -= Time.deltaMilli;
+
+            if(this.countDown < this.fadeCountStart) {
+                this.fadeCounter -= Time.deltaMilli;
+                var fadePct = 1.0 - (this.fadeCounter / this.fadeCountStart);
+                this.colour.w = this.alphaStart - (fadePct * this.alphaDiff);
+            }
+
             if(this.countDown < 0.0)
                 this.Reset();
         }
@@ -42,9 +52,11 @@ ParticleSimple.prototype = {
     Reset: function() {
         this.pos.SetCopy(this.startPos);
         this.vel.SetCopy(this.startVel);
-        this.acc.SetCopy(this.startAcc);
         this.tailPos.SetCopy(this.startPos);
         this.countDown = this.travelTime;
+
+        this.colour.w = this.alphaStart;
+        this.fadeCounter = this.fadeCountStart;
     }
 };
 
@@ -80,23 +92,28 @@ function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
         var randomX = Math.random(),
             randomY = Math.random(),
             randomZ = Math.random();
-        this.ptcls.push(new ParticleSimple(effects.travelTime, effects.staggerRate * i));
 
         var randConeAngle = (effects.range / 2.0) * (randomX * 2) - 1;
         var randRotAngle = 360 * randomY;
         var randDir = dir.GetRotated(randConeAngle, dir.GetOrthoAxis());
         randDir.SetRotated(randRotAngle, dir);
 
-        this.ptcls[i].startPos.SetCopy(randDir.GetScaleByNum(effects.startDist));
-        this.ptcls[i].startVel.SetCopy(randDir.GetScaleByNum(effects.speed));
-        this.ptcls[i].startAcc.SetCopy(effects.acc);
-        this.ptcls[i].dampening = effects.dampening;
-
-        this.ptcls[i].colour.SetValues(
-            (effects.colourTop.x - effects.colourBtm.x) * randomX + effects.colourBtm.x,
-            (effects.colourTop.y - effects.colourBtm.y) * randomY + effects.colourBtm.y,
-            (effects.colourTop.z - effects.colourBtm.z) * randomZ + effects.colourBtm.z
-        );
+        this.ptcls.push(new ParticleSimple(
+            effects.travelTime,
+            effects.staggerRate * i,
+            randDir.GetScaleByNum(effects.startDist),
+            randDir.GetScaleByNum(effects.speed),
+            effects.acc,
+            effects.dampening,
+            new Vector3(
+                (effects.colourTop.x - effects.colourBtm.x) * randomX + effects.colourBtm.x,
+                (effects.colourTop.y - effects.colourBtm.y) * randomY + effects.colourBtm.y,
+                (effects.colourTop.z - effects.colourBtm.z) * randomZ + effects.colourBtm.z
+            ),
+            effects.alphaStart,
+            effects.fadePoint,
+            effects.alphaEnd
+        ));
 
         // Once positions are established, sort from back to front
         // This stays here uniquely because it's using StartPos, not regular pos;
@@ -267,9 +284,6 @@ function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
     this.fieldLifeTime = fieldLife || 20.0;
     this.counter = this.fieldLifeTime;
 
-    /*
-    tailEffects.axis = Axes.x;
-    */
     this.axis = new Vector3();
     if(effects.axis == Axes.x)
         this.axis.x = effects.thickness / 2;
@@ -284,6 +298,22 @@ function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
     // Using changing looping functions
     this.Callback = this.Launch;
 
+    // Work out alpha effects
+    var alphas = [];
+    var startFade = this.ptclCount * effects.fadePoint;
+    startFade = Math.round(startFade);
+    var remainder = this.ptclCount - startFade;
+    var alphaIncr = (effects.alphaStart - effects.alphaEnd) / remainder;
+    var incrCounter = 0;
+    for(var i = 0; i < this.ptclCount; i++) {
+        if(i < startFade)
+            alphas.push(effects.alphaStart);
+        else {
+            incrCounter++;
+            alphas.push(effects.alphaStart - (alphaIncr * incrCounter));
+        }
+    }
+
     this.posCoords = [];
     var colElems = [];
     for(var i = 0; i < this.ptclCount; i++) {
@@ -293,6 +323,7 @@ function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
         this.axis.SetNegative();
 
         colElems = colElems.concat(effects.colour.GetData());
+        colElems.push(alphas[i]);
     }
 
     var ptclVerts = {

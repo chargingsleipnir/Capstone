@@ -13,8 +13,8 @@ var Primitives = {
             count: 2,
             posCoords: posCoords,
             colElems: [
-                1.0, 0.0, 1.0,
-                1.0, 0.0, 1.0
+                1.0, 0.0, 1.0, 1.0,
+                1.0, 0.0, 1.0, 1.0
             ],
             texCoords: [],
             normAxes: [],
@@ -80,22 +80,22 @@ var Primitives = {
                     colElems: (function () {
                         var colors = [];
                         // Origin
-                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        colors = colors.concat([0.0, 1.0, 1.0, 1.0]);
                         // x arn
-                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        colors = colors.concat([0.0, 1.0, 1.0, 1.0]);
                         // x end
                         for (var i = 0; i < 8; i++)
-                            colors = colors.concat([1.0, 0.0, 0.0]);
+                            colors = colors.concat([1.0, 0.0, 0.0, 1.0]);
                         // y arm
-                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        colors = colors.concat([0.0, 1.0, 1.0, 1.0]);
                         // y end
                         for (var i = 0; i < 8; i++)
-                            colors = colors.concat([0.0, 0.8, 0.0]);
+                            colors = colors.concat([0.0, 0.8, 0.0, 1.0]);
                         // z arm
-                        colors = colors.concat([0.0, 1.0, 1.0]);
+                        colors = colors.concat([0.0, 1.0, 1.0, 1.0]);
                         // z end
                         for (var i = 0; i < 8; i++)
-                            colors = colors.concat([0.0, 0.0, 1.0]);
+                            colors = colors.concat([0.0, 0.0, 1.0, 1.0]);
                         return colors;
                     })(),
                     texCoords: [],
@@ -170,22 +170,22 @@ var Primitives = {
                     colElems: (function () {
                         var colors = [];
                         // Origin
-                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        colors = colors.concat([1.0, 0.0, 1.0, 1.0]);
                         // x arn
-                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        colors = colors.concat([1.0, 0.0, 1.0, 1.0]);
                         // x end
                         for (var i = 0; i < 5; i++)
-                            colors = colors.concat([1.0, 0.0, 0.0]);
+                            colors = colors.concat([1.0, 0.0, 0.0, 1.0]);
                         // y arm
-                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        colors = colors.concat([1.0, 0.0, 1.0, 1.0]);
                         // y end
                         for (var i = 0; i < 5; i++)
-                            colors = colors.concat([0.0, 0.8, 0.0]);
+                            colors = colors.concat([0.0, 0.8, 0.0, 1.0]);
                         // z arm
-                        colors = colors.concat([1.0, 0.0, 1.0]);
+                        colors = colors.concat([1.0, 0.0, 1.0, 1.0]);
                         // z end
                         for (var i = 0; i < 5; i++)
-                            colors = colors.concat([0.0, 0.0, 1.0]);
+                            colors = colors.concat([0.0, 0.0, 1.0, 1.0]);
                         return colors;
                     })(),
                     texCoords: [],
@@ -249,12 +249,12 @@ var Primitives = {
                         0.0, 0.0, z
                     ],
                     colElems: [
-                        1.0, 0.0, 0.0,
-                        1.0, 0.0, 0.0,
-                        0.0, 0.8, 0.0,
-                        0.0, 0.8, 0.0,
-                        0.0, 0.0, 1.0,
-                        0.0, 0.0, 1.0
+                        1.0, 0.0, 0.0, 1.0,
+                        1.0, 0.0, 0.0, 1.0,
+                        0.0, 0.8, 0.0, 1.0,
+                        0.0, 0.8, 0.0, 1.0,
+                        0.0, 0.0, 1.0, 1.0,
+                        0.0, 0.0, 1.0, 1.0
                     ],
                     texCoords: [],
                     normAxes: []
@@ -291,11 +291,11 @@ var Primitives = {
                 colElems: (function () {
                     var colors = [];
                     for (var i = 0; i < 100; i++)
-                        colors = colors.concat([1.0, 0.0, 0.0]);
+                        colors = colors.concat([1.0, 0.0, 0.0, 1.0]);
                     for (var i = 0; i < 100; i++)
-                        colors = colors.concat([0.0, 0.8, 0.0]);
+                        colors = colors.concat([0.0, 0.8, 0.0, 1.0]);
                     for (var i = 0; i < 100; i++)
-                        colors = colors.concat([0.0, 0.0, 1.0]);
+                        colors = colors.concat([0.0, 0.0, 1.0, 1.0]);
                     return colors;
                 })(),
                 texCoords: [],
@@ -341,11 +341,11 @@ var Primitives = {
                 colElems: (function () {
                     var colors = [];
                     for (var i = -100; i <= 100; i++)
-                        colors = colors.concat([1.0, 0.0, 0.0]);
+                        colors = colors.concat([1.0, 0.0, 0.0, 1.0]);
                     for (var i = -100; i <= 100; i++)
-                        colors = colors.concat([0.0, 0.8, 0.0]);
+                        colors = colors.concat([0.0, 0.8, 0.0, 1.0]);
                     for (var i = -100; i <= 100; i++)
-                        colors = colors.concat([0.0, 0.0, 1.0]);
+                        colors = colors.concat([0.0, 0.0, 1.0, 1.0]);
                     return colors;
                 })(),
                 texCoords: [],
@@ -375,9 +375,9 @@ var Primitives = {
                     for (var x = -10; x < 10; x++)
                         for (var z = -10; z < 10; z++) {
                             if ((x + z) % 2 == 0)
-                                color = [0.4, 0.4, 0.4];
+                                color = [0.4, 0.4, 0.4, 0.75];
                             else
-                                color = [0.6, 0.6, 0.6];
+                                color = [0.6, 0.6, 0.6, 0.75];
                             colors = colors.concat(color);
                         }
                     return colors;
@@ -407,9 +407,9 @@ var Primitives = {
                     for (var x = -10; x < 10; x++)
                         for (var z = -10; z < 10; z++) {
                             if ((x + z) % 2 == 0)
-                                color = [0.4, 0.4, 0.4];
+                                color = [0.4, 0.4, 0.4, 0.75];
                             else
-                                color = [0.6, 0.6, 0.6];
+                                color = [0.6, 0.6, 0.6, 0.75];
                             colors = colors.concat(color);
                             colors = colors.concat(color);
                             colors = colors.concat(color);
@@ -468,12 +468,12 @@ var Primitives = {
                              colors = colors.concat([0.0, 0.0, 1.0]);
                              colors = colors.concat([0.0, 0.0, 1.0]);
                              */
-                            colors = colors.concat([1.0, 0.75, 0.75]);
-                            colors = colors.concat([1.0, 0.75, 0.75]);
-                            colors = colors.concat([0.75, 1.0, 0.75]);
-                            colors = colors.concat([0.75, 1.0, 0.75]);
-                            colors = colors.concat([0.75, 0.75, 1.0]);
-                            colors = colors.concat([0.75, 0.75, 1.0]);
+                            colors = colors.concat([1.0, 0.75, 0.75, 1.0]);
+                            colors = colors.concat([1.0, 0.75, 0.75, 1.0]);
+                            colors = colors.concat([0.75, 1.0, 0.75, 1.0]);
+                            colors = colors.concat([0.75, 1.0, 0.75, 1.0]);
+                            colors = colors.concat([0.75, 0.75, 1.0, 1.0]);
+                            colors = colors.concat([0.75, 0.75, 1.0, 1.0]);
                         }
                     }
                     return colors;
@@ -542,7 +542,7 @@ var Primitives = {
         for (var i = 0; i < posCoords.length; i += 3) {
             var magInv = 1.0 / (new Vector3(posCoords[i], posCoords[i + 1], 0.0)).GetMag();
             normals = normals.concat([posCoords[i] * magInv, posCoords[i + 1] * magInv, 0.0]);
-            colours = colours.concat([0.0, 0.0, 0.0]);
+            colours = colours.concat([0.0, 0.0, 0.0, 1.0]);
         }
         return {
             name: "Rect",
@@ -653,14 +653,14 @@ var Primitives = {
                     0.1, 0.3, 0.0
                 ],
                 colElems: [
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0,
-                    1.0, 0.0, 0.0
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0,
+                    1.0, 0.0, 0.0, 1.0
                 ],
                 texCoords: [],
                 normAxes: [],
@@ -693,12 +693,12 @@ var Primitives = {
                     -0.2, -0.3, 0.0
                 ],
                 colElems: [
-                    0.8, 0.8, 0.0,
-                    0.8, 0.8, 0.0,
-                    0.8, 0.8, 0.0,
-                    0.8, 0.8, 0.0,
-                    0.8, 0.8, 0.0,
-                    0.8, 0.8, 0.0
+                    0.8, 0.8, 0.0, 1.0,
+                    0.8, 0.8, 0.0, 1.0,
+                    0.8, 0.8, 0.0, 1.0,
+                    0.8, 0.8, 0.0, 1.0,
+                    0.8, 0.8, 0.0, 1.0,
+                    0.8, 0.8, 0.0, 1.0
                 ],
                 texCoords: [],
                 normAxes: [],
@@ -738,7 +738,7 @@ var Primitives = {
                 colElems: (function () {
                     var colors = [];
                     for (var i = 0; i < 10; i++) {
-                        colors = colors.concat([Math.sin(i), Math.cos(i), Math.tan(i)]);
+                        colors = colors.concat([Math.sin(i), Math.cos(i), Math.tan(i), 1.0]);
                     }
                     return colors;
                 })(),
@@ -796,7 +796,7 @@ var Primitives = {
         for (var i = 0; i < posCoords.length; i += 3) {
             var magInv = 1.0 / (new Vector3(posCoords[i], posCoords[i + 1], posCoords[i + 2])).GetMag();
             normals = normals.concat([posCoords[i] * magInv, posCoords[i + 1] * magInv, posCoords[i + 2] * magInv]);
-            colours = colours.concat([0.0, 0.0, 0.0]);
+            colours = colours.concat([0.0, 0.0, 0.0, 1.0]);
         }
         var texCoords = [];
         if (canTexture)
@@ -1045,7 +1045,7 @@ var Primitives = {
             for (var j = 0; j < faces[i].length; j++) {
                 indices.push(faces[i][j]);
                 //colors = colors.concat([1.0, 1.0, 1.0]);
-                colors = colors.concat([0.0, 0.0, 0.0]);
+                colors = colors.concat([0.0, 0.0, 0.0, 1.0]);
             }
         }
 

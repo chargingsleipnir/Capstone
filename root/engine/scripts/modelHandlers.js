@@ -107,15 +107,8 @@ function RayCastHandler(rayVerts) {
     GL.CreateBufferObjects(rayVerts, this.bufferData, true);
 
     this.active = true;
-    this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
 }
 RayCastHandler.prototype = {
-    SetTintRGB: function(r, g, b) {
-        this.tint.SetVec3(r, g, b);
-    },
-    SetTintAlpha: function(a) {
-        this.tint.SetW(a);
-    },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
     }

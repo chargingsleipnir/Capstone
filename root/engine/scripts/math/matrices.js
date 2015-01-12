@@ -1,4 +1,27 @@
-﻿function Matrix3(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
+﻿function Matrix2(arg0, arg1, arg2, arg3) {
+    this.data = [
+        arg0 || 1.0, arg1 || 0.0,
+        arg2 || 0.0, arg3 || 1.0
+    ]
+}
+Matrix2.prototype = {
+    SetRotation: function(thetaDeg) {
+        var c = Math.cos(thetaDeg * DEG_TO_RAD);
+        var s = Math.sin(thetaDeg * DEG_TO_RAD);
+        this.data[0] = c;
+        this.data[1] = s;
+        this.data[2] = -s;
+        this.data[3] = c;
+    },
+    MultiplyVec2: function(vec2) {
+        return new Vector2(
+            (this.data[0] * vec2.x) + (this.data[1] * vec2.y),
+            (this.data[2] * vec2.x) + (this.data[3] * vec2.y)
+        );
+    }
+};
+
+function Matrix3(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
     /// <signature>
     ///  <summary>Make 9 element identity matrix</summary>
     ///  <param name="r1c1, r1c2, r1c3, r2c1, r2c2, r2c3, r3c1, r3c2, r3c3" type="decimals">Initial values</param>

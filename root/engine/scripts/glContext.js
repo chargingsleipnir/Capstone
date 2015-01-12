@@ -255,7 +255,7 @@ var GL = {
                 this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
                 if (shdr.a_Col != -1) {
                     this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
                 }
                 if (shdr.a_TexCoord != -1) {
                     this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
@@ -364,7 +364,7 @@ var GL = {
                     this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
 
                     this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
                     if(buff.texID) {
                         this.ctx.activeTexture(this.ctx.TEXTURE0);
@@ -382,15 +382,17 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
             }
-            var trails = scene.ptclSystems[i].GetTails();
+
+            var tails = scene.ptclSystems[i].GetTails();
             shdr = EL.assets.shaderPrograms['ray'];
             this.ctx.useProgram(shdr.program);
-            for (var j = 0; j < trails.length; j++)
+            this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+            for (var j = 0; j < tails.length; j++)
             {
-                if(trails[j].active) {
+                if(tails[j].active) {
                     //fieldCount++;
                     // These just allow everything to be better read
-                    buff = trails[j].trailHdlr.bufferData;
+                    buff = tails[j].trailHdlr.bufferData;
 
                     // USE PROGRAM AND VBO
                     this.ctx.useProgram(shdr.program);
@@ -401,10 +403,7 @@ var GL = {
                     this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
 
                     this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-                    this.ctx.uniform4fv(shdr.u_Tint, trails[j].trailHdlr.tint.GetData());
+                    this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
                     this.ctx.drawArrays(this.ctx.TRIANGLE_STRIP, 0, buff.numVerts);
 
@@ -445,7 +444,7 @@ var GL = {
                     this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
                     if (shdr.a_Col != -1) {
                         this.ctx.enableVertexAttribArray(shdr.a_Col);
-                        this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                        this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
                     }
 
                     this.mtxModel.SetIdentity();
@@ -496,11 +495,7 @@ var GL = {
                         this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
 
                         this.ctx.enableVertexAttribArray(shdr.a_Col);
-                        this.ctx.vertexAttribPointer(shdr.a_Col, 3, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-
-                        // SEND UP UNIFORMS
-
-                        this.ctx.uniform4fv(shdr.u_Tint, dispObjs[i].tint.GetData());
+                        this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
 
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                         this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
