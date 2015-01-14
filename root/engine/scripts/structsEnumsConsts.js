@@ -83,7 +83,7 @@ function MsgBoxStyle(style) {
     this.bgColour = new Vector3();
     this.bgHoverColour = new Vector3();
     this.bgAlpha = 1.0;
-    this.margin = 0.5;
+    this.margin = 0.0;
     this.bold = false;
 
     if(style) {

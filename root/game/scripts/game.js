@@ -45,7 +45,7 @@ function BuildGame() {
     style.bold = true;
 
     var resumeBtn = new GUIObject(
-        new WndRect(20, 20, backDrop.rectLocal.w - 40, 50),
+        new WndRect(20, 20, backDrop.rectGlobal.w - 40, 50),
         "Resume Game",
         style
     );
@@ -55,7 +55,7 @@ function BuildGame() {
     }
 
     var quitBtn = new GUIObject(
-        new WndRect(20, 90, resumeBtn.rectLocal.w, resumeBtn.rectLocal.h),
+        new WndRect(20, 90, resumeBtn.rectGlobal.w, resumeBtn.rectGlobal.h),
         "Quit Game",
         style
     );

@@ -29,15 +29,15 @@ var Input = (function() {
 
     function onmousemove(e) {
         for (var o in activeMouseRegistry) {
-            activeMouseRegistry[o].pos.x = e.x - ViewMngr.offsetLeft;
-            activeMouseRegistry[o].pos.y = e.y - ViewMngr.offsetTop;
+            activeMouseRegistry[o].pos.x = e.pageX - ViewMngr.offsetLeft;
+            activeMouseRegistry[o].pos.y = e.pageY - ViewMngr.offsetTop;
         }
     }
 
     function onmousedown(e) {
         for (var o in activeMouseRegistry) {
-            activeMouseRegistry[o].pos.x = e.x - ViewMngr.offsetLeft;
-            activeMouseRegistry[o].pos.y = e.y - ViewMngr.offsetTop;
+            activeMouseRegistry[o].pos.x = e.pageX - ViewMngr.offsetLeft;
+            activeMouseRegistry[o].pos.y = e.pageY - ViewMngr.offsetTop;
             switch(e.button) {
                 case 0:
                     activeMouseRegistry[o].leftPressed = true;
@@ -54,8 +54,8 @@ var Input = (function() {
 
     function onmouseup(e) {
         for (var o in activeMouseRegistry) {
-            activeMouseRegistry[o].pos.x = e.x - ViewMngr.offsetLeft;
-            activeMouseRegistry[o].pos.y = e.y - ViewMngr.offsetTop;
+            activeMouseRegistry[o].pos.x = e.pageX - ViewMngr.offsetLeft;
+            activeMouseRegistry[o].pos.y = e.pageY - ViewMngr.offsetTop;
             switch(e.button) {
                 case 0:
                     activeMouseRegistry[o].leftPressed = false;
