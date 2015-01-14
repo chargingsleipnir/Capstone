@@ -1,31 +1,95 @@
 ﻿
 // Need to include mouse input ****************
 var Input = (function() {
-    var activeRegistry = {};
-    var inactiveRegistry = {};
+    var activeKeyRegistry = {};
+    var inactiveKeyRegistry = {};
 
     window.onkeydown = function(e)
     {
-        for (var o in activeRegistry)
-            if (e.keyCode in activeRegistry[o] && activeRegistry[o][e.keyCode].readyLoop)
+        for (var o in activeKeyRegistry)
+            if (e.keyCode in activeKeyRegistry[o] && activeKeyRegistry[o][e.keyCode].readyLoop)
             {
-                activeRegistry[o][e.keyCode].boolToChange.pressed = true;
-                activeRegistry[o][e.keyCode].readyLoop = false;
+                activeKeyRegistry[o][e.keyCode].controller.pressed = true;
+                activeKeyRegistry[o][e.keyCode].readyLoop = false;
             }
     };
 
     window.onkeyup = function(e)
     {
-        for (var o in activeRegistry)
-            if (e.keyCode in activeRegistry[o])
+        for (var o in activeKeyRegistry)
+            if (e.keyCode in activeKeyRegistry[o])
             {
-                activeRegistry[o][e.keyCode].boolToChange.pressed = false;
-                activeRegistry[o][e.keyCode].readyLoop = true;
+                activeKeyRegistry[o][e.keyCode].controller.pressed = false;
+                activeKeyRegistry[o][e.keyCode].readyLoop = true;
             }
     };
 
+    var activeMouseRegistry = {};
+    var inactiveMouseRegistry = {};
+
+    function onmousemove(e) {
+        for (var o in activeMouseRegistry) {
+            activeMouseRegistry[o].pos.x = e.x - ViewMngr.offsetLeft;
+            activeMouseRegistry[o].pos.y = e.y - ViewMngr.offsetTop;
+        }
+    }
+
+    function onmousedown(e) {
+        for (var o in activeMouseRegistry) {
+            activeMouseRegistry[o].pos.x = e.x - ViewMngr.offsetLeft;
+            activeMouseRegistry[o].pos.y = e.y - ViewMngr.offsetTop;
+            switch(e.button) {
+                case 0:
+                    activeMouseRegistry[o].leftPressed = true;
+                    break;
+                case 1:
+                    activeMouseRegistry[o].middlePressed = true;
+                    break;
+                case 2:
+                    activeMouseRegistry[o].rightPressed = true;
+                    break;
+            }
+        }
+    }
+
+    function onmouseup(e) {
+        for (var o in activeMouseRegistry) {
+            activeMouseRegistry[o].pos.x = e.x - ViewMngr.offsetLeft;
+            activeMouseRegistry[o].pos.y = e.y - ViewMngr.offsetTop;
+            switch(e.button) {
+                case 0:
+                    activeMouseRegistry[o].leftPressed = false;
+                    break;
+                case 1:
+                    activeMouseRegistry[o].middlePressed = false;
+                    break;
+                case 2:
+                    activeMouseRegistry[o].rightPressed = false;
+                    break;
+            }
+        }
+    }
+
+    function SwapRegistries(from, to, name) {
+        to[name] = from[name];
+        delete from[name];
+        // reset all key to ready state
+        for (var o in to[name]) {
+            if(to[name][o].hasOwnProperty('controller')) {
+                to[name][o].controller.pressed = false;
+                to[name][o].readyLoop = true;
+            }
+            else {
+                to[name][o].leftPressed = false;
+                to[name][o].middlePressed = false;
+                to[name][o].rightPressed = false;
+            }
+
+        }
+    }
+
     return {
-        RegisterControlScheme: function(name, active)
+        RegisterControlScheme: function(name, active, inputType)
         {
             /// <signature>
             ///  <summary>Store a distinct instance to recieve input</summary>
@@ -33,10 +97,18 @@ var Input = (function() {
             ///  <param name="active" type="bool">Whether or not this object is currently requiring input</param>
             ///  <returns type="void" />
             /// </signature>
-            if(active)
-                activeRegistry[name] = {};
-            else
-                inactiveRegistry[name] = {};
+            switch(inputType) {
+                case InputTypes.keyboard:
+                    if(active) activeKeyRegistry[name] = {};
+                    else inactiveKeyRegistry[name] = {};
+                    break;
+                case InputTypes.mouse:
+                    if(active) activeMouseRegistry[name] = {};
+                    else inactiveMouseRegistry[name] = {};
+                    break;
+                case InputTypes.gamepad:
+                    break;
+            }
         },
         UnRegisterControlScheme: function(name)
         {
@@ -45,12 +117,11 @@ var Input = (function() {
             ///  <param name="name" type="string">The unique string name given to the object</param>
             ///  <returns type="void" />
             /// </signature>
-            if (name in activeRegistry)
-                delete activeRegistry[name];
-            else if (name in inactiveRegistry)
-                delete inactiveRegistry[name];
-            else
-                throw ("No object by that name to unregister");
+            if (name in activeKeyRegistry) delete activeKeyRegistry[name];
+            else if (name in inactiveKeyRegistry) delete inactiveKeyRegistry[name];
+            else if (name in activeMouseRegistry) delete activeMouseRegistry[name];
+            else if (name in inactiveMouseRegistry) delete inactiveMouseRegistry[name];
+            else throw ("No object by that name to unregister");
         },
         SetActive: function(name, beActive)
         {
@@ -60,25 +131,22 @@ var Input = (function() {
             ///  <param name="beActive" type="bool">Whether or not this object is to recieve input</param>
             ///  <returns type="void" />
             /// </signature>
-            if (!(name in activeRegistry) && !(name in inactiveRegistry))
+            if (!(name in activeKeyRegistry) &&
+                !(name in inactiveKeyRegistry) &&
+                !(name in activeMouseRegistry) &&
+                !(name in inactiveMouseRegistry))
                 throw ("No object by that name to change active status");
-            else if (name in activeRegistry && beActive == false) {
-                inactiveRegistry[name] = activeRegistry[name];
-                delete activeRegistry[name];
-                // reset all key to ready state
-                for (var o in inactiveRegistry[name]) {
-                    inactiveRegistry[name][o].boolToChange.pressed = false;
-                    inactiveRegistry[name][o].readyLoop = true;
-                }
+            else if (name in activeKeyRegistry && beActive == false) {
+                SwapRegistries(activeKeyRegistry, inactiveKeyRegistry, name);
             }
-            else if (name in inactiveRegistry && beActive) {
-                activeRegistry[name] = inactiveRegistry[name];
-                delete inactiveRegistry[name];
-                // reset all key to ready state
-                for (var o in inactiveRegistry[name]) {
-                    inactiveRegistry[name][o].boolToChange.pressed = false;
-                    inactiveRegistry[name][o].readyLoop = true;
-                }
+            else if (name in inactiveKeyRegistry && beActive) {
+                SwapRegistries(inactiveKeyRegistry, activeKeyRegistry, name);
+            }
+            else if (name in activeMouseRegistry && beActive == false) {
+                SwapRegistries(activeMouseRegistry, inactiveMouseRegistry, name);
+            }
+            else if (name in inactiveMouseRegistry && beActive) {
+                SwapRegistries(inactiveMouseRegistry, activeMouseRegistry, name);
             }
             else
                 throw ("Object is already where you want it");
@@ -89,42 +157,83 @@ var Input = (function() {
             ///  <summary>List all objects registered to recieve input at some point</summary>
             ///  <returns type="void" />
             /// </signature>
-            for (var o in activeRegistry)
-                console.log('Active: ' + o + ' : ' + activeRegistry[o]);
-            for (var o in inactiveRegistry)
-                console.log('Inactive: ' + o + ' : ' + inactiveRegistry[o]);
+            for (var o in activeKeyRegistry)
+                console.log('Active: ' + o + ' : ' + activeKeyRegistry[o]);
+            for (var o in inactiveKeyRegistry)
+                console.log('Inactive: ' + o + ' : ' + inactiveKeyRegistry[o]);
+            for (var o in activeMouseRegistry)
+                console.log('Active: ' + o + ' : ' + activeMouseRegistry[o]);
+            for (var o in inactiveMouseRegistry)
+                console.log('Inactive: ' + o + ' : ' + inactiveMouseRegistry[o]);
         },
         CheckRegistry: function(name) {
-            return (name in activeRegistry || name in inactiveRegistry);
+            if(name in activeKeyRegistry || name in inactiveKeyRegistry)
+                return InputTypes.keyboard;
+            else if (name in activeMouseRegistry || name in inactiveMouseRegistry)
+                return InputTypes.mouse;
+            else
+                return -1;
         },
-        CreateInputController: function(name, inputCode) {
+        CreateInputController: function(name, keyMapping) {
             /// <signature>
             ///  <summary>Add specific input to an object</summary>
             ///  <param name="name" type="string">The unique string name given to the object</param>
-            ///  <param name="input" type="decimal">Use the global object keyMap to get exact key codes</param>
+            ///  <param name="keyMapping" type="int">Use the global object keyMap to get exact key codes for keyboard implementation only</param>
             ///  <returns type="bool" />
             /// </signature>
-            var keyController = {
-                pressed: false,
-                Release: function() { this.pressed = false; }
+
+            if(keyMapping) {
+                var keyController = {
+                    pressed: false,
+                    Release: function() { this.pressed = false; }
+                };
+
+                if (name in activeKeyRegistry) {
+                    activeKeyRegistry[name][keyMapping] = {
+                        controller: keyController,
+                        readyLoop: true
+                    };
+                }
+                else if (name in inactiveKeyRegistry) {
+                    inactiveKeyRegistry[name][keyMapping] = {
+                        controller: keyController,
+                        readyLoop: true
+                    };
+                }
+                else
+                    throw ("No object by that name to add boolean reference");
+
+                return keyController;
             }
 
-            if (name in activeRegistry) {
-                activeRegistry[name][inputCode] = {
-                    boolToChange: keyController,
-                    readyLoop: true
-                };
+
+            var mouseController = {
+                pos: new Vector2(0, 0),
+                leftPressed: false,
+                middlePressed: false,
+                rightPressed: false,
+                LeftRelease: function() { this.leftPressed = false; },
+                MiddleRelease: function() { this.middlePressed = false; },
+                RightRelease: function() { this.rightPressed = false; },
+                HideCursor: function(hide) {
+                    if(hide)
+                    { /*canvas.style.cursor = "none" */ }
+                    else
+                    { /*canvas.style.cursor = "auto" */ }
+                    { /*canvas.style.cursor = "crosshair" */ }
+                }
+            };
+
+            if (name in activeMouseRegistry) {
+                activeMouseRegistry[name] = mouseController;
             }
-            else if (name in inactiveRegistry) {
-                inactiveRegistry[name][inputCode] = {
-                    boolToChange: keyController,
-                    readyLoop: true
-                };
+            else if (name in inactiveMouseRegistry) {
+                inactiveMouseRegistry[name] = mouseController;
             }
             else
                 throw ("No object by that name to add boolean reference");
 
-            return keyController;
+            return mouseController;
         },
         RemoveInputCall: function(name, input)
         {
@@ -134,12 +243,17 @@ var Input = (function() {
             ///  <param name="input" type="decimal">Use the global object keyMap to get exact key code to remove</param>
             ///  <returns type="void" />
             /// </signature>
-            if (name in activeRegistry)
-                delete activeRegistry[name][input];
-            else if (name in inactiveRegistry)
-                delete inactiveRegistry[name][input];
+            if (name in activeKeyRegistry)
+                delete activeKeyRegistry[name][input];
+            else if (name in inactiveKeyRegistry)
+                delete inactiveKeyRegistry[name][input];
             else
                 throw ("No object by that name to remove callback");
+        },
+        GetCanvas: function(canvas) {
+            canvas.addEventListener('mousemove', onmousemove, false);
+            canvas.addEventListener('mousedown', onmousedown, false);
+            canvas.addEventListener('mouseup', onmouseup, false);
         }
     };
 })();

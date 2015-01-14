@@ -28,12 +28,14 @@ function BuildScene3(scene, skyBoxObj) {
 
         balls[i].AddComponent(Components.rigidBody);
         ImpulseBallBehaviour(balls[i]);
+        balls[i].rigidBody.SetMass(2.0);
+        balls[i].dampening = 0.95;
     }
-
-    // Add some springs for extra fun!
-    SpringLoadPull(scene, balls[3].rigidBody, balls[0].rigidBody);
-    SpringLoad(scene, balls[2].rigidBody, balls[1].rigidBody);
-    SpringLoadPush(scene, balls[1].rigidBody, balls[0].rigidBody);
+    // Add some springs
+    balls[1].rigidBody.AddForceGenerator(new ForceGenerators.Spring_PushOnly(balls[0].rigidBody, 2.0, 5.0));
+    balls[2].rigidBody.AddForceGenerator(new ForceGenerators.Gravity(VEC3_GRAVITY));
+    balls[2].rigidBody.AddForceGenerator(new ForceGenerators.Spring(balls[1].rigidBody, 3.0, 4.0));
+    balls[3].rigidBody.AddForceGenerator(new ForceGenerators.Spring_PullOnly(balls[0].rigidBody, 1.0, 10.0));
 
     scene.rootObj.AddComponent(Components.camera);
     scene.rootObj.camera.SetControlsActive(scene.name, false);
@@ -42,7 +44,7 @@ function BuildScene3(scene, skyBoxObj) {
     balls[0].camera.SetControlsActive(balls[0].name, true);
 
     var physicsTestName = "PhysicsTestScene";
-    Input.RegisterControlScheme(physicsTestName, false);
+    Input.RegisterControlScheme(physicsTestName, false, InputTypes.keyboard);
     var launch = Input.CreateInputController(physicsTestName, KeyMap.Z);
     var gotoTitle = Input.CreateInputController(physicsTestName, KeyMap.Enter);
     var launchForce = new Vector3(0.0, 0.0, -250.0);

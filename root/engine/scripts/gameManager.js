@@ -4,6 +4,7 @@ var GameMngr = {
         textures: {},
         models: {}
     },
+    paused: false,
     UserUpdate: function() {},
     Initialize: function(canvasWebGL, canvas2D) {
         /// <signature>
@@ -15,6 +16,7 @@ var GameMngr = {
         // get webGL context
         GL.Initialize(canvasWebGL.getContext('webgl'));
         ViewMngr.Initialize(canvasWebGL);
+        Input.GetCanvas(canvasWebGL);
         TwoD.Initialize(canvas2D.getContext('2d'));
         DebugMngr.Initialize();
     },
@@ -24,6 +26,9 @@ var GameMngr = {
             FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
         }
         FileUtils.LoadTextures(textureNamesFilepaths, this.assets.textures, LoadModels);
+    },
+    TogglePause: function() {
+        this.paused = !this.paused;
     },
     BeginLoop: function() {
         var time_LastFrame;
@@ -35,11 +40,14 @@ var GameMngr = {
             time_LastFrame = time_ThisFrame;
             Time.deltaMilli = time_Delta / 1000;
             Time.fps = 1000 / time_Delta;
-            Time.counter += Time.deltaMilli;
 
-            // Updating Game World and Draw Calls
-            SceneMngr.Update();
-            DebugMngr.Update();
+            if(!that.paused) {
+                Time.counter += Time.deltaMilli;
+                // Updating Game World and Draw Calls
+                SceneMngr.Update();
+                DebugMngr.Update();
+
+            }
             that.UserUpdate();
             GL.RenderScene();
         }

@@ -68,7 +68,8 @@ GUIObject.prototype = {
         }
 
         this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
-        this.boxHdl.tint.SetAxisAngle(this.style.bgColour, this.style.bgAlpha);
+        this.boxHdl.SetTintRGB(this.style.bgColour);
+        this.boxHdl.SetTintAlpha(this.style.bgAlpha);
         if (this.style.bgTexture) {
             this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
         }
@@ -118,7 +119,8 @@ GUIObject.prototype = {
 
             // Build text
             this.strHdl = new StringDisplayHandler(this.charBlockModel);
-            this.strHdl.tint.SetAxisAngle(this.style.fontColour, this.style.fontAlpha);
+            this.strHdl.SetTintRGB(this.style.fontColour);
+            this.strHdl.SetTintAlpha(this.style.fontAlpha);
             if (this.style.bold)
                 this.strHdl.UseBoldTexture();
         }
@@ -139,6 +141,16 @@ GUIObject.prototype = {
             newVerts = newVerts.concat(FontMap.texCoords[msg[i] || ' ']);
         }
         this.strHdl.RewriteVerts(newVerts);
+    },
+    AsButton: function(mousePos, clicked, Callback) {
+        this.boxHdl.SetTintRGB(this.style.bgColour);
+        this.strHdl.SetTintRGB(this.style.fontColour);
+        if(this.rectGlobal.ContainsPoint(mousePos)) {
+            this.boxHdl.SetTintRGB(this.style.bgHoverColour);
+            this.strHdl.SetTintRGB(this.style.fontHoverColour);
+            if(clicked)
+                Callback();
+        }
     },
     FadeBackground: function(incr) {
         this.boxHdl.tint.w += incr;
@@ -211,6 +223,9 @@ var GUINetwork = (function() {
             }
             else
                 throw ("Object is already where you want it");
+        },
+        CheckActive: function(sysName) {
+            return sysName in activeSystems;
         },
         GetActiveSystems: function() {
             return activeSystems;

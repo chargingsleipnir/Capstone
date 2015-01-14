@@ -53,7 +53,7 @@ function BuildScene4(scene) {
     // End testing
 
     var lightTestScene = "LightTestScene";
-    Input.RegisterControlScheme(lightTestScene, false);
+    Input.RegisterControlScheme(lightTestScene, false, InputTypes.keyboard);
     var nextScene = Input.CreateInputController(lightTestScene, KeyMap.Enter);
 
     function Start() {

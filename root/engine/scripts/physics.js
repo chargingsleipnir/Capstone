@@ -22,6 +22,8 @@ function RigidBody(trfm, modelRadius) {
     this.axisOfRotation = new Vector3();
     this.inertiaTensorInv = new Matrix3();
     this.radiusToPt = new Vector3();
+
+    this.forceGenerators = [];
 }
 RigidBody.prototype = {
     SetMass: function(mass) {
@@ -33,6 +35,9 @@ RigidBody.prototype = {
     },
     HasFiniteMass: function() {
         return this.massInv > INFINITESIMAL;
+    },
+    AddForceGenerator: function(generator) {
+        this.forceGenerators.push(generator);
     },
     AddForce: function(force) {
         this.forceAccum.SetAdd(force);
@@ -66,6 +71,11 @@ RigidBody.prototype = {
         rigidBody.velFinal.SetCopy(rigidBody.velInitial.GetAddScaled(collisionDist, -impulse * rigidBody.massInv));
     },
     Update: function() {
+
+        for (var i = 0; i < this.forceGenerators.length; i++) {
+            this.forceGenerators[i].Update(this);
+        }
+
         // ROTATIONAL UPDATE
         //this.axisOfRotation = this.trfm.up.GetCross(this.velFinal);
         //this.axisOfRotation.SetNormalized();
@@ -102,10 +112,10 @@ var ForceGenerators = {
         ///  <param name="gravity" type="Vector3">Gravitaional acceleration</param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
-            if (!particle.HasFiniteMass())
+        this.Update = function(rb) {
+            if (!rb.HasFiniteMass())
                 return;
-            particle.AddForce(gravity.GetScaleByNum(particle.GetMass()));
+            rb.AddForce(gravity.GetScaleByNum(rb.GetMass()));
         }
     },
     Drag: function(k1, k2)
@@ -116,8 +126,8 @@ var ForceGenerators = {
         ///  <param name="k2" type="decimal">Quadratic drag coefficient</param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
-            var force = particle.velFinal.GetCopy();
+        this.Update = function(rb) {
+            var force = rb.velFinal.GetCopy();
 
             var dragCoefficient = force.GetMag();
             dragCoefficient = (k1 * dragCoefficient) + (k2 * dragCoefficient * dragCoefficient);
@@ -125,7 +135,7 @@ var ForceGenerators = {
             force.SetNormalized();
             force.SetScaleByNum(-dragCoefficient);
 
-            particle.AddForce(force);
+            rb.AddForce(force);
         }
     },
     Spring: function(anchor, springConstant, restLength) {
@@ -139,8 +149,8 @@ var ForceGenerators = {
         ///  <param name="restLength" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
-            var force = particle.trfm.pos.GetSubtract(anchor.trfm.pos);
+        this.Update = function(rb) {
+            var force = rb.trfm.pos.GetSubtract(anchor.trfm.pos);
 
             var mag = force.GetMag();
             mag -= restLength; // mag = Math.abs(magnitude - restLength); // for anchor in the middle
@@ -149,7 +159,7 @@ var ForceGenerators = {
             force.SetNormalized();
             force.SetScaleByNum(-mag);
 
-            particle.AddForce(force);
+            rb.AddForce(force);
         }
     },
     Spring_PullOnly: function(anchor, springConstant, restLength) {
@@ -163,9 +173,9 @@ var ForceGenerators = {
         ///  <param name="restLength" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
+        this.Update = function(rb) {
 
-            var force = particle.trfm.pos.GetSubtract(anchor.trfm.pos);
+            var force = rb.trfm.pos.GetSubtract(anchor.trfm.pos);
 
             var mag = force.GetMagSqr();
             if (mag <= restLength * restLength)
@@ -177,7 +187,7 @@ var ForceGenerators = {
             force.SetNormalized();
             force.SetScaleByNum(-mag);
 
-            particle.AddForce(force);
+            rb.AddForce(force);
         }
     },
     Spring_PushOnly: function(anchor, springConstant, restLength) {
@@ -191,8 +201,8 @@ var ForceGenerators = {
         ///  <param name="restLength" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
-            var force = particle.trfm.pos.GetSubtract(anchor.trfm.pos);
+        this.Update = function(rb) {
+            var force = rb.trfm.pos.GetSubtract(anchor.trfm.pos);
 
             var mag = force.GetMagSqr();
             if (mag >= restLength * restLength)
@@ -204,7 +214,7 @@ var ForceGenerators = {
             force.SetNormalized();
             force.SetScaleByNum(-mag);
 
-            particle.AddForce(force);
+            rb.AddForce(force);
         }
     },
     Spring_Stiff_Fake: function(anchorPos, springConstant, dampening) {
@@ -218,23 +228,23 @@ var ForceGenerators = {
         ///  <param name="dampening" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
-            if (!particle.HasFiniteMass())
+        this.Update = function(rb) {
+            if (!rb.HasFiniteMass())
                 return;
 
-            var pos = particle.trfm.pos.GetSubtract(anchorPos);
+            var pos = rb.trfm.pos.GetSubtract(anchorPos);
 
             var gamma = 0.5 * Math.sqrt(4 * springConstant - dampening * dampening);
             if (gamma == 0.0)
                 return;
 
-            var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(particle.velFinal.GetScaleByNum(1.0 / gamma));
+            var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(rb.velFinal.GetScaleByNum(1.0 / gamma));
             var target = pos.GetScaleByNum(Math.cos(gamma * Time.deltaMilli)).SetAdd(c.GetScaleByNum(Math.sin(gamma * Time.deltaMilli)));
             target.SetScaleByNum(Math.exp(-0.5 * Time.deltaMilli * dampening));
 
-            var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(particle.velFinal.GetScaleByNum(Time.deltaMilli));
+            var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(rb.velFinal.GetScaleByNum(Time.deltaMilli));
 
-            particle.AddForce(accel * particle.GetMass());
+            rb.AddForce(accel * rb.GetMass());
         }
     },
     Buoyancy: function(maxDepth, volume, liquidHeight, liquidDensity) {
@@ -246,8 +256,8 @@ var ForceGenerators = {
         ///  <param name="liquidDensity" type="decimal">1000 for water</param>
         ///  <returns type="void" />
         /// </signature>
-        this.Update = function(particle) {
-            var depth = particle.trfm.pos.y;
+        this.Update = function(rb) {
+            var depth = rb.trfm.pos.y;
 
             if (depth >= liquidHeight + maxDepth)
                 return;
@@ -256,36 +266,13 @@ var ForceGenerators = {
 
             if (depth <= liquidHeight - maxDepth) {
                 force.y = liquidDensity * volume;
-                particle.AddForce(force);
+                rb.AddForce(force);
                 return;
             }
 
             force.y = liquidDensity * volume * (depth - maxDepth - liquidHeight) / 2 * maxDepth;
 
-            particle.AddForce(force);
-        }
-    }
-};
-
-function ForceRegistry() {
-    this.registry = []
-
-}
-ForceRegistry.prototype = {
-    Add: function(particle, forceGenerator) {
-        this.registry.push({
-            particle: particle,
-            forceGenerator: forceGenerator
-        });
-    },
-    Remove: function(particle, forceGenerator) {
-    },
-    Clear: function() {
-        this.registry = [];
-    },
-    Update: function() {
-        for (var i in this.registry) {
-            this.registry[i].forceGenerator.Update(this.registry[i].particle);
+            rb.AddForce(force);
         }
     }
 };

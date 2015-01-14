@@ -105,7 +105,7 @@ function BuildScene5(scene) {
 
 
     var ctrlName = "ParticleTestScene";
-    Input.RegisterControlScheme(ctrlName, false);
+    Input.RegisterControlScheme(ctrlName, false, InputTypes.keyboard);
     var nextScene = Input.CreateInputController(ctrlName, KeyMap.Enter);
     var fireStream = Input.CreateInputController(ctrlName, KeyMap.Z);
     var fireGatling = Input.CreateInputController(ctrlName, KeyMap.X);

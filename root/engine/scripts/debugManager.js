@@ -12,7 +12,7 @@ var DebugMngr = {
     },
     Initialize: function() {
         if(this.active) {
-            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 220, 20, 200, 100), "Performance Data");
+            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), "Performance Data");
 
             var style = new MsgBoxStyle();
             style.fontSize = 20;
@@ -26,10 +26,15 @@ var DebugMngr = {
             style.margin = 5.0;
             style.bgAlpha = 0.25;
             style.bold = false;
-            this.frameRateMsg = new GUIObject(new WndRect(0, 0, 200, 30), "FrameRt", style);
+            this.frameRateMsg = new GUIObject(new WndRect(0, 0, 300, 30), "FrameRt", style);
+            this.mousePosMsg = new GUIObject(new WndRect(0, 30, 300, 30), "000000000000000000000", style);
             performanceData.AddGUIObject(this.frameRateMsg);
+            performanceData.AddGUIObject(this.mousePosMsg);
 
             GUINetwork.AddSystem(performanceData, true);
+
+            Input.RegisterControlScheme("GUIMouseTracking", true, InputTypes.mouse);
+            this.mouse = Input.CreateInputController("GUIMouseTracking");
         }
     },
     frameRateMsg: null,
@@ -43,6 +48,7 @@ var DebugMngr = {
                 this.frameRateCapture = Time.fps;
             }
             this.frameRateMsg.UpdateMsg("FPS: " + this.frameRateCapture.toString());
+            this.mousePosMsg.UpdateMsg("Mouse x: " + this.mouse.pos.x + ", y: " + this.mouse.pos.y);
         }
     }
 };

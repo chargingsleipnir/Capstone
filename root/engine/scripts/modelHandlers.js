@@ -126,11 +126,13 @@ function GUIBoxHandler(boxVerts) {
     this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
 }
 GUIBoxHandler.prototype = {
-    SetTintRGB: function(r, g, b) {
-        this.tint.SetVec3(r, g, b);
+    SetTintRGB: function(RGBvec3) {
+        this.tint.x = RGBvec3.x;
+        this.tint.y = RGBvec3.y;
+        this.tint.z = RGBvec3.z;
     },
     SetTintAlpha: function(a) {
-        this.tint.SetW(a);
+        this.tint.w = a;
     },
     SetTexture: function(texture, texFilter) {
         this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
@@ -147,11 +149,13 @@ function StringDisplayHandler(stringLine) {
     this.bufferData.texID = GL.CreateTextureObject(EL.assets.textures['fontMapBasic'], TextureFilters.nearest);
 }
 StringDisplayHandler.prototype = {
-    SetTintRGB: function(r, g, b) {
-        this.tint.SetVec3(r, g, b);
+    SetTintRGB: function(RGBvec3) {
+        this.tint.x = RGBvec3.x;
+        this.tint.y = RGBvec3.y;
+        this.tint.z = RGBvec3.z;
     },
     SetTintAlpha: function(a) {
-        this.tint.SetW(a);
+        this.tint.w = a;
     },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));

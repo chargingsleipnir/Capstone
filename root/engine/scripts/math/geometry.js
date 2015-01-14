@@ -462,6 +462,12 @@ WndRect.prototype = {
             out.y += thatMax.y - thisMax.y;
 
         return out;
+    },
+    ContainsPoint: function(vec2) {
+        return vec2.x > this.x &&
+            vec2.x < this.x + this.w &&
+            vec2.y > this.y &&
+            vec2.y < this.y + this.h;
     }
 };
 

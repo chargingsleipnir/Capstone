@@ -10,7 +10,6 @@ function Scene(name) {
     ///  <param name="name" type="string">Scene identifier</param>
     /// </signature>
     this.name = name;
-    this.paused = false;
 
     this.rootObj = new GameObject("Root", Labels.none);
 
@@ -19,7 +18,6 @@ function Scene(name) {
     this.ptclSystems = [];
 
     this.collisionNetwork = new CollisionNetwork();
-    this.forceRegistry = new ForceRegistry();
 
     this.light = {
         amb: {
@@ -76,14 +74,11 @@ Scene.prototype = {
         this.ExitCall = ExitCallback;
     },
     Update: function() {
-        if(!this.paused) {
-            this.rootObj.Update(this.rootObj.trfmLocal);
-            this.debug.Update();
-            this.LoopCall();
+        this.rootObj.Update(this.rootObj.trfmLocal);
+        this.debug.Update();
+        this.LoopCall();
 
-            this.collisionNetwork.Update();
-            this.forceRegistry.Update();
-        }
+        this.collisionNetwork.Update();
     }
 };
 

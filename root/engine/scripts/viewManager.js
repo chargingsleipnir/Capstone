@@ -5,6 +5,8 @@
 var ViewMngr = {
     wndWidth: 0,
     wndHeight: 0,
+    offsetLeft: 0,
+    offsetTop: 0,
     mtxProj: new Matrix4(),
     activeCam: null,
     frustum: null,
@@ -14,6 +16,8 @@ var ViewMngr = {
         var canvasStyles = window.getComputedStyle(canvas, null);
         this.wndWidth = parseFloat(canvasStyles.width);
         this.wndHeight = parseFloat(canvasStyles.height);
+        this.offsetLeft = canvas.offsetLeft;
+        this.offsetTop = canvas.offsetTop;
 
         // Instantiate frustum and projection matrix together
         this.frustum = new Frustum(this.mtxProj, 45.0, this.wndWidth / this.wndHeight, 0.1, this.farCullDist);

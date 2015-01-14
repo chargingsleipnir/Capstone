@@ -49,7 +49,7 @@ function BuildScene1(scene) {
     GUINetwork.AddSystem(titleScreen, false);
 
     var ctrlSchemeName = "Title screen transition";
-    Input.RegisterControlScheme(ctrlSchemeName, false);
+    Input.RegisterControlScheme(ctrlSchemeName, false, InputTypes.keyboard);
     var nextSceneBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Enter);
 
     var fadingIn;

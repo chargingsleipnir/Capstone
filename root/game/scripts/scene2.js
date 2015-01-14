@@ -93,7 +93,7 @@ function BuildScene2(scene, playerObj) {
     var timer = 0.0;
 
     var ctrlSchemeName = "In-game menu control";
-    Input.RegisterControlScheme(ctrlSchemeName, false);
+    Input.RegisterControlScheme(ctrlSchemeName, false, InputTypes.keyboard);
     var resetBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Enter);
 
     function Start() {

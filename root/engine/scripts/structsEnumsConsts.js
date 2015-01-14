@@ -73,6 +73,7 @@ function MsgBoxStyle(style) {
     // This is height in px. Width will be 2/3 this value
     this.fontSize = 20.0;
     this.fontColour = new Vector3();
+    this.fontHoverColour = new Vector3();
     this.fontAlpha = 1.0;
     this.textMaxWidth = 100;
     this.textAlignWidth = Alignment.centre;
@@ -80,6 +81,7 @@ function MsgBoxStyle(style) {
     this.textLineSpacing = 0.0;
     this.bgTexture = null;
     this.bgColour = new Vector3();
+    this.bgHoverColour = new Vector3();
     this.bgAlpha = 1.0;
     this.margin = 0.5;
     this.bold = false;
@@ -87,6 +89,7 @@ function MsgBoxStyle(style) {
     if(style) {
         this.fontSize = style.fontSize;
         this.fontColour = style.fontColour.GetCopy();
+        this.fontHoverColour = style.fontHoverColour.GetCopy();
         this.fontAlpha = style.fontAlpha;
         this.textMaxWidth = style.textMaxWidth;
         this.textAlignWidth = style.textAlignWidth;
@@ -94,6 +97,7 @@ function MsgBoxStyle(style) {
         this.textLineSpacing = style.textLineSpacing;
         this.bgTexture = style.bgTexture;
         this.bgColour = style.bgColour.GetCopy();
+        this.bgHoverColour = style.bgHoverColour.GetCopy();
         this.bgAlpha = style.bgAlpha;
         this.margin = style.margin;
         this.bold = style.bold;
@@ -145,6 +149,7 @@ var MoveMethod = { input: 0, physics: 1, script: 2 };
 var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
 var Alignment = { left: 0, centre: 0.5, right: 1, bottom: 1, top: 0 };
 var Axes = { x: 0, y: 1, z: 2 };
+var InputTypes = { keyboard: 0, mouse: 1, gamepad: 2 };
 
 var KeyMap = {
     Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Ctrl: 17, Alt: 18, CapsLock: 20, Esc: 27,

@@ -11,7 +11,7 @@ function CameraController(trfmAxes, ctrlSchemeName) {
 
     // Control camera
     this.camRegName = ctrlSchemeName;
-    Input.RegisterControlScheme(this.camRegName, true);
+    Input.RegisterControlScheme(this.camRegName, true, InputTypes.keyboard);
 
     this.ctrl.moveLeft = Input.CreateInputController(this.camRegName, KeyMap.A);
     this.ctrl.moveRight = Input.CreateInputController(this.camRegName, KeyMap.D);
