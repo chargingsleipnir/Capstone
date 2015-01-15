@@ -3,6 +3,7 @@
 var Input = (function() {
     var activeKeyRegistry = {};
     var inactiveKeyRegistry = {};
+    var canvasElem;
 
     window.onkeydown = function(e)
     {
@@ -206,7 +207,6 @@ var Input = (function() {
                 return keyController;
             }
 
-
             var mouseController = {
                 pos: new Vector2(0, 0),
                 leftPressed: false,
@@ -215,13 +215,7 @@ var Input = (function() {
                 LeftRelease: function() { this.leftPressed = false; },
                 MiddleRelease: function() { this.middlePressed = false; },
                 RightRelease: function() { this.rightPressed = false; },
-                HideCursor: function(hide) {
-                    if(hide)
-                    { /*canvas.style.cursor = "none" */ }
-                    else
-                    { /*canvas.style.cursor = "auto" */ }
-                    { /*canvas.style.cursor = "crosshair" */ }
-                }
+                SetCursor: function(cursorType) { canvasElem.style.cursor = cursorType; }
             };
 
             if (name in activeMouseRegistry) {
@@ -254,6 +248,7 @@ var Input = (function() {
             canvas.addEventListener('mousemove', onmousemove, false);
             canvas.addEventListener('mousedown', onmousedown, false);
             canvas.addEventListener('mouseup', onmouseup, false);
+            canvasElem = canvas;
         }
     };
 })();

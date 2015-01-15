@@ -11,6 +11,7 @@ function BuildGame() {
     var gameMouseCtrlName = "GameMouse";
     Input.RegisterControlScheme(gameMouseCtrlName, true, InputTypes.mouse);
     var gameMouse = Input.CreateInputController(gameMouseCtrlName);
+    gameMouse.SetCursor(CursorTypes.none);
 
     var gameKeyCtrlName = "SceneAndMenuNav";
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
@@ -128,8 +129,10 @@ function BuildGame() {
         if(menuBtn.pressed) {
             menuToggle = !menuToggle;
             GUINetwork.SetActive(menuSysName, menuToggle);
-            menuBtn.Release();
             GameMngr.TogglePause();
+            if(menuToggle) gameMouse.SetCursor(CursorTypes.normal);
+            else gameMouse.SetCursor(CursorTypes.none);
+            menuBtn.Release();
         }
         if(GUINetwork.CheckActive(menuSysName)) {
             resumeBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, resumeCallback);
@@ -138,6 +141,7 @@ function BuildGame() {
 
 
         if(!GameMngr.paused) {
+
             skyBox.trfmLocal.Rotate(VEC3_FWD, angle);
         }
     }
