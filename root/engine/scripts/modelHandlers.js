@@ -2,6 +2,8 @@
 /******************* MODELS *************************/
 
 function ModelHandler(model, trfm, shapeData) {
+    //console.log("\n*****" + model.name + "*****\n");
+
     // Decide whether to draw with Elements or not
     this.vertData = ModelUtils.SelectVAOData(model.vertices);
     this.shapeData = shapeData;

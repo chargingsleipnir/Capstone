@@ -4,12 +4,13 @@
 
 /********** Scenes to be added to the Network ************/
 
-function Scene(name) {
+function Scene(name, sceneType) {
     /// <signature>
     ///  <summary>Create a scene of models, lighting, etc</summary>
     ///  <param name="name" type="string">Scene identifier</param>
     /// </signature>
     this.name = name;
+    this.type = sceneType;
 
     this.rootObj = new GameObject("Root", Labels.none);
 
@@ -43,6 +44,8 @@ Scene.prototype = {
         ///  <summary>Add model handle to render model as part of this scene</summary>
         ///  <param name="gameObject" type="GameObject"></param>
         /// </signature>
+        for(var i = 0; i < gameObject.children.length; i++)
+            this.Add(gameObject.children[i]);
         if(!gameObject.parent || gameObject.parent.name == "Root")
             this.rootObj.AddChild(gameObject);
         if(gameObject.mdlHdlr)
@@ -68,17 +71,38 @@ Scene.prototype = {
             }
         }
     },
+    SortForDraw: function() {
+        for(var i = 0; i < this.models.length; i++) {
+            if(i > 0) {
+                var idx = i;
+                do {
+                    var distThisModel = this.models[idx].trfm.pos.GetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
+                    var distPrevModel = this.models[idx-1].trfm.pos.GetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
+
+                    if (distThisModel > distPrevModel) {
+                        RefUtils.Swap(this.models, idx, idx - 1);
+                        idx--;
+                    }
+                    else
+                        idx = 0;
+                }
+                while (idx > 0);
+            }
+        }
+    },
     SetCallbacks: function(InitCallback, LoopCallback, ExitCallback) {
         this.InitCall = InitCallback;
         this.LoopCall = LoopCallback;
         this.ExitCall = ExitCallback;
     },
     Update: function() {
+        this.LoopCall();
         this.rootObj.Update(this.rootObj.trfmLocal);
         this.debug.Update();
-        this.LoopCall();
-
         this.collisionNetwork.Update();
+        /* Sort everything back to front. This is really needed just for
+         * anything with an alpha < 1, but I cannot easily track that. */
+        this.SortForDraw();
     }
 };
 

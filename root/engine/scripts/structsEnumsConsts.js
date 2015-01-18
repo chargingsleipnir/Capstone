@@ -106,7 +106,6 @@ function MsgBoxStyle(style) {
 
 function PtclFieldEffects() {
     this.travelTime = 5.0;
-    this.staggerRate = 0.0;
     this.startDist = 0.0;
     this.dir = new Vector3(0.0, 1.0, 0.0);
     this.range = 90.0;
@@ -140,7 +139,7 @@ var Time = {
 /***** ENUMS *****/
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
 var Components = { camera: 0, collisionBody: 1, rigidBody: 2, particleSystem: 3 };
-var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4 };
+var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4, player: 5 };
 var GUILabels = { container: 0, msg: 1, btn: 2 };
 var Space = { local: 0, global: 1 };
 var BoundingShapes = { sphere: 0, aabb: 1 };
@@ -149,6 +148,7 @@ var MoveMethod = { input: 0, physics: 1, script: 2 };
 var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
 var Alignment = { left: 0, centre: 0.5, right: 1, bottom: 1, top: 0 };
 var Axes = { x: 0, y: 1, z: 2 };
+var SceneTypes = { menu: 0, cutScene: 1, gameplay: 2 };
 var CursorTypes = { none: "none", normal: "auto", crosshair: "crosshair" };
 var InputTypes = { keyboard: 0, mouse: 1, gamepad: 2 };
 
@@ -264,8 +264,8 @@ var ShdrLines = {
             tintCol: "u_Tint.rgb",
             col: " + v_Col.rgb",
             texCol: " + texColour.rgb",
-            colA: " + v_Col.a",
-            texA: " + texColour.a",
+            colA: " * v_Col.a",
+            texA: " * texColour.a",
             light: " * v_LightWeight",
             alphaStart: ", u_Tint.a",
             end: ");\n"

@@ -2,7 +2,8 @@
 var GameMngr = {
     assets: {
         textures: {},
-        models: {}
+        models: {},
+        sounds: {}
     },
     paused: false,
     UserUpdate: function() {},
@@ -20,11 +21,17 @@ var GameMngr = {
         TwoD.Initialize(canvas2D.getContext('2d'));
         DebugMngr.Initialize();
     },
-    LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, Callback) {
+    LoadExternal: function(textureNamesFilepaths, modelNamesFilepaths, audioNamesFilepaths, Callback) {
         var that = this;
         function LoadModels() {
             FileUtils.LoadModels(modelNamesFilepaths, that.assets.models, Callback);
         }
+
+        // Load up audio quick and easy first
+        for(var i = 0; i < audioNamesFilepaths.length; i++) {
+            this.assets.sounds[audioNamesFilepaths[i][0]] = new Audio(audioNamesFilepaths[i][1]);
+        }
+
         FileUtils.LoadTextures(textureNamesFilepaths, this.assets.textures, LoadModels);
     },
     TogglePause: function() {

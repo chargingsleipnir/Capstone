@@ -4,7 +4,7 @@
 
 /******************************** Point and line Particles *****************************************/
 
-function ParticleSimple(travelTime, countDown, startPos, startVel, acc, dampening, colour, alphaStart, fadePoint, alphaEnd) {
+function ParticleSimple(travelTime, stagger, startPos, startVel, acc, dampening, colour, alphaStart, fadePoint, alphaEnd) {
     // Physics
     this.startPos = startPos;
     this.startVel = startVel;
@@ -14,14 +14,14 @@ function ParticleSimple(travelTime, countDown, startPos, startVel, acc, dampenin
     this.vel = new Vector3();
     // Duration
     this.travelTime = travelTime;
-    this.countDown = countDown;
+    this.counter = travelTime - stagger;
     this.isAlive = false;
     // Effects
     this.colour = new Vector4(colour.x, colour.y, colour.z, alphaStart);
     this.alphaStart = alphaStart;
     this.alphaDiff = alphaStart - alphaEnd;
-    this.fadeCountStart = travelTime - (travelTime * fadePoint);
-    this.fadeCounter = this.fadeCountStart;
+    this.fadeCountStart = travelTime * fadePoint;
+    this.fadeDiff = travelTime - this.fadeCountStart;
     this.tailPos = this.pos.GetCopy();
     this.tailLength = 0.0;
 }
@@ -37,15 +37,39 @@ ParticleSimple.prototype = {
                 this.tailPos = this.pos.GetSubtract(dir.SetScaleByNum(this.tailLength));
             }
 
-            this.countDown -= Time.deltaMilli;
+            this.counter += Time.deltaMilli;
 
-            if(this.countDown < this.fadeCountStart) {
-                this.fadeCounter -= Time.deltaMilli;
-                var fadePct = 1.0 - (this.fadeCounter / this.fadeCountStart);
+            if(this.counter >= this.fadeCountStart) {
+                var fadePct = 1.0 - ((this.travelTime - this.counter) / this.fadeDiff);
                 this.colour.w = this.alphaStart - (fadePct * this.alphaDiff);
             }
 
-            if(this.countDown < 0.0)
+            if(this.counter >= this.travelTime)
+                this.Reset();
+        }
+    },
+    Update2: function() {
+        if(this.isAlive) {
+            if(this.tailLength > 0) {
+                var dir = this.pos.GetSubtract(this.tailPos);
+                dir.SetNormalized();
+                this.tailPos = this.pos.GetSubtract(dir.SetScaleByNum(this.tailLength));
+            }
+
+            this.counter += Time.deltaMilli;
+
+            this.pos.SetCopy(this.startPos.GetAdd(new Vector3(
+                Math.cos(this.counter * 5) / 4.0,
+                this.counter / 4,
+                Math.sin(this.counter * 5) / 4.0
+            )));
+
+            if(this.counter >= this.fadeCountStart) {
+                var fadePct = 1.0 - ((this.travelTime - this.counter) / this.fadeDiff);
+                this.colour.w = this.alphaStart - (fadePct * this.alphaDiff);
+            }
+
+            if(this.counter >= this.travelTime)
                 this.Reset();
         }
     },
@@ -53,10 +77,9 @@ ParticleSimple.prototype = {
         this.pos.SetCopy(this.startPos);
         this.vel.SetCopy(this.startVel);
         this.tailPos.SetCopy(this.startPos);
-        this.countDown = this.travelTime;
+        this.counter = 0.0;
 
         this.colour.w = this.alphaStart;
-        this.fadeCounter = this.fadeCountStart;
     }
 };
 
@@ -69,7 +92,7 @@ function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
     // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
     this.active = false;
     this.deadPtcls = this.ptclCount;
-    this.stagger = effects.staggerRate;
+    this.stagger = effects.travelTime / ptclCount;
 
     // Using changing looping functions
     this.Callback = this.Launch;
@@ -100,7 +123,7 @@ function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
 
         this.ptcls.push(new ParticleSimple(
             effects.travelTime,
-            effects.staggerRate * i,
+            this.stagger * (i),
             randDir.GetScaleByNum(effects.startDist),
             randDir.GetScaleByNum(effects.speed),
             effects.acc,
@@ -125,22 +148,24 @@ function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
         ptclVerts.posCoords = ptclVerts.posCoords.concat(this.ptcls[i].pos.GetData());
         ptclVerts.colElems = ptclVerts.colElems.concat(this.ptcls[i].colour.GetData());
 
-        if(effects.lineLength > 0) {
+        if(effects.lineLength > 0.0) {
             this.ptcls[i].tailLength = effects.lineLength;
             ptclVerts.posCoords = ptclVerts.posCoords.concat(this.ptcls[i].tailPos.GetData());
             ptclVerts.colElems = ptclVerts.colElems.concat(this.ptcls[i].colour.GetData());
         }
     }
 
-    if(effects.lineLength <= 0) {
+    if(effects.lineLength <= 0.0) {
         this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
         if(effects.texture != null)
             this.fieldHdlr.SetTexture(effects.texture, TextureFilters.linear);
 
         this.fieldHdlr.pntSize = effects.size;
     }
-    else
+    else {
+        ptclVerts.count *= 2;
         this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.lines);
+    }
 }
 ParticleFieldSimple.prototype = {
     SortForLaunch: function(idx) {
@@ -188,9 +213,6 @@ ParticleFieldSimple.prototype = {
         }
         this.fieldHdlr.RewriteVerts(newPosCoords.concat(newColElems));
     },
-    DefinePtclFade: function(endAlpha, fromTime) {
-
-    },
     CheckEnd: function() {
         this.counter -= Time.deltaMilli;
         if(this.counter <= 0)
@@ -200,20 +222,21 @@ ParticleFieldSimple.prototype = {
         /* This loop function is implemented to allow each particle field to slowly stagger
          * in, update, and stagger out all of it's particles, so they don't all have to arrive
          * or disappear at the same time. */
+
         if(this.deadPtcls > 0) {
             for (var i = 0; i < this.ptcls.length; i++) {
                 // This will stagger them out accordingly,
                 // as pre-set in constructor
                 if (this.ptcls[i].isAlive == false) {
-                    this.ptcls[i].countDown -= Time.deltaMilli;
-                    if (this.ptcls[i].countDown <= 0) {
+                    this.ptcls[i].counter += Time.deltaMilli;
+                    if (this.ptcls[i].counter >= this.ptcls[i].travelTime) {
                         this.ptcls[i].isAlive = true;
                         this.deadPtcls--;
                         this.ptcls[i].Reset();
                     }
                 }
                 else {
-                    this.ptcls[i].Update();
+                    this.ptcls[i].Update2();
                 }
                 if(this.needsSorting)
                     this.SortPtcl(i);
@@ -231,7 +254,7 @@ ParticleFieldSimple.prototype = {
          * in, update, and stagger out all of it's particles, so they don't all have to arrive
          * or disappear at the same time. */
         for (var i = 0; i < this.ptcls.length; i++) {
-            this.ptcls[i].Update();
+            this.ptcls[i].Update2();
             if(this.needsSorting)
                 this.SortPtcl(i);
         }
@@ -246,9 +269,9 @@ ParticleFieldSimple.prototype = {
         if(this.deadPtcls < this.ptcls.length) {
             for (var i = 0; i < this.ptcls.length; i++) {
                 if (this.ptcls[i].isAlive) {
-                    this.ptcls[i].Update();
+                    this.ptcls[i].Update2();
                     // This condition is met on during each particle's reset.
-                    if (this.ptcls[i].countDown >= this.ptcls[i].travelTime - Time.deltaMilli) {
+                    if (this.ptcls[i].counter == 0.0) {
                         this.ptcls[i].isAlive = false;
                         this.ptcls[i].pos.SetValues(0.0, 999.0, 0.0);
                         this.ptcls[i].tailPos.SetValues(0.0, 999.0, 0.0);
@@ -265,7 +288,7 @@ ParticleFieldSimple.prototype = {
             this.Callback = this.Launch;
             this.counter = this.fieldLifeTime;
             for (var i = 0; i < this.ptcls.length; i++) {
-                this.ptcls[i].countDown = this.stagger * i;
+                this.ptcls[i].counter = this.ptcls[i].travelTime - this.stagger * i;
 
                 // Resort based on start pos to make sure next iteration starts off smooth
                 if(this.needsSorting)

@@ -148,8 +148,9 @@ GUIObject.prototype = {
         if(this.rectGlobal.ContainsPoint(mousePos)) {
             this.boxHdl.SetTintRGB(this.style.bgHoverColour);
             this.strHdl.SetTintRGB(this.style.fontHoverColour);
-            if(clicked)
+            if(clicked) {
                 Callback();
+            }
         }
     },
     FadeBackground: function(incr) {

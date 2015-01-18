@@ -53,6 +53,7 @@ function BuildGame() {
     function resumeCallback() {
         gameMouse.LeftRelease();
         console.log("Resume button pressed");
+        GameMngr.assets.sounds['tick'].play();
     }
 
     var quitBtn = new GUIObject(
@@ -63,6 +64,7 @@ function BuildGame() {
     function quitCallback() {
         gameMouse.LeftRelease();
         console.log("Quit button pressed");
+        GameMngr.assets.sounds['select'].play();
     }
 
     mainMenu.AddGUIObject(backDrop);
@@ -147,5 +149,6 @@ function BuildGame() {
     }
 
     GameMngr.UserUpdate = GameUpdate;
+    GameMngr.assets.sounds['bgMusicLight'].play();
     GameMngr.BeginLoop();
 }

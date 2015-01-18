@@ -396,8 +396,8 @@ var Primitives = {
                             vertices = vertices.concat([z, 0.0, x]);
                             vertices = vertices.concat([z, 0.0, x + 1]);
                             vertices = vertices.concat([z + 1, 0.0, x]);
-                            vertices = vertices.concat([z + 1, 0.0, x + 1]);
                             vertices = vertices.concat([z, 0.0, x + 1]);
+                            vertices = vertices.concat([z + 1, 0.0, x + 1]);
                         }
                     return vertices;
                 })(),

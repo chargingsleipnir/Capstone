@@ -4,14 +4,25 @@ var DebugMngr = {
     dispOrientAxes: false,
     dispShells: false,
     dispRays: false,
+    dispAxes: false,
+    dispGrid: false,
+    axes: null,
+    grid: null,
     SetFullActive: function(active) {
-        if(active)
-            this.active = this.dispOrientAxes = this.dispShells = this.dispRays = true;
-        else
-            this.active = this.dispOrientAxes = this.dispShells = this.dispRays = false;
+        if(active) this.active = this.dispOrientAxes = this.dispShells = this.dispRays = this.dispAxes = this.dispGrid = true;
+        else this.active = this.dispOrientAxes = this.dispShells = this.dispRays = this.dispAxes = this.dispGrid = false;
     },
     Initialize: function() {
         if(this.active) {
+            var zeroPointAxes = new GameObject('zeroPointAxes', Labels.productionEnvironment);
+            zeroPointAxes.SetModel(Primitives.axesZeroPoints);
+            this.axes = zeroPointAxes.mdlHdlr;
+
+            var grid = new GameObject('grid', Labels.productionEnvironment);
+            grid.SetModel(Primitives.grid);
+            grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
+            this.grid = grid.mdlHdlr;
+
             var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), "Performance Data");
 
             var style = new MsgBoxStyle();

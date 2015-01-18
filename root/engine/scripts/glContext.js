@@ -1,4 +1,6 @@
 ﻿
+var testBool = true;
+
 var GL = {
     ctx: null,
     Initialize: function(contextWebGL) {
@@ -12,6 +14,7 @@ var GL = {
         this.ctx.depthFunc(this.ctx.LESS);
         this.ctx.enable(this.ctx.BLEND);
         this.ctx.blendFunc(this.ctx.SRC_ALPHA, this.ctx.ONE_MINUS_SRC_ALPHA);
+        this.ctx.enable(this.ctx.CULL_FACE);
         this.ctx.lineWidth(3);
 
         this.CreateShaderPrograms(EL.assets.shaderStrings, EL.assets.shaderPrograms);
@@ -246,6 +249,12 @@ var GL = {
                 shdr = scene.models[i].shaderData;
                 buff = scene.models[i].bufferData;
 
+                if(testBool) {
+
+                    if(i >= scene.models.length -1)
+                        testBool = false;
+                }
+
                 // USE PROGRAM AND VBO
                 this.ctx.useProgram(shdr.program);
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
@@ -425,6 +434,10 @@ var GL = {
             }
             if(DebugMngr.dispShells)
                 dispObjs = dispObjs.concat(scene.debug.dispObjs.shells.models);
+            if(DebugMngr.dispAxes)
+                dispObjs.push(DebugMngr.axes);
+            if(DebugMngr.dispGrid)
+                dispObjs.push(DebugMngr.grid);
 
             for (var i = 0; i < dispObjs.length; i++)
             {
@@ -548,6 +561,7 @@ var GL = {
 
                 // Unbind buffers after use
                 this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
 
 
                 /******************* TEXT BLOCKS *************************/
@@ -577,6 +591,7 @@ var GL = {
 
                 // Unbind buffers after use
                 this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
         this.ctx.enable(this.ctx.DEPTH_TEST);

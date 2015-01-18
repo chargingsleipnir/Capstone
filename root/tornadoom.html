@@ -31,14 +31,22 @@
     <script type="text/javascript" src="engine/scripts/2DContext.js"></script>
     <script type="text/javascript" src="engine/scripts/behaviours/FPController.js"></script>
     <!---------- Game scripts  ---------->
-    <script type="text/javascript" src="game/scripts/behaviours/impulseBalls.js"></script>
-    <script type="text/javascript" src="game/scripts/scene1.js"></script>
-    <script type="text/javascript" src="game/scripts/scene2.js"></script>
-    <script type="text/javascript" src="game/scripts/scene3.js"></script>
-    <script type="text/javascript" src="game/scripts/scene4.js"></script>
-    <script type="text/javascript" src="game/scripts/scene5.js"></script>
-    <script type="text/javascript" src="game/scripts/game.js"></script>
-
+    <!--
+    <script type="text/javascript" src="testGame/scripts/behaviours/impulseBalls.js"></script>
+    <script type="text/javascript" src="testGame/scripts/scene1.js"></script>
+    <script type="text/javascript" src="testGame/scripts/scene2.js"></script>
+    <script type="text/javascript" src="testGame/scripts/scene3.js"></script>
+    <script type="text/javascript" src="testGame/scripts/scene4.js"></script>
+    <script type="text/javascript" src="testGame/scripts/scene5.js"></script>
+    <script type="text/javascript" src="testGame/scripts/game.js"></script>
+    -->
+    <script type="text/javascript" src="tornadoom/scripts/player.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/game.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/scene1.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/scene2.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/scene3.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/scene4.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/scene5.js"></script>
 </head>
 <body onload="EL.PreLoad(Initialize)">
     <canvas id="canvasWebGL" width="1500" height="800"></canvas>
@@ -49,21 +57,44 @@
         * the body's onload function within
         * EL.PreLoad(). */
         function Initialize() {
+            /*  FOR TEST GAME
             var textureNamesFilepaths = [
-                ['discSurface', 'game/assets/images/discSurface.png']
+                ['discSurface', 'testGame/assets/images/discSurface.png']
             ];
             var modelNamesFilepaths = [
-                ['disc', 'game/assets/models/GameObjects_Disc.json'],
-                ['floor', 'game/assets/models/GameObjects_Floor.json'],
-                ['tornadGoalo01', 'game/assets/models/GameObjects_TornadoGoal01.json'],
-                ['tornadGoalo02', 'game/assets/models/GameObjects_TornadoGoal02.json']
+                ['disc', 'testGame/assets/models/GameObjects_Disc.json'],
+                ['floor', 'testGame/assets/models/GameObjects_Floor.json'],
+                ['tornadGoalo01', 'testGame/assets/models/GameObjects_TornadoGoal01.json'],
+                ['tornadGoalo02', 'testGame/assets/models/GameObjects_TornadoGoal02.json']
+            ];
+            var audioNamesFilepaths = [
+                ['tick', "testGame/assets/sounds/Tick.ogg"],
+                ['select', "testGame/assets/sounds/Select.ogg"],
+                ['bgMusicLight', "testGame/assets/sounds/songLightCold.ogg"]
+            ];
+
+            DebugMngr.SetFullActive(true);
+            */
+
+            var textureNamesFilepaths = [
+                ['funnelTex', 'tornadoom/assets/images/tornadoFunnel.png']
+                //['funnelEffectsTex', 'tornadoom/assets/images/tornadoFunnelLayers.png']
+            ];
+            var modelNamesFilepaths = [
+                ['playerTornado', 'tornadoom/assets/models/GameObjects_Funnel01.json']
+                //['playerTornadoEffects', 'tornadoom/assets/models/GameObjects_Funnel02.json']
+            ];
+            var audioNamesFilepaths = [
+                ['tick', "tornadoom/assets/sounds/Tick.ogg"],
+                ['select', "tornadoom/assets/sounds/Select.ogg"],
+                ['bgMusicLight', "tornadoom/assets/sounds/songLightCold.ogg"]
             ];
 
             DebugMngr.SetFullActive(true);
 
             // Initialize the Game Manager, passing the canvas to do much of the startup
             GameMngr.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));
-            GameMngr.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, BuildGame);
+            GameMngr.LoadExternal(textureNamesFilepaths, modelNamesFilepaths, audioNamesFilepaths, BuildGame);
         }
     </script>
 </body>
