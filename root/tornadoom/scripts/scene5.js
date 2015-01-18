@@ -15,7 +15,7 @@ function BuildScene5(scene) {
     ptclObj1.AddComponent(Components.particleSystem);
     ptclObj1.trfmLocal.SetPosAxes(0.0, 0.0, 0.0);
 
-    var effects = new PtclFieldEffects();
+    var effects = new PtclPhysicsEffects();
     effects.travelTime = 7.0;
     effects.staggerRate = 0.1;
     effects.startDist = 0.0;
@@ -32,7 +32,7 @@ function BuildScene5(scene) {
     effects.fadePoint = 0.5;
     effects.alphaEnd = 0.0;
 
-    ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
+    ptclObj1.ptclSys.AddField(150, 30.0, effects);
 
     effects.travelTime = 7.0;
     effects.staggerRate = 0.1;
@@ -47,14 +47,14 @@ function BuildScene5(scene) {
     effects.lineLength = 0.3;
     effects.size = 0.0;
 
-    ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
+    ptclObj1.ptclSys.AddField(150, 30.0, effects);
 
     effects.dir = new Vector3(1.0, -1.0, 1.0);
     effects.acc = new Vector3(-4.0, 2.0, -2.0);
     effects.colourBtm = new Vector3(0.0, 1.0, 1.0);
     effects.colourTop = new Vector3(1.0, 1.0, 1.0);
 
-    ptclObj1.ptclSys.AddSimpleField(150, 30.0, effects);
+    ptclObj1.ptclSys.AddField(150, 30.0, effects);
 
 
     //////////////////////////////////
@@ -98,7 +98,7 @@ function BuildScene5(scene) {
     effects.texture = EL.assets.textures['star'];
     effects.size = 40.0;
 
-    ptclObj3.ptclSys.AddSimpleField(100, 30, effects);
+    ptclObj3.ptclSys.AddField(100, 30, effects);
 
 
     //////////////////////////////////

@@ -48,7 +48,39 @@ ParticleSimple.prototype = {
                 this.Reset();
         }
     },
-    Update2: function() {
+    Reset: function() {
+        this.pos.SetCopy(this.startPos);
+        this.vel.SetCopy(this.startVel);
+        this.tailPos.SetCopy(this.startPos);
+        this.counter = 0.0;
+
+        this.colour.w = this.alphaStart;
+    }
+};
+
+function ParticleSpiral(travelTime, stagger, startPos, scaleAngle, scaleDiam, scaleLen, colour, alphaStart, fadePoint, alphaEnd) {
+    // Physics
+    this.startPos = startPos;
+    this.pos = new Vector3(0.0, 999.0, 0.0);
+    // Duration
+    this.travelTime = travelTime;
+    this.counter = travelTime - stagger;
+    this.isAlive = false;
+    // Motion scaling
+    this.scaleAngle = scaleAngle;
+    this.scaleDiam = scaleDiam;
+    this.scaleLen = scaleLen;
+    // Effects
+    this.colour = new Vector4(colour.x, colour.y, colour.z, alphaStart);
+    this.alphaStart = alphaStart;
+    this.alphaDiff = alphaStart - alphaEnd;
+    this.fadeCountStart = travelTime * fadePoint;
+    this.fadeDiff = travelTime - this.fadeCountStart;
+    this.tailPos = this.pos.GetCopy();
+    this.tailLength = 0.0;
+}
+ParticleSpiral.prototype = {
+    Update: function() {
         if(this.isAlive) {
             if(this.tailLength > 0) {
                 var dir = this.pos.GetSubtract(this.tailPos);
@@ -59,9 +91,9 @@ ParticleSimple.prototype = {
             this.counter += Time.deltaMilli;
 
             this.pos.SetCopy(this.startPos.GetAdd(new Vector3(
-                Math.cos(this.counter * 5) / 4.0,
-                this.counter / 4,
-                Math.sin(this.counter * 5) / 4.0
+                Math.cos(this.counter * this.scaleAngle) * this.scaleDiam,
+                this.counter * this.scaleLen,
+                Math.sin(this.counter * this.scaleAngle) * this.scaleDiam
             )));
 
             if(this.counter >= this.fadeCountStart) {
@@ -75,7 +107,6 @@ ParticleSimple.prototype = {
     },
     Reset: function() {
         this.pos.SetCopy(this.startPos);
-        this.vel.SetCopy(this.startVel);
         this.tailPos.SetCopy(this.startPos);
         this.counter = 0.0;
 
@@ -83,11 +114,10 @@ ParticleSimple.prototype = {
     }
 };
 
-function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
+function ParticleField(trfmObj, ptclCount, fieldLife, effects) {
     this.trfmObj = trfmObj;
     this.ptclCount = ptclCount || 10;
-    this.fieldLifeTime = fieldLife || 20.0;
-    this.counter = this.fieldLifeTime;
+    this.fieldLifeTime = this.counter = fieldLife;
 
     // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
     this.active = false;
@@ -121,22 +151,42 @@ function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
         var randDir = dir.GetRotated(randConeAngle, dir.GetOrthoAxis());
         randDir.SetRotated(randRotAngle, dir);
 
-        this.ptcls.push(new ParticleSimple(
-            effects.travelTime,
-            this.stagger * (i),
-            randDir.GetScaleByNum(effects.startDist),
-            randDir.GetScaleByNum(effects.speed),
-            effects.acc,
-            effects.dampening,
-            new Vector3(
-                (effects.colourTop.x - effects.colourBtm.x) * randomX + effects.colourBtm.x,
-                (effects.colourTop.y - effects.colourBtm.y) * randomY + effects.colourBtm.y,
-                (effects.colourTop.z - effects.colourBtm.z) * randomZ + effects.colourBtm.z
-            ),
-            effects.alphaStart,
-            effects.fadePoint,
-            effects.alphaEnd
-        ));
+        if(effects.hasOwnProperty('speed')) {
+            this.ptcls.push(new ParticleSimple(
+                effects.travelTime,
+                this.stagger * (i),
+                randDir.GetScaleByNum(effects.startDist),
+                randDir.GetScaleByNum(effects.speed),
+                effects.acc,
+                effects.dampening,
+                new Vector3(
+                    (effects.colourTop.x - effects.colourBtm.x) * randomX + effects.colourBtm.x,
+                    (effects.colourTop.y - effects.colourBtm.y) * randomY + effects.colourBtm.y,
+                    (effects.colourTop.z - effects.colourBtm.z) * randomZ + effects.colourBtm.z
+                ),
+                effects.alphaStart,
+                effects.fadePoint,
+                effects.alphaEnd
+            ));
+        }
+        else {
+            this.ptcls.push(new ParticleSpiral(
+                effects.travelTime,
+                this.stagger * (i),
+                randDir.GetScaleByNum(effects.startDist),
+                effects.scaleAngle,
+                effects.scaleDiam,
+                effects.scaleLen,
+                new Vector3(
+                    (effects.colourTop.x - effects.colourBtm.x) * randomX + effects.colourBtm.x,
+                    (effects.colourTop.y - effects.colourBtm.y) * randomY + effects.colourBtm.y,
+                    (effects.colourTop.z - effects.colourBtm.z) * randomZ + effects.colourBtm.z
+                ),
+                effects.alphaStart,
+                effects.fadePoint,
+                effects.alphaEnd
+            ));
+        }
 
         // Once positions are established, sort from back to front
         // This stays here uniquely because it's using StartPos, not regular pos;
@@ -167,7 +217,7 @@ function ParticleFieldSimple(trfmObj, ptclCount, fieldLife, effects) {
         this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.lines);
     }
 }
-ParticleFieldSimple.prototype = {
+ParticleField.prototype = {
     SortForLaunch: function(idx) {
         if(idx > 0) {
             do {
@@ -214,9 +264,11 @@ ParticleFieldSimple.prototype = {
         this.fieldHdlr.RewriteVerts(newPosCoords.concat(newColElems));
     },
     CheckEnd: function() {
-        this.counter -= Time.deltaMilli;
-        if(this.counter <= 0)
-            this.Callback = this.Terminate;
+        if(this.fieldLifeTime) {
+            this.counter -= Time.deltaMilli;
+            if (this.counter <= 0)
+                this.Callback = this.Terminate;
+        }
     },
     Launch: function() {
         /* This loop function is implemented to allow each particle field to slowly stagger
@@ -236,7 +288,7 @@ ParticleFieldSimple.prototype = {
                     }
                 }
                 else {
-                    this.ptcls[i].Update2();
+                    this.ptcls[i].Update();
                 }
                 if(this.needsSorting)
                     this.SortPtcl(i);
@@ -254,7 +306,7 @@ ParticleFieldSimple.prototype = {
          * in, update, and stagger out all of it's particles, so they don't all have to arrive
          * or disappear at the same time. */
         for (var i = 0; i < this.ptcls.length; i++) {
-            this.ptcls[i].Update2();
+            this.ptcls[i].Update();
             if(this.needsSorting)
                 this.SortPtcl(i);
         }
@@ -269,7 +321,7 @@ ParticleFieldSimple.prototype = {
         if(this.deadPtcls < this.ptcls.length) {
             for (var i = 0; i < this.ptcls.length; i++) {
                 if (this.ptcls[i].isAlive) {
-                    this.ptcls[i].Update2();
+                    this.ptcls[i].Update();
                     // This condition is met on during each particle's reset.
                     if (this.ptcls[i].counter == 0.0) {
                         this.ptcls[i].isAlive = false;
@@ -414,40 +466,40 @@ FlatTail.prototype = {
 function ParticleSystem(trfmObj) {
     this.trfmObj = trfmObj;
 
-    this.simpleFields = [];
+    this.fields = [];
     this.tails = [];
 }
 ParticleSystem.prototype = {
-    AddSimpleField: function(ptclCount, fieldLife, effects) {
-        this.simpleFields.push(new ParticleFieldSimple(this.trfmObj, ptclCount, fieldLife, effects));
+    AddField: function(ptclCount, fieldLife, effects) {
+        this.fields.push(new ParticleField(this.trfmObj, ptclCount, fieldLife, effects));
     },
     AddTail: function(ptclCount, fieldLife, effects) {
         this.tails.push(new FlatTail(this.trfmObj, ptclCount, fieldLife, effects));
     },
     RemoveField: function(field) {
-        var index = this.simpleFields.indexOf(field);
+        var index = this.fields.indexOf(field);
         if(index != -1) {
-            this.simpleFields.splice(index, 1);
+            this.fields.splice(index, 1);
         }
     },
     RunField: function(index) {
-        if(this.simpleFields[index])
-            this.simpleFields[index].active = true;
+        if(this.fields[index])
+            this.fields[index].active = true;
     },
     RunTail: function(index) {
         if(this.tails[index])
             this.tails[index].active = true;
     },
     GetSimpleFields: function() {
-        return this.simpleFields;
+        return this.fields;
     },
     GetTails: function() {
         return this.tails;
     },
     Update: function() {
-        for (var i = this.simpleFields.length - 1; i >= 0; i--) {
-            if(this.simpleFields[i].active) {
-                this.simpleFields[i].Callback();
+        for (var i = this.fields.length - 1; i >= 0; i--) {
+            if(this.fields[i].active) {
+                this.fields[i].Callback();
             }
         }
         for (var i = this.tails.length - 1; i >= 0; i--) {

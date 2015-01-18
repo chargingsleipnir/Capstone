@@ -104,7 +104,7 @@ function MsgBoxStyle(style) {
     }
 }
 
-function PtclFieldEffects() {
+function PtclPhysicsEffects() {
     this.travelTime = 5.0;
     this.startDist = 0.0;
     this.dir = new Vector3(0.0, 1.0, 0.0);
@@ -112,6 +112,23 @@ function PtclFieldEffects() {
     this.speed = 1.0;
     this.acc = new Vector3();
     this.dampening = 1.0;
+    this.colourBtm = new Vector3();
+    this.colourTop = new Vector3(1.0, 1.0, 1.0);
+    this.lineLength = 0.0;
+    this.texture = null;
+    this.size = 1.0;
+    this.alphaStart = 1.0;
+    this.fadePoint = 0.5;
+    this.alphaEnd = 0.0;
+}
+function PtclSpiralEffects() {
+    this.travelTime = 5.0;
+    this.startDist = 0.0;
+    this.dir = new Vector3(0.0, 1.0, 0.0);
+    this.range = 90.0;
+    this.scaleAngle = 1.0;
+    this.scaleDiam = 1.0;
+    this.scaleLen = 1.0;
     this.colourBtm = new Vector3();
     this.colourTop = new Vector3(1.0, 1.0, 1.0);
     this.lineLength = 0.0;
