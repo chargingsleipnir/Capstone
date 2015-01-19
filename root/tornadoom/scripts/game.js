@@ -142,6 +142,15 @@ function BuildGame() {
     var player = new Player();
     player.obj.trfmLocal.SetPosAxes(0.0, 1.0, -3.0);
 
+    // Keep the object itself where it is at (0, 0, 0), and just move the cam around.
+    var buildCamera = new GameObject("Main Camera", Labels.camera);
+    buildCamera.AddComponent(Components.camera);
+    buildCamera.camera.trfmAxes.SetPosAxes(0.0, 3.0, 3.0);
+    buildCamera.camera.trfmAxes.RotateLocalViewX(-10);
+    buildCamera.camera.SetControlsActive(buildCamera.name, true);
+    ViewMngr.SetActiveCamera(buildCamera.camera);
+    var camToggle = true;
+
     /********************************** Scenes */
 
     // Title screen just has gui elements
@@ -150,11 +159,11 @@ function BuildGame() {
     SceneMngr.AddScene(title, true);
 
     // Player, internal objects, and several different giu elements
-    var bossBattle = new Scene("Final Boss Battle!", SceneTypes.gameplay);
-    bossBattle.Add(testCube);
-    bossBattle.Add(player.obj);
-    BuildScene2(bossBattle);
-    SceneMngr.AddScene(bossBattle, false);
+    var lvl01 = new Scene("Level 01", SceneTypes.gameplay);
+    lvl01.Add(testCube);
+    lvl01.Add(player.obj);
+    BuildScene2(lvl01);
+    SceneMngr.AddScene(lvl01, false);
 
     var angle = 0.01;
     function GameUpdate() {
@@ -176,12 +185,18 @@ function BuildGame() {
 
         if(!GameMngr.paused) {
             if(SceneMngr.GetActiveScene().type == SceneTypes.gameplay) {
+                buildCamera.Update(buildCamera.trfmLocal);
                 player.Update();
 
                 if(switchCam.pressed) {
 
-                    // Switch between player camera & controls
-                    // To free (current) camera & controls
+                    camToggle = !camToggle;
+                    if(camToggle) {
+                        ViewMngr.SetActiveCamera(buildCamera.camera);
+                    }
+                    else {
+                        ViewMngr.SetActiveCamera(player.obj.camera);
+                    }
 
                     switchCam.Release();
                 }

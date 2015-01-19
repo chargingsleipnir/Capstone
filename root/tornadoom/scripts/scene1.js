@@ -61,7 +61,7 @@ function BuildScene1(scene) {
     function Update() {
         if(nextSceneBtn.pressed) {
             nextSceneBtn.Release();
-            SceneMngr.SetActive("Final Boss Battle!");
+            SceneMngr.SetActive("Level 01");
         }
         if(fadingIn)
             if(titleMsg.FadeBackground(0.01) >= 1.0 && titleMsg.FadeMsg(0.01) >= 1.0)

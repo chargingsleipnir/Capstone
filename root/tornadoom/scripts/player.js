@@ -51,8 +51,8 @@ function Player() {
     this.obj.AddComponent(Components.camera);
     this.obj.camera.trfmAxes.SetPosAxes(1.0, 0.6, 2.75);
     this.obj.camera.trfmAxes.RotateLocalViewX(-10);
-    this.obj.camera.SetControlsActive(this.obj.name, true);
-    ViewMngr.SetActiveCamera(this.obj.camera);
+    this.obj.camera.SetControlsActive(this.obj.name, true); // Don't make this - use player-specific controls with cam following.
+    //ViewMngr.SetActiveCamera(this.obj.camera);
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
