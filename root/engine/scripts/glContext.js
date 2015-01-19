@@ -14,7 +14,7 @@ var GL = {
         this.ctx.depthFunc(this.ctx.LESS);
         this.ctx.enable(this.ctx.BLEND);
         this.ctx.blendFunc(this.ctx.SRC_ALPHA, this.ctx.ONE_MINUS_SRC_ALPHA);
-        this.ctx.enable(this.ctx.CULL_FACE);
+        //this.ctx.enable(this.ctx.CULL_FACE);
         this.ctx.lineWidth(3);
 
         this.CreateShaderPrograms(EL.assets.shaderStrings, EL.assets.shaderPrograms);

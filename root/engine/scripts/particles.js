@@ -114,8 +114,7 @@ ParticleSpiral.prototype = {
     }
 };
 
-function ParticleField(trfmObj, ptclCount, fieldLife, effects) {
-    this.trfmObj = trfmObj;
+function ParticleField(ptclCount, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
     this.fieldLifeTime = this.counter = fieldLife;
 
@@ -187,11 +186,6 @@ function ParticleField(trfmObj, ptclCount, fieldLife, effects) {
                 effects.alphaEnd
             ));
         }
-
-        // Once positions are established, sort from back to front
-        // This stays here uniquely because it's using StartPos, not regular pos;
-        if(this.needsSorting)
-            this.SortForLaunch(i);
     }
 
     for(var i = 0; i < this.ptcls.length; i++) {
@@ -218,6 +212,20 @@ function ParticleField(trfmObj, ptclCount, fieldLife, effects) {
     }
 }
 ParticleField.prototype = {
+    GetObjectTransform: function(trfmObj) {
+        this.trfmObj = trfmObj;
+        // Once positions are established, sort from back to front
+        // This stays here uniquely because it's using StartPos, not regular pos;
+        if(this.needsSorting)
+            for(var i = 0; i < this.ptcls.length; i++)
+                this.SortForLaunch(i);
+    },
+    Run: function() {
+        this.active = true;
+    },
+    Stop: function() {
+        this.counter = 0.0;
+    },
     SortForLaunch: function(idx) {
         if(idx > 0) {
             do {
@@ -226,10 +234,8 @@ ParticleField.prototype = {
 
                 if (distThisPtcl > distPrevPtcl) {
                     RefUtils.Swap(this.ptcls, idx, idx - 1);
-                    idx--;
                 }
-                else
-                    idx = 0;
+                idx--;
             }
             while (idx > 0);
         }
@@ -242,10 +248,8 @@ ParticleField.prototype = {
 
                 if (distThisPtcl > distPrevPtcl) {
                     RefUtils.Swap(this.ptcls, idx, idx - 1);
-                    idx--;
                 }
-                else
-                    idx = 0;
+                idx--;
             }
             while (idx > 0);
         }
@@ -264,7 +268,7 @@ ParticleField.prototype = {
         this.fieldHdlr.RewriteVerts(newPosCoords.concat(newColElems));
     },
     CheckEnd: function() {
-        if(this.fieldLifeTime) {
+        if(this.counter != null) {
             this.counter -= Time.deltaMilli;
             if (this.counter <= 0)
                 this.Callback = this.Terminate;
@@ -470,8 +474,9 @@ function ParticleSystem(trfmObj) {
     this.tails = [];
 }
 ParticleSystem.prototype = {
-    AddField: function(ptclCount, fieldLife, effects) {
-        this.fields.push(new ParticleField(this.trfmObj, ptclCount, fieldLife, effects));
+    AddField: function(field) {
+        this.fields.push(field);
+        field.GetObjectTransform(this.trfmObj);
     },
     AddTail: function(ptclCount, fieldLife, effects) {
         this.tails.push(new FlatTail(this.trfmObj, ptclCount, fieldLife, effects));
@@ -481,10 +486,6 @@ ParticleSystem.prototype = {
         if(index != -1) {
             this.fields.splice(index, 1);
         }
-    },
-    RunField: function(index) {
-        if(this.fields[index])
-            this.fields[index].active = true;
     },
     RunTail: function(index) {
         if(this.tails[index])

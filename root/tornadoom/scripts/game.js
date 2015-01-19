@@ -11,12 +11,14 @@ function BuildGame() {
     var gameMouseCtrlName = "GameMouse";
     Input.RegisterControlScheme(gameMouseCtrlName, true, InputTypes.mouse);
     var gameMouse = Input.CreateInputController(gameMouseCtrlName);
-    gameMouse.SetCursor(CursorTypes.none);
+    gameMouse.SetCursor(CursorTypes.crosshair);
 
     var gameKeyCtrlName = "SceneAndMenuNav";
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
     var nextSceneBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Enter);
     var menuBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Esc);
+    // Temp camera control
+    var switchCam = Input.CreateInputController(gameKeyCtrlName, KeyMap.C);
 
     /********************************** Main Menu */
 
@@ -162,7 +164,7 @@ function BuildGame() {
             //GUINetwork.SetActive(menuSysName, menuToggle);
             GameMngr.TogglePause();
             if(menuToggle) gameMouse.SetCursor(CursorTypes.normal);
-            else gameMouse.SetCursor(CursorTypes.none);
+            else gameMouse.SetCursor(CursorTypes.crosshair);
             menuBtn.Release();
         }
         /*
@@ -175,6 +177,14 @@ function BuildGame() {
         if(!GameMngr.paused) {
             if(SceneMngr.GetActiveScene().type == SceneTypes.gameplay) {
                 player.Update();
+
+                if(switchCam.pressed) {
+
+                    // Switch between player camera & controls
+                    // To free (current) camera & controls
+
+                    switchCam.Release();
+                }
             }
         }
     }
