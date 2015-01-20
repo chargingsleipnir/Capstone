@@ -49,7 +49,6 @@ GameObject.prototype = {
         /// </signature>
         if(component == Components.camera) {
             this.camera = new Camera(this.trfmGlobal);
-            this.components.push(this.camera);
         }
         else if (component == Components.rigidBody) {
             this.rigidBody = new RigidBody(this.trfmLocal, this.shape.radius);
@@ -124,6 +123,8 @@ GameObject.prototype = {
 
             //this.trfmGlobal.IsChanging();
         }
+        else
+            this.trfmGlobal.active = false;
 
         // Scripts first?? Sure...
         for (var i in this.loopCalls)
@@ -138,7 +139,5 @@ GameObject.prototype = {
             //this.children[i].transform.SetParentMatrix(this.transform.matrix_Model);
             this.children[i].Update(this.trfmGlobal);
         }
-        // Once children have changed based on their parent's movement, stop parent activity until set active again.
-        this.trfmGlobal.active = false;
     }
 };

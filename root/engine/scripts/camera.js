@@ -157,23 +157,27 @@ Frustum.prototype = {
 function Camera(trfmObj) {
 
     this.active = false;
-
-    this.trfmObj = trfmObj;
     this.trfmAxes = new TransformAxes();
-    this.trfmAxes.pos.SetCopy(this.trfmObj.pos);
-    this.posGbl = this.trfmAxes.pos;
+    this.posGbl = this.trfmAxes.pos.GetCopy();
+
+    // If a component of an object, make it act as it's child
+    if(trfmObj) {
+        this.trfmObj = trfmObj;
+        this.trfmAxes.pos.SetCopy(this.trfmObj.pos);
+        this.posGbl = this.trfmAxes.pos.GetCopy();
+        this.Update = this.FollowObjectUpdate;
+    }
 
     this.hasKeyCtrl = false;
 
     this.mtxCam = new Matrix4();
-
     ViewMngr.frustum.CalculatePlanes(this.trfmAxes.pos, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
 }
 Camera.prototype = {
     ToDefaultOrientation: function() {
         this.trfmAxes.SetDefault();
     },
-    SetControlsActive: function(ctrlSchemeName, ctrlActive) {
+    SetFreeControls: function(ctrlSchemeName, ctrlActive) {
         this.hasKeyCtrl = ctrlActive;
         if(!this.ctrl)
             this.ctrl = new CameraController(this.trfmAxes, ctrlSchemeName);
@@ -181,9 +185,26 @@ Camera.prototype = {
             this.ctrl.SetInputActive(true);
         else
             this.ctrl.SetInputActive(false);
+
+        this.Update = this.FreeControlUpdate;
     },
-    Update: function() {
+    FreeControlUpdate: function() {
         // Update controls
+        if(this.active) {
+
+            if (this.hasKeyCtrl) {
+                this.ctrl.Update();
+            }
+
+            if (this.trfmAxes.IsChanging()) {
+                this.posGbl.SetCopy(this.trfmAxes.pos);
+                // Update game view
+                this.mtxCam.SetOrientation(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
+                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
+            }
+        }
+    },
+    FollowObjectUpdate: function() {
         if(this.active) {
 
             if (this.hasKeyCtrl) {
@@ -192,32 +213,24 @@ Camera.prototype = {
 
             if (this.trfmAxes.IsChanging() || this.trfmObj.IsChanging()) {
 
-                /* This same kind of parent-child updating is what makes it at all
-                 * valuable to add a camera as a component of a gameObject */
+                //this.posGbl.SetCopy(this.trfmAxes.pos);
+                this.posGbl.SetCopy(this.trfmAxes.pos.GetAdd(this.trfmObj.pos));
 
-
-                this.posGbl = this.trfmAxes.pos.GetAdd(this.trfmObj.pos);
                 //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
-                /*
-                 var newDirFwd.SetCopy(this.trfmLocal.fwd);
-                 //this.trfmGlobal.fwd.Add(trfmParent.fwd);
-                 var newDirUp.SetCopy(this.trfmLocal.up);
-                 //this.trfmGlobal.up.Add(trfmParent.up);
-                 var newDirRight.SetCopy(this.trfmLocal.right);
-                 */
-                // Update game view
-                this.mtxCam.SetOrientation(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
-                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
 
-                /* Use these to adjust controls, if set by user, to rotate camera around object.
-                 * Allow user to set camera modes...
-                 * This is where pushing and popping matrices will come into play!! */
+                //console.log(this.posGbl.GetData() + ",     " + this.trfmAxes.pos.GetData());
+
+                //var objFwd = this.trfmObj.orient.GetMultiplyVec3(VEC3_FWD);
+                //var objUp = this.trfmObj.orient.GetMultiplyVec3(VEC3_UP);
+                //var objRight = this.trfmObj.orient.GetMultiplyVec3(VEC3_RIGHT);
+
                 //this.mtxCam.SetIdentity();
-                //this.mtxCam.SetTranslateVec3(this.trfmObj.pos);
+                //this.mtxCam.SetTranslateVec3(this.posGbl);
                 //this.mtxCam.SetRotateAbout(newOrient.GetAxis(), -newOrient.GetAngle());
                 //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
 
-                //this.mtxCam.SetScaleVec3(this.trfmObj.scale);
+                this.mtxCam.SetOrientation(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
+                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
             }
         }
     }

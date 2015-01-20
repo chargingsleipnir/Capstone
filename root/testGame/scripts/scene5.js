@@ -5,7 +5,7 @@
 function BuildScene5(scene) {
 
     scene.rootObj.AddComponent(Components.camera);
-    scene.rootObj.camera.SetControlsActive(scene.name, true);
+    scene.rootObj.camera.SetFreeControls(scene.name, true);
 
 
     //////////////////////////////////

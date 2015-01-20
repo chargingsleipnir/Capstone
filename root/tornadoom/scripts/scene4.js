@@ -5,7 +5,7 @@
 function BuildScene4(scene) {
 
     scene.rootObj.AddComponent(Components.camera);
-    scene.rootObj.camera.SetControlsActive(scene.name, true);
+    scene.rootObj.camera.SetFreeControls(scene.name, true);
 
     scene.light.amb.bright = 0.25;
     scene.light.dir.bright = 0.5;

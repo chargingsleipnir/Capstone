@@ -84,6 +84,10 @@ Transform.prototype = {
         //this.RotateView(axis, thetaDeg);
         this.active = true;
     },
+    SetUpdatedOrient: function(normAxis, thetaDeg) {
+        this.orient.UpdateAxisAngle(normAxis, thetaDeg);
+        this.active = true;
+    },
     Rotate: function(axis, thetaDeg) {
         /// <signature>
         ///  <summary>Apply Rotation around given axis by given angle</summary>

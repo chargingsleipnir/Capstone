@@ -4,7 +4,15 @@
 
 function BuildGame() {
 
-    /********************************** GLOBAL GAME VARIABLES **********************************/
+    /********************************** GLOBAL GAME SETUP **********************************/
+
+
+    /********************************** Env. Init */
+
+    // This is temporary, just to view the wold and build scenes easier.
+    ViewMngr.camera.trfmAxes.SetPosAxes(0.0, 5.0, 0.0);
+    ViewMngr.camera.trfmAxes.RotateLocalViewX(-10);
+    var camToggle = true;
 
     /********************************** Global Input */
 
@@ -142,15 +150,6 @@ function BuildGame() {
     var player = new Player();
     player.obj.trfmLocal.SetPosAxes(0.0, 1.0, -3.0);
 
-    // Keep the object itself where it is at (0, 0, 0), and just move the cam around.
-    var buildCamera = new GameObject("Main Camera", Labels.camera);
-    buildCamera.AddComponent(Components.camera);
-    buildCamera.camera.trfmAxes.SetPosAxes(0.0, 3.0, 3.0);
-    buildCamera.camera.trfmAxes.RotateLocalViewX(-10);
-    buildCamera.camera.SetControlsActive(buildCamera.name, true);
-    ViewMngr.SetActiveCamera(buildCamera.camera);
-    var camToggle = true;
-
     /********************************** Scenes */
 
     // Title screen just has gui elements
@@ -185,18 +184,14 @@ function BuildGame() {
 
         if(!GameMngr.paused) {
             if(SceneMngr.GetActiveScene().type == SceneTypes.gameplay) {
-                buildCamera.Update(buildCamera.trfmLocal);
                 player.Update();
 
                 if(switchCam.pressed) {
-
                     camToggle = !camToggle;
-                    if(camToggle) {
-                        ViewMngr.SetActiveCamera(buildCamera.camera);
-                    }
-                    else {
+                    if(camToggle)
                         ViewMngr.SetActiveCamera(player.obj.camera);
-                    }
+                    else
+                        ViewMngr.SetActiveCamera();
 
                     switchCam.Release();
                 }

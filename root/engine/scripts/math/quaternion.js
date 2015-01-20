@@ -94,8 +94,20 @@ Quaternion.prototype = {
         if (axis.GetDot(axis) > INFINITESIMAL)
             axis.SetNormalized();
 
-        this.w = Math.cos(angle / 2.0);
-        this.v = axis.GetScaleByNum(Math.sin(angle / 2.0));
+        this.w = Math.cos(angle * 0.5);
+        this.v = axis.GetScaleByNum(Math.sin(angle * 0.5));
+
+        return this;
+    },
+    UpdateAxisAngle: function(axis, thetaDeg) {
+        /// <signature>
+        ///  <summary>Update for rotation axis and angle. Saves processing if confident with axis param</summary>
+        ///  <param name="axis" type="Vector3"></param>
+        ///  <param name="thetaDeg" type="decimal"></param>
+        ///  <returns type="Quaternion" />
+        /// </signature>
+        this.w = Math.cos((thetaDeg * DEG_TO_RAD) * 0.5);
+        this.v = axis.GetScaleByNum(Math.sin((thetaDeg * DEG_TO_RAD) * 0.5));
 
         return this;
     },

@@ -38,10 +38,10 @@ function BuildScene3(scene, skyBoxObj) {
     balls[3].rigidBody.AddForceGenerator(new ForceGenerators.Spring_PullOnly(balls[0].rigidBody, 1.0, 10.0));
 
     scene.rootObj.AddComponent(Components.camera);
-    scene.rootObj.camera.SetControlsActive(scene.name, false);
+    scene.rootObj.camera.SetFreeControls(scene.name, false);
 
     balls[0].AddComponent(Components.camera);
-    balls[0].camera.SetControlsActive(balls[0].name, true);
+    balls[0].camera.SetFreeControls(balls[0].name, true);
 
     var physicsTestName = "PhysicsTestScene";
     Input.RegisterControlScheme(physicsTestName, false, InputTypes.keyboard);

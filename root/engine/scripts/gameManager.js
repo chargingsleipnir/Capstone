@@ -53,7 +53,7 @@ var GameMngr = {
                 // Updating Game World and Draw Calls
                 SceneMngr.Update();
                 DebugMngr.Update();
-
+                ViewMngr.Update();
             }
             that.UserUpdate();
             GL.RenderScene();

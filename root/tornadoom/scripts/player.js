@@ -5,8 +5,10 @@
 function Player() {
     // Basic player obj visual
     this.obj = new GameObject('Player01', Labels.player);
-    this.obj.SetModel(GameMngr.assets.models['playerTornado']);
-    this.obj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
+    var modelObj = new GameObject("Player01 model", Labels.none);
+    modelObj.SetModel(GameMngr.assets.models['playerTornado']);
+    modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
+    this.obj.AddChild(modelObj);
 
     // Add particle effects
     this.obj.AddComponent(Components.particleSystem);
@@ -34,33 +36,30 @@ function Player() {
     var dustVisual = new ParticleField(300, null, effects);
     this.obj.ptclSys.AddField(dustVisual);
 
-    effects.colourBtm.SetZero();
-    effects.colourTop.SetZero();
-    effects.alphaStart = 0.75;
-    effects.fadePoint = 0.85;
-    effects.alphaEnd = 0.25;
-    effects.range = 10.0;
-    effects.scaleDiam = 0.33;
-    effects.lineLength = 0.02;
-    var speedVisual = new ParticleField(200, null, effects);
-    this.obj.ptclSys.AddField(speedVisual);
-    speedVisual.Run();
-
     // Add controls
 
     this.obj.AddComponent(Components.camera);
-    this.obj.camera.trfmAxes.SetPosAxes(1.0, 0.6, 2.75);
-    this.obj.camera.trfmAxes.RotateLocalViewX(-10);
-    this.obj.camera.SetControlsActive(this.obj.name, true); // Don't make this - use player-specific controls with cam following.
-    //ViewMngr.SetActiveCamera(this.obj.camera);
+    this.obj.camera.trfmAxes.SetPosAxes(0.0, 7.5, 7.5);
+    this.obj.camera.trfmAxes.RotateLocalViewX(-30);
+    // Not this, but perhaps a limited control scheme to encircle the object?
+    //this.obj.camera.SetFreeControls(this.obj.name, true);
+    ViewMngr.SetActiveCamera(this.obj.camera);
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
     var startPtcls = Input.CreateInputController(playerCtrlName, KeyMap.Z);
     var stopPtcls = Input.CreateInputController(playerCtrlName, KeyMap.X);
 
+    // Twister rotation visual
+    var angle = 0.0;
     this.Update = function() {
-        //this.obj.trfmLocal.Rotate(VEC3_UP, 5.0);
+        angle++;
+        if(angle > 360.0)
+            angle = 0.0;
+
+        this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
+        this.obj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle);
+        modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
         if(startPtcls.pressed) {
             ammoVisual.Run();

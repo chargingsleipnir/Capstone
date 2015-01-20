@@ -87,7 +87,7 @@ function BuildScene2(scene, playerObj) {
 
     // apply camera control
     scene.rootObj.AddComponent(Components.camera);
-    scene.rootObj.camera.SetControlsActive(scene.name, true);
+    scene.rootObj.camera.SetFreeControls(scene.name, true);
 
     var waveringValue = 0.0;
     var timer = 0.0;

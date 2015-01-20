@@ -21,17 +21,25 @@ var ViewMngr = {
 
         // Instantiate frustum and projection matrix together
         this.frustum = new Frustum(this.mtxProj, 45.0, this.wndWidth / this.wndHeight, 0.1, this.farCullDist);
-        this.activeCam = new Camera(new Transform(Space.local), true);
+
+        this.camera = new Camera();
+        this.camera.SetFreeControls("Initial Camera Controller", true);
+        this.activeCam = this.camera;
+        this.SetActiveCamera(this.camera);
 
         GL.ReshapeWindow(this.wndWidth, this.wndHeight);
     },
     SetActiveCamera: function(camera) {
-        if(this.activeCam) {
-            this.activeCam.active = false;
+        this.activeCam.active = false;
+        if(camera) {
+            camera.active = true;
+            this.activeCam = camera;
         }
-
-        camera.active = true;
-        this.activeCam = camera;
+        else {
+            this.camera.active = true;
+            this.activeCam = this.camera;
+        }
+        this.activeCam.trfmAxes.active = true;
     },
     Update: function() {
         this.activeCam.Update();
