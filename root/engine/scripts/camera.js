@@ -213,24 +213,25 @@ Camera.prototype = {
 
             if (this.trfmAxes.IsChanging() || this.trfmObj.IsChanging()) {
 
-                //this.posGbl.SetCopy(this.trfmAxes.pos);
                 this.posGbl.SetCopy(this.trfmAxes.pos.GetAdd(this.trfmObj.pos));
 
-                //var newOrient = this.trfm.orient.GetMultiplyQuat(this.trfmObj.orient);
+                // Use this purely for view rotations
+                this.mtxCam.SetOrientation(VEC3_ZERO, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
+                // As is in reverse order, translate reversed from the object, then rotate around it, then apply local translation
+                this.mtxCam.SetTranslateVec3(this.trfmAxes.pos.GetNegative());
+                this.mtxCam.SetRotateAbout(this.trfmObj.orient.GetAxis(), -this.trfmObj.orient.GetAngle());
+                this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
 
-                //console.log(this.posGbl.GetData() + ",     " + this.trfmAxes.pos.GetData());
-
-                //var objFwd = this.trfmObj.orient.GetMultiplyVec3(VEC3_FWD);
-                //var objUp = this.trfmObj.orient.GetMultiplyVec3(VEC3_UP);
-                //var objRight = this.trfmObj.orient.GetMultiplyVec3(VEC3_RIGHT);
-
-                //this.mtxCam.SetIdentity();
-                //this.mtxCam.SetTranslateVec3(this.posGbl);
-                //this.mtxCam.SetRotateAbout(newOrient.GetAxis(), -newOrient.GetAngle());
-                //this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
-
-                this.mtxCam.SetOrientation(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
                 ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
+
+                /*
+                ViewMngr.frustum.CalculatePlanes(
+                    this.posGbl,
+                    this.trfmObj.orient.GetMultiplyVec3(VEC3_FWD),
+                    this.trfmObj.orient.GetMultiplyVec3(VEC3_UP),
+                    this.trfmObj.orient.GetMultiplyVec3(VEC3_RIGHT)
+                );
+                */
             }
         }
     }
