@@ -39,8 +39,9 @@ function Player() {
     // Add controls
 
     this.obj.AddComponent(Components.camera);
-    this.obj.camera.trfmAxes.SetPosAxes(1.0, 1.5, 5.5);
-    //this.obj.camera.trfmAxes.RotateLocalViewX(-10);
+    this.obj.camera.trfmAxes.SetPosAxes(3.0, 2.0, -8.5);
+    this.obj.camera.trfmAxes.RotateLocalViewY(180);
+    this.obj.camera.trfmAxes.RotateLocalViewX(-15);
 
 
     // Not this, but perhaps a limited control scheme to encircle the object?
@@ -56,12 +57,14 @@ function Player() {
     var angle = 0.0;
     this.Update = function() {
         angle++;
-        if(angle > 360.0)
-            angle = 0.0;
+        //if(angle > 360.0)
+         //   angle = 0.0;
 
-        //this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
-        //this.obj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle);
+        this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
+        //this.obj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 3);
         //modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
+
+        console.log(this.obj.camera.posGbl.GetData());
 
         if(startPtcls.pressed) {
             //this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
@@ -79,8 +82,16 @@ function Player() {
             startPtcls.Release();
         }
         else if(stopPtcls.pressed) {
-            ammoVisual.Stop();
-            dustVisual.Stop();
+
+            console.log(
+                this.obj.camera.posGbl.GetData() + ",    " +
+                this.obj.camera.trfmAxes.fwd.GetData() + ",    " +
+                this.obj.camera.trfmAxes.up.GetData() + ",    " +
+                this.obj.camera.trfmAxes.right.GetData()
+            );
+
+            //ammoVisual.Stop();
+            //dustVisual.Stop();
             stopPtcls.Release();
         }
     }

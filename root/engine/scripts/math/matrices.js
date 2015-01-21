@@ -530,6 +530,26 @@ Matrix4.prototype = {
 
         return out;
     },
+    GetMultiplyVec3: function(vec3)
+    {
+        /// <signature>
+        ///  <summary>Multiplies the passed vector by the matrix</summary>
+        ///  <param name="vec4" type="Vector4">Vector being transformed</param>
+        ///  <returns type="Vector4" />
+        /// </signature>
+        /*
+         return new Vector3(
+         (this.data[0] * vec3.x) + (this.data[4] * vec3.y) + (this.data[8] * vec3.z) + (this.data[12]),
+         (this.data[1] * vec3.x) + (this.data[5] * vec3.y) + (this.data[9] * vec3.z) + (this.data[13]),
+         (this.data[2] * vec3.x) + (this.data[6] * vec3.y) + (this.data[10] * vec3.z) + (this.data[14])
+         );
+         */
+        return new Vector3(
+            (this.data[0] * vec3.x) + (this.data[1] * vec3.y) + (this.data[2] * vec3.z) + (this.data[3]),
+            (this.data[4] * vec3.x) + (this.data[5] * vec3.y) + (this.data[6] * vec3.z) + (this.data[7]),
+            (this.data[8] * vec3.x) + (this.data[9] * vec3.y) + (this.data[10] * vec3.z) + (this.data[11])
+        );
+    },
     GetMultiplyVec4: function(vec4)
     {
         /// <signature>

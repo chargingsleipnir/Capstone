@@ -213,16 +213,30 @@ Camera.prototype = {
 
             if (this.trfmAxes.IsChanging() || this.trfmObj.IsChanging()) {
 
-                this.posGbl.SetCopy(this.trfmAxes.pos.GetAdd(this.trfmObj.pos));
-
                 // Use this purely for view rotations
                 this.mtxCam.SetOrientation(VEC3_ZERO, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
+                //this.mtxCam.SetIdentity();
                 // As is in reverse order, translate reversed from the object, then rotate around it, then apply local translation
                 this.mtxCam.SetTranslateVec3(this.trfmAxes.pos.GetNegative());
                 this.mtxCam.SetRotateAbout(this.trfmObj.orient.GetAxis(), -this.trfmObj.orient.GetAngle());
                 this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
 
-                ViewMngr.frustum.CalculatePlanes(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
+                // Use the cam matrix to rotate the local cam position to ensure it's correct global positioning
+                var newLocalPos = this.mtxCam.GetMultiplyVec3(this.trfmAxes.pos);
+                this.posGbl.SetCopy(newLocalPos.GetAdd(this.trfmObj.pos));
+                //this.posGbl = this.mtxCam.GetMultiplyVec3(this.trfmAxes.pos.GetAdd(this.trfmObj.pos));
+
+                // Rotate the directions as well, for proper frustum placement
+                var newViewFwd = this.mtxCam.GetMultiplyVec3(this.trfmAxes.fwd);
+                var newViewUp = this.mtxCam.GetMultiplyVec3(this.trfmAxes.up);
+                var newViewRight = this.mtxCam.GetMultiplyVec3(this.trfmAxes.right);
+
+                //this.trfmAxes.fwd = this.trfmObj.orient.GetMultiplyVec3(VEC3_FWD);
+                //this.trfmAxes.up = this.trfmObj.orient.GetMultiplyVec3(VEC3_UP);
+                //this.trfmAxes.right = this.trfmObj.orient.GetMultiplyVec3(VEC3_RIGHT);
+
+
+                ViewMngr.frustum.CalculatePlanes(this.posGbl, newViewFwd, newViewUp, newViewRight);
 
                 /*
                 ViewMngr.frustum.CalculatePlanes(
