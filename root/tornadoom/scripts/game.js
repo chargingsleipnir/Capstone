@@ -148,7 +148,7 @@ function BuildGame() {
     testCube.trfmLocal.SetPosAxes(0.0, 0.0, -10.0);
 
     var player = new Player();
-    player.obj.trfmLocal.SetPosAxes(0.0, 1.0, -3.0);
+    player.obj.trfmLocal.SetPosAxes(0.0, 1.0, 0.0);
 
     /********************************** Scenes */
 

@@ -39,11 +39,8 @@ function Player() {
     // Add controls
 
     this.obj.AddComponent(Components.camera);
-    this.obj.camera.trfmAxes.SetPosAxes(3.0, 2.0, -8.5);
-    this.obj.camera.trfmAxes.RotateLocalViewY(180);
-    this.obj.camera.trfmAxes.RotateLocalViewX(-15);
-
-
+    this.obj.camera.trfmAxes.SetPosAxes(0.0, 7.5, 7.5);
+    this.obj.camera.trfmAxes.RotateLocalViewX(-30);
     // Not this, but perhaps a limited control scheme to encircle the object?
     //this.obj.camera.SetFreeControls(this.obj.name, true);
     ViewMngr.SetActiveCamera(this.obj.camera);
@@ -53,45 +50,28 @@ function Player() {
     var startPtcls = Input.CreateInputController(playerCtrlName, KeyMap.Z);
     var stopPtcls = Input.CreateInputController(playerCtrlName, KeyMap.X);
 
+
     // Twister rotation visual
     var angle = 0.0;
     this.Update = function() {
         angle++;
-        //if(angle > 360.0)
-         //   angle = 0.0;
+        if(angle > 360.0)
+            angle = 0.0;
 
-        this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
+        // Player controls
+        //this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
         //this.obj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 3);
-        //modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
-        console.log(this.obj.camera.posGbl.GetData());
+        modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
         if(startPtcls.pressed) {
-            //this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
-            //this.obj.trfmLocal.SetUpdatedOrient(VEC3_UP, 90);
-            //modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
-
-            console.log(
-                this.obj.camera.posGbl.GetData() + ",    " +
-                this.obj.camera.trfmAxes.fwd.GetData() + ",    " +
-                this.obj.camera.trfmAxes.up.GetData() + ",    " +
-                this.obj.camera.trfmAxes.right.GetData()
-            );
-            //ammoVisual.Run();
-            //dustVisual.Run();
+            ammoVisual.Run();
+            dustVisual.Run();
             startPtcls.Release();
         }
         else if(stopPtcls.pressed) {
-
-            console.log(
-                this.obj.camera.posGbl.GetData() + ",    " +
-                this.obj.camera.trfmAxes.fwd.GetData() + ",    " +
-                this.obj.camera.trfmAxes.up.GetData() + ",    " +
-                this.obj.camera.trfmAxes.right.GetData()
-            );
-
-            //ammoVisual.Stop();
-            //dustVisual.Stop();
+            ammoVisual.Stop();
+            dustVisual.Stop();
             stopPtcls.Release();
         }
     }

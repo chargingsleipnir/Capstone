@@ -134,7 +134,7 @@ Matrix3.prototype = {
         ///  <param name="mat3" type="Matrix3">Matrix to multiply into the other</param>
         ///  <returns type="Matrix3" />
         /// </signature>
-        var copy = this.CreateCopy();
+        var copy = this.GetCopy();
         this.SetZero();
 
         for (var i = 0; i < 3; i++)
@@ -941,28 +941,6 @@ Matrix4.prototype = {
         this.data[15] = 1.0;
 
         return this;
-    },
-    Orient: function(pos, dirFwd, dirUp) {
-        /// <signature>
-        ///  <summary>Create matrix oriented by directional control</summary>
-        ///  <param name="pos" type="Vector3">Location of viewer</param>
-        ///  <param name="fwd" type="Vector3">Normalized View direction</param>
-        ///  <param name="up" type="Vector3">Normalized Vector 90 degrees to fwd, to control roll</param>
-        ///  <returns type="Matrix4" />
-        /// </signature>
-        var dirSide = dirFwd.GetCross(dirUp);
-
-        /*
-        // Translate
-        for(var i = 0; i < 4; i++)
-            this.data[i + 12] = (this.data[i] * vec.x) + (this.data[i + 4] * vec.y) + (this.data[i + 8] * vec.z) + this.data[i + 12];
-
-        for (var i = 0; i < 3; i++) {
-            for (var j = 0; j < 3; j++) {
-                this.data[(i * 3) + j] = (this.data
-            }
-        }
-        */
     },
     SetPerspective: function(thetaDeg, aspectRatio, boundNear, boundFar) {
         /// <signature>
