@@ -19,8 +19,9 @@ var DebugMngr = {
             this.axes = zeroPointAxes.mdlHdlr;
 
             var grid = new GameObject('grid', Labels.productionEnvironment);
-            grid.SetModel(Primitives.grid);
             grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
+            grid.SetModel(Primitives.grid);
+            grid.Update(grid.trfmGlobal);
             this.grid = grid.mdlHdlr;
 
             var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), "Performance Data");

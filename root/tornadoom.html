@@ -29,7 +29,6 @@
     <script type="text/javascript" src="engine/scripts/sceneManager.js"></script>
     <script type="text/javascript" src="engine/scripts/gameManager.js"></script>
     <script type="text/javascript" src="engine/scripts/2DContext.js"></script>
-    <script type="text/javascript" src="engine/scripts/behaviours/FPController.js"></script>
     <!---------- Game scripts  ---------->
     <!--
     <script type="text/javascript" src="testGame/scripts/behaviours/impulseBalls.js"></script>
@@ -41,6 +40,7 @@
     <script type="text/javascript" src="testGame/scripts/game.js"></script>
     -->
     <script type="text/javascript" src="tornadoom/scripts/player.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/behaviours/ObjectControllers.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/game.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/scene1.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/scene2.js"></script>
@@ -90,7 +90,7 @@
                 ['bgMusicLight', "tornadoom/assets/sounds/songLightCold.ogg"]
             ];
 
-            DebugMngr.SetFullActive(true);
+            DebugMngr.active = true;
 
             // Initialize the Game Manager, passing the canvas to do much of the startup
             GameMngr.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));

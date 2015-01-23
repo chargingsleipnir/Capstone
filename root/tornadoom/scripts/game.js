@@ -186,12 +186,19 @@ function BuildGame() {
             if(SceneMngr.GetActiveScene().type == SceneTypes.gameplay) {
                 player.Update();
 
+                // ACTIVATES FULL ENGINE-BUILD VIEW WITH ALL CONTROL SHIFTED TO SEPARATE CAMERA
                 if(switchCam.pressed) {
                     camToggle = !camToggle;
-                    if(camToggle)
+                    if(camToggle) {
+                        player.ctrl.SetActive(true);
                         ViewMngr.SetActiveCamera(player.obj.camera);
-                    else
+                        DebugMngr.SetFullActive(false);
+                    }
+                    else {
+                        player.ctrl.SetActive(false);
                         ViewMngr.SetActiveCamera();
+                        DebugMngr.SetFullActive(true);
+                    }
 
                     switchCam.Release();
                 }

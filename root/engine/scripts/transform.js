@@ -69,6 +69,33 @@ Transform.prototype = {
         this.pos.SetAdd(translation);
         this.active = true;
     },
+    TranslateFwd: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.orient.GetMultiplyVec3(VEC3_FWD).GetScaleByNum(speed));
+        this.active = true;
+    },
+    TranslateUp: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.orient.GetMultiplyVec3(VEC3_UP).GetScaleByNum(speed));
+        this.active = true;
+    },
+    TranslateRight: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.SetAdd(this.orient.GetMultiplyVec3(VEC3_RIGHT).GetScaleByNum(speed));
+        this.active = true;
+    },
     SetRotation: function(quat) {
         this.orient.SetCopy(quat);
         this.active = true;

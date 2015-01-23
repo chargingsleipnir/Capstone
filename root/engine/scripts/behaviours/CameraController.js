@@ -6,9 +6,6 @@ function CameraController(trfmAxes, ctrlSchemeName) {
     this.moveSpeed = 10;
     this.turnSpeed = 1.0;
 
-    this.pitchAngle = 0.0;
-    this.yawAngle = 0.0;
-
     // Control camera
     this.camRegName = ctrlSchemeName;
     Input.RegisterControlScheme(this.camRegName, true, InputTypes.keyboard);

@@ -3,6 +3,7 @@
  */
 
 function Player() {
+
     // Basic player obj visual
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
@@ -37,13 +38,16 @@ function Player() {
     this.obj.ptclSys.AddField(dustVisual);
 
     // Add controls
-
     this.obj.AddComponent(Components.camera);
     this.obj.camera.trfmAxes.SetPosAxes(0.0, 7.5, 7.5);
     this.obj.camera.trfmAxes.RotateLocalViewX(-30);
-    // Not this, but perhaps a limited control scheme to encircle the object?
-    //this.obj.camera.SetFreeControls(this.obj.name, true);
     ViewMngr.SetActiveCamera(this.obj.camera);
+
+
+    var topDownCtrl = new TopDownController(this.obj, "Top-down player controls");
+    topDownCtrl.SetActive(true);
+    var snipeCtrl = new SnipeController(this.obj, "Over-shoulder player controls");
+    this.ctrl = topDownCtrl;
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
@@ -53,10 +57,17 @@ function Player() {
 
     // Twister rotation visual
     var angle = 0.0;
+
+    this.SwitchControls = function() {
+
+    };
+
     this.Update = function() {
         angle++;
         if(angle > 360.0)
             angle = 0.0;
+
+        this.ctrl.Update();
 
         // Player controls
         //this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
