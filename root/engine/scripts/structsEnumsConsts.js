@@ -156,7 +156,7 @@ var Time = {
 /***** ENUMS *****/
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
 var Components = { camera: 0, collisionBody: 1, rigidBody: 2, particleSystem: 3 };
-var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4, player: 5 };
+var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4, player: 5, movable: 6 };
 var GUILabels = { container: 0, msg: 1, btn: 2 };
 var Space = { local: 0, global: 1 };
 var BoundingShapes = { sphere: 0, aabb: 1 };

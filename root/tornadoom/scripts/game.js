@@ -143,10 +143,6 @@ function BuildGame() {
 
     /********************************** Global Objects */
 
-    var testCube = new GameObject('test', Labels.testObject);
-    testCube.SetModel(EL.assets.models['dimensionBox']);
-    testCube.trfmLocal.SetPosAxes(0.0, 0.0, -10.0);
-
     var player = new Player();
     player.obj.trfmLocal.SetPosAxes(0.0, 1.0, 0.0);
 
@@ -159,7 +155,6 @@ function BuildGame() {
 
     // Player, internal objects, and several different giu elements
     var lvl01 = new Scene("Level 01", SceneTypes.gameplay);
-    lvl01.Add(testCube);
     lvl01.Add(player.obj);
     BuildScene2(lvl01);
     SceneMngr.AddScene(lvl01, false);
