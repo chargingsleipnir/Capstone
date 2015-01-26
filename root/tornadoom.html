@@ -93,6 +93,7 @@
             ];
 
             DebugMngr.active = true;
+            ViewMngr.SetLightProperties(true, LightModels.phong);
 
             // Initialize the Game Manager, passing the canvas to do much of the startup
             GameMngr.Initialize(document.getElementById('canvasWebGL'), document.getElementById('canvas2D'));

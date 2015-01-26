@@ -306,6 +306,22 @@ var ModelUtils = {
             mainFunc += ShdrLines.main.glPos.MVP;
         }
         else {
+
+            /*
+            if(ViewMngr.lightProps.useFragLighting) {
+
+            }
+            if(ViewMngr.lightProps.model == LightModels.phong) {
+
+            }
+            else if(ViewMngr.lightProps.model == LightModels.blinnPhong) {
+
+            }
+            else if(ViewMngr.lightProps.model == LightModels.toon) {
+
+            }
+            */
+
             declaration += ShdrLines.attr.norm;
 
             if(!usesFragLighting) {

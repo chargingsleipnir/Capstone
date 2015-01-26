@@ -11,6 +11,14 @@ var ViewMngr = {
     activeCam: null,
     frustum: null,
     farCullDist: 200.0,
+    lightProps: {
+        useFragLighting: false,
+        model: LightModels.phong
+    },
+    SetLightProperties: function(useFragLighting, lightModel) {
+        this.lightProps.useFragLighting = useFragLighting;
+        this.lightProps.model = lightModel;
+    },
     Initialize: function(canvas) {
         // Get and use GL canvas window sizing
         var canvasStyles = window.getComputedStyle(canvas, null);
