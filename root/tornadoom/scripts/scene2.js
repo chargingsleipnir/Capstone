@@ -8,11 +8,8 @@ function BuildScene2(scene) {
     var MAX_COWS = 10;
 
     for(var i = 0; i < MAX_COWS; i++ ) {
-        cows[i] = new GameObject('cow' + i, Labels.movable);
-        cows[i].SetModel(GameMngr.assets.models['cow']);
-        cows[i].mdlHdlr.SetTexture(GameMngr.assets.textures['cowTex'], TextureFilters.linear);
-        cows[i].trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
-        cows[i].trfmLocal.SetPosAxes(3.0, 0.0, -i * 3);
+        cows[i] = new Cow();
+        cows[i].obj.trfmLocal.TranslateAxes(3.0, 0.0, -i * 3);
     }
 
     function Start() {
@@ -27,7 +24,7 @@ function BuildScene2(scene) {
     }
 
     for(var i = 0; i < MAX_COWS; i++ )
-        scene.Add(cows[i]);
+        scene.Add(cows[i].obj);
 
     scene.SetCallbacks(Start, Update, End);
 }

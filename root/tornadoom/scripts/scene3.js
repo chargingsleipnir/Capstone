@@ -24,7 +24,6 @@ function BuildScene3(scene, skyBoxObj) {
         balls[i].trfmLocal.SetPosVec3(startPositions[i]);
 
         balls[i].AddComponent(Components.collisionBody);
-        //balls[i].collider.SetBoundingShape(BoundingShapes.aabb);
 
         balls[i].AddComponent(Components.rigidBody);
         ImpulseBallBehaviour(balls[i]);

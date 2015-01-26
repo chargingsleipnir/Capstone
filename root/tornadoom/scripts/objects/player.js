@@ -11,6 +11,10 @@ function Player() {
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
     this.obj.AddChild(modelObj);
 
+    this.obj.AddComponent(Components.collisionBody);
+    this.obj.collider.ResizeBoundingShapes(modelObj.shape);
+    this.obj.collider.SetTier2Shape(BoundingShapes.cylinder);
+
     // Add particle effects
     this.obj.AddComponent(Components.particleSystem);
 

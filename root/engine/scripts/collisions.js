@@ -10,14 +10,10 @@ function CollisionBody(shapeData, trfm) {
     this.trfm = trfm;
     this.shapeData = shapeData;
 
+    // Sphere is first tier of detection
     this.sphere = new Sphere(this.trfm.pos, shapeData.radius);
-    this.aabb = new AABB(this.trfm.pos, shapeData.radii);
-
-    // Sphere set as standard
-    //this.activeShape = this.sphere;
-
-    // Intentionally left this blank to bypass condition checks
-    //this.SetBoundingShape();
+    // AABB is second tier of detection off the start
+    this.tier2Shape = new AABB(this.trfm.pos, shapeData.radii);
 
     this.active = true;
     this.detectOnly = true;
@@ -36,14 +32,29 @@ CollisionBody.prototype = {
         this.rigidBody = rigidBody;
         this.detectOnly = false;
     },
+    SetTier2Shape: function(shape) {
+        if(shape == BoundingShapes.aabb) {
+
+        }
+        else if(shape == BoundingShapes.orientedBB) {
+            this.tier2Shape = new OrientedBB();
+        }
+        else if(shape == BoundingShapes.cylinder) {
+            this.tier2Shape = new Cylinder();
+        }
+    },
+    ResizeBoundingShapes: function(shapeData) {
+        this.shapeData = shapeData;
+        this.sphere.radius = shapeData.radius;
+    },
     /* Restricting ability to choose from various shapes for now, while I implement partitioning and phase systems.
     SetBoundingShape: function(shape) {
 
         var index = GameMngr.models.indexOf(this.activeFrame);
 
-        if (shape == BoundingShapes.aabb) {
-            this.activeShape = this.aabb;
-            GameMngr.models[index] = this.activeFrame = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
+        if (shape == BoundingShapes.tier2Shape) {
+            this.activeShape = this.tier2Shape;
+            GameMngr.models[index] = this.activeFrame = new ModelHandler(new Primitives.Cube(this.tier2Shape.radii, false), this.shapeData);
         }
         else if (shape == BoundingShapes.sphere) {
             this.activeShape = this.sphere;
@@ -73,10 +84,70 @@ CollisionBody.prototype = {
     },
     Update: function() {
         this.sphere.pos = this.trfm.pos;
-        //this.aabb.pos = this.trfm.pos;
+        //this.tier2Shape.pos = this.trfm.pos;
         var mostScale = this.trfm.GetLargestScaleValue();
         this.sphere.radius = this.shapeData.radius * mostScale;
-        //this.aabb.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
+        //this.tier2Shape.radii = this.shapeData.radii.GetScaleByVec(this.trfm.scale);
+    }
+};
+
+// The pair of objects to move through the phases of collision checking
+function PotentialContact() {
+    this.body = [];
+}
+
+// Binary Search Tree Node
+function BoundingVolumeNode () {
+    this.children = [];
+    this.parentShape;
+    this.body = null;
+}
+BoundingVolumeNode.prototype = {
+    Isleaf: function() {
+        return this.collider != null;
+    },
+    GetPotentialContactsWith: function(otherNode, contacts, limit) {
+        if(!this.Overlaps(otherNode) || limit == 0)
+            return 0;
+
+        if(this.Isleaf() && otherNode.Isleaf()) {
+            contacts.body[0] = this.body;
+            contacts.body[1] = otherNode.body;
+            return 1;
+        }
+
+        var count = 0;
+        if(otherNode.Isleaf() || (!this.Isleaf() && this.parentShape.GetSize() >= otherNode.parentShape.GetSize())) {
+            // recurse into self
+            count = this.children[0].GetPotentialContactsWith(otherNode, contacts, limit);
+            // Check whether there are enough slots to do the other side too.
+            if(limit > count) {
+                return count + this.children[1].GetPotentialContactsWith(otherNode, contacts + count, limit - count);
+            }
+            else {
+                return count;
+            }
+        }
+        else {
+            // recurse into other node
+            count = this.GetPotentialContactsWith(otherNode.children[0], contacts, limit);
+            // Check whether there are enough slots to do the other side too.
+            if(limit > count) {
+                return count + this.GetPotentialContactsWith(otherNode.children[1], contacts + count, limit - count);
+            }
+            else {
+                return count;
+            }
+        }
+    },
+    GetPotentialContacts: function(contacts, limit) {
+        if(this.Isleaf() || limit == 0)
+            return 0;
+
+        return this.children[0].GetPotentialContactsWith(this.children[1], contacts, limit);
+    },
+    Overlaps: function(otherNode) {
+        return this.body.Overlaps(otherNode.body);
     }
 };
 

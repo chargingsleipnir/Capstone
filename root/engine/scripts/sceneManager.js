@@ -61,7 +61,7 @@ Scene.prototype = {
 
             if(gameObject.collider) {
                 var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), new Transform(Space.global), gameObject.collider.shapeData);
-                //var aabbShell = new ModelHandler(new Primitives.Cube(this.aabb.radii, false), this.shapeData);
+                //var aabbShell = new ModelHandler(new Primitives.Cube(this.tier2Shape.radii, false), this.shapeData);
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
                 this.debug.AddBoundingShell(sphereShell, gameObject.collider.trfm, BoundingShapes.sphere);

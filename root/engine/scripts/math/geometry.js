@@ -529,6 +529,28 @@ Sphere.prototype = {
     }
 };
 
+function Cylinder(pos, radius, axis, halfLength) {
+    /// <signature>
+    ///  <summary>Defined by position and radius</summary>
+    ///  <param name="position" type="Vector3"></param>
+    ///  <param name="radius" type="decimal"></param>
+    ///  <param name="axis" type="Axis">Axis along which the length is defined, where</param>
+    ///  <param name="halfLength" type="decimal"></param>
+    ///  <returns type="Sphere" />
+    /// </signature>
+    /// <signature>
+    ///  <summary>Defined by position, radius, and height</summary>
+    ///  <returns type="Sphere" />
+    /// </signature>
+    this.pos = new Vector3();
+    this.pos.SetCopy(pos || this.pos);
+    this.radius = radius || 1.0;
+    this.halfLength = halfLength || 1.0;
+}
+Cylinder.prototype = {
+
+};
+
 function AABB(pos, radii) {
     /// <signature>
     ///  <summary>Defined by position, radii, and scale</summary>
@@ -628,6 +650,193 @@ AABB.prototype = {
 			(norm.y < 0) ? this.GetMaxCorner().y : this.GetMinCorner().y,
 			(norm.z < 0) ? this.GetMaxCorner().z : this.GetMinCorner().z
 		);
+    },
+    IntersectsSphere: function(sphere) {
+        /// <signature>
+        ///  <summary>Returns false if there is no collision, otherwise returns a Vector3 with the depth of collision into each dimension</summary>
+        ///  <param name="sphere" type="Sphere"></param>
+        ///  <returns type="false or Vector3" />
+        /// </signature>
+        var radiusSqr = sphere.radius * sphere.radius;
+        var out = new Vector3(0.0, 0.0, 0.0);
+        var min = this.GetMinCorner();
+        var max = this.GetMaxCorner();
+
+        if (sphere.pos.x < min.x) {
+            out.x = sphere.pos.x - min.x;
+            radiusSqr -= out.x * out.x;
+        }
+        else if (sphere.pos.x > max.x) {
+            out.x = sphere.pos.x - max.x;
+            radiusSqr -= out.x * out.x;
+        }
+        if (sphere.pos.y < min.y) {
+            out.y = sphere.pos.y - min.y;
+            radiusSqr -= out.y * out.y;
+        }
+        else if (sphere.pos.y > max.y) {
+            out.y = sphere.pos.y - max.y;
+            radiusSqr -= out.y * out.y;
+        }
+        if (sphere.pos.z < min.z) {
+            out.z = sphere.pos.z - min.z;
+            radiusSqr -= out.z * out.z;
+        }
+        else if (sphere.pos.z > max.z) {
+            out.z = sphere.pos.z - max.z;
+            radiusSqr -= out.z * out.z;
+        }
+
+        if(radiusSqr > 0)
+            return out;
+
+        return false;
+    },
+    IntersectsAABB: function(box) {
+        /// <signature>
+        ///  <summary>Returns false if there is no collision, otherwise returns a Vector3 with the depth of collision into each dimension</summary>
+        ///  <param name="box" type="AABB"></param>
+        ///  <returns type="false or Vector3" />
+        /// </signature>
+        var radiiSqr = box.radii.GetDot(box.radii); // Use Dot to get squared components
+        var out = new Vector3(0.0, 0.0, 0.0);
+        var min = this.GetMinCorner();
+        var max = this.GetMaxCorner();
+
+        if (box.pos.x < min.x) {
+            out.x = box.pos.x - min.x;
+            radiiSqr -= out.x * out.x;
+        }
+        else if (box.pos.x > max.x) {
+            out.x = box.pos.x - max.x;
+            radiiSqr -= out.x * out.x;
+        }
+        if (box.pos.y < min.y) {
+            out.y = box.pos.y - min.y;
+            radiiSqr -= out.y * out.y;
+        }
+        else if (box.pos.y > max.y) {
+            out.y = box.pos.y - max.y;
+            radiiSqr -= out.y * out.y;
+        }
+        if (box.pos.z < min.z) {
+            out.z = box.pos.z - min.z;
+            radiiSqr -= out.z * out.z;
+        }
+        else if (box.pos.z > max.z) {
+            out.z = box.pos.z - max.z;
+            radiiSqr -= out.z * out.z;
+        }
+
+        if(radiiSqr > 0)
+            return out;
+
+        return false;
+    }
+};
+
+function OrientedBB(pos, radii, orient) {
+    /// <signature>
+    ///  <summary>Defined by position, radii, and scale</summary>
+    ///  <param name="position" type="Vector3"></param>
+    ///  <param name="radii" type="Vector3"></param>
+    ///  <returns type="AABB" />
+    /// </signature>
+    /// <signature>
+    ///  <summary>Defined by position and radii, which constructs at 0.5 each</summary>
+    ///  <returns type="AABB" />
+    /// </signature>
+    this.pos = new Vector3();
+    this.radii = new Vector3(1.0, 1.0, 1.0);
+    this.orient = new Quaternion();
+
+    if(pos)
+        this.pos.SetCopy(pos);
+    if(radii)
+        this.radii.SetCopy(radii);
+    if(orient)
+        this.orient.SetCopy(orient);
+}
+OrientedBB.prototype = {
+    SetCopy: function(box) {
+        /// <signature>
+        ///  <summary>Create new copy</summary>
+        ///  <param name="box" type="AABB"></param>
+        ///  <returns type="AABB" />
+        /// </signature>
+        this.pos.SetCopy(box.pos);
+        this.radii.SetCopy(box.radii);
+    },
+    GetCopy: function() {
+        /// <signature>
+        ///  <summary>Create new copy of this</summary>
+        ///  <returns type="AABB" />
+        /// </signature>
+        return new AABB(this.pos, this.radii);
+    },
+    SetValues: function(pos, radii) {
+        /// <signature>
+        ///  <summary>Defined by position, radii, and scale</summary>
+        ///  <param name="position" type="Vector3"></param>
+        ///  <param name="radii" type="Vector3"></param>
+        ///  <returns type="AABB" />
+        /// </signature>
+        this.pos.SetCopy(pos);
+        this.radii.SetCopy(radii);
+    },
+    Scale: function(scalar) {
+        /// <signature>
+        ///  <summary>Modify scale value</summary>
+        ///  <param name="scalar" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.radii.SetScaleByVec(scalar);
+    },
+    GetScaled: function(scalar) {
+        /// <signature>
+        ///  <summary>Get radii components times scale factors</summary>
+        ///  <param name="scalar" type="Vector3"></param>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        return this.radii.GetScaleByVec(scalar);
+    },
+    GetMinCorner: function() {
+        /// <signature>
+        ///  <summary>Get the vector representing the lowest valued corner</summary>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        return this.pos.GetSubtract(this.radii);
+    },
+    GetMaxCorner: function() {
+        /// <signature>
+        ///  <summary>Get the vector representing the highest valued corner</summary>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        return this.pos.GetAdd(this.radii);
+    },
+    GetCornerFurthestAlong: function(norm) {
+        /// <signature>
+        ///  <summary>Return the AABB values most in the direction given</summary>
+        ///  <param name="norm" type="Vector3"></param>
+        ///  <returns type="AABB" />
+        /// </signature>
+        return new Vector3(
+            (norm.x > 0) ? this.GetMaxCorner().x : this.GetMinCorner().x,
+            (norm.y > 0) ? this.GetMaxCorner().y : this.GetMinCorner().y,
+            (norm.z > 0) ? this.GetMaxCorner().z : this.GetMinCorner().z
+        );
+    },
+    GetCornerLeastAlong: function(norm) {
+        /// <signature>
+        ///  <summary>Return the AABB values least in the direction given</summary>
+        ///  <param name="norm" type="Vector3"></param>
+        ///  <returns type="AABB" />
+        /// </signature>
+        return Vector3(
+            (norm.x < 0) ? this.GetMaxCorner().x : this.GetMinCorner().x,
+            (norm.y < 0) ? this.GetMaxCorner().y : this.GetMinCorner().y,
+            (norm.z < 0) ? this.GetMaxCorner().z : this.GetMinCorner().z
+        );
     },
     IntersectsSphere: function(sphere) {
         /// <signature>
