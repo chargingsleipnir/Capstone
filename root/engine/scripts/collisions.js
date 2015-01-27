@@ -98,26 +98,30 @@ function PotentialContact() {
 
 // Binary Search Tree Node
 function BoundingVolumeNode () {
-    this.children = [];
-    this.parentShape;
-    this.body = null;
+    this.children = []; // 2 other nodes
+    this.volume = null; // The parenting sphere/box
+    this.body = null; // The actual sphere/box collider data
 }
 BoundingVolumeNode.prototype = {
     Isleaf: function() {
-        return this.collider != null;
+        // Only leaves have collision bodies attached
+        return this.body != null;
     },
     GetPotentialContactsWith: function(otherNode, contacts, limit) {
+        // Out if no contact or room to report contacts
         if(!this.Overlaps(otherNode) || limit == 0)
             return 0;
 
+        // If these are both leaf nodes, then we have apotential contact to move to the midphase
         if(this.Isleaf() && otherNode.Isleaf()) {
             contacts.body[0] = this.body;
             contacts.body[1] = otherNode.body;
             return 1;
         }
 
+        // Descend into whichever is not a leaf. If both are branches, go into the largest one
         var count = 0;
-        if(otherNode.Isleaf() || (!this.Isleaf() && this.parentShape.GetSize() >= otherNode.parentShape.GetSize())) {
+        if(otherNode.Isleaf() || (!this.Isleaf() && this.volume.GetSize() >= otherNode.volume.GetSize())) {
             // recurse into self
             count = this.children[0].GetPotentialContactsWith(otherNode, contacts, limit);
             // Check whether there are enough slots to do the other side too.
@@ -141,13 +145,56 @@ BoundingVolumeNode.prototype = {
         }
     },
     GetPotentialContacts: function(contacts, limit) {
+        // Early out if leaf node or if there's no room for contacts
         if(this.Isleaf() || limit == 0)
             return 0;
 
         return this.children[0].GetPotentialContactsWith(this.children[1], contacts, limit);
     },
     Overlaps: function(otherNode) {
+        // Need to make an "Overlaps" method for the shape to be used here.
         return this.body.Overlaps(otherNode.body);
+    },
+    Insert: function(newBody, newVolume) {
+        // If this is a leaf, spawn tw new children and place body in one
+        if(this.Isleaf()) {
+            // Child one is a copy of us
+            this.children[0] = new BoundingVolumeNode(this, this.volume, this.body);
+            // Child two is the new one
+            this.children[1] = new BoundingVolumeNode(this, newVolume, newBody);
+            // Now no longer a leaf
+            this.body = null;
+            this.RecalculateBoundingVolume();
+        }
+        // Otherwise, insert into whichever side would grow the least to incorporate it.
+        else {
+            if(this.children[0].volume.GetGrowth(newVolume) < this.children[1].volume.GetGrowth(newVolume))
+                this.children[0].Insert(newBody, newVolume);
+            else
+                this.children[1].Insert(newBody, newVolume);
+        }
+    },
+    Remove: function() {
+        if(this.parent) {
+            // Find sibling
+            var sibling = (this.parent.children[0] == this) ? parent.children[1] : parent.children[0];
+            // Write data to parent
+            this.parent.volume = sibling.volume;
+            this.parent.body = sibling.body;
+            this.parent.children = sibling.children;
+            // Get rid of sibling
+            sibling = null;
+
+            this.parent.RecalculateBoundingVolume();
+        }
+        if(this.children[0]) {
+            this.children[0].parent = null;
+            this.children[0] = null;
+        }
+        if(this.children[1]) {
+            this.children[1].parent = null;
+            this.children[1] = null;
+        }
     }
 };
 
