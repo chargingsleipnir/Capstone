@@ -250,6 +250,70 @@ function Tri() {
     */
 }
 
+function Circle(pos, radius) {
+    /// <signature>
+    ///  <summary>Defined by position and radius</summary>
+    ///  <param name="position" type="Vector2"></param>
+    ///  <param name="radius" type="decimal"></param>
+    ///  <returns type="Circle" />
+    /// </signature>
+    /// <signature>
+    ///  <summary>Defined by position and radius, which constructs at 0.5</summary>
+    ///  <returns type="Circle" />
+    /// </signature>
+    this.pos = new Vector2();
+    this.pos.SetCopy(pos || this.pos);
+    this.radius = radius || 1.0;
+}
+Circle.prototype = {
+    SetCopy: function(circle) {
+        /// <signature>
+        ///  <summary>Set as exact duplicate</summary>
+        ///  <param name="sphere" type="Sphere"></param>
+        ///  <returns type="Circle" />
+        /// </signature>
+        this.pos = circle.pos.GetCopy();
+        this.radius = circle.radius;
+        return this;
+    },
+    GetCopy: function() {
+        /// <signature>
+        ///  <summary>Get copy of this</summary>
+        ///  <returns type="Circle" />
+        /// </signature>
+        return new Circle(this.pos, this.radius);
+    },
+    SetValues: function(pos, radius) {
+        /// <signature>
+        ///  <summary>Set with given values</summary>
+        ///  <param name="position" type="Vector2"></param>
+        ///  <param name="radius" type="decimal"></param>
+        ///  <returns type="Circle" />
+        /// </signature>
+        this.pos = pos.GetCopy();
+        this.radius = radius;
+        return this;
+    },
+    Scale: function(scalar) {
+        this.radius *= scalar;
+    },
+    GetScaled: function(scalar) {
+        return this.radius * scalar;
+    },
+    IntersectsCircle: function(circle) {
+        var collisionDist = this.pos.GetSubtract(circle.pos);
+        if(collisionDist.GetMagSqr() < Math.pow(this.radius, 2) + Math.pow(circle.radius, 2))
+            return collisionDist;
+        return false;
+    },
+    GetInnerDist: function(circle) {
+        return circle.pos.GetSubtract(this.pos).GetMagSqr() - (Math.pow(circle.radius, 2) + Math.pow(this.radius, 2));
+    },
+    GetGrowth: function(circle) {
+        return circle.pos.GetSubtract(this.pos).GetMagSqr() + circle.radius + this.radius;
+    }
+};
+
 function Rect(posX, posY, radialWidth, radialHeight) {
     /// <signature>
     ///  <summary>Defined by position and radii</summary>
@@ -343,6 +407,39 @@ Rect.prototype = {
             (norm.x < 0) ? this.GetMaxCorner().x : this.GetMinCorner().x,
             (norm.y < 0) ? this.GetMaxCorner().y : this.GetMinCorner().y
         );
+    },
+    IntersectsCircle: function(circle) {
+        /// <signature>
+        ///  <summary>Returns false if there is no collision, otherwise returns a Vector3 with the depth of collision into each dimension</summary>
+        ///  <param name="sphere" type="Sphere"></param>
+        ///  <returns type="false or Vector3" />
+        /// </signature>
+        var radiusSqr = circle.radius * circle.radius;
+        var out = new Vector2(0.0, 0.0);
+        var min = this.GetMinCorner();
+        var max = this.GetMaxCorner();
+
+        if (circle.pos.x < min.x) {
+            out.x = circle.pos.x - min.x;
+            radiusSqr -= out.x * out.x;
+        }
+        else if (circle.pos.x > max.x) {
+            out.x = circle.pos.x - max.x;
+            radiusSqr -= out.x * out.x;
+        }
+        if (circle.pos.y < min.y) {
+            out.y = circle.pos.y - min.y;
+            radiusSqr -= out.y * out.y;
+        }
+        else if (circle.pos.y > max.y) {
+            out.y = circle.pos.y - max.y;
+            radiusSqr -= out.y * out.y;
+        }
+
+        if(radiusSqr > 0)
+            return out;
+
+        return false;
     }
 };
 function WndRect(x, y, w, h) {
@@ -526,10 +623,18 @@ Sphere.prototype = {
         if(collisionDist.GetMagSqr() < Math.pow(this.radius, 2) + Math.pow(sphere.radius, 2))
             return collisionDist;
         return false;
+    },
+    GetInnerDist: function(sphere) {
+        return sphere.pos.GetSubtract(this.pos).GetMagSqr() - (Math.pow(sphere.radius, 2) + Math.pow(this.radius, 2));
     }
+    /*
+    GetGrowth: function(sphere) {
+        return sphere.pos.GetSubtract(this.pos).GetMagSqr() + sphere.radius + this.radius;
+    }
+    */
 };
 
-function Cylinder(pos, radius, axis, halfLength) {
+function Cylinder(pos, radius, normAxis, halfLength) {
     /// <signature>
     ///  <summary>Defined by position and radius</summary>
     ///  <param name="position" type="Vector3"></param>
@@ -545,10 +650,20 @@ function Cylinder(pos, radius, axis, halfLength) {
     this.pos = new Vector3();
     this.pos.SetCopy(pos || this.pos);
     this.radius = radius || 1.0;
+    this.axis = new Vector3(0.0, 1.0, 0.0);
+    if(normAxis) this.axis.SetCopy(normAxis);
     this.halfLength = halfLength || 1.0;
 }
 Cylinder.prototype = {
+    GetPosCentrePnt: function() {
+        return this.pos.GetAddScaled(this.axis, this.halfLength);
+    },
+    GetNegCentrePnt: function() {
+        return this.pos.GetAddScaled(this.axis, -this.halfLength);
+    },
+    Intersects: function(OBB) {
 
+    }
 };
 
 function AABB(pos, radii) {
@@ -735,16 +850,16 @@ AABB.prototype = {
     }
 };
 
-function OrientedBB(pos, radii, orient) {
+function OBB(pos, radii, orient) {
     /// <signature>
     ///  <summary>Defined by position, radii, and scale</summary>
     ///  <param name="position" type="Vector3"></param>
     ///  <param name="radii" type="Vector3"></param>
-    ///  <returns type="AABB" />
+    ///  <returns type="OBB" />
     /// </signature>
     /// <signature>
     ///  <summary>Defined by position and radii, which constructs at 0.5 each</summary>
-    ///  <returns type="AABB" />
+    ///  <returns type="OBB" />
     /// </signature>
     this.pos = new Vector3();
     this.radii = new Vector3(1.0, 1.0, 1.0);
@@ -757,32 +872,34 @@ function OrientedBB(pos, radii, orient) {
     if(orient)
         this.orient.SetCopy(orient);
 }
-OrientedBB.prototype = {
+OBB.prototype = {
     SetCopy: function(box) {
         /// <signature>
         ///  <summary>Create new copy</summary>
-        ///  <param name="box" type="AABB"></param>
-        ///  <returns type="AABB" />
+        ///  <param name="box" type="OBB"></param>
+        ///  <returns type="OBB" />
         /// </signature>
         this.pos.SetCopy(box.pos);
         this.radii.SetCopy(box.radii);
+        this.orient.SetCopy(box.orient);
     },
     GetCopy: function() {
         /// <signature>
         ///  <summary>Create new copy of this</summary>
-        ///  <returns type="AABB" />
+        ///  <returns type="OBB" />
         /// </signature>
-        return new AABB(this.pos, this.radii);
+        return new OBB(this.pos, this.radii, this.orient);
     },
-    SetValues: function(pos, radii) {
+    SetValues: function(pos, radii, orient) {
         /// <signature>
         ///  <summary>Defined by position, radii, and scale</summary>
         ///  <param name="position" type="Vector3"></param>
         ///  <param name="radii" type="Vector3"></param>
-        ///  <returns type="AABB" />
+        ///  <returns type="OBB" />
         /// </signature>
         this.pos.SetCopy(pos);
         this.radii.SetCopy(radii);
+        this.orient.SetCopy(orient);
     },
     Scale: function(scalar) {
         /// <signature>
@@ -805,14 +922,14 @@ OrientedBB.prototype = {
         ///  <summary>Get the vector representing the lowest valued corner</summary>
         ///  <returns type="Vector3" />
         /// </signature>
-        return this.pos.GetSubtract(this.radii);
+        //return this.pos.GetSubtract(this.radii);
     },
     GetMaxCorner: function() {
         /// <signature>
         ///  <summary>Get the vector representing the highest valued corner</summary>
         ///  <returns type="Vector3" />
         /// </signature>
-        return this.pos.GetAdd(this.radii);
+        //return this.pos.GetAdd(this.radii);
     },
     GetCornerFurthestAlong: function(norm) {
         /// <signature>
@@ -838,86 +955,79 @@ OrientedBB.prototype = {
             (norm.z < 0) ? this.GetMaxCorner().z : this.GetMinCorner().z
         );
     },
-    IntersectsSphere: function(sphere) {
-        /// <signature>
-        ///  <summary>Returns false if there is no collision, otherwise returns a Vector3 with the depth of collision into each dimension</summary>
-        ///  <param name="sphere" type="Sphere"></param>
-        ///  <returns type="false or Vector3" />
-        /// </signature>
-        var radiusSqr = sphere.radius * sphere.radius;
-        var out = new Vector3(0.0, 0.0, 0.0);
-        var min = this.GetMinCorner();
-        var max = this.GetMaxCorner();
+    GetClosestPntToPnt: function(pnt) {
+        // Vector between objs
+        var d = pnt.GetSubtract(this.pos);
+        // Rotated axes of box
+        var u = [
+            this.orient.GetMultiplyVec3(VEC3_RIGHT),
+            this.orient.GetMultiplyVec3(VEC3_UP),
+            this.orient.GetMultiplyVec3(VEC3_FWD)
+        ];
+        // half-lengths of box
+        var e = this.radii.GetData();
 
-        if (sphere.pos.x < min.x) {
-            out.x = sphere.pos.x - min.x;
-            radiusSqr -= out.x * out.x;
-        }
-        else if (sphere.pos.x > max.x) {
-            out.x = sphere.pos.x - max.x;
-            radiusSqr -= out.x * out.x;
-        }
-        if (sphere.pos.y < min.y) {
-            out.y = sphere.pos.y - min.y;
-            radiusSqr -= out.y * out.y;
-        }
-        else if (sphere.pos.y > max.y) {
-            out.y = sphere.pos.y - max.y;
-            radiusSqr -= out.y * out.y;
-        }
-        if (sphere.pos.z < min.z) {
-            out.z = sphere.pos.z - min.z;
-            radiusSqr -= out.z * out.z;
-        }
-        else if (sphere.pos.z > max.z) {
-            out.z = sphere.pos.z - max.z;
-            radiusSqr -= out.z * out.z;
+        // Start out result at centre of OBB
+        var out = this.pos.GetData();
+        // For each axis
+        for(var i = 0; i < 3; i++) {
+            // Project d onto axis to get proj dist along that axis
+            var dist = d.GetDot(u[i]);
+            // If dist further than box extents, clamp to the box
+            if(dist > e[i]) dist = e[i];
+            else if(dist < -e[i]) dist = -e[i];
+            // Move dist along axis to get point
+            out[i] += dist * u[i];
         }
 
-        if(radiusSqr > 0)
-            return out;
-
-        return false;
+        return new Vector3(out[0], out[1], out[2]);
     },
-    IntersectsAABB: function(box) {
-        /// <signature>
-        ///  <summary>Returns false if there is no collision, otherwise returns a Vector3 with the depth of collision into each dimension</summary>
-        ///  <param name="box" type="AABB"></param>
-        ///  <returns type="false or Vector3" />
-        /// </signature>
-        var radiiSqr = box.radii.GetDot(box.radii); // Use Dot to get squared components
-        var out = new Vector3(0.0, 0.0, 0.0);
-        var min = this.GetMinCorner();
-        var max = this.GetMaxCorner();
+    GetDistToPntSqr: function(pnt) {
+        // Vector between objs
+        var d = pnt.GetSubtract(this.pos);
+        // Rotated axes of box
+        var u = [
+            this.orient.GetMultiplyVec3(VEC3_RIGHT),
+            this.orient.GetMultiplyVec3(VEC3_UP),
+            this.orient.GetMultiplyVec3(VEC3_FWD)
+        ];
+        // half-lengths of box
+        var e = this.radii.GetData();
 
-        if (box.pos.x < min.x) {
-            out.x = box.pos.x - min.x;
-            radiiSqr -= out.x * out.x;
-        }
-        else if (box.pos.x > max.x) {
-            out.x = box.pos.x - max.x;
-            radiiSqr -= out.x * out.x;
-        }
-        if (box.pos.y < min.y) {
-            out.y = box.pos.y - min.y;
-            radiiSqr -= out.y * out.y;
-        }
-        else if (box.pos.y > max.y) {
-            out.y = box.pos.y - max.y;
-            radiiSqr -= out.y * out.y;
-        }
-        if (box.pos.z < min.z) {
-            out.z = box.pos.z - min.z;
-            radiiSqr -= out.z * out.z;
-        }
-        else if (box.pos.z > max.z) {
-            out.z = box.pos.z - max.z;
-            radiiSqr -= out.z * out.z;
+        var out = 0.0;
+        // For each axis
+        for(var i = 0; i < 3; i++) {
+            // Project d onto axis to get proj dist along that axis
+            var dist = d.GetDot(u[i]),
+                excess = 0.0;
+            // If dist further than box extents, get the extra amount
+            if(dist > e[i]) excess = dist - e[i];
+            else if(dist < -e[i]) excess = dist + e[i];
+            // Move dist along axis to get point
+            out += excess * excess;
         }
 
-        if(radiiSqr > 0)
-            return out;
-
-        return false;
+        return out;
+        //return this.GetClosestPntToPnt(pnt).SetSubtract(pnt).GetMagSqr();
+    },
+    IntersectsPlane: function(plane) {
+        // Rotated axes of box
+        var u = [
+            this.orient.GetMultiplyVec3(VEC3_RIGHT),
+            this.orient.GetMultiplyVec3(VEC3_UP),
+            this.orient.GetMultiplyVec3(VEC3_FWD)
+        ];
+        // half-lengths of box
+        var e = this.radii.GetData();
+        // Compute the projection interval radius of this onto L(t) = this.pos + t * plane.norm
+        var r =
+            e[0] * Math.abs(plane.norm.GetDot(u[0])) +
+            e[1] * Math.abs(plane.norm.GetDot(u[1])) +
+            e[2] * Math.abs(plane.norm.GetDot(u[2]));
+        // Dist of box pos to plane
+        // Might need to write-out formula, subtracting dist instead?
+        var s = plane.DistanceTo(this.pos);
+        // Intersection occurs when s falls within [-r, r]
+        return Math.abs(s) <= r;
     }
 };

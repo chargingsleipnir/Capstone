@@ -8,10 +8,11 @@ function GameObject(name, label) {
     this.components = [];
     this.loopCalls = [];
 
-    this.shape = new AAShapeData3D();
-
     this.trfmLocal = new Transform(Space.local);
     this.trfmGlobal = new Transform(Space.global);
+
+    this.shape = new AAShapeData3D();
+    this.sphere = new Sphere(this.trfmGlobal.pos, this.shape.radius);
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -101,9 +102,9 @@ GameObject.prototype = {
         // Make sure the correct set of vertices are being centred.
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
+        this.sphere.SetValues(this.trfmGlobal.pos, this.shape.radius);
 
-        this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.shape);
-        this.components.push(this.mdlHdlr);
+        this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.sphere);
     },
     Update: function(trfmParent) {
         /// <signature>
@@ -122,6 +123,12 @@ GameObject.prototype = {
             this.trfmGlobal.SetScaleVec3(this.trfmLocal.scale.GetScaleByVec(trfmParent.scale));
 
             //this.trfmGlobal.IsChanging();
+
+            // Keep bounding sphere updated for accurate frustum culling
+            this.sphere.pos.SetCopy(this.trfmGlobal.pos);
+            // Ideally, I would do a better calculation, applying the scale to the shape radii to determine
+            // a closer-to-accurate radius.
+            this.sphere.radius = this.shape.radius * this.trfmGlobal.GetLargestScaleValue();
         }
         else
             this.trfmGlobal.active = false;

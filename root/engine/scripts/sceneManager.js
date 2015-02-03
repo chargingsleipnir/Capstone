@@ -15,7 +15,16 @@ function Scene(name, sceneType) {
     this.rootObj = new GameObject("Root", Labels.none);
 
     this.debug = new DebugHandler();
+
+    //this.hier = new SphereHierarchyNode(new Sphere(new Vector3(), 1.0), null);
+    //this.hier.children[0] = new SphereHierarchyNode(new Sphere(new Vector3(), 1.0), null);
+    //this.hier.children[1] = new SphereHierarchyNode(new Sphere(new Vector3(), 1.0), null);
+
+    this.allObjs = [];
+    this.sphereHierRootNodes = [];
+    this.drawIndices = [];
     this.models = [];
+
     this.ptclSystems = [];
 
     this.collisionNetwork = new CollisionNetwork();
@@ -44,12 +53,18 @@ Scene.prototype = {
         ///  <summary>Add model handle to render model as part of this scene</summary>
         ///  <param name="gameObject" type="GameObject"></param>
         /// </signature>
+
+        //this.allObjs.push(gameObject);
+        //this.hier.Insert(gameObject.sphere, this.allObjs.indexOf(gameObject));
+
         for(var i = 0; i < gameObject.children.length; i++)
             this.Add(gameObject.children[i]);
         if(!gameObject.parent || gameObject.parent.name == "Root")
             this.rootObj.AddChild(gameObject);
-        if(gameObject.mdlHdlr)
+        if(gameObject.mdlHdlr) {
             this.models.push(gameObject.mdlHdlr);
+            //this.drawHier.Insert(gameObject.sphere, gameObject.mdlHdlr);
+        }
         if(gameObject.collider)
             this.collisionNetwork.AddBody(gameObject.collider);
         if(gameObject.ptclSys)
@@ -57,10 +72,10 @@ Scene.prototype = {
 
         if(DebugMngr.active) {
             var axesLengths = gameObject.shape.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
-            this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.trfmGlobal, gameObject.shape));
+            this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.trfmGlobal, gameObject.sphere));
 
             if(gameObject.collider) {
-                var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), new Transform(Space.global), gameObject.collider.shapeData);
+                var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), new Transform(Space.global), gameObject.collider.sphere);
                 //var aabbShell = new ModelHandler(new Primitives.Cube(this.tier2Shape.radii, false), this.shapeData);
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);

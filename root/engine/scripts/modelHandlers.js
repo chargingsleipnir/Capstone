@@ -1,12 +1,11 @@
 ﻿
 /******************* MODELS *************************/
 
-function ModelHandler(model, trfm, shapeData) {
+function ModelHandler(model, trfm, sphere) {
     //console.log("\n*****" + model.name + "*****\n");
 
     // Decide whether to draw with Elements or not
     this.vertData = ModelUtils.SelectVAOData(model.vertices);
-    this.shapeData = shapeData;
 
     // Create Buffer
     this.bufferData = new BufferData();
@@ -31,7 +30,7 @@ function ModelHandler(model, trfm, shapeData) {
     this.active = true;
 
     // This is specifically set this way for frustum culling. No need to be more dynamic
-    this.drawSphere = new Sphere(shapeData.centre, shapeData.radius);
+    this.drawSphere = sphere;
     this.trfm = trfm;
 
     // Hold just indices for now, so as to rewrite if necessary, to create wire frames
@@ -69,11 +68,6 @@ ModelHandler.prototype = {
     },
     RewriteVerts: function(vertArray) {
         GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
-    },
-    Update: function() {
-        // Keep bounding sphere updated for accurate frustum culling
-        this.drawSphere.pos.SetCopy(this.trfm.pos);
-        this.drawSphere.radius = this.shapeData.radius * this.trfm.GetLargestScaleValue();
     }
 };
 

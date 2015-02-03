@@ -11,9 +11,17 @@ function Player() {
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
     this.obj.AddChild(modelObj);
 
+    // Tornado collisions
     this.obj.AddComponent(Components.collisionBody);
     this.obj.collider.ResizeBoundingShapes(modelObj.shape);
     this.obj.collider.SetTier2Shape(BoundingShapes.cylinder);
+
+    function ObjInRange(obj) {
+        console.log("Detecting obj: ");
+    }
+
+    this.obj.collider.SetDetectionCall(ObjInRange);
+
 
     // Add particle effects
     this.obj.AddComponent(Components.particleSystem);

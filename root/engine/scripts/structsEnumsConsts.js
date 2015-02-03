@@ -147,6 +147,11 @@ function FlatTailEffects() {
     this.alphaEnd = 0.0;
 }
 
+function SceneModels() {
+    this.drawSphere;
+    this.distToCamPlane;
+}
+
 var Time = {
     deltaMilli: 0.0,
     counter: 0.0,

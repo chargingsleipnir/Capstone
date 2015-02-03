@@ -53,14 +53,16 @@ var DebugMngr = {
     frameRateCapture: 0,
     counter: 0,
     Update: function() {
-        if(this.frameRateMsg != null) {
-            this.counter += Time.deltaMilli;
-            if (this.counter > 0.25) {
-                this.counter = 0.0;
-                this.frameRateCapture = Time.fps;
+        if(this.active) {
+            if (this.frameRateMsg != null) {
+                this.counter += Time.deltaMilli;
+                if (this.counter > 0.25) {
+                    this.counter = 0.0;
+                    this.frameRateCapture = Time.fps;
+                }
+                this.frameRateMsg.UpdateMsg("FPS: " + this.frameRateCapture.toString());
+                this.mousePosMsg.UpdateMsg("Mouse x: " + this.mouse.pos.x + ", y: " + this.mouse.pos.y);
             }
-            this.frameRateMsg.UpdateMsg("FPS: " + this.frameRateCapture.toString());
-            this.mousePosMsg.UpdateMsg("Mouse x: " + this.mouse.pos.x + ", y: " + this.mouse.pos.y);
         }
     }
 };
@@ -99,10 +101,6 @@ DebugHandler.prototype =  {
     },
     Update: function () {
         if(DebugMngr.active) {
-            if(DebugMngr.dispOrientAxes) {
-                for (var i = 0; i < this.dispObjs.orientAxes.models.length; i++)
-                    this.dispObjs.orientAxes.models[i].Update();
-            }
             if(DebugMngr.dispShells) {
                 for (var i = 0; i < this.dispObjs.shells.models.length; i++) {
                     this.dispObjs.shells.models[i].trfm.SetPosVec3(this.dispObjs.shells.trfms[i].pos);
@@ -111,7 +109,6 @@ DebugHandler.prototype =  {
                         this.dispObjs.shells.models[i].trfm.SetScaleAxes(radius, radius, radius);
                     }
                     this.dispObjs.shells.models[i].trfm.IsChanging();
-                    this.dispObjs.shells.models[i].Update();
                 }
             }
             if(DebugMngr.dispRays) {
