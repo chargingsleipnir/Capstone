@@ -16,8 +16,9 @@ function Player() {
     this.obj.collider.ResizeBoundingShapes(modelObj.shape);
     this.obj.collider.SetTier2Shape(BoundingShapes.cylinder);
 
-    function ObjInRange(obj) {
-        console.log("Detecting obj: ");
+    function ObjInRange(collider) {
+        // Just testing, tossing them in the air
+        collider.rigidBody.ApplyGravity(VEC3_GRAVITY.GetScaleByNum(-3.0));
     }
 
     this.obj.collider.SetDetectionCall(ObjInRange);

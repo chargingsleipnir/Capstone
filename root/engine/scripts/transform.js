@@ -27,6 +27,30 @@ Transform.prototype = {
         else
             return this.scale.z;
     },
+    SetPosX: function(x) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.x = x;
+        this.active = true;
+    },
+    SetPosY: function(y) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.y = y;
+        this.active = true;
+    },
+    SetPosZ: function(z) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.pos.z = z;
+        this.active = true;
+    },
     SetPosAxes: function(x, y, z) {
         ///  <summary>Set a new position</summary>
         ///  <param name="x" type="decimal"></param>

@@ -110,10 +110,12 @@ CollisionNetwork.prototype = {
                         if (collisionDist) {
 
                             // MID-PHASE DETECTION
-                            var contactPnt = this.colls[i].tier2Shape.Intersects(this.colls[j].tier2Shape);
+                            //var contactPnt = this.colls[i].tier2Shape.Intersects(this.colls[j].tier2Shape);
+                            /*
                             if(contactPnt) {
 
                             }
+                            */
 
                             this.colls[i].DetectionCallback(this.colls[j]);
                             this.colls[j].DetectionCallback(this.colls[i]);

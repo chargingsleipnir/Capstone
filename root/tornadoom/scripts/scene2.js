@@ -18,12 +18,14 @@ function BuildScene2(scene) {
 
     function Start() {
         for(var i = 0; i < MAX_COWS; i++ ) {
-            //cows[i].obj.trfmLocal.SetScaleAxes(3.0, 3.0, 3.0);
+
         }
     }
 
     function Update() {
-
+        for(var i = 0; i < MAX_COWS; i++ ) {
+            cows[i].Update();
+        }
     }
 
     function End() {

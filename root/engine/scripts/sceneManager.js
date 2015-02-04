@@ -20,9 +20,11 @@ function Scene(name, sceneType) {
     //this.hier.children[0] = new SphereHierarchyNode(new Sphere(new Vector3(), 1.0), null);
     //this.hier.children[1] = new SphereHierarchyNode(new Sphere(new Vector3(), 1.0), null);
 
+    /*
     this.allObjs = [];
     this.sphereHierRootNodes = [];
     this.drawIndices = [];
+    */
     this.models = [];
 
     this.ptclSystems = [];

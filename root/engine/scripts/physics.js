@@ -42,6 +42,100 @@ RigidBody.prototype = {
     AddForce: function(force) {
         this.forceAccum.SetAdd(force);
     },
+    ApplyGravity: function(gravity) {
+        if (!this.HasFiniteMass())
+            return;
+        this.forceAccum.SetAdd(gravity.GetScaleByNum(this.GetMass()));
+    },
+    ApplyDrag: function(k1, k2)
+    {
+        var force = this.velFinal.GetCopy();
+
+        var dragCoefficient = force.GetMag();
+        dragCoefficient = (k1 * dragCoefficient) + (k2 * dragCoefficient * dragCoefficient);
+
+        force.SetNormalized();
+        force.SetScaleByNum(-dragCoefficient);
+
+        this.forceAccum.SetAdd(force);
+    },
+    ApplySpring: function(anchor, springConstant, restLength) {
+        var force = this.trfm.pos.GetSubtract(anchor.trfm.pos);
+
+        var mag = force.GetMag();
+        mag -= restLength; // mag = Math.abs(magnitude - restLength); // for anchor in the middle
+        mag *= springConstant;
+
+        force.SetNormalized();
+        force.SetScaleByNum(-mag);
+
+        this.forceAccum.SetAdd(force);
+    },
+    ApplySpring_PullOnly: function(anchor, springConstant, restLength) {
+        var force = this.trfm.pos.GetSubtract(anchor.trfm.pos);
+
+        var mag = force.GetMagSqr();
+        if (mag <= restLength * restLength)
+            return;
+
+        mag = Math.sqrt(mag);
+        mag = springConstant * (mag - restLength);
+
+        force.SetNormalized();
+        force.SetScaleByNum(-mag);
+
+        this.forceAccum.SetAdd(force);
+    },
+    ApplySpring_PushOnly: function(anchor, springConstant, restLength) {
+        var force = this.trfm.pos.GetSubtract(anchor.trfm.pos);
+
+        var mag = force.GetMagSqr();
+        if (mag >= restLength * restLength)
+            return;
+
+        mag = Math.sqrt(mag);
+        mag = springConstant * (mag - restLength);
+
+        force.SetNormalized();
+        force.SetScaleByNum(-mag);
+
+        this.forceAccum.SetAdd(force);
+    },
+    ApplySpring_Stiff_Fake: function(anchorPos, springConstant, dampening) {
+        if (!this.HasFiniteMass())
+            return;
+
+        var pos = this.trfm.pos.GetSubtract(anchorPos);
+
+        var gamma = 0.5 * Math.sqrt(4 * springConstant - dampening * dampening);
+        if (gamma == 0.0)
+            return;
+
+        var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(this.velFinal.GetScaleByNum(1.0 / gamma));
+        var target = pos.GetScaleByNum(Math.cos(gamma * Time.deltaMilli)).SetAdd(c.GetScaleByNum(Math.sin(gamma * Time.deltaMilli)));
+        target.SetScaleByNum(Math.exp(-0.5 * Time.deltaMilli * dampening));
+
+        var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(this.velFinal.GetScaleByNum(Time.deltaMilli));
+
+        this.forceAccum.SetAdd(accel * this.GetMass());
+    },
+    ApplyBuoyancy: function(maxDepth, volume, liquidHeight, liquidDensity) {
+        var depth = this.trfm.pos.y;
+
+        if (depth >= liquidHeight + maxDepth)
+            return;
+
+        var force = new Vector3();
+
+        if (depth <= liquidHeight - maxDepth) {
+            force.y = liquidDensity * volume;
+            this.forceAccum.SetAdd(force);
+            return;
+        }
+
+        force.y = liquidDensity * volume * (depth - maxDepth - liquidHeight) / 2 * maxDepth;
+        this.forceAccum.SetAdd(force);
+    },
     GetNetVelocity: function(rigidBody) {
         return this.velFinal.GetSubtract(rigidBody.velFinal);
     },
@@ -72,8 +166,10 @@ RigidBody.prototype = {
     },
     Update: function() {
 
+        // Add forces this way, one time for the scene, or apply them directly in loop using Apply... methods
         for (var i = 0; i < this.forceGenerators.length; i++) {
-            this.forceGenerators[i].Update(this);
+            if (this.forceGenerators[i].active)
+                this.forceGenerators[i].Update(this);
         }
 
         // ROTATIONAL UPDATE
@@ -112,6 +208,7 @@ var ForceGenerators = {
         ///  <param name="gravity" type="Vector3">Gravitaional acceleration</param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
             if (!rb.HasFiniteMass())
                 return;
@@ -126,6 +223,7 @@ var ForceGenerators = {
         ///  <param name="k2" type="decimal">Quadratic drag coefficient</param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
             var force = rb.velFinal.GetCopy();
 
@@ -149,6 +247,7 @@ var ForceGenerators = {
         ///  <param name="restLength" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
             var force = rb.trfm.pos.GetSubtract(anchor.trfm.pos);
 
@@ -173,6 +272,7 @@ var ForceGenerators = {
         ///  <param name="restLength" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
 
             var force = rb.trfm.pos.GetSubtract(anchor.trfm.pos);
@@ -201,6 +301,7 @@ var ForceGenerators = {
         ///  <param name="restLength" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
             var force = rb.trfm.pos.GetSubtract(anchor.trfm.pos);
 
@@ -228,6 +329,7 @@ var ForceGenerators = {
         ///  <param name="dampening" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
             if (!rb.HasFiniteMass())
                 return;
@@ -256,6 +358,7 @@ var ForceGenerators = {
         ///  <param name="liquidDensity" type="decimal">1000 for water</param>
         ///  <returns type="void" />
         /// </signature>
+        this.active = true;
         this.Update = function(rb) {
             var depth = rb.trfm.pos.y;
 
