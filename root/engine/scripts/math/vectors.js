@@ -92,7 +92,7 @@ Vector2.prototype = {
         this.y += vec2.y;
         return this;
     },
-    GetAdd: function(vec3) {
+    GetAdd: function(vec2) {
         /// <signature>
         ///  <summary>Return this vector plus the passed vector</summary>
         ///  <param name="vec2" type="Vector2"></param>
@@ -144,6 +144,7 @@ Vector2.prototype = {
         /// </signature>
         this.x *= scalar;
         this.y *= scalar;
+        return this;
     },
     GetScaleByNum: function(scalar) {
         /// <signature>
@@ -266,6 +267,12 @@ Vector2.prototype = {
         ///  <returns type="Vector2" />
         /// </signature>
         return (this.GetDistAsVec(point)).SetNormalized();
+    },
+    GetLerp: function(toVec2, t) {
+        return new Vector2(
+            this.x + ((toVec2.x - this.x) * t),
+            this.y + ((toVec2.y - this.y) * t)
+        );
     }
 };
 

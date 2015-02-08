@@ -9,15 +9,18 @@ function RigidBody(trfm, modelRadius) {
     this.modelRadius = modelRadius;
 
     this.active = true;
-    this.velAngularDir = new Vector3();
-    this.velAngularMag = new Vector3();
-    this.velInitial = new Vector3();
-    this.velFinal = new Vector3();
+
+    this.velI = new Vector3();
+    this.velF = new Vector3();
     this.acc = new Vector3();
-    this.torque = new Vector3();
     this.forceAccum = new Vector3();
     this.massInv = 0.0;
     this.dampening = 1.0;
+
+    this.torque = new Vector3();
+    this.angVel = new Vector3();
+    this.angVelMag = new Vector3();
+    this.angDisplace = 0.0;
 
     this.axisOfRotation = new Vector3();
     this.inertiaTensorInv = new Matrix3();
@@ -49,7 +52,7 @@ RigidBody.prototype = {
     },
     ApplyDrag: function(k1, k2)
     {
-        var force = this.velFinal.GetCopy();
+        var force = this.velF.GetCopy();
 
         var dragCoefficient = force.GetMag();
         dragCoefficient = (k1 * dragCoefficient) + (k2 * dragCoefficient * dragCoefficient);
@@ -59,8 +62,8 @@ RigidBody.prototype = {
 
         this.forceAccum.SetAdd(force);
     },
-    ApplySpring: function(anchor, springConstant, restLength) {
-        var force = this.trfm.pos.GetSubtract(anchor.trfm.pos);
+    ApplySpring: function(anchorPos, springConstant, restLength) {
+        var force = this.trfm.pos.GetSubtract(anchorPos);
 
         var mag = force.GetMag();
         mag -= restLength; // mag = Math.abs(magnitude - restLength); // for anchor in the middle
@@ -111,11 +114,11 @@ RigidBody.prototype = {
         if (gamma == 0.0)
             return;
 
-        var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(this.velFinal.GetScaleByNum(1.0 / gamma));
+        var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(this.velF.GetScaleByNum(1.0 / gamma));
         var target = pos.GetScaleByNum(Math.cos(gamma * Time.deltaMilli)).SetAdd(c.GetScaleByNum(Math.sin(gamma * Time.deltaMilli)));
         target.SetScaleByNum(Math.exp(-0.5 * Time.deltaMilli * dampening));
 
-        var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(this.velFinal.GetScaleByNum(Time.deltaMilli));
+        var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(this.velF.GetScaleByNum(Time.deltaMilli));
 
         this.forceAccum.SetAdd(accel * this.GetMass());
     },
@@ -136,21 +139,69 @@ RigidBody.prototype = {
         force.y = liquidDensity * volume * (depth - maxDepth - liquidHeight) / 2 * maxDepth;
         this.forceAccum.SetAdd(force);
     },
+    ApplyTornadoMotion: function(anchorPos, windspeed, c) {
+        // c  = drag coefficient, uses rho, mass density
+        // fv = viscous drag force
+
+        // Combining laminar and turbulent flow
+        var fv = (c * windspeed) + (c * windspeed * windspeed);
+
+        // Get the direction toward the eye or the tornado, and radius
+        var objToEye = new Vector2(anchorPos.x - this.trfm.pos.x, anchorPos.z - this.trfm.pos.z);
+        var radius = objToEye.GetMag();
+        // Finish Normalization
+        objToEye.SetScaleByNum(1.0 / radius);
+
+        // Make sure obj angular velocity never exceeds windspeed
+        var objVelSqr = this.velF.GetMagSqr();
+        var angVel = objVelSqr / (radius * radius);
+        var angVelScalar = 1.0 - (angVel / windspeed);
+
+        // Use the tangential direction to determine linear velocity, scaled by angular velocity max
+        var tanDir = new Vector2(-objToEye.y, objToEye.x);
+        tanDir.SetScaleByNum(fv * angVelScalar); /** This might be better off as an if statement saying not to go any higher than windspeed **/
+
+        /* // Get circular displacement? Need opposite direction vector, or do reverse calculations
+        this.angDisplace = Math.atan2(-eyeToObj.y, eyeToObj.x);
+        if (this.angDisplace < 0) this.angDisplace += Math.PI * 2;
+
+        var arc = windspeed / Time.deltaMilli;
+        var theta = arc / radius;
+        this.angDisplace += theta;
+        */
+
+        // Maybe get the normalized force direction, which is lerp between the tangent to the radius,
+        // and the eye of the funnel, based on the object's velocity relative to the windspeed
+        /*
+        var t = this.velF.GetMagSqr() / (windspeed * windspeed);
+        objToEye.SetNormalized();
+        var force2D = tanDir.GetLerp(objToEye, t);
+        force2D.SetNormalized();
+        force2D.SetScaleByNum(forceScalar);
+        */
+
+        // Set centripetal force;
+        objToEye.SetScaleByNum((this.GetMass() * objVelSqr) / radius);
+
+        // Apply the force to the object
+        var force2D = tanDir.GetAdd(objToEye);
+        this.forceAccum.SetAdd(new Vector3(force2D.x, 0.0, force2D.y));
+    },
     GetNetVelocity: function(rigidBody) {
-        return this.velFinal.GetSubtract(rigidBody.velFinal);
+        return this.velF.GetSubtract(rigidBody.velF);
     },
     SetInertiaTensor: function(radius) {
         this.inertiaTensorInv.SetInertiaTensorSphere(this.GetMass(), radius);
         this.inertiaTensorInv.Invert();
     },
     GetRestitution: function(velPreColl, velPostColl) {
-        var netPreColl = this.velInitial.GetSubtract(velPreColl);
-        var netPostColl = this.velFinal.GetSubtract(velPostColl);
+        var netPreColl = this.velI.GetSubtract(velPreColl);
+        var netPostColl = this.velF.GetSubtract(velPostColl);
         return -netPostColl.SetScaleByVec(netPreColl.SetConjugate()).GetMag();
     },
     CalculateImpulse: function(rigidBody, collisionDist, coefOfRest) {
         collisionDist.SetNormalized();
-        var relative = collisionDist.GetDot(this.velInitial.GetSubtract(rigidBody.velInitial));
+        var relative = collisionDist.GetDot(this.velI.GetSubtract(rigidBody.velI));
         // Calculate impulse
         var numerator = -relative * (coefOfRest + 1.0);
         var denomObj0 = collisionDist.GetDot((this.inertiaTensorInv.MultiplyVec3(this.radiusToPt.GetCross(collisionDist))).GetCross(this.radiusToPt));
@@ -161,8 +212,8 @@ RigidBody.prototype = {
         //this.AddForce(collisionDist.GetScaleByNum(impulse));
         //rigidBody.AddForce(collisionDist.GetScaleByNum(-impulse));
 
-        this.velFinal.SetCopy(this.velInitial.GetAddScaled(collisionDist, impulse * this.massInv));
-        rigidBody.velFinal.SetCopy(rigidBody.velInitial.GetAddScaled(collisionDist, -impulse * rigidBody.massInv));
+        this.velF.SetCopy(this.velI.GetAddScaled(collisionDist, impulse * this.massInv));
+        rigidBody.velF.SetCopy(rigidBody.velI.GetAddScaled(collisionDist, -impulse * rigidBody.massInv));
     },
     Update: function() {
 
@@ -173,27 +224,27 @@ RigidBody.prototype = {
         }
 
         // ROTATIONAL UPDATE
-        //this.axisOfRotation = this.trfm.up.GetCross(this.velFinal);
+        //this.axisOfRotation = this.trfm.up.GetCross(this.velF);
         //this.axisOfRotation.SetNormalized();
-        //this.velAngularMag = this.velFinal.GetMag() / this.modelRadius;
-        //this.velAngularDir = this.axisOfRotation.SetScaleByNum(this.velAngularMag);
-        //this.trfm.SetOrientationAxisAngle(this.velAngularDir, this.velAngularMag);
+        //this.angVelMag = this.velF.GetMag() / this.modelRadius;
+        //this.angVel = this.axisOfRotation.SetScaleByNum(this.angVelMag);
+        //this.trfm.SetOrientationAxisAngle(this.angVel, this.angVelMag);
         //dynObjs[i].qOrientation += (dynObjs[i].vAngularVelocity * dynObjs[i].qOrientation) * qTimeStep;
 
         // LINEAR UPDATE
-        this.velInitial.SetCopy(this.velFinal);
-        //this.trfm.TranslateVec(this.velFinal.GetScaleByNum(Time.deltaMilli));
-        this.trfm.TranslateVec((this.velInitial.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
+        this.velI.SetCopy(this.velF);
+        //this.trfm.TranslateVec(this.velF.GetScaleByNum(Time.deltaMilli));
+        this.trfm.TranslateVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
 
         this.acc.SetZero();
         this.acc.SetAddScaled(this.forceAccum, this.massInv);
         this.forceAccum.SetZero();
 
-        this.velFinal.SetCopy(this.velInitial.GetAddScaled(this.acc, Time.deltaMilli));
-        this.velFinal.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
+        this.velF.SetCopy(this.velI.GetAddScaled(this.acc, Time.deltaMilli));
+        this.velF.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
 
-        if(this.velFinal.GetMagSqr() < INFINITESIMAL)
-            this.velFinal.SetZero();
+        if(this.velF.GetMagSqr() < INFINITESIMAL)
+            this.velF.SetZero();
     }
 };
 
@@ -225,7 +276,7 @@ var ForceGenerators = {
         /// </signature>
         this.active = true;
         this.Update = function(rb) {
-            var force = rb.velFinal.GetCopy();
+            var force = rb.velF.GetCopy();
 
             var dragCoefficient = force.GetMag();
             dragCoefficient = (k1 * dragCoefficient) + (k2 * dragCoefficient * dragCoefficient);
@@ -340,11 +391,11 @@ var ForceGenerators = {
             if (gamma == 0.0)
                 return;
 
-            var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(rb.velFinal.GetScaleByNum(1.0 / gamma));
+            var c = pos.GetScaleByNum(dampening / (2.0 * gamma)).SetAdd(rb.velF.GetScaleByNum(1.0 / gamma));
             var target = pos.GetScaleByNum(Math.cos(gamma * Time.deltaMilli)).SetAdd(c.GetScaleByNum(Math.sin(gamma * Time.deltaMilli)));
             target.SetScaleByNum(Math.exp(-0.5 * Time.deltaMilli * dampening));
 
-            var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(rb.velFinal.GetScaleByNum(Time.deltaMilli));
+            var accel = (target.GetSubtract(pos).SetScaleByNum(1.0 / Time.deltaMilli * Time.deltaMilli)).SetSubtract(rb.velF.GetScaleByNum(Time.deltaMilli));
 
             rb.AddForce(accel * rb.GetMass());
         }

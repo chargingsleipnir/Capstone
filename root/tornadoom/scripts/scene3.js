@@ -73,7 +73,7 @@ function BuildScene3(scene, skyBoxObj) {
 
         for(var i = 0; i < 4; i++) {
             balls[i].trfmLocal.SetPosVec3(startPositions[i]);
-            balls[i].rigidBody.velFinal.SetZero();
+            balls[i].rigidBody.velF.SetZero();
         }
 
         ViewMngr.activeCam.ToDefaultOrientation();

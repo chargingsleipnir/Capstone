@@ -29,7 +29,7 @@ function Cow() {
         // Land and remove gravity force if not needed
         else if(this.obj.trfmGlobal.pos.y < cowHalfHeight) {
             this.obj.trfmLocal.SetPosY(cowHalfHeight);
-            this.obj.rigidBody.velFinal.SetZero();
+            this.obj.rigidBody.velF.y = 0;
             cowGrav.active = false;
         }
     }

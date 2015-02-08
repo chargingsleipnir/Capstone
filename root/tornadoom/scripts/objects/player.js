@@ -16,9 +16,15 @@ function Player() {
     this.obj.collider.ResizeBoundingShapes(modelObj.shape);
     this.obj.collider.SetTier2Shape(BoundingShapes.cylinder);
 
+    // Wind characteristics
+    var massDensity = 1.205;
+
+    var that = this;
     function ObjInRange(collider) {
+        //console.log("Player colliding");
         // Just testing, tossing them in the air
-        collider.rigidBody.ApplyGravity(VEC3_GRAVITY.GetScaleByNum(-3.0));
+        //collider.rigidBody.ApplySpring(that.obj.trfmLocal.pos, 5000, 1.0);
+        collider.rigidBody.ApplyTornadoMotion(that.obj.trfmLocal.pos, 5.0, massDensity);
     }
 
     this.obj.collider.SetDetectionCall(ObjInRange);
