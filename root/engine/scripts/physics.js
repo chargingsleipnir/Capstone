@@ -17,7 +17,7 @@ function RigidBody(trfm, modelRadius) {
     this.massInv = 0.0;
     this.dampening = 1.0;
 
-    this.torque = new Vector3();
+    this.torqueAccum = new Vector3();
     this.angVel = new Vector3();
     this.angVelMag = new Vector3();
     this.angDisplace = 0.0;
@@ -44,6 +44,13 @@ RigidBody.prototype = {
     },
     AddForce: function(force) {
         this.forceAccum.SetAdd(force);
+    },
+    AddTorque: function(torque) {
+        this.torqueAccum.SetAdd(torque);
+    },
+    ClearAccumulators: function() {
+        this.forceAccum.SetZero();
+        this.torqueAccum.SetZero();
     },
     ApplyGravity: function(gravity) {
         if (!this.HasFiniteMass())
@@ -238,7 +245,7 @@ RigidBody.prototype = {
 
         this.acc.SetZero();
         this.acc.SetAddScaled(this.forceAccum, this.massInv);
-        this.forceAccum.SetZero();
+        this.ClearAccumulators();
 
         this.velF.SetCopy(this.velI.GetAddScaled(this.acc, Time.deltaMilli));
         this.velF.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));

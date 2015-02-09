@@ -46,7 +46,7 @@ Quaternion.prototype = {
         this.v.SetValues(x, y, z);
         this.w = w;
     },
-    SetEuler: function(pitch, yaw, roll) {
+    SetFromEuler: function(pitch, yaw, roll) {
         /// <signature>
         ///  <summary>Container for rotation axis and angle, from Euler angles</summary>
         ///  <param name="pitch" type="decimal">in degrees</param>
@@ -57,30 +57,61 @@ Quaternion.prototype = {
         var p = pitch * DEG_TO_RAD,
             y = yaw * DEG_TO_RAD,
             r = roll * DEG_TO_RAD;
-        var sinP = Math.sin(p),
-            sinY = Math.sin(y),
-            sinR = Math.sin(r),
-            cosP = Math.cos(p),
-            cosY = Math.cos(y),
-            cosR = Math.cos(r);
+        var sinP = Math.sin(0.5 * p),
+            sinY = Math.sin(0.5 * y),
+            sinR = Math.sin(0.5 * r),
+            cosP = Math.cos(0.5 * p),
+            cosY = Math.cos(0.5 * y),
+            cosR = Math.cos(0.5 * r);
 
-        /* This is the one I first studied, but seems a little effed
-		this.w = sinP * sinY * sinR + cosP * cosY * cosR;
-		this.v.Set(
-			sinR * cosP * cosY - sinP * sinY * cosR,
-			sinP * cosY * cosR + sinY * sinR * cosP,
-			sinY * cosR * cosP - sinR * sinP * cosY
-        ); */
-
-        // This is still effed
-        this.w = (sinP * sinY * sinR + cosP * cosY * cosR) / 2.0;
+        this.w = sinP * sinY * sinR + cosP * cosY * cosR;
         this.v.SetValues(
+            sinR * cosP * cosY - sinP * sinY * cosR,
             sinP * cosY * cosR + sinY * sinR * cosP,
-			sinY * cosR * cosP - sinR * sinP * cosY,
-			sinR * cosP * cosY - sinP * sinY * cosR
+            sinY * cosR * cosP - sinR * sinP * cosY
         );
 
         return this;
+    },
+    GetEuler: function() {
+        /// <signature>
+        ///  <summary>Container for rotation axis and angle, from Euler angles</summary>
+        ///  <param name="pitch" type="decimal">in degrees</param>
+        ///  <param name="yaw" type="decimal">in degrees</param>
+        ///  <param name="roll" type="decimal">in degrees</param>
+        ///  <returns type="Quaternion" />
+        /// </signature>
+        var r11, r12, r13, r21, r31, r32, r33;
+        var temp;
+
+        var q00 = this.w * this.w,
+            q11 = this.v.x * this.v.x,
+            q22 = this.v.y * this.v.y,
+            q33 = this.v.z * this.v.z;
+
+        r11 = q00 + q11 - q22 - q33;
+        r21 = 2 * (this.v.x * this.v.y + this.w * this.v.z);
+        r31 = 2 * (this.v.x * this.v.z - this.w * this.v.y);
+        r32 = 2 * (this.v.y * this.v.z + this.w * this.v.x);
+        r33 = q00 - q11 - q22 + q33;
+
+        temp = Math.abs(r31);
+        if(temp > 0.999999) {
+            r12 = 2 * (this.v.x * this.v.y - this.w * this.v.z);
+            r13 = 2 * (this.v.x * this.v.z + this.w * this.v.y);
+
+            return new Vector3(
+                RAD_TO_DEG * (-(Math.PI / 2.0) * (r31 / temp)),
+                RAD_TO_DEG * Math.atan2(-r12, -r31 * r13),
+                0.0
+            );
+        }
+
+        return new Vector3(
+            RAD_TO_DEG * Math.asin(-r31),
+            RAD_TO_DEG * Math.atan2(r21, r11),
+            RAD_TO_DEG * Math.atan2(r32, r33)
+        );
     },
     SetFromAxisAngle: function(vec3, thetaDeg) {
         /// <signature>

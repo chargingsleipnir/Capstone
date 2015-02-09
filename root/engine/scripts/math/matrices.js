@@ -341,8 +341,19 @@ Matrix3.prototype = {
             0.0, tensorVal, 0.0,
             0.0, 0.0, tensorVal
         );
+    },
+    SetInertiaTensorCuboid: function(mass, radii) {
+        var twelfthMass = (1.0 / 12.0) * mass,
+            wSqr = Math.pow(radii.x * 2, 2),
+            hSqr = Math.pow(radii.y * 2, 2),
+            dSqr = Math.pow(radii.z * 2, 2);
+        return new Matrix3(
+            twelfthMass * hSqr + twelfthMass * dSqr, 0.0, 0.0,
+            0.0, twelfthMass * wSqr + twelfthMass * dSqr, 0.0,
+            0.0, 0.0, twelfthMass * wSqr + twelfthMass * hSqr
+        );
     }
-}
+};
 
 function Matrix4(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15) {
     /// <signature>

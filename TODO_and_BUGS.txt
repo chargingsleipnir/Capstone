@@ -1,26 +1,15 @@
 TODO
 
 1. Materials - Use other exported properties (mirror, darkness, etc...)
-2. Animations - Investigate how much of a nightmare they may be to export and implement.
-3. Mouse input
-4. Performance info/control - Build temporary html display fields outside of canvas to display pertinant performance info and provide
-   toggle controls for per-fragment lighting, shadow casting, etc.
-5. Provide simple control for offsetting an object's centre of mass/rotation.
-	Set up scene graph - better management of matrices... pertinent to my setup? I think I more-or-less have this now?
-6. Shadow casting
-7. Get some tasks on alternate threads - Look up Web Workers (one page bookmarked in JS reference folder)
-8. Get this thing online, and test all browsers
-9. a) Fix ParticleForceGenerators.Buoancy to take actual submerged volume into account.
-10. Use this for trajectory around Tornado shape:
-	x = tcos(t)
-	y = t
-	z = tsin(t)
+2. Toggle controls for per-fragment lighting, shadow casting, etc.
+3. Shadow casting
+4. Get some tasks on alternate threads - Look up Web Workers (one page bookmarked in JS reference folder)
+5. Get this thing online, and test all browsers
+6. Fix ParticleForceGenerator Buoancy to take actual submerged volume into account.
+7. 3D local rotations
+8. Improve collisions with 2nd tier shapes and spatial partitioning.
 
 BUGS
 
 1. Multiple light sources of the same type - Build this in. This might be finite, as individual lights may require hard-coding.
 2. Objects with many textures - Test how to ensure the right textures end up in the right place.
-4. Continue Fireworks sample
-5. Unless a very good reason for not doing this approaches, make the Particle Force Generators/Registration a part of the ParticlePhysics prototype for each particle
-6. Textured particles do not perfectly emulate camera's rotations. They also need to oppose they rotations of the base object.
-	If they can just be made to always track and turn towards the camera's position... Some Quaternion Lookat()??
