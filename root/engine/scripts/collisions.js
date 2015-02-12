@@ -2,7 +2,7 @@
 function CollisionSphere(objTrfm, radius) {
     Sphere.call(this, objTrfm.pos, radius);
     this.trfm = new Transform(Space.local);
-    this.trfm.pos.SetCopy(objTrfm.pos);
+    this.trfm.pos = objTrfm.pos;
     this.trfm.offsetOrient = objTrfm.orient;
 }
 CollisionSphere.prototype = new Sphere();
@@ -16,14 +16,12 @@ CollisionSphere.prototype.SetPosOffset = function(x, y, z) {
     this.trfm.SetOffsetPosAxes(x, y, z);
 };
 CollisionSphere.prototype.IntersectsSphere = function(sphere) {
-    return this.trfm.pos.GetSubtract(sphere.trfm.pos).GetMagSqr() <= Math.pow(this.GetScaled() + sphere.GetScaled(), 2);
+    return this.pos.GetSubtract(sphere.pos).GetMagSqr() <= Math.pow(this.GetScaled() + sphere.GetScaled(), 2);
 };
 CollisionSphere.prototype.Callback = function(collider){};
 CollisionSphere.prototype.Update = function(objTrfm) {
     var newLocalPos = objTrfm.orient.GetMultiplyVec3(this.trfm.offsetPos);
-    this.pos = this.trfm.pos = newLocalPos.GetAdd(objTrfm.pos);
-
-    //this.pos = this.trfm.pos = trfm.pos.GetAdd(this.trfm.offsetPos);
+    this.pos = newLocalPos.GetAdd(objTrfm.pos);
     this.SetScale(objTrfm.GetLargestScaleValue());
 };
 
@@ -119,6 +117,9 @@ CollisionSystem.prototype = {
     },
     OffsetSpherePosAxes: function(x, y, z) {
         this.collSphere.SetPosOffset(x, y, z);
+    },
+    ScaleSphere: function(scalar) {
+        this.collSphere.radius *= scalar;
     },
     SetOBBCall: function(Callback) {
         /// <signature>
