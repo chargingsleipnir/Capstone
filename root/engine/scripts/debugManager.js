@@ -8,9 +8,12 @@ var DebugMngr = {
     dispGrid: false,
     axes: null,
     grid: null,
+    dispName: "Performance Data",
     SetFullActive: function(active) {
         if(active) this.active = this.dispOrientAxes = this.dispShells = this.dispRays = this.dispAxes = this.dispGrid = true;
         else this.active = this.dispOrientAxes = this.dispShells = this.dispRays = this.dispAxes = this.dispGrid = false;
+
+        GUINetwork.SetActive(this.dispName, active);
     },
     Initialize: function() {
         if(this.active) {
@@ -24,7 +27,7 @@ var DebugMngr = {
             grid.Update(grid.trfmGlobal);
             this.grid = grid.mdlHdlr;
 
-            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), "Performance Data");
+            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), this.dispName);
 
             var style = new MsgBoxStyle();
             style.fontSize = 20;
@@ -43,7 +46,7 @@ var DebugMngr = {
             performanceData.AddGUIObject(this.frameRateMsg);
             performanceData.AddGUIObject(this.mousePosMsg);
 
-            GUINetwork.AddSystem(performanceData, true);
+            GUINetwork.AddSystem(performanceData, false);
 
             Input.RegisterControlScheme("GUIMouseTracking", true, InputTypes.mouse);
             this.mouse = Input.CreateInputController("GUIMouseTracking");
@@ -101,16 +104,6 @@ DebugHandler.prototype =  {
     },
     Update: function () {
         if(DebugMngr.active) {
-            if(DebugMngr.dispShells) {
-                for (var i = 0; i < this.dispObjs.shells.models.length; i++) {
-                    this.dispObjs.shells.models[i].trfm.SetPosVec3(this.dispObjs.shells.trfms[i].pos);
-                    if(this.dispObjs.shells.shapes[i] == BoundingShapes.sphere) {
-                        var radius = this.dispObjs.shells.trfms[i].GetLargestScaleValue();
-                        this.dispObjs.shells.models[i].trfm.SetScaleAxes(radius, radius, radius);
-                    }
-                    this.dispObjs.shells.models[i].trfm.IsChanging();
-                }
-            }
             if(DebugMngr.dispRays) {
                 for (var i = 0; i < this.dispObjs.rayCasts.rays.length; i++) {
                     var newVertData = this.dispObjs.rayCasts.pos[i].GetData();

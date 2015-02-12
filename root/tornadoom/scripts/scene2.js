@@ -1,6 +1,6 @@
 function BuildScene2(scene) {
 
-    scene.light.amb.bright = 0.5;
+    scene.light.amb.bright = 0.8;
     scene.light.dir.bright = 0.75;
     scene.light.dir.dir.SetValues(1.0, -1.0, -1.0);
 

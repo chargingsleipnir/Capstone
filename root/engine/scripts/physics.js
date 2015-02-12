@@ -197,6 +197,12 @@ RigidBody.prototype = {
     GetNetVelocity: function(rigidBody) {
         return this.velF.GetSubtract(rigidBody.velF);
     },
+    OnCollisionHeadingWith: function(rigidBody) {
+        var collisionDist = this.trfm.pos.GetSubtract(rigidBody.trfm.pos);
+        var netVel = this.GetNetVelocity(rigidBody);
+        if (netVel.GetDot(collisionDist) < 0) return true;
+        return false;
+    },
     SetInertiaTensor: function(radius) {
         this.inertiaTensorInv.SetInertiaTensorSphere(this.GetMass(), radius);
         this.inertiaTensorInv.Invert();

@@ -25,9 +25,9 @@ function BuildScene2(scene, playerObj) {
     heart.mdlHdlr.SetTintRGB(-0.2, 0.3, 0.5);
     cube.mdlHdlr.SetTintRGB(0.0, 0.5, 0.5);
 
-    arrow.AddComponent(Components.collisionBody);
-    heart.AddComponent(Components.collisionBody);
-    testCube.AddComponent(Components.collisionBody);
+    arrow.AddComponent(Components.collisionSystem);
+    heart.AddComponent(Components.collisionSystem);
+    testCube.AddComponent(Components.collisionSystem);
 
     playerObj.AddChild(arrow);
     playerObj.AddChild(heart);

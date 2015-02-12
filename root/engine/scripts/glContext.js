@@ -241,7 +241,12 @@ var GL = {
                 //frustumTestCount++;
 
                 this.mtxModel.SetIdentity();
+                // Full/Final translation
                 this.mtxModel.SetTranslateVec3(scene.models[i].trfm.pos);
+                // Offset transformations
+                this.mtxModel.SetRotateAbout(scene.models[i].trfm.offsetOrient.GetAxis(), scene.models[i].trfm.offsetOrient.GetAngle());
+                this.mtxModel.SetTranslateVec3(scene.models[i].trfm.offsetPos);
+                // Base transformations
                 this.mtxModel.SetRotateAbout(scene.models[i].trfm.orient.GetAxis(), scene.models[i].trfm.orient.GetAngle());
                 this.mtxModel.SetScaleVec3(scene.models[i].trfm.scale);
 
@@ -378,7 +383,12 @@ var GL = {
                     }
 
                     this.mtxModel.SetIdentity();
+                    // Full/Final translation
                     this.mtxModel.SetTranslateVec3(dispObjs[i].trfm.pos);
+                    // Offset transformations
+                    this.mtxModel.SetRotateAbout(dispObjs[i].trfm.offsetOrient.GetAxis(), dispObjs[i].trfm.offsetOrient.GetAngle());
+                    this.mtxModel.SetTranslateVec3(dispObjs[i].trfm.offsetPos);
+                    // Base transformations
                     this.mtxModel.SetRotateAbout(dispObjs[i].trfm.orient.GetAxis(), dispObjs[i].trfm.orient.GetAngle());
                     this.mtxModel.SetScaleVec3(dispObjs[i].trfm.scale);
                     this.mtxModel.SetMultiply(mtxVP);
@@ -445,7 +455,13 @@ var GL = {
             var simpleFields = scene.ptclSystems[i].GetSimpleFields();
 
             this.mtxModel.SetIdentity();
+
+            // Full/Final translation
             this.mtxModel.SetTranslateVec3(scene.ptclSystems[i].trfmObj.pos);
+            // Offset transformations
+            this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.offsetOrient.GetAxis(), scene.ptclSystems[i].trfmObj.offsetOrient.GetAngle());
+            this.mtxModel.SetTranslateVec3(scene.ptclSystems[i].trfmObj.offsetPos);
+            // Base transformations
             this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.orient.GetAxis(), scene.ptclSystems[i].trfmObj.orient.GetAngle());
             this.mtxModel.SetScaleVec3(scene.ptclSystems[i].trfmObj.scale);
             this.mtxModel.SetMultiply(mtxVP);

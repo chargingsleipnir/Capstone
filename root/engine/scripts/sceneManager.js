@@ -73,12 +73,16 @@ Scene.prototype = {
             this.ptclSystems.push(gameObject.ptclSys);
 
         if(DebugMngr.active) {
-            var axesLengths = gameObject.shape.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
+            var axesLengths = gameObject.shapeData.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
             this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.trfmGlobal, gameObject.sphere));
 
             if(gameObject.collider) {
-                var sphereShell = new ModelHandler(new Primitives.IcoSphere(2, gameObject.collider.sphere.radius), new Transform(Space.global), gameObject.collider.sphere);
-                //var aabbShell = new ModelHandler(new Primitives.Cube(this.tier2Shape.radii, false), this.shapeData);
+                var sphereShell = new ModelHandler(
+                    new Primitives.IcoSphere(2, gameObject.collider.collSphere.radius),
+                    gameObject.collider.collSphere.trfm,
+                    gameObject.collider.collSphere
+                );
+                //var aabbShell = new ModelHandler(new Primitives.Cube(this.collBox.radii, false), this.shapeData);
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
                 this.debug.AddBoundingShell(sphereShell, gameObject.collider.trfm, BoundingShapes.sphere);

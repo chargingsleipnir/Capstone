@@ -12,23 +12,19 @@ function Player() {
     this.obj.AddChild(modelObj);
 
     // Tornado collisions
-    this.obj.AddComponent(Components.collisionBody);
-    this.obj.collider.ResizeBoundingShapes(modelObj.shape);
-    this.obj.collider.SetTier2Shape(BoundingShapes.cylinder);
+    this.obj.AddComponent(Components.collisionSystem);
+    this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
+    this.obj.collider.OffsetSpherePosAxes(1.0, 0.0, -1.0);
+    //modelObj.trfmLocal.offsetOrient = this.obj.trfmLocal.orient;
 
     // Wind characteristics
     var massDensity = 1.205;
-
     var that = this;
     function ObjInRange(collider) {
         //console.log("Player colliding");
-        // Just testing, tossing them in the air
-        //collider.rigidBody.ApplySpring(that.obj.trfmLocal.pos, 5000, 1.0);
-        collider.rigidBody.ApplyTornadoMotion(that.obj.trfmLocal.pos, 5.0, massDensity);
+        //collider.rigidBody.ApplyTornadoMotion(that.obj.trfmLocal.pos, 5.0, massDensity);
     }
-
-    this.obj.collider.SetDetectionCall(ObjInRange);
-
+    this.obj.collider.SetSphereCall(ObjInRange);
 
     // Add particle effects
     this.obj.AddComponent(Components.particleSystem);
@@ -58,8 +54,8 @@ function Player() {
 
     // Add controls
     this.obj.AddComponent(Components.camera);
-    this.obj.camera.trfmAxes.SetPosAxes(0.0, 7.5, 7.5);
-    this.obj.camera.trfmAxes.RotateLocalViewX(-30);
+    this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 7.5);
+    this.obj.camera.trfmAxes.RotateLocalViewX(-15);
     ViewMngr.SetActiveCamera(this.obj.camera);
 
 
@@ -87,10 +83,6 @@ function Player() {
             angle = 0.0;
 
         this.ctrl.Update();
-
-        // Player controls
-        //this.obj.trfmLocal.SetPosAxes(0.0, 1.0, -angle / 10);
-        //this.obj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 3);
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 

@@ -8,8 +8,8 @@ function Cow() {
     this.obj.SetModel(GameMngr.assets.models['cow']);
     this.obj.mdlHdlr.SetTexture(GameMngr.assets.textures['cowTex'], TextureFilters.linear);
 
-    this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
-    var cowHalfHeight = this.obj.shape.radii.y * this.obj.trfmLocal.scale.y;
+    //this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
+    var cowHalfHeight = this.obj.shapeData.radii.y * this.obj.trfmLocal.scale.y;
     this.obj.trfmLocal.SetPosAxes(0.0, cowHalfHeight, 0);
 
     this.obj.AddComponent(Components.rigidBody);
@@ -18,8 +18,7 @@ function Cow() {
     this.obj.rigidBody.AddForceGenerator(cowGrav);
     cowGrav.active = false;
 
-    this.obj.AddComponent(Components.collisionBody);
-    this.obj.collider.SetTier2Shape(BoundingShapes.orientedBB);
+    this.obj.AddComponent(Components.collisionSystem);
 
     this.Update = function() {
         // Apply gravity when in the air

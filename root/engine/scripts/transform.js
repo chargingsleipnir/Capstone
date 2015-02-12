@@ -5,9 +5,8 @@ function Transform(space) {
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
 
-    //this.offsetPos = Vector3.CreateZero();
-    //this.offsetRot = Vector3.CreateZero();
-    //this.offsetScale = Vector3.CreateOne();
+    this.offsetPos = new Vector3();
+    this.offsetOrient = new Quaternion();
 
     this.active = false;
     this.space = space;
@@ -72,6 +71,27 @@ Transform.prototype = {
         this.pos.SetCopy(pos);
         this.active = true;
     },
+    SetOffsetPosAxes: function(x, y, z) {
+        ///  <summary>Set a new offset position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.offsetPos.x = x;
+        this.offsetPos.y = y;
+        this.offsetPos.z = z;
+        this.active = true;
+    },
+    SetOffsetPosVec3: function(pos) {
+        /// <signature>
+        ///  <summary>Set a new offset position</summary>
+        ///  <param name="position" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.offsetPos.SetCopy(pos);
+        this.active = true;
+    },
     TranslateAxes: function(x, y, z) {
         ///  <summary>Move position by amount given</summary>
         ///  <param name="x" type="decimal"></param>
@@ -124,6 +144,10 @@ Transform.prototype = {
         this.orient.SetCopy(quat);
         this.active = true;
     },
+    SetOffsetRotation: function(quat) {
+        this.offsetOrient.SetCopy(quat);
+        this.active = true;
+    },
     SetOrientAxisAngle: function(axis, thetaDeg) {
         /// <signature>
         ///  <summary>Set Rotation around given axis by given angle</summary>
@@ -148,7 +172,6 @@ Transform.prototype = {
         /// </signature>
         var rotation = new Quaternion();
         this.orient.SetMultiplyQuat(rotation.SetFromAxisAngle(axis, thetaDeg));
-        //this.RotateView(axis, thetaDeg);
         this.active = true;
     },
     SetScaleAxes: function(x, y, z) {

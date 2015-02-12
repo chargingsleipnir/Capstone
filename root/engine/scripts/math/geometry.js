@@ -579,8 +579,8 @@ function Sphere(pos, radius) {
     ///  <summary>Defined by position and radius, which constructs at 0.5</summary>
     ///  <returns type="Sphere" />
     /// </signature>
-    this.pos = new Vector3();
-    this.pos.SetCopy(pos || this.pos);
+    if(pos) this.pos = pos;
+    else this.pos = new Vector3();
     this.radius = radius || 1.0;
 }
 Sphere.prototype = {
@@ -620,12 +620,15 @@ Sphere.prototype = {
     },
     IntersectsSphere: function(sphere) {
         var collisionDist = this.pos.GetSubtract(sphere.pos);
-        if(collisionDist.GetMagSqr() < Math.pow(this.radius, 2) + Math.pow(sphere.radius, 2))
+        return collisionDist.GetMagSqr() <= Math.pow(this.radius + sphere.radius, 2);
+        /*
+        if(collisionDist.GetMagSqr() < Math.pow(this.radius + sphere.radius, 2))
             return collisionDist;
         return false;
+        */
     },
     GetInnerDist: function(sphere) {
-        return sphere.pos.GetSubtract(this.pos).GetMagSqr() - (Math.pow(sphere.radius, 2) + Math.pow(this.radius, 2));
+        return sphere.pos.GetSubtract(this.pos).GetMagSqr() - (Math.pow(sphere.radius + this.radius, 2));
     }
     /*
     GetGrowth: function(sphere) {

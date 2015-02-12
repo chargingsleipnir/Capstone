@@ -23,7 +23,7 @@ function BuildScene3(scene, skyBoxObj) {
         balls[i].mdlHdlr.SetTintRGB(Math.sin(i), Math.cos(i), Math.tan(i));
         balls[i].trfmLocal.SetPosVec3(startPositions[i]);
 
-        balls[i].AddComponent(Components.collisionBody);
+        balls[i].AddComponent(Components.collisionSystem);
 
         balls[i].AddComponent(Components.rigidBody);
         ImpulseBallBehaviour(balls[i]);

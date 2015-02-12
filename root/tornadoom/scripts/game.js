@@ -9,10 +9,11 @@ function BuildGame() {
 
     /********************************** Env. Init */
 
-    // This is temporary, just to view the wold and build scenes easier.
+    // This is temporary, just to view the world and build scenes easier.
     ViewMngr.camera.trfmAxes.SetPosAxes(0.0, 5.0, 0.0);
     ViewMngr.camera.trfmAxes.RotateLocalViewX(-10);
     var camToggle = true;
+    var gizmoToggle = true;
 
     /********************************** Global Input */
 
@@ -25,7 +26,9 @@ function BuildGame() {
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
     var nextSceneBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Enter);
     var menuBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Esc);
-    // Temp camera control
+
+    // Controls for engine display
+    var showGizmos = Input.CreateInputController(gameKeyCtrlName, KeyMap.G);
     var switchCam = Input.CreateInputController(gameKeyCtrlName, KeyMap.C);
 
     /********************************** Main Menu */
@@ -187,15 +190,18 @@ function BuildGame() {
                     if(camToggle) {
                         player.ctrl.SetActive(true);
                         ViewMngr.SetActiveCamera(player.obj.camera);
-                        DebugMngr.SetFullActive(false);
                     }
                     else {
                         player.ctrl.SetActive(false);
                         ViewMngr.SetActiveCamera();
-                        DebugMngr.SetFullActive(true);
                     }
 
                     switchCam.Release();
+                }
+                else if(showGizmos.pressed) {
+                    DebugMngr.SetFullActive(gizmoToggle);
+                    gizmoToggle = !gizmoToggle;
+                    showGizmos.Release();
                 }
             }
         }

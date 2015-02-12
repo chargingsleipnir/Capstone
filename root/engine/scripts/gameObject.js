@@ -11,8 +11,10 @@ function GameObject(name, label) {
     this.trfmLocal = new Transform(Space.local);
     this.trfmGlobal = new Transform(Space.global);
 
-    this.shape = new AAShapeData3D();
-    this.sphere = new Sphere(this.trfmGlobal.pos, this.shape.radius);
+    this.shapeData = new AAShapeData3D();
+    this.sphere = new Sphere(this.trfmGlobal.pos, this.shapeData.radius);
+
+    this.isMoving = false;
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -52,13 +54,13 @@ GameObject.prototype = {
             this.camera = new Camera(this.trfmGlobal);
         }
         else if (component == Components.rigidBody) {
-            this.rigidBody = new RigidBody(this.trfmLocal, this.shape.radius);
+            this.rigidBody = new RigidBody(this.trfmLocal, this.shapeData.radius);
             if(this.collider)
                 this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.rigidBody);
         }
-        else if (component == Components.collisionBody) {
-            this.collider = new CollisionBody(this.shape, this.trfmGlobal);
+        else if (component == Components.collisionSystem) {
+            this.collider = new CollisionSystem(this.shapeData, this.trfmGlobal);
             if(this.rigidBody)
                 this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.collider);
@@ -101,10 +103,14 @@ GameObject.prototype = {
         this.model = model;
         // Make sure the correct set of vertices are being centred.
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
-        this.shape = GeomUtils.GetShapeData3D(vertData.posCoords, true);
-        this.sphere.SetValues(this.trfmGlobal.pos, this.shape.radius);
+        this.shapeData = GeomUtils.GetShapeData3D(vertData.posCoords, true);
+        this.sphere.SetValues(this.trfmGlobal.pos, this.shapeData.radius);
 
         this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.sphere);
+
+        if(this.collisionSystem) {
+            this.collisionSystem.ResizeBoundingShapes(this.shapeData);
+        }
     },
     Update: function(trfmParent) {
         /// <signature>
@@ -122,13 +128,16 @@ GameObject.prototype = {
             this.trfmGlobal.SetRotation(this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient));
             this.trfmGlobal.SetScaleVec3(this.trfmLocal.scale.GetScaleByVec(trfmParent.scale));
 
+            this.trfmGlobal.SetOffsetPosVec3(this.trfmLocal.offsetPos.GetAdd(trfmParent.offsetPos));
+            this.trfmGlobal.SetOffsetRotation(this.trfmLocal.offsetOrient.GetMultiplyQuat(trfmParent.offsetOrient));
+
             //this.trfmGlobal.IsChanging();
 
             // Keep bounding sphere updated for accurate frustum culling
             this.sphere.pos.SetCopy(this.trfmGlobal.pos);
             // Ideally, I would do a better calculation, applying the scale to the shape radii to determine
             // a closer-to-accurate radius.
-            this.sphere.radius = this.shape.radius * this.trfmGlobal.GetLargestScaleValue();
+            this.sphere.radius = this.shapeData.radius * this.trfmGlobal.GetLargestScaleValue();
         }
         else
             this.trfmGlobal.active = false;

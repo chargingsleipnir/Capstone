@@ -161,11 +161,11 @@ var Time = {
 /***** ENUMS *****/
 var DrawMethods = { points: 1, lines: 2, triangles: 3, triangleFan: 4, triangleStrip: 5 };
 var LightModels = { phong: 0, blinnPhong: 1, toon: 2 };
-var Components = { camera: 0, collisionBody: 1, rigidBody: 2, particleSystem: 3 };
+var Components = { camera: 0, collisionSystem: 1, rigidBody: 2, particleSystem: 3 };
 var Labels = { none: 0, testObject: 1, productionEnvironment: 2, light: 3, camera: 4, player: 5, movable: 6 };
 var GUILabels = { container: 0, msg: 1, btn: 2 };
 var Space = { local: 0, global: 1 };
-var BoundingShapes = { sphere: 0, aabb: 1, orientedBB: 2, cylinder: 3 };
+var BoundingShapes = { sphere: 0, aabb: 1, obb: 2, cylinder: 3 };
 var Planes = { left: 0, right: 1, bottom: 2, top: 3, far: 4, near: 5 };
 var MoveMethod = { input: 0, physics: 1, script: 2 };
 var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
