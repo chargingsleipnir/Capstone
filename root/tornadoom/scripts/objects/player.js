@@ -14,7 +14,7 @@ function Player() {
     // Tornado collisions
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
-    this.obj.collider.OffsetSpherePosAxes(1.0, 0.0, -1.0);
+    this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
     //modelObj.trfmLocal.offsetOrient = this.obj.trfmLocal.orient;
 
     // Wind characteristics
@@ -85,6 +85,8 @@ function Player() {
         this.ctrl.Update();
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
+
+        //console.log(this.obj.collider.collSphere.pos.GetData());
 
         if(startPtcls.pressed) {
             ammoVisual.Run();
