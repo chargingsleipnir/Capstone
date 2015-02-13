@@ -13,8 +13,6 @@ function GameObject(name, label) {
 
     this.shapeData = new AAShapeData3D();
     this.sphere = new Sphere(this.trfmGlobal.pos, this.shapeData.radius);
-
-    this.isMoving = false;
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {

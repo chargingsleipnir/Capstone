@@ -864,16 +864,15 @@ function OBB(pos, radii, orient) {
     ///  <summary>Defined by position and radii, which constructs at 0.5 each</summary>
     ///  <returns type="OBB" />
     /// </signature>
-    this.pos = new Vector3();
-    this.radii = new Vector3(1.0, 1.0, 1.0);
-    this.orient = new Quaternion();
 
-    if(pos)
-        this.pos.SetCopy(pos);
-    if(radii)
-        this.radii.SetCopy(radii);
-    if(orient)
-        this.orient.SetCopy(orient);
+    if(pos) this.pos = pos;
+    else this.pos = new Vector3();
+
+    if(radii) this.radii = radii;
+    else this.radii = new Vector3(1.0, 1.0, 1.0);
+
+    if(orient) this.orient = orient;
+    else this.orient = new Quaternion();
 }
 OBB.prototype = {
     SetCopy: function(box) {

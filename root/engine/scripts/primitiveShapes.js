@@ -906,6 +906,63 @@ var Primitives = {
             drawMethod: DrawMethods.triangles
         };
     },
+    WireCube: function (radii) {
+
+        var w, h, d;
+        if(radii) {
+            w = radii.x;
+            h = radii.y;
+            d = radii.z;
+        }
+        else
+            w = h = d = 1.0;
+
+        var posCoords = [
+            -w, h, -d,
+            -w, -h, -d,
+            w, -h, -d,
+            w, h, -d,
+
+            -w, h, d,
+            -w, -h, d,
+            w, -h, d,
+            w, h, d
+        ];
+        var colours = [];
+        for (var i = 0; i < posCoords.length; i += 3) {
+            colours = colours.concat([0.0, 0.0, 0.0, 1.0]);
+        }
+        return {
+            name: "Cube",
+            numTris: 12,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: 8,
+                    posCoords: posCoords,
+                    colElems: colours,
+                    texCoords: [],
+                    normAxes: [],
+                    indices: [
+                        // back
+                        0, 1,   1, 2,   2, 3,   3, 0,
+                        // front
+                        4, 5,   5, 6,   6, 7,   7, 4,
+                        // connections
+                        0, 4,   1, 5,   2, 6,   3, 7
+                    ]
+                },
+                byFaces: {
+                    count: 36,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.lines
+        };
+    },
     IcoSphere: function (recursionLevel, radius) {
         var posCoords = [
             // zy plane, 1:2 size

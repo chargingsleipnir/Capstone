@@ -8,7 +8,7 @@ function Cow() {
     this.obj.SetModel(GameMngr.assets.models['cow']);
     this.obj.mdlHdlr.SetTexture(GameMngr.assets.textures['cowTex'], TextureFilters.linear);
 
-    this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
+    //this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
     var cowHalfHeight = this.obj.shapeData.radii.y * this.obj.trfmLocal.scale.y;
     this.obj.trfmLocal.SetPosAxes(0.0, cowHalfHeight, 0);
 

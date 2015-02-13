@@ -77,15 +77,23 @@ Scene.prototype = {
             this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.trfmGlobal, gameObject.sphere));
 
             if(gameObject.collider) {
+                // Visual for bounding sphere
                 var sphereShell = new ModelHandler(
                     new Primitives.IcoSphere(2, gameObject.collider.collSphere.radius),
                     gameObject.collider.collSphere.trfm,
                     gameObject.collider.collSphere
                 );
-                //var aabbShell = new ModelHandler(new Primitives.Cube(this.collBox.radii, false), this.shapeData);
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
                 this.debug.AddBoundingShell(sphereShell, gameObject.collider.trfm, BoundingShapes.sphere);
+                // Visual for bounding box
+                var boxShell = new ModelHandler(
+                    new Primitives.WireCube(gameObject.collider.collBox.radii),
+                    gameObject.collider.collBox.trfm,
+                    gameObject.sphere
+                );
+                boxShell.SetTintRGB(0.0, 1.0, 1.0);
+                this.debug.AddBoundingShell(boxShell, gameObject.collider.trfm, BoundingShapes.obb);
             }
             if(gameObject.rigidBody) {
                 this.debug.AddRayCast(new RayCastHandler(new Primitives.Ray()), gameObject.rigidBody.trfm.pos, gameObject.rigidBody.velF);
