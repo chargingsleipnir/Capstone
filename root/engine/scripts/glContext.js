@@ -221,7 +221,7 @@ var GL = {
     RenderJSONModel: function() {
 
     },
-    RenderDebugShapes: function() {
+    RenderBasicShapes: function() {
 
     },
     RenderParticles: function() {
@@ -229,21 +229,6 @@ var GL = {
     },
     RenderGUIElemenets: function() {
 
-    },
-    RenderScene2: function() {
-        /// <signature>
-        ///  <summary>Render every object in the scene</summary>
-        /// </signature>
-        var shdr;
-        var buff;
-
-        // Clear the scene for new draw call
-        this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
-
-        var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
-
-        //var frustumTestCount = 0;
-        var scene = SceneMngr.GetActiveScene();
     },
     RenderScene: function() {
         /// <signature>
