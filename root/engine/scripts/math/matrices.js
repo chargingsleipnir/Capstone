@@ -995,5 +995,15 @@ Matrix4.prototype = {
             (left + right) * lr, (bottom + top) * bt, (near + far) * nf, 1.0
         );
         return this;
+    },
+    Transform: function(trfmData) {
+        // Full/Final translation
+        this.SetTranslateVec3(trfmData.baseTrans);
+        // Offset transformations
+        this.SetRotateAbout(trfmData.offsetRot.GetAxis(), trfmData.offsetRot.GetAngle());
+        this.SetTranslateVec3(trfmData.offsetTrans);
+        // Base transformations
+        this.SetRotateAbout(trfmData.orient.GetAxis(), trfmData.orient.GetAngle());
+        this.SetScaleVec3(trfmData.scale);
     }
-}
+};

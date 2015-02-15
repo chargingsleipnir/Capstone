@@ -146,26 +146,24 @@ RigidBody.prototype = {
         force.y = liquidDensity * volume * (depth - maxDepth - liquidHeight) / 2 * maxDepth;
         this.forceAccum.SetAdd(force);
     },
-    ApplyTornadoMotion: function(anchorPos, windspeed, c) {
+    ApplyTornadoMotion: function(objToEyeVec, objToEyeDistSqr, windspeed, c, drawScalar) {
         // c  = drag coefficient, uses rho, mass density
         // fv = viscous drag force
 
         // Combining laminar and turbulent flow
         var fv = (c * windspeed) + (c * windspeed * windspeed);
 
-        // Get the direction toward the eye or the tornado, and radius
-        var objToEye = new Vector2(anchorPos.x - this.trfm.pos.x, anchorPos.z - this.trfm.pos.z);
-        var radius = objToEye.GetMag();
         // Finish Normalization
-        objToEye.SetScaleByNum(1.0 / radius);
+        var objToEyeDist = Math.sqrt(objToEyeDistSqr);
+        var centripetal = objToEyeVec.GetScaleByNum(1.0 / objToEyeDist);
 
         // Make sure obj angular velocity never exceeds windspeed
         var objVelSqr = this.velF.GetMagSqr();
-        var angVel = objVelSqr / (radius * radius);
+        var angVel = objVelSqr / objToEyeDistSqr;
         var angVelScalar = 1.0 - (angVel / windspeed);
 
         // Use the tangential direction to determine linear velocity, scaled by angular velocity max
-        var tanDir = new Vector2(-objToEye.y, objToEye.x);
+        var tanDir = new Vector2(-centripetal.y, centripetal.x);
         tanDir.SetScaleByNum(fv * angVelScalar); /** This might be better off as an if statement saying not to go any higher than windspeed **/
 
         /* // Get circular displacement? Need opposite direction vector, or do reverse calculations
@@ -188,10 +186,12 @@ RigidBody.prototype = {
         */
 
         // Set centripetal force;
-        objToEye.SetScaleByNum((this.GetMass() * objVelSqr) / radius);
+        centripetal.SetScaleByNum((this.GetMass() * objVelSqr) / objToEyeDist);
+        // Scale for extra draw force
+        centripetal.SetScaleByNum(drawScalar);
 
         // Apply the force to the object
-        var force2D = tanDir.GetAdd(objToEye);
+        var force2D = tanDir.GetAdd(centripetal);
         this.forceAccum.SetAdd(new Vector3(force2D.x, 0.0, force2D.y));
     },
     GetNetVelocity: function(rigidBody) {

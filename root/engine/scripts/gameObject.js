@@ -2,6 +2,7 @@
 function GameObject(name, label) {
     this.name = name;
     this.label = label;
+    this.active = true;
 
     this.parent = null;
     this.children = [];
@@ -57,7 +58,7 @@ GameObject.prototype = {
             this.components.push(this.rigidBody);
         }
         else if (component == Components.collisionSystem) {
-            this.collider = new CollisionSystem(this.shapeData, this.trfmGlobal);
+            this.collider = new CollisionSystem(this.shapeData, this);
             if(this.rigidBody)
                 this.collider.SetRigidBody(this.rigidBody);
             this.components.push(this.collider);
@@ -108,6 +109,16 @@ GameObject.prototype = {
             this.collisionSystem.ResizeBoundingShapes(this.shapeData);
         }
     },
+    MakeInert: function() {
+        this.trfmLocal.SetDefault();
+        if(this.mdlHdlr)
+            this.mdlHdlr.active = false;
+        for (var i in this.components)
+            this.components[i].active = false;
+    },
+    Destroy: function() {
+
+    },
     Update: function(trfmParent) {
         /// <signature>
         ///  <summary>Update all components, children, and their children</summary>
@@ -142,7 +153,8 @@ GameObject.prototype = {
 
         // Put this into movement check? Could work out.
         for (var i in this.components)
-            this.components[i].Update();
+            if(this.components[i].active)
+                this.components[i].Update();
 
         for (var i in this.children) {
             // Have each gameObject hold it's own model matrix, and multiply each childs matrix into it's parents.

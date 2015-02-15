@@ -6,7 +6,7 @@ function Transform(space) {
     this.scale = new Vector3(1.0, 1.0, 1.0);
 
     this.baseTrans = new Vector3();
-    this.baseRot = new Vector3();
+    this.baseRot = new Quaternion();
 
     this.offsetTrans = new Vector3();
     this.offsetRot = new Quaternion();
@@ -19,6 +19,15 @@ Transform.prototype = {
         this.pos.SetZero();
         this.orient.SetIdentity();
         this.scale.SetOne();
+
+        this.baseTrans.SetZero();
+        this.baseRot.SetIdentity();
+
+        this.offsetTrans.SetZero();
+        this.offsetRot.SetIdentity();
+
+        this.UpdatePos();
+
         this.active = true;
     },
     GetLargestScaleValue: function() {

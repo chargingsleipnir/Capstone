@@ -218,6 +218,33 @@ var GL = {
         }
     },
     mtxModel: new Matrix4(),
+    RenderJSONModel: function() {
+
+    },
+    RenderDebugShapes: function() {
+
+    },
+    RenderParticles: function() {
+
+    },
+    RenderGUIElemenets: function() {
+
+    },
+    RenderScene2: function() {
+        /// <signature>
+        ///  <summary>Render every object in the scene</summary>
+        /// </signature>
+        var shdr;
+        var buff;
+
+        // Clear the scene for new draw call
+        this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
+
+        var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
+
+        //var frustumTestCount = 0;
+        var scene = SceneMngr.GetActiveScene();
+    },
     RenderScene: function() {
         /// <signature>
         ///  <summary>Render every object in the scene</summary>
@@ -239,15 +266,9 @@ var GL = {
             if (scene.models[i].active && ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere))
             {
                 //frustumTestCount++;
+
                 this.mtxModel.SetIdentity();
-                // Full/Final translation
-                this.mtxModel.SetTranslateVec3(scene.models[i].trfm.baseTrans);
-                // Offset transformations
-                this.mtxModel.SetRotateAbout(scene.models[i].trfm.offsetRot.GetAxis(), scene.models[i].trfm.offsetRot.GetAngle());
-                this.mtxModel.SetTranslateVec3(scene.models[i].trfm.offsetTrans);
-                // Base transformations
-                this.mtxModel.SetRotateAbout(scene.models[i].trfm.orient.GetAxis(), scene.models[i].trfm.orient.GetAngle());
-                this.mtxModel.SetScaleVec3(scene.models[i].trfm.scale);
+                this.mtxModel.Transform(scene.models[i].trfm);
 
                 // These just allow everything to be better read
                 shdr = scene.models[i].shaderData;
@@ -382,14 +403,7 @@ var GL = {
                     }
 
                     this.mtxModel.SetIdentity();
-                    // Full/Final translation
-                    this.mtxModel.SetTranslateVec3(dispObjs[i].trfm.baseTrans);
-                    // Offset transformations
-                    this.mtxModel.SetRotateAbout(dispObjs[i].trfm.offsetRot.GetAxis(), dispObjs[i].trfm.offsetRot.GetAngle());
-                    this.mtxModel.SetTranslateVec3(dispObjs[i].trfm.offsetTrans);
-                    // Base transformations
-                    this.mtxModel.SetRotateAbout(dispObjs[i].trfm.orient.GetAxis(), dispObjs[i].trfm.orient.GetAngle());
-                    this.mtxModel.SetScaleVec3(dispObjs[i].trfm.scale);
+                    this.mtxModel.Transform(dispObjs[i].trfm);
                     this.mtxModel.SetMultiply(mtxVP);
 
                     // SEND UP UNIFORMS
@@ -454,15 +468,7 @@ var GL = {
             var simpleFields = scene.ptclSystems[i].GetSimpleFields();
 
             this.mtxModel.SetIdentity();
-
-            // Full/Final translation
-            this.mtxModel.SetTranslateVec3(scene.ptclSystems[i].trfmObj.baseTrans);
-            // Offset transformations
-            this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.offsetRot.GetAxis(), scene.ptclSystems[i].trfmObj.offsetRot.GetAngle());
-            this.mtxModel.SetTranslateVec3(scene.ptclSystems[i].trfmObj.offsetTrans);
-            // Base transformations
-            this.mtxModel.SetRotateAbout(scene.ptclSystems[i].trfmObj.orient.GetAxis(), scene.ptclSystems[i].trfmObj.orient.GetAngle());
-            this.mtxModel.SetScaleVec3(scene.ptclSystems[i].trfmObj.scale);
+            this.mtxModel.Transform(scene.ptclSystems[i].trfmObj);
             this.mtxModel.SetMultiply(mtxVP);
 
             // Used to shrink point size

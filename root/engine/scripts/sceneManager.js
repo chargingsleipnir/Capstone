@@ -25,6 +25,8 @@ function Scene(name, sceneType) {
     this.sphereHierRootNodes = [];
     this.drawIndices = [];
     */
+    this.gameObjs = [];
+
     this.models = [];
 
     this.ptclSystems = [];

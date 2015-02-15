@@ -4,6 +4,20 @@
 
 function Player() {
 
+    // Player characteristics
+    var windspeed = 5.0;
+
+    var contactScale = 1.5;
+    var drawScale = 1.0;
+    var captureRadius = 0.75;
+
+    var massMax = 100;
+    var massHeld = 0.0;
+
+    var caughtCows = [];
+    var caughtHayBales = [];
+    var caughtDebris = [];
+
     // Basic player obj visual
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
@@ -14,17 +28,25 @@ function Player() {
     // Tornado collisions
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
-    this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
-    //this.obj.collider.ScaleSphere(2.0);
+    //this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
+    this.obj.collider.ScaleSphere(contactScale);
     //this.obj.collider.OffsetBoxPosAxes(-3.0, 0.0, -3.0);
     //this.obj.collider.ScaleBox(3.0, 0.5, 0.5);
 
     // Wind characteristics
     var massDensity = 1.205;
+
     var that = this;
+    var pos = this.obj.trfmLocal.pos;
     function ObjInRange(collider) {
-        console.log("Player sphere colliding");
-        //collider.rigidBody.ApplyTornadoMotion(that.obj.trfmLocal.pos, 5.0, massDensity);
+        var objToEyeVec = new Vector2(pos.x - collider.trfm.pos.x, pos.z - collider.trfm.pos.z);
+        var objToEyeDistSqr = objToEyeVec.GetMagSqr();
+
+        if(objToEyeDistSqr < captureRadius * captureRadius)
+            Capture(collider.gameObj);
+        else
+            collider.rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
+
     }
     this.obj.collider.SetSphereCall(ObjInRange);
 
@@ -80,13 +102,27 @@ function Player() {
     var stopPtcls = Input.CreateInputController(playerCtrlName, KeyMap.X);
 
 
-    // Twister rotation visual
-    var angle = 0.0;
-
-    this.SwitchControls = function() {
+    // PLAYER METHODS
+    var SwitchControls = function() {
 
     };
+    var Capture = function(gameObj) {
+        switch(gameObj.name) {
+            case 'cow':
+                caughtCows.push(gameObj);
+                gameObj.MakeInert();
+                console.log("Cows captured: " + caughtCows.length);
+                break;
+            case 'hayBale':
+                console.log("Hay bales captured: " + caughtCows.length);
+                break;
+        }
 
+    };
+    this.LevelUp = function() {
+
+    };
+    var angle = 0.0;
     this.Update = function() {
         angle++;
         if(angle > 360.0)

@@ -52,7 +52,7 @@ CollisionBox.prototype.Update = function(objTrfm) {
     this.trfm.SetBaseTransByVec(objTrfm.pos);
 };
 
-function CollisionSystem(shapeData, trfm) {
+function CollisionSystem(shapeData, obj) {
     /// <signature>
     ///  <summary>Add collision body to gameobject</summary>
     ///  <param name="shapeData" type="object">Data container describing the object's relative shapeData</param>
@@ -60,7 +60,9 @@ function CollisionSystem(shapeData, trfm) {
     ///  <returns type="CollisionSystem" />
     /// </signature>
 
-    this.trfm = trfm;
+    this.gameObj = obj;
+
+    this.trfm = obj.trfmGlobal;
 
     // Sphere is first tier of detection
     this.collSphere = new CollisionSphere(this.trfm, shapeData.radius);
