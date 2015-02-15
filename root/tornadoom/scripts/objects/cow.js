@@ -10,7 +10,7 @@ function Cow() {
 
     //this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
     var cowHalfHeight = this.obj.shapeData.radii.y * this.obj.trfmLocal.scale.y;
-    this.obj.trfmLocal.SetPosAxes(0.0, cowHalfHeight, 0);
+    this.obj.trfmLocal.SetBaseTransByAxes(0.0, cowHalfHeight, 0);
 
     this.obj.AddComponent(Components.rigidBody);
     this.obj.rigidBody.SetMass(20.0);
@@ -27,7 +27,7 @@ function Cow() {
         }
         // Land and remove gravity force if not needed
         else if(this.obj.trfmGlobal.pos.y < cowHalfHeight) {
-            this.obj.trfmLocal.SetPosY(cowHalfHeight);
+            this.obj.trfmLocal.SetBaseTransY(cowHalfHeight);
             this.obj.rigidBody.velF.y = 0;
             cowGrav.active = false;
         }

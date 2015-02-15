@@ -17,9 +17,9 @@ function BuildScene2(scene, playerObj) {
     testCube.mdlHdlr.SetTexture(EL.assets.textures['logo'], TextureFilters.linear);
     cube.mdlHdlr.SetTexture(EL.assets.textures['questionBlock'], TextureFilters.linear);
 
-    arrow.trfmLocal.SetPosAxes(5.5, 1.0, -2.5);
-    heart.trfmLocal.SetPosVec3(new Vector3(4.0, 0.5, -1.0));
-    cube.trfmLocal.SetPosVec3(new Vector3(-10.5, 0.0, -20.0));
+    arrow.trfmLocal.SetBaseTransByAxes(5.5, 1.0, -2.5);
+    heart.trfmLocal.SetBaseTransByVec(new Vector3(4.0, 0.5, -1.0));
+    cube.trfmLocal.SetBaseTransByVec(new Vector3(-10.5, 0.0, -20.0));
 
     arrow.mdlHdlr.SetTintRGB(-0.2, 0.3, 0.5);
     heart.mdlHdlr.SetTintRGB(-0.2, 0.3, 0.5);
@@ -98,8 +98,8 @@ function BuildScene2(scene, playerObj) {
 
     function Start() {
         ViewMngr.SetActiveCamera(scene.rootObj.camera);        
-        ViewMngr.activeCam.trfmAxes.SetPosAxes(2.0, 3.0, 15.0);
-        playerObj.trfmLocal.SetPosAxes(10.0, 5.0, -5.0);
+        ViewMngr.activeCam.trfmAxes.SetBaseTransByAxes(2.0, 3.0, 15.0);
+        playerObj.trfmLocal.SetBaseTransByAxes(10.0, 5.0, -5.0);
         GUINetwork.SetActive(hud.name, true);
         angle = 0.01;
         waveringValue = 0.0;
@@ -124,12 +124,12 @@ function BuildScene2(scene, playerObj) {
     }
 
     function End() {
-        playerObj.trfmLocal.SetPosAxes(0.0, 1.0, -5.0);
+        playerObj.trfmLocal.SetBaseTransByAxes(0.0, 1.0, -5.0);
         playerObj.trfmLocal.orient.SetIdentity();
         playerObj.trfmLocal.scale.SetOne();
         testCube.trfmLocal.scale.SetOne();
-        arrow.trfmLocal.SetPosAxes(-0.5, 1.0, -2.5);
-        heart.trfmLocal.SetPosVec3(new Vector3(3.5, 0.5, -1.0));
+        arrow.trfmLocal.SetBaseTransByAxes(-0.5, 1.0, -2.5);
+        heart.trfmLocal.SetBaseTransByVec(new Vector3(3.5, 0.5, -1.0));
 
         GUINetwork.SetActive(hud.name, false);
         timer = 0.0;

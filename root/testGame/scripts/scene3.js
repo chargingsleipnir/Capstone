@@ -21,7 +21,7 @@ function BuildScene3(scene, skyBoxObj) {
         balls[i].SetModel(new Primitives.IcoSphere(2, 1));
         balls[i].mdlHdlr.MakeWireFrame();
         balls[i].mdlHdlr.SetTintRGB(Math.sin(i), Math.cos(i), Math.tan(i));
-        balls[i].trfmLocal.SetPosVec3(startPositions[i]);
+        balls[i].trfmLocal.SetBaseTransByVec(startPositions[i]);
 
         balls[i].AddComponent(Components.collisionSystem);
 
@@ -72,7 +72,7 @@ function BuildScene3(scene, skyBoxObj) {
         DebugMngr.SetFullActive(true);
 
         for(var i = 0; i < 4; i++) {
-            balls[i].trfmLocal.SetPosVec3(startPositions[i]);
+            balls[i].trfmLocal.SetBaseTransByVec(startPositions[i]);
             balls[i].rigidBody.velF.SetZero();
         }
 

@@ -33,16 +33,16 @@ function TopDownController(obj, ctrlName) {
 
         if(active) {
             if (ctrl.moveLeft.pressed) {
-                obj.trfmLocal.TranslateRight(-moveSpeed * Time.deltaMilli);
+                obj.trfmLocal.TranslateBaseRight(-moveSpeed * Time.deltaMilli);
             }
             else if (ctrl.moveRight.pressed) {
-                obj.trfmLocal.TranslateRight(moveSpeed * Time.deltaMilli);
+                obj.trfmLocal.TranslateBaseRight(moveSpeed * Time.deltaMilli);
             }
             if (ctrl.moveForth.pressed) {
-                obj.trfmLocal.TranslateFwd(moveSpeed * Time.deltaMilli);
+                obj.trfmLocal.TranslateBaseFwd(moveSpeed * Time.deltaMilli);
             }
             else if (ctrl.moveBack.pressed) {
-                obj.trfmLocal.TranslateFwd(-moveSpeed * Time.deltaMilli);
+                obj.trfmLocal.TranslateBaseFwd(-moveSpeed * Time.deltaMilli);
             }
             if(ctrl.yawLeft.pressed) {
                 yawAngle++;
@@ -105,16 +105,16 @@ function SnipeController(obj, ctrlName) {
 
         if(active) {
             if (this.ctrl.moveLeft.pressed) {
-                this.obj.trfmLocal.TranslateRight(-moveSpeed * Time.deltaMilli);
+                this.obj.trfmLocal.TranslateBaseRight(-moveSpeed * Time.deltaMilli);
             }
             else if (this.ctrl.moveRight.pressed) {
-                this.obj.trfmLocal.TranslateRight(moveSpeed * Time.deltaMilli);
+                this.obj.trfmLocal.TranslateBaseRight(moveSpeed * Time.deltaMilli);
             }
             if (this.ctrl.moveForth.pressed) {
-                obj.trfmLocal.TranslateFwd(this.moveSpeed * Time.deltaMilli);
+                obj.trfmLocal.TranslateBaseFwd(this.moveSpeed * Time.deltaMilli);
             }
             else if (this.ctrl.moveBack.pressed) {
-                this.obj.trfmLocal.TranslateFwd(-this.moveSpeed * Time.deltaMilli);
+                this.obj.trfmLocal.TranslateBaseFwd(-this.moveSpeed * Time.deltaMilli);
             }
             /*
              if(this.ctrl.pitchUp.pressed) {

@@ -75,11 +75,8 @@ function DebugHandler() {
         orientAxes: {
             models: []
         },
-        // objDirAxes ??
         shells: {
-            models: [],
-            trfms: [],
-            shapes: []
+            models: []
         },
         rayCasts: {
             rays: [],
@@ -92,10 +89,8 @@ DebugHandler.prototype =  {
     AddOrientAxes: function(model) {
         this.dispObjs.orientAxes.models.push(model);
     },
-    AddBoundingShell: function(model, trfm, shape) {
+    AddBoundingShell: function(model) {
         this.dispObjs.shells.models.push(model);
-        this.dispObjs.shells.trfms.push(trfm);
-        this.dispObjs.shells.shapes.push(shape);
     },
     AddRayCast: function(ray, pos, slope) {
         this.dispObjs.rayCasts.rays.push(ray);

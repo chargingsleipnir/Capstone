@@ -14,17 +14,27 @@ function Player() {
     // Tornado collisions
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
-    //this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
-    this.obj.collider.ScaleSphere(2.0);
+    this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
+    //this.obj.collider.ScaleSphere(2.0);
+    //this.obj.collider.OffsetBoxPosAxes(-3.0, 0.0, -3.0);
+    //this.obj.collider.ScaleBox(3.0, 0.5, 0.5);
 
     // Wind characteristics
     var massDensity = 1.205;
     var that = this;
     function ObjInRange(collider) {
-        //console.log("Player colliding");
-        collider.rigidBody.ApplyTornadoMotion(that.obj.trfmLocal.pos, 5.0, massDensity);
+        console.log("Player sphere colliding");
+        //collider.rigidBody.ApplyTornadoMotion(that.obj.trfmLocal.pos, 5.0, massDensity);
     }
     this.obj.collider.SetSphereCall(ObjInRange);
+
+    /*
+    function ObjInFunnel(collider) {
+        console.log("Player box colliding");
+        // remove obj, add to gui
+    }
+    this.obj.collider.SetBoxCall(ObjInFunnel);
+    */
 
     // Add particle effects
     this.obj.AddComponent(Components.particleSystem);
@@ -85,6 +95,9 @@ function Player() {
         this.ctrl.Update();
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
+
+        //console.log(this.obj.collider.collBox.pos.GetData());
+        //console.log(this.obj.mdlHdlr.sphere.pos.GetData());
 
         if(startPtcls.pressed) {
             ammoVisual.Run();

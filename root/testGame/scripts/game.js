@@ -80,7 +80,7 @@ function BuildGame() {
     player.SetModel(GameMngr.assets.models['disc']);
     player.mdlHdlr.SetTexture(GameMngr.assets.textures['discSurface'], TextureFilters.linear);
     player.AddComponent(Components.collisionSystem);
-    player.trfmLocal.SetPosAxes(10.0, 5.0, -5.0);
+    player.trfmLocal.SetBaseTransByAxes(10.0, 5.0, -5.0);
 
     var skyBox = new GameObject('skybox', Labels.testObject);
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));

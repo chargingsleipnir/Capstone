@@ -11,9 +11,9 @@ function BuildScene2(scene) {
         cows[i] = new Cow();
 
         if(i < 10)
-            cows[i].obj.trfmLocal.TranslateAxes(3.0, 0.0, -i * 6);
+            cows[i].obj.trfmLocal.TranslateBaseByAxes(3.0, 0.0, -i * 6);
         else
-            cows[i].obj.trfmLocal.TranslateAxes(-3.0, 0.0, ((-i + (MAX_COWS / 2)) * 6));
+            cows[i].obj.trfmLocal.TranslateBaseByAxes(-3.0, 0.0, ((-i + (MAX_COWS / 2)) * 6));
     }
 
     function Start() {
@@ -26,6 +26,7 @@ function BuildScene2(scene) {
         for(var i = 0; i < MAX_COWS; i++ ) {
             cows[i].Update();
         }
+        //cows[0].obj.trfmLocal.TranslateBaseByAxes(0.001, 0.0, 0.0);
     }
 
     function End() {

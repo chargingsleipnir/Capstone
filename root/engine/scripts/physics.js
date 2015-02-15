@@ -246,8 +246,8 @@ RigidBody.prototype = {
 
         // LINEAR UPDATE
         this.velI.SetCopy(this.velF);
-        //this.trfm.TranslateVec(this.velF.GetScaleByNum(Time.deltaMilli));
-        this.trfm.TranslateVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
+        //this.trfm.TranslateBaseByVec(this.velF.GetScaleByNum(Time.deltaMilli));
+        this.trfm.TranslateBaseByVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
 
         this.acc.SetZero();
         this.acc.SetAddScaled(this.forceAccum, this.massInv);

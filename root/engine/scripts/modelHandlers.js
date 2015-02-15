@@ -1,7 +1,7 @@
 ﻿
 /******************* MODELS *************************/
 
-function ModelHandler(model, trfm, sphere) {
+function ModelHandler(model, trfmGlobal, radius) {
     //console.log("\n*****" + model.name + "*****\n");
 
     // Decide whether to draw with Elements or not
@@ -28,10 +28,9 @@ function ModelHandler(model, trfm, sphere) {
         this.drawMethod = GL.GetDrawMethod(DrawMethods.triangles);
 
     this.active = true;
-
+    this.trfm = trfmGlobal;
     // This is specifically set this way for frustum culling. No need to be more dynamic
-    this.drawSphere = sphere;
-    this.trfm = trfm;
+    this.drawSphere = new Sphere(trfmGlobal.pos, radius);
 
     // Hold just indices for now, so as to rewrite if necessary, to create wire frames
     this.indices = model.vertices.byMesh.indices;

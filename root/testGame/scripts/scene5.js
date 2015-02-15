@@ -13,7 +13,7 @@ function BuildScene5(scene) {
 
     var ptclObj1 = new GameObject('Particle Object 1', Labels.testObject);
     ptclObj1.AddComponent(Components.particleSystem);
-    ptclObj1.trfmLocal.SetPosAxes(0.0, 0.0, 0.0);
+    ptclObj1.trfmLocal.SetBaseTransByAxes(0.0, 0.0, 0.0);
 
     var effects = new PtclPhysicsEffects();
     effects.travelTime = 7.0;
@@ -79,7 +79,7 @@ function BuildScene5(scene) {
 
 
     var ptclObj3 = new GameObject('Particle Object 3', Labels.testObject);
-    ptclObj3.trfmLocal.SetPosAxes(0.0, 10.0, 0.0);
+    ptclObj3.trfmLocal.SetBaseTransByAxes(0.0, 10.0, 0.0);
     ptclObj3.SetModel(new Primitives.IcoSphere(2, 3));
     ptclObj3.mdlHdlr.SetTexture(EL.assets.textures['ice'], TextureFilters.linear);
     ptclObj3.AddComponent(Components.particleSystem);
@@ -115,7 +115,7 @@ function BuildScene5(scene) {
     function Start() {
         Input.SetActive(ctrlName, true);
         ViewMngr.SetActiveCamera(scene.rootObj.camera);
-        ViewMngr.activeCam.trfmAxes.SetPosAxes(0.0, 0.0, 7.5);
+        ViewMngr.activeCam.trfmAxes.SetBaseTransByAxes(0.0, 0.0, 7.5);
 
         ptclObj2.trfmLocal.Rotate(VEC3_FWD, 90);
     }
@@ -149,7 +149,7 @@ function BuildScene5(scene) {
             angle = 0.0;
 
         ptclObj2.trfmLocal.Rotate(VEC3_RIGHT, -0.25);
-        ptclObj2.trfmLocal.SetPosAxes(Math.sin(angle * DEG_TO_RAD) * 10.0, 3.0, Math.cos(angle * DEG_TO_RAD) * 10.0);
+        ptclObj2.trfmLocal.SetBaseTransByAxes(Math.sin(angle * DEG_TO_RAD) * 10.0, 3.0, Math.cos(angle * DEG_TO_RAD) * 10.0);
     }
 
     function End() {

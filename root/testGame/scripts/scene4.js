@@ -17,38 +17,38 @@ function BuildScene4(scene) {
 
     var circleObj = new GameObject('Basic circle', Labels.testObject);
     circleObj.SetModel(new Primitives.Circle(1.0, 30));
-    circleObj.trfmLocal.SetPosAxes(-8.0, 0.0, -5.0);
+    circleObj.trfmLocal.SetBaseTransByAxes(-8.0, 0.0, -5.0);
 
     var heartObj = new GameObject('heart', Labels.testObject);
     heartObj.SetModel(Primitives.heart);
-    heartObj.trfmLocal.SetPosAxes(-5.0, 0.0, -5.0);
+    heartObj.trfmLocal.SetBaseTransByAxes(-5.0, 0.0, -5.0);
 
     var texOnlyObj = new GameObject('textured rect', Labels.testObject);
     texOnlyObj.SetModel(Primitives.RectTextured(new Vector2(1.0, 1.0)));
     texOnlyObj.mdlHdlr.SetTexture(EL.assets.textures['questionBlock'], TextureFilters.linear);
-    texOnlyObj.trfmLocal.SetPosAxes(-2.0, 0.0, -5.0);
+    texOnlyObj.trfmLocal.SetBaseTransByAxes(-2.0, 0.0, -5.0);
 
     var colTexObj = new GameObject('coloured and textured cube', Labels.testObject);
     colTexObj.SetModel(EL.assets.models['dimensionBox']);
     colTexObj.mdlHdlr.SetTexture(EL.assets.textures['logo'], TextureFilters.linear);
-    colTexObj.trfmLocal.SetPosAxes(2.0, 0.0, -5.0);
+    colTexObj.trfmLocal.SetBaseTransByAxes(2.0, 0.0, -5.0);
 
     var litObj = new GameObject('lit cube', Labels.testObject);
     litObj.SetModel(EL.assets.models['litUpCube']);
     litObj.mdlHdlr.SetTintRGB(1.0, 1.0, 1.0);
-    litObj.trfmLocal.SetPosAxes(5.0, 0.0, -5.0);
+    litObj.trfmLocal.SetBaseTransByAxes(5.0, 0.0, -5.0);
 
     var floor = new GameObject('floor', Labels.none);
     floor.SetModel(GameMngr.assets.models['floor']);
-    floor.trfmLocal.SetPosAxes(0.0, -1.5, 0.0);
+    floor.trfmLocal.SetBaseTransByAxes(0.0, -1.5, 0.0);
 
     var tor1 = new GameObject('tornado1', Labels.none);
     tor1.SetModel(GameMngr.assets.models['tornadGoalo01']);
-    tor1.trfmLocal.SetPosAxes(-3.0, 0.0, -2.0);
+    tor1.trfmLocal.SetBaseTransByAxes(-3.0, 0.0, -2.0);
 
     var tor2 = new GameObject('tornado2', Labels.none);
     tor2.SetModel(GameMngr.assets.models['tornadGoalo02']);
-    tor2.trfmLocal.SetPosAxes(2.0, 0.0, -1.0);
+    tor2.trfmLocal.SetBaseTransByAxes(2.0, 0.0, -1.0);
 
     // End testing
 
@@ -59,7 +59,7 @@ function BuildScene4(scene) {
     function Start() {
         Input.SetActive(lightTestScene, true);
         ViewMngr.SetActiveCamera(scene.rootObj.camera);
-        ViewMngr.activeCam.trfmAxes.SetPosAxes(0.0, 0.0, 7.5);
+        ViewMngr.activeCam.trfmAxes.SetBaseTransByAxes(0.0, 0.0, 7.5);
         DebugMngr.SetFullActive(false);
     }
 

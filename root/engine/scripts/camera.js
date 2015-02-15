@@ -217,11 +217,11 @@ Camera.prototype = {
                 // As is in reverse order, translate reversed from the object, then rotate around it, then apply local translation
                 this.mtxCam.SetTranslateVec3(this.trfmAxes.pos.GetNegative());
                 this.mtxCam.SetRotateAbout(this.trfmObj.orient.GetAxis(), -this.trfmObj.orient.GetAngle());
-                this.mtxCam.SetTranslateVec3(this.trfmObj.pos.GetNegative());
+                this.mtxCam.SetTranslateVec3(this.trfmObj.baseTrans.GetNegative());
 
                 // Use the obj orientation to rotate the local cam position to ensure it's correct global positioning
                 var newLocalPos = this.trfmObj.orient.GetMultiplyVec3(this.trfmAxes.pos);
-                this.posGbl.SetCopy(newLocalPos.GetAdd(this.trfmObj.pos));
+                this.posGbl.SetCopy(newLocalPos.GetAdd(this.trfmObj.baseTrans));
 
                 // This ensures that the cam's axis rotations are properly represented, which is, relative to the base object
                 this.mtxCam.SetMultiply((new Matrix4()).SetOrientation(VEC3_ZERO, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global));

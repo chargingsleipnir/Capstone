@@ -147,7 +147,7 @@ function BuildGame() {
     /********************************** Global Objects */
 
     var player = new Player();
-    player.obj.trfmLocal.SetPosAxes(0.0, 1.0, 0.0);
+    player.obj.trfmLocal.SetBaseTransByAxes(0.0, 1.0, 0.0);
 
     /********************************** Scenes */
 

@@ -1,10 +1,9 @@
 ﻿
 // COLLISION SPHERE INHERITS FROM SPHERE
 function CollisionSphere(objTrfm, radius) {
-    Sphere.call(this, objTrfm.pos, radius);
     this.trfm = new Transform(Space.local);
-    this.trfm.pos = objTrfm.pos;
-    this.trfm.offsetOrient = objTrfm.orient;
+    this.trfm.offsetRot = objTrfm.orient;
+    Sphere.call(this, this.trfm.pos, radius);
 }
 CollisionSphere.prototype = new Sphere();
 CollisionSphere.prototype.SetScale = function(scalar) {
@@ -13,26 +12,26 @@ CollisionSphere.prototype.SetScale = function(scalar) {
 CollisionSphere.prototype.GetScaled = function() {
     return this.radius * this.trfm.scale.x;
 };
-CollisionSphere.prototype.SetPosOffset = function(x, y, z) {
-    this.trfm.SetOffsetPosAxes(x, y, z);
+CollisionSphere.prototype.SetOffsetTrans = function(x, y, z) {
+    this.trfm.SetOffsetTransByAxes(x, y, z);
 };
 CollisionSphere.prototype.IntersectsSphere = function(sphere) {
-    return this.pos.GetSubtract(sphere.pos).GetMagSqr() <= Math.pow(this.GetScaled() + sphere.GetScaled(), 2);
+    var radiiSum = this.GetScaled() + sphere.GetScaled();
+    return this.trfm.pos.GetSubtract(sphere.trfm.pos).GetMagSqr() <= radiiSum * radiiSum;
 };
 CollisionSphere.prototype.Callback = function(collider){};
 CollisionSphere.prototype.Update = function(objTrfm) {
-    var newLocalPos = objTrfm.orient.GetMultiplyVec3(this.trfm.offsetPos);
-    this.pos = newLocalPos.GetAdd(objTrfm.pos);
+    // Must update here to make sure local trfm.pos is updated
+    this.trfm.SetBaseTransByVec(objTrfm.pos);
     this.SetScale(objTrfm.GetLargestScaleValue());
 };
 
 // COLLISION BOX INHERITS FROM OBB
 function CollisionBox(objTrfm, radii) {
-    OBB.call(this, objTrfm.pos, radii, objTrfm.orient);
     this.trfm = new Transform(Space.local);
-    this.trfm.pos = objTrfm.pos;
     this.trfm.scale = objTrfm.scale;
-    this.trfm.offsetOrient = objTrfm.orient;
+    this.trfm.offsetRot = objTrfm.orient;
+    OBB.call(this, this.trfm.pos, radii, objTrfm.orient);
 }
 CollisionBox.prototype = new OBB();
 CollisionBox.prototype.SetScale = function(x, y, z) {
@@ -41,16 +40,16 @@ CollisionBox.prototype.SetScale = function(x, y, z) {
 CollisionBox.prototype.GetScaled = function() {
     return this.radii.GetScaleByVec(this.trfm.scale);
 };
-CollisionBox.prototype.SetPosOffset = function(x, y, z) {
-    this.trfm.SetOffsetPosAxes(x, y, z);
+CollisionBox.prototype.SetOffsetTrans = function(x, y, z) {
+    this.trfm.SetOffsetTransByAxes(x, y, z);
 };
 CollisionBox.prototype.IntersectsOBB = function(box) {
 
 };
 CollisionBox.prototype.Callback = function(collider){};
 CollisionBox.prototype.Update = function(objTrfm) {
-    var newLocalPos = objTrfm.orient.GetMultiplyVec3(this.trfm.offsetPos);
-    this.pos = newLocalPos.GetAdd(objTrfm.pos);
+    // Must update here to make sure local trfm.pos is updated
+    this.trfm.SetBaseTransByVec(objTrfm.pos);
 };
 
 function CollisionSystem(shapeData, trfm) {
@@ -62,12 +61,11 @@ function CollisionSystem(shapeData, trfm) {
     /// </signature>
 
     this.trfm = trfm;
-    this.shapeData = shapeData;
 
     // Sphere is first tier of detection
     this.collSphere = new CollisionSphere(this.trfm, shapeData.radius);
     // OBB is second tier of detection off the start
-    this.collBox = new CollisionBox(this.trfm, shapeData.radii);
+    this.collBox = new CollisionBox(this.trfm, shapeData.radii.GetCopy());
 
     this.active = true;
 
@@ -113,9 +111,8 @@ CollisionSystem.prototype = {
     },
     */
     ResizeBoundingShapes: function(shapeData) {
-        this.shapeData = shapeData;
         this.collSphere.radius = shapeData.radius;
-        this.collBox.radii = shapeData.radii;
+        this.collBox.radii.SetCopy(shapeData.radii);
     },
     /* Restricting ability to choose from various shapes for now, while I implement partitioning and phase systems.
     SetBoundingShape: function(shape) {
@@ -145,7 +142,7 @@ CollisionSystem.prototype = {
         this.collSphere.Callback = Callback;
     },
     OffsetSpherePosAxes: function(x, y, z) {
-        this.collSphere.SetPosOffset(x, y, z);
+        this.collSphere.SetOffsetTrans(x, y, z);
     },
     ScaleSphere: function(scalar) {
         this.collSphere.radius *= scalar;
@@ -159,7 +156,7 @@ CollisionSystem.prototype = {
         this.collBox.Callback = Callback;
     },
     OffsetBoxPosAxes: function(x, y, z) {
-        this.collSphere.SetPosOffset(x, y, z);
+        this.collBox.SetOffsetTrans(x, y, z);
     },
     ScaleBox: function(x, y, z) {
         this.collBox.radii.x *= x;

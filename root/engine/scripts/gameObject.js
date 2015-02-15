@@ -12,7 +12,6 @@ function GameObject(name, label) {
     this.trfmGlobal = new Transform(Space.global);
 
     this.shapeData = new AAShapeData3D();
-    this.sphere = new Sphere(this.trfmGlobal.pos, this.shapeData.radius);
 }
 GameObject.prototype = {
     AddChild: function(gameObject) {
@@ -102,9 +101,8 @@ GameObject.prototype = {
         // Make sure the correct set of vertices are being centred.
         var vertData = ModelUtils.SelectVAOData(this.model.vertices);
         this.shapeData = GeomUtils.GetShapeData3D(vertData.posCoords, true);
-        this.sphere.SetValues(this.trfmGlobal.pos, this.shapeData.radius);
 
-        this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.sphere);
+        this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.shapeData.radius);
 
         if(this.collisionSystem) {
             this.collisionSystem.ResizeBoundingShapes(this.shapeData);
@@ -122,20 +120,18 @@ GameObject.prototype = {
             //trfmParent.active = true;
 
             // Update global to pass to children
-            this.trfmGlobal.SetPosVec3(this.trfmLocal.pos.GetAdd(trfmParent.pos));
+            this.trfmGlobal.SetBaseTransByVec(this.trfmLocal.pos.GetAdd(trfmParent.pos));
             this.trfmGlobal.SetRotation(this.trfmLocal.orient.GetMultiplyQuat(trfmParent.orient));
             this.trfmGlobal.SetScaleVec3(this.trfmLocal.scale.GetScaleByVec(trfmParent.scale));
 
-            this.trfmGlobal.SetOffsetPosVec3(this.trfmLocal.offsetPos.GetAdd(trfmParent.offsetPos));
-            this.trfmGlobal.SetOffsetRotation(this.trfmLocal.offsetOrient.GetMultiplyQuat(trfmParent.offsetOrient));
-
-            //this.trfmGlobal.IsChanging();
+            this.trfmGlobal.SetOffsetTransByVec(this.trfmLocal.offsetTrans.GetAdd(trfmParent.offsetTrans));
+            this.trfmGlobal.SetOffsetRotation(this.trfmLocal.offsetRot.GetMultiplyQuat(trfmParent.offsetRot));
 
             // Keep bounding sphere updated for accurate frustum culling
-            this.sphere.pos.SetCopy(this.trfmGlobal.pos);
             // Ideally, I would do a better calculation, applying the scale to the shape radii to determine
             // a closer-to-accurate radius.
-            this.sphere.radius = this.shapeData.radius * this.trfmGlobal.GetLargestScaleValue();
+            if(this.mdlHdlr && this.trfmGlobal.active)
+                this.mdlHdlr.drawSphere.radius = this.shapeData.radius * this.trfmGlobal.GetLargestScaleValue();
         }
         else
             this.trfmGlobal.active = false;
@@ -144,6 +140,7 @@ GameObject.prototype = {
         for (var i in this.loopCalls)
             this.loopCalls[i]();
 
+        // Put this into movement check? Could work out.
         for (var i in this.components)
             this.components[i].Update();
 

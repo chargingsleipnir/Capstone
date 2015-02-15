@@ -73,29 +73,35 @@ Scene.prototype = {
             this.ptclSystems.push(gameObject.ptclSys);
 
         if(DebugMngr.active) {
+            // Visual for quaternion orientation
             var axesLengths = gameObject.shapeData.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
-            this.debug.AddOrientAxes(new ModelHandler(new Primitives.OrientAxes(axesLengths), gameObject.trfmGlobal, gameObject.sphere));
+            this.debug.AddOrientAxes(new ModelHandler(
+                new Primitives.OrientAxes(axesLengths),
+                gameObject.trfmGlobal,
+                gameObject.shapeData.radius)
+            );
 
             if(gameObject.collider) {
                 // Visual for bounding sphere
                 var sphereShell = new ModelHandler(
                     new Primitives.IcoSphere(2, gameObject.collider.collSphere.radius),
                     gameObject.collider.collSphere.trfm,
-                    gameObject.collider.collSphere
+                    gameObject.collider.collSphere.radius
                 );
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
-                this.debug.AddBoundingShell(sphereShell, gameObject.collider.trfm, BoundingShapes.sphere);
+                this.debug.AddBoundingShell(sphereShell);
                 // Visual for bounding box
                 var boxShell = new ModelHandler(
                     new Primitives.WireCube(gameObject.collider.collBox.radii),
                     gameObject.collider.collBox.trfm,
-                    gameObject.sphere
+                    gameObject.collider.collBox.radii.GetMag()
                 );
                 boxShell.SetTintRGB(0.0, 1.0, 1.0);
-                this.debug.AddBoundingShell(boxShell, gameObject.collider.trfm, BoundingShapes.obb);
+                this.debug.AddBoundingShell(boxShell);
             }
             if(gameObject.rigidBody) {
+                // Visual for velocities
                 this.debug.AddRayCast(new RayCastHandler(new Primitives.Ray()), gameObject.rigidBody.trfm.pos, gameObject.rigidBody.velF);
             }
         }

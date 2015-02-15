@@ -579,8 +579,10 @@ function Sphere(pos, radius) {
     ///  <summary>Defined by position and radius, which constructs at 0.5</summary>
     ///  <returns type="Sphere" />
     /// </signature>
-    if(pos) this.pos = pos;
-    else this.pos = new Vector3();
+    if(pos)
+        this.pos = pos;
+    else
+        this.pos = new Vector3();
     this.radius = radius || 1.0;
 }
 Sphere.prototype = {

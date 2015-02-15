@@ -5,8 +5,11 @@ function Transform(space) {
     this.orient = new Quaternion();
     this.scale = new Vector3(1.0, 1.0, 1.0);
 
-    this.offsetPos = new Vector3();
-    this.offsetOrient = new Quaternion();
+    this.baseTrans = new Vector3();
+    this.baseRot = new Vector3();
+
+    this.offsetTrans = new Vector3();
+    this.offsetRot = new Quaternion();
 
     this.active = false;
     this.space = space;
@@ -26,127 +29,139 @@ Transform.prototype = {
         else
             return this.scale.z;
     },
-    SetPosX: function(x) {
+    SetBaseTransX: function(x) {
         ///  <summary>Set a new position</summary>
         ///  <param name="x" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.x = x;
+        this.baseTrans.x = x;
         this.active = true;
+        this.UpdatePos();
     },
-    SetPosY: function(y) {
+    SetBaseTransY: function(y) {
         ///  <summary>Set a new position</summary>
         ///  <param name="x" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.y = y;
+        this.baseTrans.y = y;
         this.active = true;
+        this.UpdatePos();
     },
-    SetPosZ: function(z) {
+    SetBaseTransZ: function(z) {
         ///  <summary>Set a new position</summary>
         ///  <param name="x" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.z = z;
+        this.baseTrans.z = z;
         this.active = true;
+        this.UpdatePos();
     },
-    SetPosAxes: function(x, y, z) {
+    SetBaseTransByAxes: function(x, y, z) {
         ///  <summary>Set a new position</summary>
         ///  <param name="x" type="decimal"></param>
         ///  <param name="y" type="decimal"></param>
         ///  <param name="z" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.x = x;
-        this.pos.y = y;
-        this.pos.z = z;
+        this.baseTrans.SetValues(x, y, z);
         this.active = true;
+        this.UpdatePos();
     },
-    SetPosVec3: function(pos) {
+    SetBaseTransByVec: function(newBaseTrans) {
         /// <signature>
         ///  <summary>Set a new position</summary>
         ///  <param name="position" type="Vector3"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.SetCopy(pos);
+        this.baseTrans.SetCopy(newBaseTrans);
         this.active = true;
+        this.UpdatePos();
     },
-    SetOffsetPosAxes: function(x, y, z) {
+    SetOffsetTransByAxes: function(x, y, z) {
         ///  <summary>Set a new offset position</summary>
         ///  <param name="x" type="decimal"></param>
         ///  <param name="y" type="decimal"></param>
         ///  <param name="z" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.offsetPos.x = x;
-        this.offsetPos.y = y;
-        this.offsetPos.z = z;
+        this.offsetTrans.x = x;
+        this.offsetTrans.y = y;
+        this.offsetTrans.z = z;
         this.active = true;
+        this.UpdatePos();
     },
-    SetOffsetPosVec3: function(pos) {
+    SetOffsetTransByVec: function(pos) {
         /// <signature>
         ///  <summary>Set a new offset position</summary>
         ///  <param name="position" type="Vector3"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.offsetPos.SetCopy(pos);
+        this.offsetTrans.SetCopy(pos);
         this.active = true;
+        this.UpdatePos();
     },
-    TranslateAxes: function(x, y, z) {
+    TranslateBaseByAxes: function(x, y, z) {
         ///  <summary>Move position by amount given</summary>
         ///  <param name="x" type="decimal"></param>
         ///  <param name="y" type="decimal"></param>
         ///  <param name="z" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.x += x;
-        this.pos.y += y;
-        this.pos.z += z;
+        this.baseTrans.x += x;
+        this.baseTrans.y += y;
+        this.baseTrans.z += z;
         this.active = true;
+        this.UpdatePos();
     },
-    TranslateVec: function(translation) {
+    TranslateBaseByVec: function(translation) {
         /// <signature>
         ///  <summary>Move position by amount given</summary>
         ///  <param name="translation" type="Vector3"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.SetAdd(translation);
+        this.baseTrans.SetAdd(translation);
         this.active = true;
+        this.UpdatePos();
     },
-    TranslateFwd: function(speed) {
+    TranslateBaseFwd: function(speed) {
         /// <signature>
         ///  <summary>Move position forward by amount given</summary>
         ///  <param name="speed" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.SetAdd(this.orient.GetMultiplyVec3(VEC3_FWD).GetScaleByNum(speed));
+        this.baseTrans.SetAdd(this.orient.GetMultiplyVec3(VEC3_FWD).GetScaleByNum(speed));
         this.active = true;
+        this.UpdatePos();
     },
-    TranslateUp: function(speed) {
+    TranslateBaseUp: function(speed) {
         /// <signature>
         ///  <summary>Move position forward by amount given</summary>
         ///  <param name="speed" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.SetAdd(this.orient.GetMultiplyVec3(VEC3_UP).GetScaleByNum(speed));
+        this.baseTrans.SetAdd(this.orient.GetMultiplyVec3(VEC3_UP).GetScaleByNum(speed));
         this.active = true;
+        this.UpdatePos();
     },
-    TranslateRight: function(speed) {
+    TranslateBaseRight: function(speed) {
         /// <signature>
         ///  <summary>Move position forward by amount given</summary>
         ///  <param name="speed" type="decimal"></param>
         ///  <returns type="void" />
         /// </signature>
-        this.pos.SetAdd(this.orient.GetMultiplyVec3(VEC3_RIGHT).GetScaleByNum(speed));
+        this.baseTrans.SetAdd(this.orient.GetMultiplyVec3(VEC3_RIGHT).GetScaleByNum(speed));
         this.active = true;
+        this.UpdatePos();
     },
     SetRotation: function(quat) {
         this.orient.SetCopy(quat);
         this.active = true;
+        this.UpdatePos();
     },
     SetOffsetRotation: function(quat) {
-        this.offsetOrient.SetCopy(quat);
+        this.offsetRot.SetCopy(quat);
         this.active = true;
+        this.UpdatePos();
     },
     SetOrientAxisAngle: function(axis, thetaDeg) {
         /// <signature>
@@ -158,10 +173,12 @@ Transform.prototype = {
         this.orient.SetFromAxisAngle(axis, thetaDeg);
         //this.RotateView(axis, thetaDeg);
         this.active = true;
+        this.UpdatePos();
     },
     SetUpdatedOrient: function(normAxis, thetaDeg) {
         this.orient.UpdateAxisAngle(normAxis, thetaDeg);
         this.active = true;
+        this.UpdatePos();
     },
     Rotate: function(axis, thetaDeg) {
         /// <signature>
@@ -173,6 +190,7 @@ Transform.prototype = {
         var rotation = new Quaternion();
         this.orient.SetMultiplyQuat(rotation.SetFromAxisAngle(axis, thetaDeg));
         this.active = true;
+        this.UpdatePos();
     },
     SetScaleAxes: function(x, y, z) {
         /// <summary>Set a new scale</summary>
@@ -215,6 +233,10 @@ Transform.prototype = {
         /// </signature>
         this.scale.SetAdd(scaleVec);
         this.active = true;
+    },
+    UpdatePos: function() {
+        this.pos.SetCopy(this.offsetRot.GetMultiplyVec3(this.offsetTrans).SetAdd(this.baseTrans));
+        // would need to do more to account for base Rotation?
     },
     IsChanging: function() {
         /* Accurate representation of directions, but forces use of
