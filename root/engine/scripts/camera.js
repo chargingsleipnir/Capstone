@@ -188,6 +188,11 @@ Camera.prototype = {
 
         this.Update = this.FreeControlUpdate;
     },
+    SetActive: function(boolActive) {
+        this.active = boolActive;
+        if(!boolActive)
+            ViewMngr.SetActiveCamera();
+    },
     FreeControlUpdate: function() {
         // Update controls
         if(this.active) {

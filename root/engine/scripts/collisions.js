@@ -165,6 +165,16 @@ CollisionSystem.prototype = {
         this.collBox.radii.y *= y;
         this.collBox.radii.z *= z;
     },
+    SetActive: function(boolActive) {
+        this.active = boolActive;
+        if(!boolActive){
+            this.collSphere.trfm.SetDefault();
+            this.collBox.trfm.SetDefault();
+
+            //this.collSphere.SetActive(boolActive);
+            //this.collBox.SetActive(boolActive);
+        }
+    },
     Update: function() {
         this.collSphere.Update(this.trfm);
         this.collBox.Update(this.trfm);

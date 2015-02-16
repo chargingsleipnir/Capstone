@@ -110,7 +110,7 @@ function Player() {
         switch(gameObj.name) {
             case 'cow':
                 caughtCows.push(gameObj);
-                gameObj.MakeInert();
+                gameObj.SetActive(false);
                 console.log("Cows captured: " + caughtCows.length);
                 break;
             case 'hayBale':

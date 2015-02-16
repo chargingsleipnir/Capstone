@@ -109,12 +109,13 @@ GameObject.prototype = {
             this.collisionSystem.ResizeBoundingShapes(this.shapeData);
         }
     },
-    MakeInert: function() {
+    SetActive: function(boolActive) {
         this.trfmLocal.SetDefault();
+        //this.trfmGlobal.SetDefault();
         if(this.mdlHdlr)
-            this.mdlHdlr.active = false;
+            this.mdlHdlr.active = boolActive;
         for (var i in this.components)
-            this.components[i].active = false;
+            this.components[i].SetActive(boolActive);
     },
     Destroy: function() {
 

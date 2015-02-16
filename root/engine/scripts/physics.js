@@ -228,36 +228,46 @@ RigidBody.prototype = {
         this.velF.SetCopy(this.velI.GetAddScaled(collisionDist, impulse * this.massInv));
         rigidBody.velF.SetCopy(rigidBody.velI.GetAddScaled(collisionDist, -impulse * rigidBody.massInv));
     },
+    SetActive: function(boolActive) {
+        this.active = boolActive;
+        if(!boolActive) {
+            this.ClearAccumulators();
+            this.velI.SetZero();
+            this.velF.SetZero();
+        }
+    },
     Update: function() {
 
-        // Add forces this way, one time for the scene, or apply them directly in loop using Apply... methods
-        for (var i = 0; i < this.forceGenerators.length; i++) {
-            if (this.forceGenerators[i].active)
-                this.forceGenerators[i].Update(this);
+        if(this.active) {
+            // Add forces this way, one time for the scene, or apply them directly in loop using Apply... methods
+            for (var i = 0; i < this.forceGenerators.length; i++) {
+                if (this.forceGenerators[i].active)
+                    this.forceGenerators[i].Update(this);
+            }
+
+            // ROTATIONAL UPDATE
+            //this.axisOfRotation = this.trfm.up.GetCross(this.velF);
+            //this.axisOfRotation.SetNormalized();
+            //this.angVelMag = this.velF.GetMag() / this.modelRadius;
+            //this.angVel = this.axisOfRotation.SetScaleByNum(this.angVelMag);
+            //this.trfm.SetOrientationAxisAngle(this.angVel, this.angVelMag);
+            //dynObjs[i].qOrientation += (dynObjs[i].vAngularVelocity * dynObjs[i].qOrientation) * qTimeStep;
+
+            // LINEAR UPDATE
+            this.velI.SetCopy(this.velF);
+            //this.trfm.TranslateBaseByVec(this.velF.GetScaleByNum(Time.deltaMilli));
+            this.trfm.TranslateBaseByVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
+
+            this.acc.SetZero();
+            this.acc.SetAddScaled(this.forceAccum, this.massInv);
+            this.ClearAccumulators();
+
+            this.velF.SetCopy(this.velI.GetAddScaled(this.acc, Time.deltaMilli));
+            this.velF.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
+
+            if (this.velF.GetMagSqr() < INFINITESIMAL)
+                this.velF.SetZero();
         }
-
-        // ROTATIONAL UPDATE
-        //this.axisOfRotation = this.trfm.up.GetCross(this.velF);
-        //this.axisOfRotation.SetNormalized();
-        //this.angVelMag = this.velF.GetMag() / this.modelRadius;
-        //this.angVel = this.axisOfRotation.SetScaleByNum(this.angVelMag);
-        //this.trfm.SetOrientationAxisAngle(this.angVel, this.angVelMag);
-        //dynObjs[i].qOrientation += (dynObjs[i].vAngularVelocity * dynObjs[i].qOrientation) * qTimeStep;
-
-        // LINEAR UPDATE
-        this.velI.SetCopy(this.velF);
-        //this.trfm.TranslateBaseByVec(this.velF.GetScaleByNum(Time.deltaMilli));
-        this.trfm.TranslateBaseByVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
-
-        this.acc.SetZero();
-        this.acc.SetAddScaled(this.forceAccum, this.massInv);
-        this.ClearAccumulators();
-
-        this.velF.SetCopy(this.velI.GetAddScaled(this.acc, Time.deltaMilli));
-        this.velF.SetScaleByNum(Math.pow(this.dampening, Time.deltaMilli));
-
-        if(this.velF.GetMagSqr() < INFINITESIMAL)
-            this.velF.SetZero();
     }
 };
 

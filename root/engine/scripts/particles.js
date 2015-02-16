@@ -469,6 +469,7 @@ FlatTail.prototype = {
 
 function ParticleSystem(trfmObj) {
     this.trfmObj = trfmObj;
+    this.active = true;
 
     this.fields = [];
     this.tails = [];
@@ -497,15 +498,26 @@ ParticleSystem.prototype = {
     GetTails: function() {
         return this.tails;
     },
-    Update: function() {
+    SetActive: function(boolActive) {
+        this.active = boolActive;
         for (var i = this.fields.length - 1; i >= 0; i--) {
-            if(this.fields[i].active) {
-                this.fields[i].Callback();
-            }
+            this.fields[i].active = boolActive;
         }
         for (var i = this.tails.length - 1; i >= 0; i--) {
-            if (this.tails[i].active) {
-                this.tails[i].Callback();
+            this.tails[i].active = boolActive;
+        }
+    },
+    Update: function() {
+        if(this.active) {
+            for (var i = this.fields.length - 1; i >= 0; i--) {
+                if (this.fields[i].active) {
+                    this.fields[i].Callback();
+                }
+            }
+            for (var i = this.tails.length - 1; i >= 0; i--) {
+                if (this.tails[i].active) {
+                    this.tails[i].Callback();
+                }
             }
         }
     }
