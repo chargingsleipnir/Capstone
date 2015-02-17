@@ -114,14 +114,17 @@ ParticleSpiral.prototype = {
     }
 };
 
-function ParticleField(ptclCount, fieldLife, effects) {
+function ParticleField(ptclCount, willStagger, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
     this.fieldLifeTime = this.counter = fieldLife;
 
     // Timing of this field. Using a field shutdown that allows every active particle to finish out it's own lifespan.
     this.active = false;
     this.deadPtcls = this.ptclCount;
-    this.stagger = effects.travelTime / ptclCount;
+
+    this.stagger = 0.0;
+    if(willStagger)
+        this.stagger = effects.travelTime / ptclCount;
 
     // Using changing looping functions
     this.Callback = this.Launch;
@@ -150,6 +153,7 @@ function ParticleField(ptclCount, fieldLife, effects) {
         var randDir = dir.GetRotated(randConeAngle, dir.GetOrthoAxis());
         randDir.SetRotated(randRotAngle, dir);
 
+        // Physics controlled particle
         if(effects.hasOwnProperty('speed')) {
             this.ptcls.push(new ParticleSimple(
                 effects.travelTime,

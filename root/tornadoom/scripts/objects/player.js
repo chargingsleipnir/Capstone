@@ -2,20 +2,22 @@
  * Created by Devin on 2015-01-16.
  */
 
-function Player() {
+function Player(hud) {
 
     // Player characteristics
     var windspeed = 5.0;
 
-    var contactScale = 1.5;
+    var contactScale = 2.0;
     var drawScale = 1.0;
     var captureRadius = 0.75;
 
     var massMax = 100;
     var massHeld = 0.0;
 
+    var ammoIdx = 0;
+    var ammoTypeCount = 3;
     var caughtCows = [];
-    var caughtHayBales = [];
+    var caughtHayRolls = [];
     var caughtDebris = [];
 
     // Basic player obj visual
@@ -62,27 +64,42 @@ function Player() {
     this.obj.AddComponent(Components.particleSystem);
 
     var effects = new PtclSpiralEffects();
-    effects.travelTime = 8.0;
+    effects.travelTime = 2.5;
     effects.startDist = 1.0;
     effects.dir = new Vector3(0.0, -1.0, 0.0);
     effects.range = 15.0;
     effects.scaleAngle = 5.0;
-    effects.scaleDiam = 0.33;
-    effects.scaleLen = 0.25;
+    effects.scaleDiam = 0.5;
+    effects.scaleLen = 0.15;
     effects.colourBtm = new Vector3(0.5, 0.5, 0.5);
     effects.colourTop = new Vector3(0.5, 0.8, 0.8);
     effects.lineLength = 0.0;
-    effects.size = 5.0;
-    effects.alphaStart = 0.75;
-    effects.fadePoint = 0.90;
-    effects.alphaEnd = 0.5;
-    var ammoVisual = new ParticleField(200, null, effects);
-    this.obj.ptclSys.AddField(ammoVisual);
-
-    effects.texture = GameMngr.assets.textures['dustPtcl'];
     effects.size = 32.0;
-    var dustVisual = new ParticleField(300, null, effects);
+    effects.texture = GameMngr.assets.textures['dustPtcl'];
+    effects.alphaStart = 0.5;
+    effects.fadePoint = 0.75;
+    effects.alphaEnd = 0.0;
+    var dustVisual = new ParticleField(50, true, null, effects);
     this.obj.ptclSys.AddField(dustVisual);
+    dustVisual.Run();
+
+    effects = new PtclPhysicsEffects();
+    effects.travelTime = 0.5;
+    effects.startDist = 0.5;
+    effects.dir.SetValues(0.0, 1.0, 0.0);
+    effects.range = 360.0;
+    effects.speed = 1.5;
+    effects.acc.SetValues(0.0, 0.0, 0.0);
+    effects.dampening = 0.25;
+    effects.colourBtm.SetValues(0.0, 0.5, 0.25);
+    effects.colourTop.SetValues(0.0, 1.0, 1.0);
+    effects.lineLength = 0.0;
+    effects.alphaStart = 1.0;
+    effects.fadePoint = 0.5;
+    effects.alphaEnd = 0.0;
+    effects.size = 5.0;
+    var collectionVisual = new ParticleField(50, false, 0.25, effects);
+    this.obj.ptclSys.AddField(collectionVisual);
 
     // Add controls
     this.obj.AddComponent(Components.camera);
@@ -98,8 +115,9 @@ function Player() {
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
-    var startPtcls = Input.CreateInputController(playerCtrlName, KeyMap.Z);
-    var stopPtcls = Input.CreateInputController(playerCtrlName, KeyMap.X);
+    var btnShoot = Input.CreateInputController(playerCtrlName, KeyMap.Shift);
+    var btnAmmoScrollLeft = Input.CreateInputController(playerCtrlName, KeyMap.BracketOpen);
+    var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
 
 
     // PLAYER METHODS
@@ -107,11 +125,13 @@ function Player() {
 
     };
     var Capture = function(gameObj) {
+        // Small particle visual
+        collectionVisual.Run();
+        // Determine object captured
         switch(gameObj.name) {
             case 'cow':
                 caughtCows.push(gameObj);
                 gameObj.SetActive(false);
-                console.log("Cows captured: " + caughtCows.length);
                 break;
             case 'hayBale':
                 console.log("Hay bales captured: " + caughtCows.length);
@@ -132,18 +152,23 @@ function Player() {
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
-        //console.log(this.obj.collider.collBox.pos.GetData());
-        //console.log(this.obj.mdlHdlr.sphere.pos.GetData());
-
-        if(startPtcls.pressed) {
-            ammoVisual.Run();
-            dustVisual.Run();
-            startPtcls.Release();
+        // Pop captured object from it's list and shoot forward from right on Tornado
+        if(btnShoot.pressed) {
+            btnShoot.Release();
         }
-        else if(stopPtcls.pressed) {
-            ammoVisual.Stop();
-            dustVisual.Stop();
-            stopPtcls.Release();
+        // Change ammo type
+        if(btnAmmoScrollLeft.pressed) {
+            ammoIdx = (ammoIdx > 0) ? ammoIdx - 1 : ammoTypeCount - 1;
+            console.log(ammoIdx);
+            // change int type
+            // ammoList[type].hudMsg + ammoList[type].list.length
+            // hud.guiObjs['ammo info'].UpdateMsg("Cows: " + caughtCows.length);
+            btnAmmoScrollLeft.Release();
+        }
+        if(btnAmmoScrollRight.pressed) {
+            ammoIdx = (ammoIdx + 1) % ammoTypeCount;
+            console.log(ammoIdx);
+            btnAmmoScrollRight.Release();
         }
     }
 }

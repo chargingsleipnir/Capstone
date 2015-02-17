@@ -91,25 +91,25 @@ function BuildGame() {
 
     /******************************** HUD *************************************************/
 
-    /*
     var hud = new GUISystem(new WndRect(20, 20, ViewMngr.wndWidth - 40, ViewMngr.wndHeight - 40), "in-game HUD");
 
-
     var style = new MsgBoxStyle();
-    style.fontSize = 30;
+    style.fontSize = 21;
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
-    style.textMaxWidth = 60;
-    style.textAlignWidth = Alignment.right;
-    style.textAlignHeight = Alignment.bottom;
+    style.textMaxWidth = 11;
+    style.textAlignWidth = Alignment.left;
+    style.textAlignHeight = Alignment.centre;
     style.bgTexture = null;
-    style.bgColour = new Vector3(0.0, 0.25, 0.0);
-    style.textLineSpacing = 15.0;
+    style.bgColour = new Vector3(0.0, 0.0, 0.0);
+    style.textLineSpacing = 0.0;
     style.margin = 5.0;
-    style.bgAlpha = 0.8;
+    style.bgAlpha = 1.0;
     style.bold = false;
-    var greenMsg = new GUIObject(new WndRect(0, 0, 300, 300), "$100 is 16% if the #stupid amount of tuition we pay!! Write devinodin@gmail.com", style);
-    hud.AddGUIObject(greenMsg);
+    var hudAmmoInfo = new GUIObject('ammo info', new WndRect(0, hud.sysRect.h - 60, 140, 31), "Cows: 00", style);
+    hud.AddGUIObject(hudAmmoInfo);
+    hudAmmoInfo.UpdateMsg('Cows: 0');
 
+    /*
     style.bgColour = new Vector3(0.0, 0.0, 0.25);
     style.fontSize = 25;
     style.textAlignWidth = Alignment.left;
@@ -140,13 +140,13 @@ function BuildGame() {
     style.bold = false;
     var aquaMsg = new GUIObject(new WndRect(redMsg.rectLocal.x + redMsg.rectLocal.w + 30 , redMsg.rectLocal.y, 200, 100), "Size", style);
     hud.AddGUIObject(aquaMsg);
-
-    GUINetwork.AddSystem(hud, false);
     */
+
+    GUINetwork.AddSystem(hud, true);
 
     /********************************** Global Objects */
 
-    var player = new Player();
+    var player = new Player(hud);
     player.obj.trfmLocal.SetBaseTransByAxes(0.0, 1.0, 0.0);
 
     /********************************** Scenes */

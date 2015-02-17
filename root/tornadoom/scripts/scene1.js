@@ -13,6 +13,7 @@ function BuildScene1(scene) {
     style.bgAlpha = 1.0;
     style.bold = false;
     var title = new GUIObject(
+        'title',
         new WndRect(titleScreen.sysRect.w/2 - 200, titleScreen.sysRect.h/2 - 100, 400, 200),
         "Test Title",
         style
@@ -25,6 +26,7 @@ function BuildScene1(scene) {
     style.fontSize = 30;
     style.bold = true;
     var titleMsg = new GUIObject(
+        'titleMsg',
         new WndRect(title.rectGlobal.w, title.rectLocal.y + title.rectLocal.h + 20, 700, 100),
         "Press enter to start the game!",
         style
@@ -33,6 +35,7 @@ function BuildScene1(scene) {
     style.bgAlpha = 1.0;
     style.bgTexture = EL.assets.textures['lava'];
     var background = new GUIObject(
+        'background',
         titleScreen.sysRect,
         "",
         style
