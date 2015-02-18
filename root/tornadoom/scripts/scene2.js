@@ -1,8 +1,10 @@
 function BuildScene2(scene) {
 
-    scene.light.amb.bright = 0.8;
-    scene.light.dir.bright = 0.4;
+    scene.light.amb.bright = 0.5;
+    scene.light.dir.bright = 0.25;
     scene.light.dir.dir.SetValues(1.0, -1.0, -1.0);
+    scene.light.pnt.bright = 0.0;
+    scene.light.pnt.pos.SetValues(0.0, 0.0, 0.0);
 
     var cows = [];
     var MAX_COWS = 20;

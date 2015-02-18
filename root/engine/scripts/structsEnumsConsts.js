@@ -258,7 +258,7 @@ var ShdrLines = {
             "vec3 eyeDir = normalize(u_CamPos - v_Pos.xyz);\n" +
             "vec3 reflDir = vec3(0.0, 0.0, 0.0);\n" +
             "\n" +
-            "if(u_DirBright > 0.0) {\n" +
+            "if(u_DirBright > 0.0)\n{\n" +
             "reflDir = reflect(-u_DirDir, v_TrfmNorm);\n" +
             "specBright = pow(max(dot(reflDir, eyeDir), 0.0), u_SpecInt);\n" +
             "specColWeight = u_SpecCol * specBright;\n" +
@@ -267,7 +267,7 @@ var ShdrLines = {
             "\n" +
             "dirCol = (u_DiffColWeight * dirWeight) + (specColWeight * dirWeight);\n}\n" +
             "\n" +
-            "if(u_PntBright > 0.0) {\n" +
+            "if(u_PntBright > 0.0)\n{\n" +
             "vec3 pntDir = normalize(u_PntPos - v_Pos.xyz);\n" +
             "reflDir = reflect(-pntDir, v_TrfmNorm);\n" +
             "specBright = pow(max(dot(reflDir, eyeDir), 0.0), u_SpecInt);\n" +

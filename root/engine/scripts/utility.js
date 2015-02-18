@@ -394,7 +394,8 @@ var ModelUtils = {
                 declaration += ShdrLines.unif.camPos;
 
                 mainFunc += ShdrLines.main.normalizeNorm;
-                mainFunc += ShdrLines.main.lighting.replace("v_TrfmNorm", "normal");
+                // This regex usage is unsafe, but necessary to replace ALL occurrences.
+                mainFunc += ShdrLines.main.lighting.replace(/v_TrfmNorm/g, "normal");
                 mainFunc += "vec3 " + ShdrLines.vary.sendLight;
             }
             fragColour += ")";
@@ -414,8 +415,8 @@ var ModelUtils = {
         mainFunc += ShdrLines.main.end;
 
         fshdrStr = '' + declaration + mainFunc;
-        console.log("---------------------");
-        console.log(fshdrStr);
+        //console.log("---------------------");
+        //console.log(fshdrStr);
 
         return GL.CreateShaderPrograms(new ShaderFilePair('', vshdrStr, fshdrStr));
     }

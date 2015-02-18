@@ -296,6 +296,7 @@ var GL = {
                     // Specular
                     this.ctx.uniform3fv(shdr.u_SpecCol, scene.models[i].mat.spec.col);
                     this.ctx.uniform1f(shdr.u_SpecInt, scene.models[i].mat.spec.int);
+
                     //gl.uniform1f(shdr.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
                     // Mirror
                     //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
