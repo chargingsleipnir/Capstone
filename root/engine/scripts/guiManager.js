@@ -4,7 +4,7 @@
 
 /********** Objects to be parented and added to a system ************/
 
-function GUIObject(name, wndRect, msg, style) {
+function GUIObject(wndRect, msg, style) {
     /// <signature>
     ///  <summary>Add a msg box to this system</summary>
     ///  <param name="wndRect" type="Rect">Pos x and y use viewport space, with (0,0) in the top-left</param>
@@ -12,7 +12,6 @@ function GUIObject(name, wndRect, msg, style) {
     ///  <param name="depth" type="int">Defines overlap position relative to other elements within this system</param>
     ///  <param name="style" type="MsgBoxStyle Object">A struct of various styke details that can be applied to this message box</param>
     /// </signature>
-    this.name = name;
     this.rectLocal = wndRect.GetCopy();
     this.rectGlobal = wndRect.GetCopy();
     this.msg = msg;
@@ -174,7 +173,6 @@ function GUISystem(wndRect, name) {
     /// </signature>
     this.sysRect = wndRect;
     this.name = name;
-    this.guiObjs = {};
     this.boxMdls = [];
     this.textBlocks = [];
 }
@@ -186,7 +184,6 @@ GUISystem.prototype = {
         /// </signature>
         guiObj.UpdateGlobalRect(this.sysRect);
         guiObj.InstantiateDisplay();
-        this.guiObjs[guiObj.name] = guiObj;
         this.boxMdls.push(guiObj.boxHdl);
         this.textBlocks.push(guiObj.strHdl);
     }

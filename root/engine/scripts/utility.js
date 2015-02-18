@@ -414,8 +414,8 @@ var ModelUtils = {
         mainFunc += ShdrLines.main.end;
 
         fshdrStr = '' + declaration + mainFunc;
-        //console.log("---------------------");
-        //console.log(fshdrStr);
+        console.log("---------------------");
+        console.log(fshdrStr);
 
         return GL.CreateShaderPrograms(new ShaderFilePair('', vshdrStr, fshdrStr));
     }

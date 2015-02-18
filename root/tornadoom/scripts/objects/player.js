@@ -4,7 +4,7 @@
 
 function Player(hud) {
 
-    // Player characteristics
+    // Player characteristics -------------------------------------------------
     var windspeed = 5.0;
 
     var contactScale = 2.0;
@@ -17,17 +17,17 @@ function Player(hud) {
     var ammoIdx = 0;
     var ammoTypeCount = 3;
     var caughtCows = [];
-    var caughtHayRolls = [];
+    var caughtHayBales = [];
     var caughtDebris = [];
 
-    // Basic player obj visual
+    // Basic player obj visual -------------------------------------------------
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
     this.obj.AddChild(modelObj);
 
-    // Tornado collisions
+    // Tornado collisions -------------------------------------------------
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
     //this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
@@ -35,7 +35,7 @@ function Player(hud) {
     //this.obj.collider.OffsetBoxPosAxes(-3.0, 0.0, -3.0);
     //this.obj.collider.ScaleBox(3.0, 0.5, 0.5);
 
-    // Wind characteristics
+    // Wind characteristics -------------------------------------------------
     var massDensity = 1.205;
 
     var that = this;
@@ -60,7 +60,7 @@ function Player(hud) {
     this.obj.collider.SetBoxCall(ObjInFunnel);
     */
 
-    // Add particle effects
+    // Add particle effects -------------------------------------------------
     this.obj.AddComponent(Components.particleSystem);
 
     var effects = new PtclSpiralEffects();
@@ -101,7 +101,30 @@ function Player(hud) {
     var collectionVisual = new ParticleField(50, false, 0.25, effects);
     this.obj.ptclSys.AddField(collectionVisual);
 
-    // Add controls
+    // Add to HUD -------------------------------------------------
+    var style = new MsgBoxStyle();
+    style.fontSize = 30;
+    style.fontColour = new Vector3(0.0, 0.0, 0.0);
+    style.textMaxWidth = 15;
+    style.textAlignWidth = Alignment.right;
+    style.textAlignHeight = Alignment.bottom;
+    style.bgColour = new Vector3(0.0, 0.0, 0.0);
+    style.textLineSpacing = 0.0;
+    style.margin = 15.0;
+    style.bgAlpha = 1.0;
+    style.bold = false;
+
+    style.bgTexture = GameMngr.assets.textures['baleIcon'];
+    var caughtBaleInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 68, 132, 68), "00", style);
+    hud.AddGUIObject(caughtBaleInfo);
+    caughtBaleInfo.UpdateMsg('0');
+
+    style.bgTexture = GameMngr.assets.textures['cowIcon'];
+    var caughtCowInfo = new GUIObject(new WndRect(0, caughtBaleInfo.rectLocal.y - 78, 132, 68), "00", style);
+    hud.AddGUIObject(caughtCowInfo);
+    caughtCowInfo.UpdateMsg('0');
+
+    // Add controls -------------------------------------------------
     this.obj.AddComponent(Components.camera);
     this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 7.5);
     this.obj.camera.trfmAxes.RotateLocalViewX(-15);
@@ -120,7 +143,7 @@ function Player(hud) {
     var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
 
 
-    // PLAYER METHODS
+    // PLAYER METHODS -------------------------------------------------
     var SwitchControls = function() {
 
     };
@@ -131,10 +154,13 @@ function Player(hud) {
         switch(gameObj.name) {
             case 'cow':
                 caughtCows.push(gameObj);
+                caughtCowInfo.UpdateMsg("" + caughtCows.length);
                 gameObj.SetActive(false);
                 break;
-            case 'hayBale':
-                console.log("Hay bales captured: " + caughtCows.length);
+            case 'hay bale':
+                caughtHayBales.push(gameObj);
+                caughtBaleInfo.UpdateMsg("" + caughtHayBales.length);
+                gameObj.SetActive(false);
                 break;
         }
 
@@ -168,6 +194,8 @@ function Player(hud) {
         if(btnAmmoScrollRight.pressed) {
             ammoIdx = (ammoIdx + 1) % ammoTypeCount;
             console.log(ammoIdx);
+
+
             btnAmmoScrollRight.Release();
         }
     }

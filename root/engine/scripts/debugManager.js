@@ -41,8 +41,8 @@ var DebugMngr = {
             style.margin = 5.0;
             style.bgAlpha = 0.25;
             style.bold = false;
-            this.frameRateMsg = new GUIObject('frame rate', new WndRect(0, 0, 300, 30), "FrameRt", style);
-            this.mousePosMsg = new GUIObject('mouse position', new WndRect(0, 30, 300, 30), "000000000000000000000", style);
+            this.frameRateMsg = new GUIObject(new WndRect(0, 0, 300, 30), "FrameRt", style);
+            this.mousePosMsg = new GUIObject(new WndRect(0, 30, 300, 30), "000000000000000000000", style);
             performanceData.AddGUIObject(this.frameRateMsg);
             performanceData.AddGUIObject(this.mousePosMsg);
 

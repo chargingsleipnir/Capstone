@@ -1,19 +1,22 @@
 function BuildScene2(scene) {
 
     scene.light.amb.bright = 0.8;
-    scene.light.dir.bright = 0.75;
+    scene.light.dir.bright = 0.4;
     scene.light.dir.dir.SetValues(1.0, -1.0, -1.0);
 
     var cows = [];
     var MAX_COWS = 20;
+    var bales = [];
+    var MAX_BALES = 20;
 
     for(var i = 0; i < MAX_COWS; i++ ) {
         cows[i] = new Cow();
+        if(i < 10) cows[i].obj.trfmLocal.TranslateBaseByAxes(3.0, 0.0, -i * 6);
+        else cows[i].obj.trfmLocal.TranslateBaseByAxes(-3.0, 0.0, ((-i + (MAX_COWS / 2)) * 6));
 
-        if(i < 10)
-            cows[i].obj.trfmLocal.TranslateBaseByAxes(3.0, 0.0, -i * 6);
-        else
-            cows[i].obj.trfmLocal.TranslateBaseByAxes(-3.0, 0.0, ((-i + (MAX_COWS / 2)) * 6));
+        bales[i] = new HayBale();
+        if(i < 10) bales[i].obj.trfmLocal.TranslateBaseByAxes(6.0, 0.0, -i * 6);
+        else bales[i].obj.trfmLocal.TranslateBaseByAxes(-6.0, 0.0, ((-i + (MAX_BALES / 2)) * 6));
     }
 
     function Start() {
@@ -25,16 +28,18 @@ function BuildScene2(scene) {
     function Update() {
         for(var i = 0; i < MAX_COWS; i++ ) {
             cows[i].Update();
+            bales[i].Update();
         }
-        //cows[0].obj.trfmLocal.TranslateBaseByAxes(0.001, 0.0, 0.0);
     }
 
     function End() {
 
     }
 
-    for(var i = 0; i < MAX_COWS; i++ )
+    for(var i = 0; i < MAX_COWS; i++ ) {
         scene.Add(cows[i].obj);
+        scene.Add(bales[i].obj);
+    }
 
     scene.SetCallbacks(Start, Update, End);
 }

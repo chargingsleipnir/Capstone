@@ -2,7 +2,7 @@
 /******************* MODELS *************************/
 
 function ModelHandler(model, trfmGlobal, radius) {
-    //console.log("\n*****" + model.name + "*****\n");
+    console.log("\n*****" + model.name + "*****\n");
 
     // Decide whether to draw with Elements or not
     this.vertData = ModelUtils.SelectVAOData(model.vertices);

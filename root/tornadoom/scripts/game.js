@@ -93,22 +93,6 @@ function BuildGame() {
 
     var hud = new GUISystem(new WndRect(20, 20, ViewMngr.wndWidth - 40, ViewMngr.wndHeight - 40), "in-game HUD");
 
-    var style = new MsgBoxStyle();
-    style.fontSize = 21;
-    style.fontColour = new Vector3(1.0, 1.0, 1.0);
-    style.textMaxWidth = 11;
-    style.textAlignWidth = Alignment.left;
-    style.textAlignHeight = Alignment.centre;
-    style.bgTexture = null;
-    style.bgColour = new Vector3(0.0, 0.0, 0.0);
-    style.textLineSpacing = 0.0;
-    style.margin = 5.0;
-    style.bgAlpha = 1.0;
-    style.bold = false;
-    var hudAmmoInfo = new GUIObject('ammo info', new WndRect(0, hud.sysRect.h - 60, 140, 31), "Cows: 00", style);
-    hud.AddGUIObject(hudAmmoInfo);
-    hudAmmoInfo.UpdateMsg('Cows: 0');
-
     /*
     style.bgColour = new Vector3(0.0, 0.0, 0.25);
     style.fontSize = 25;
