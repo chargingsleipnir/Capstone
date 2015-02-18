@@ -5,20 +5,27 @@
 function Player(hud) {
 
     // Player characteristics -------------------------------------------------
-    var windspeed = 5.0;
+    var windspeed = 7.5;
+    var massDensity = 1.205;
 
-    var contactScale = 2.0;
+    var contactScale = 2.5;
     var drawScale = 1.0;
     var captureRadius = 0.75;
 
-    var massMax = 100;
+    var massMax = 200;
     var massHeld = 0.0;
 
     var ammoIdx = 0;
-    var ammoTypeCount = 3;
+    var ammoTypeCount = 2;
     var caughtCows = [];
     var caughtHayBales = [];
-    var caughtDebris = [];
+    //var caughtDebris = [];
+    var ammoTypes = [
+        caughtCows,
+        caughtHayBales
+    ];
+
+    var that = this;
 
     // Basic player obj visual -------------------------------------------------
     this.obj = new GameObject('Player01', Labels.player);
@@ -26,6 +33,8 @@ function Player(hud) {
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
     this.obj.AddChild(modelObj);
+    // Just to help
+    var pos = this.obj.trfmGlobal.pos;
 
     // Tornado collisions -------------------------------------------------
     this.obj.AddComponent(Components.collisionSystem);
@@ -35,11 +44,6 @@ function Player(hud) {
     //this.obj.collider.OffsetBoxPosAxes(-3.0, 0.0, -3.0);
     //this.obj.collider.ScaleBox(3.0, 0.5, 0.5);
 
-    // Wind characteristics -------------------------------------------------
-    var massDensity = 1.205;
-
-    var that = this;
-    var pos = this.obj.trfmLocal.pos;
     function ObjInRange(collider) {
         var objToEyeVec = new Vector2(pos.x - collider.trfm.pos.x, pos.z - collider.trfm.pos.z);
         var objToEyeDistSqr = objToEyeVec.GetMagSqr();
@@ -124,6 +128,11 @@ function Player(hud) {
     hud.AddGUIObject(caughtCowInfo);
     caughtCowInfo.UpdateMsg('0');
 
+    var hudAmmoMsgs = [
+        caughtCowInfo,
+        caughtBaleInfo
+    ];
+
     // Add controls -------------------------------------------------
     this.obj.AddComponent(Components.camera);
     this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 7.5);
@@ -143,9 +152,23 @@ function Player(hud) {
     var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
 
 
-    // PLAYER METHODS -------------------------------------------------
-    var SwitchControls = function() {
+    // HELPER FUNCTIONS -------------------------------------------------
 
+    var UpdateHUDAmmoCount = function(idx) {
+        hudAmmoMsgs[idx].UpdateMsg("" + ammoTypes[idx].length);
+    };
+    var UpdateHUDAmmoSelection = function() {
+        for(var i = 0; i < hudAmmoMsgs.length; i++) {
+            hudAmmoMsgs[i].SetObjectFade(0.66);
+        }
+        hudAmmoMsgs[ammoIdx].SetObjectFade(1.0);
+    };
+    UpdateHUDAmmoSelection();
+    var PrepAmmo = function(gameObj, isVisible) {
+        if(gameObj.mdlHdlr)
+            gameObj.mdlHdlr.active = isVisible;
+        for (var i in gameObj.components)
+            gameObj.components[i].SetActive(isVisible);
     };
     var Capture = function(gameObj) {
         // Small particle visual
@@ -154,17 +177,31 @@ function Player(hud) {
         switch(gameObj.name) {
             case 'cow':
                 caughtCows.push(gameObj);
-                caughtCowInfo.UpdateMsg("" + caughtCows.length);
-                gameObj.SetActive(false);
+                UpdateHUDAmmoCount(0);
                 break;
             case 'hay bale':
                 caughtHayBales.push(gameObj);
-                caughtBaleInfo.UpdateMsg("" + caughtHayBales.length);
-                gameObj.SetActive(false);
+                UpdateHUDAmmoCount(1);
                 break;
         }
+        PrepAmmo(gameObj, false);
+    };
+    var Shoot = function() {
+        var fwd = that.obj.trfmLocal.GetFwd();
+        var gameObj = ammoTypes[ammoIdx].pop();
+        if(gameObj) {
+            gameObj.trfmLocal.SetBaseTransByVec(pos.GetAdd(fwd.SetScaleByNum(contactScale + 1.0)));
+            UpdateHUDAmmoCount(ammoIdx);
+            PrepAmmo(gameObj, true);
+            gameObj.rigidBody.AddForce(fwd.GetScaleByNum(windspeed * massDensity * 1000));
+        }
+    };
+
+    // PLAYER METHODS -------------------------------------------------
+    var SwitchControls = function() {
 
     };
+
     this.LevelUp = function() {
 
     };
@@ -180,22 +217,18 @@ function Player(hud) {
 
         // Pop captured object from it's list and shoot forward from right on Tornado
         if(btnShoot.pressed) {
+            Shoot();
             btnShoot.Release();
         }
         // Change ammo type
         if(btnAmmoScrollLeft.pressed) {
             ammoIdx = (ammoIdx > 0) ? ammoIdx - 1 : ammoTypeCount - 1;
-            console.log(ammoIdx);
-            // change int type
-            // ammoList[type].hudMsg + ammoList[type].list.length
-            // hud.guiObjs['ammo info'].UpdateMsg("Cows: " + caughtCows.length);
+            UpdateHUDAmmoSelection();
             btnAmmoScrollLeft.Release();
         }
         if(btnAmmoScrollRight.pressed) {
             ammoIdx = (ammoIdx + 1) % ammoTypeCount;
-            console.log(ammoIdx);
-
-
+            UpdateHUDAmmoSelection();
             btnAmmoScrollRight.Release();
         }
     }

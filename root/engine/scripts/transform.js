@@ -201,6 +201,9 @@ Transform.prototype = {
         this.active = true;
         this.UpdatePos();
     },
+    GetFwd: function() {
+        return this.orient.GetMultiplyVec3(VEC3_FWD);
+    },
     SetScaleAxes: function(x, y, z) {
         /// <summary>Set a new scale</summary>
         ///  <param name="x" type="decimal"></param>

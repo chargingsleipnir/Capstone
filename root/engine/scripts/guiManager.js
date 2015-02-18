@@ -160,6 +160,10 @@ GUIObject.prototype = {
     FadeMsg: function(incr) {
         this.strHdl.tint.w += incr;
         return this.strHdl.tint.w;
+    },
+    SetObjectFade: function(alpha) {
+        this.boxHdl.tint.w = alpha;
+        this.strHdl.tint.w = alpha;
     }
 };
 

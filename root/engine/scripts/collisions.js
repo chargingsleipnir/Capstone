@@ -168,8 +168,8 @@ CollisionSystem.prototype = {
     SetActive: function(boolActive) {
         this.active = boolActive;
         if(!boolActive){
-            this.collSphere.trfm.SetDefault();
-            this.collBox.trfm.SetDefault();
+            //this.collSphere.trfm.SetDefault();
+            //this.collBox.trfm.SetDefault();
 
             //this.collSphere.SetActive(boolActive);
             //this.collBox.SetActive(boolActive);

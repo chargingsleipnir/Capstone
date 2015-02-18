@@ -111,7 +111,7 @@ GameObject.prototype = {
     },
     SetActive: function(boolActive) {
         this.trfmLocal.SetDefault();
-        //this.trfmGlobal.SetDefault();
+        this.trfmGlobal.SetDefault();
         if(this.mdlHdlr)
             this.mdlHdlr.active = boolActive;
         for (var i in this.components)
