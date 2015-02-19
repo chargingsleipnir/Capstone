@@ -8,9 +8,10 @@ function Player(hud) {
     var windspeed = 7.5;
     var massDensity = 1.205;
 
-    var contactScale = 2.5;
+    var contactScale = 2.0;
     var drawScale = 1.0;
     var captureRadius = 0.75;
+    var launchScalar = 2000;
 
     var massMax = 200;
     var massHeld = 0.0;
@@ -30,11 +31,16 @@ function Player(hud) {
     // Basic player obj visual -------------------------------------------------
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
+    this.obj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
+    modelObj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
+
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
     this.obj.AddChild(modelObj);
-    // Just to help
-    var pos = this.obj.trfmGlobal.pos;
+
+    // Just to help in a few functions below
+    var playerPos = this.obj.trfmGlobal.pos;
+    var playerHeight = modelObj.shapeData.radii.y * modelObj.trfmLocal.scale.y * 2;
 
     // Tornado collisions -------------------------------------------------
     this.obj.AddComponent(Components.collisionSystem);
@@ -45,14 +51,22 @@ function Player(hud) {
     //this.obj.collider.ScaleBox(3.0, 0.5, 0.5);
 
     function ObjInRange(collider) {
-        var objToEyeVec = new Vector2(pos.x - collider.trfm.pos.x, pos.z - collider.trfm.pos.z);
+        var objToEyeVec = new Vector2(playerPos.x - collider.trfm.pos.x, playerPos.z - collider.trfm.pos.z);
         var objToEyeDistSqr = objToEyeVec.GetMagSqr();
 
-        if(objToEyeDistSqr < captureRadius * captureRadius)
-            Capture(collider.gameObj);
-        else
+        // This format allows not only for objects to only be captured if they are within the given radius,
+        // but ensures that their velocities don't explode at heights above the tornado:
+        // No force is applied if they're directly above the funnel.
+        if(objToEyeDistSqr < captureRadius * captureRadius) {
+            if(collider.trfm.pos.y < playerHeight) {
+                Capture(collider.gameObj);
+            }
+        }
+        else {
             collider.rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
-
+            // Perfect lift right away, slowing once obj's gravity is re-applied.
+            collider.rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
+        }
     }
     this.obj.collider.SetSphereCall(ObjInRange);
 
@@ -74,18 +88,30 @@ function Player(hud) {
     effects.range = 15.0;
     effects.scaleAngle = 5.0;
     effects.scaleDiam = 0.5;
-    effects.scaleLen = 0.15;
+    effects.scaleLen = 0.2;
     effects.colourBtm = new Vector3(0.5, 0.5, 0.5);
     effects.colourTop = new Vector3(0.5, 0.8, 0.8);
     effects.lineLength = 0.0;
-    effects.size = 32.0;
+    effects.size = 40.0;
     effects.texture = GameMngr.assets.textures['dustPtcl'];
     effects.alphaStart = 0.5;
     effects.fadePoint = 0.75;
     effects.alphaEnd = 0.0;
-    var dustVisual = new ParticleField(50, true, null, effects);
-    this.obj.ptclSys.AddField(dustVisual);
-    dustVisual.Run();
+
+    // Inner dust effect
+    var dustVisual1 = new ParticleField(40, true, null, effects);
+    this.obj.ptclSys.AddField(dustVisual1);
+    dustVisual1.Run();
+
+    // Outer dust effect
+    effects.travelTime = 3.0;
+    effects.scaleAngle = 2.5;
+    effects.scaleDiam = 0.85;
+    effects.scaleLen = 0.1;
+    effects.size = 20.0;
+    var dustVisual2 = new ParticleField(30, true, null, effects);
+    this.obj.ptclSys.AddField(dustVisual2);
+    dustVisual2.Run();
 
     effects = new PtclPhysicsEffects();
     effects.travelTime = 0.5;
@@ -135,7 +161,7 @@ function Player(hud) {
 
     // Add controls -------------------------------------------------
     this.obj.AddComponent(Components.camera);
-    this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 7.5);
+    this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
     this.obj.camera.trfmAxes.RotateLocalViewX(-15);
     ViewMngr.SetActiveCamera(this.obj.camera);
 
@@ -190,10 +216,10 @@ function Player(hud) {
         var fwd = that.obj.trfmLocal.GetFwd();
         var gameObj = ammoTypes[ammoIdx].pop();
         if(gameObj) {
-            gameObj.trfmLocal.SetBaseTransByVec(pos.GetAdd(fwd.SetScaleByNum(contactScale + 1.0)));
+            gameObj.trfmLocal.SetBaseTransByVec(playerPos.GetAdd(fwd.SetScaleByNum(contactScale + 2.0)));
             UpdateHUDAmmoCount(ammoIdx);
             PrepAmmo(gameObj, true);
-            gameObj.rigidBody.AddForce(fwd.GetScaleByNum(windspeed * massDensity * 1000));
+            gameObj.rigidBody.AddForce(fwd.GetScaleByNum(windspeed * massDensity * launchScalar));
         }
     };
 

@@ -3,6 +3,9 @@
 function CollisionSphere(objTrfm, radius) {
     this.trfm = new Transform(Space.local);
     this.trfm.offsetRot = objTrfm.orient;
+    // Possibly create collision enter, active, and exit events.
+    //this.collidingLastFrame = false;
+    //this.collidingThisFrame = false;
     Sphere.call(this, this.trfm.pos, radius);
 }
 CollisionSphere.prototype = new Sphere();

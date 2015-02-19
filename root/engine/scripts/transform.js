@@ -204,6 +204,9 @@ Transform.prototype = {
     GetFwd: function() {
         return this.orient.GetMultiplyVec3(VEC3_FWD);
     },
+    GetRight: function() {
+        return this.orient.GetMultiplyVec3(VEC3_RIGHT);
+    },
     SetScaleAxes: function(x, y, z) {
         /// <summary>Set a new scale</summary>
         ///  <param name="x" type="decimal"></param>

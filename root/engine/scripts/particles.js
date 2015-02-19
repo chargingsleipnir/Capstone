@@ -91,9 +91,9 @@ ParticleSpiral.prototype = {
             this.counter += Time.deltaMilli;
 
             this.pos.SetCopy(this.startPos.GetAdd(new Vector3(
-                Math.cos(this.counter * this.scaleAngle) * this.scaleDiam,
+                Math.cos(this.counter * -this.scaleAngle) * this.scaleDiam,
                 this.counter * this.scaleLen,
-                Math.sin(this.counter * this.scaleAngle) * this.scaleDiam
+                Math.sin(this.counter * -this.scaleAngle) * this.scaleDiam
             )));
 
             if(this.counter >= this.fadeCountStart) {

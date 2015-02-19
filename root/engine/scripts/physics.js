@@ -157,14 +157,14 @@ RigidBody.prototype = {
         var objToEyeDist = Math.sqrt(objToEyeDistSqr);
         var centripetal = objToEyeVec.GetScaleByNum(1.0 / objToEyeDist);
 
-        // Make sure obj angular velocity never exceeds windspeed
+        // Control force application, so the velocity doesn't get out of hand.
         var objVelSqr = this.velF.GetMagSqr();
         var angVel = objVelSqr / objToEyeDistSqr;
         var angVelScalar = 1.0 - (angVel / windspeed);
 
-        // Use the tangential direction to determine linear velocity, scaled by angular velocity max
+        // Use the tangential direction to determine linear velocity, scaled by angular velocity
         var tanDir = new Vector2(-centripetal.y, centripetal.x);
-        tanDir.SetScaleByNum(fv * angVelScalar); /** This might be better off as an if statement saying not to go any higher than windspeed **/
+        tanDir.SetScaleByNum(fv * angVelScalar);
 
         /* // Get circular displacement? Need opposite direction vector, or do reverse calculations
         this.angDisplace = Math.atan2(-eyeToObj.y, eyeToObj.x);
