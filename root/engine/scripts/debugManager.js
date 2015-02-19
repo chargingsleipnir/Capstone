@@ -39,13 +39,14 @@ var DebugMngr = {
             style.bgColour = new Vector3(0.0, 0.0, 0.0);
             style.textLineSpacing = 0.0;
             style.margin = 5.0;
-            style.bgAlpha = 0.25;
+            style.bgAlpha = 0.5;
             style.bold = false;
-            this.frameRateMsg = new GUIObject(new WndRect(0, 0, 300, 30), "FrameRt", style);
-            this.mousePosMsg = new GUIObject(new WndRect(0, 30, 300, 30), "000000000000000000000", style);
+            this.gameTimer = new GUIObject(new WndRect(0, 0, 300, 30), "GameTime: 00.00", style);
+            this.frameRateMsg = new GUIObject(new WndRect(0, 30, 300, 30), "FrameRt", style);
+            this.mousePosMsg = new GUIObject(new WndRect(0, 60, 300, 30), "000000000000000000000", style);
+            performanceData.AddGUIObject(this.gameTimer);
             performanceData.AddGUIObject(this.frameRateMsg);
             performanceData.AddGUIObject(this.mousePosMsg);
-
             GUINetwork.AddSystem(performanceData, false);
 
             Input.RegisterControlScheme("GUIMouseTracking", true, InputTypes.mouse);
@@ -63,6 +64,7 @@ var DebugMngr = {
                     this.counter = 0.0;
                     this.frameRateCapture = Time.fps;
                 }
+                this.gameTimer.UpdateMsg("Game Time: " + Time.counter);
                 this.frameRateMsg.UpdateMsg("FPS: " + this.frameRateCapture.toString());
                 this.mousePosMsg.UpdateMsg("Mouse x: " + this.mouse.pos.x + ", y: " + this.mouse.pos.y);
             }

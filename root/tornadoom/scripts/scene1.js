@@ -14,7 +14,7 @@ function BuildScene1(scene) {
     style.bold = false;
     var title = new GUIObject(
         new WndRect(titleScreen.sysRect.w/2 - 200, titleScreen.sysRect.h/2 - 100, 400, 200),
-        "Test Title",
+        "TORNADOOM",
         style
     );
 
