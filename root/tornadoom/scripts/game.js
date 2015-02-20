@@ -128,6 +128,7 @@ function BuildGame() {
         if (menuToggle) gameMouse.SetCursor(CursorTypes.normal);
         else gameMouse.SetCursor(CursorTypes.crosshair);
     }
+
     function GameUpdate() {
 
         if(menuBtn.pressed) {
@@ -171,6 +172,6 @@ function BuildGame() {
     }
 
     GameMngr.UserUpdate = GameUpdate;
-    //GameMngr.assets.sounds['bgMusicLight'].play();
+    GameMngr.assets.sounds['bgMusicLight'].play();
     GameMngr.BeginLoop();
 }

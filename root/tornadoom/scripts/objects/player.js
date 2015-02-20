@@ -11,7 +11,7 @@ function Player(hud) {
     var contactScale = 2.0;
     var drawScale = 1.0;
     var captureRadius = 0.75;
-    var launchScalar = 2000;
+    var launchScalar = 1000;
 
     var massMax = 200;
     var massHeld = 0.0;
