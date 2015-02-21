@@ -159,7 +159,7 @@ function ParticleField(ptclCount, willStagger, fieldLife, effects) {
                 effects.travelTime,
                 this.stagger * (i),
                 randDir.GetScaleByNum(effects.startDist),
-                randDir.GetScaleByNum(effects.speed),
+                effects.conicalDispersion ? randDir.GetScaleByNum(effects.speed) : dir.GetScaleByNum(effects.speed),
                 effects.acc,
                 effects.dampening,
                 new Vector3(

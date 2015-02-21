@@ -109,6 +109,7 @@ function PtclPhysicsEffects() {
     this.startDist = 0.0;
     this.dir = new Vector3(0.0, 1.0, 0.0);
     this.range = 90.0;
+    this.conicalDispersion = true;
     this.speed = 1.0;
     this.acc = new Vector3();
     this.dampening = 1.0;

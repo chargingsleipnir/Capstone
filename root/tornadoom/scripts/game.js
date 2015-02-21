@@ -101,6 +101,8 @@ function BuildGame() {
     var player = new Player(hud);
     player.obj.trfmLocal.SetBaseTransByAxes(0.0, 1.0, 0.0);
 
+    var ufo = new UFO();
+
     var skyBox = new GameObject('skybox', Labels.none);
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));
     skyBox.mdlHdlr.SetTexture(GameMngr.assets.textures['skyTex'], TextureFilters.nearest);
@@ -116,6 +118,7 @@ function BuildGame() {
     // Player, internal objects, and several different giu elements
     var lvl01 = new Scene("Level 01", SceneTypes.gameplay);
     lvl01.Add(player.obj);
+    lvl01.Add(ufo.obj);
     lvl01.Add(skyBox);
     BuildScene2(lvl01);
     SceneMngr.AddScene(lvl01, false);
@@ -146,6 +149,8 @@ function BuildGame() {
         if(!GameMngr.paused) {
             if(SceneMngr.GetActiveScene().type == SceneTypes.gameplay) {
                 player.Update();
+                ufo.Update();
+
                 skyBox.trfmLocal.Rotate(VEC3_FWD, angle);
 
                 // ACTIVATES FULL ENGINE-BUILD VIEW WITH ALL CONTROL SHIFTED TO SEPARATE CAMERA
