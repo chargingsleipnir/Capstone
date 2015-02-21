@@ -13,20 +13,12 @@ function TopDownController(obj, ctrlName) {
     ctrl.moveRight = Input.CreateInputController(keyName, KeyMap.D);
     ctrl.moveBack = Input.CreateInputController(keyName, KeyMap.S);
     ctrl.moveForth = Input.CreateInputController(keyName, KeyMap.W);
-    ctrl.pitchDown = Input.CreateInputController(keyName, KeyMap.ArrowDown);
-    ctrl.pitchUp = Input.CreateInputController(keyName, KeyMap.ArrowUp);
     ctrl.yawLeft = Input.CreateInputController(keyName, KeyMap.ArrowLeft);
     ctrl.yawRight = Input.CreateInputController(keyName, KeyMap.ArrowRight);
-
-    var mouseName = "Mouse: " + ctrlName;
-    Input.RegisterControlScheme(mouseName, active, InputTypes.mouse);
-    var mouse = Input.CreateInputController("Mouse: " + ctrlName);
-    mouse.SetCursor(CursorTypes.crosshair);
 
     this.SetActive = function(isActive) {
         active = isActive;
         Input.SetActive(keyName, isActive);
-        Input.SetActive(mouseName, isActive);
     };
 
     this.Update = function() {
@@ -52,17 +44,6 @@ function TopDownController(obj, ctrlName) {
                 yawAngle--;
                 obj.trfmLocal.SetUpdatedOrient(VEC3_UP, yawAngle);
             }
-
-            /*
-             if(this.ctrl.pitchUp.pressed) {
-             this.obj.trfmLocal.RotateLocalViewX(this.turnSpeed);
-             //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.right, -this.turnSpeed);
-             }
-             else if(this.ctrl.pitchDown.pressed) {
-             this.obj.trfmLocal.RotateLocalViewX(-this.turnSpeed);
-             //this.obj.trfmLocal.Rotate(this.obj.trfmLocal.right, this.turnSpeed);
-             }
-             */
         }
     }
 }
@@ -85,15 +66,18 @@ function SnipeController(obj, ctrlName) {
     ctrl.moveRight = Input.CreateInputController(keyName, KeyMap.D);
     ctrl.moveBack = Input.CreateInputController(keyName, KeyMap.S);
     ctrl.moveForth = Input.CreateInputController(keyName, KeyMap.W);
+    /*
     ctrl.pitchDown = Input.CreateInputController(keyName, KeyMap.ArrowDown);
     ctrl.pitchUp = Input.CreateInputController(keyName, KeyMap.ArrowUp);
     ctrl.yawLeft = Input.CreateInputController(keyName, KeyMap.ArrowLeft);
     ctrl.yawRight = Input.CreateInputController(keyName, KeyMap.ArrowRight);
+    */
 
     var mouseName = "Mouse: " + ctrlName;
     Input.RegisterControlScheme(mouseName, active, InputTypes.mouse);
     var mouse = Input.CreateInputController("Mouse: " + ctrlName);
     mouse.SetCursor(CursorTypes.crosshair);
+    mouse.useCanvasCoords = false;
 
     this.SetActive = function(isActive) {
         active = isActive;
@@ -104,18 +88,22 @@ function SnipeController(obj, ctrlName) {
     this.Update = function() {
 
         if(active) {
-            if (this.ctrl.moveLeft.pressed) {
-                this.obj.trfmLocal.TranslateBaseRight(-moveSpeed * Time.deltaMilli);
+            if (ctrl.moveLeft.pressed) {
+                obj.trfmLocal.TranslateBaseRight(-moveSpeed * Time.deltaMilli);
             }
-            else if (this.ctrl.moveRight.pressed) {
-                this.obj.trfmLocal.TranslateBaseRight(moveSpeed * Time.deltaMilli);
+            else if (ctrl.moveRight.pressed) {
+                obj.trfmLocal.TranslateBaseRight(moveSpeed * Time.deltaMilli);
             }
-            if (this.ctrl.moveForth.pressed) {
-                obj.trfmLocal.TranslateBaseFwd(this.moveSpeed * Time.deltaMilli);
+            if (ctrl.moveForth.pressed) {
+                obj.trfmLocal.TranslateBaseFwd(moveSpeed * Time.deltaMilli);
             }
-            else if (this.ctrl.moveBack.pressed) {
-                this.obj.trfmLocal.TranslateBaseFwd(-this.moveSpeed * Time.deltaMilli);
+            else if (ctrl.moveBack.pressed) {
+                obj.trfmLocal.TranslateBaseFwd(-moveSpeed * Time.deltaMilli);
             }
+
+
+            console.log("Mouse - x: " + mouse.pos.x + ", y:" + mouse.pos.y);
+
             /*
              if(this.ctrl.pitchUp.pressed) {
              this.obj.trfmLocal.RotateLocalViewX(this.turnSpeed);

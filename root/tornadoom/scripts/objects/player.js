@@ -165,14 +165,34 @@ function Player(hud) {
     this.obj.camera.trfmAxes.RotateLocalViewX(-15);
     ViewMngr.SetActiveCamera(this.obj.camera);
 
-
     var topDownCtrl = new TopDownController(this.obj, "Top-down player controls");
-    topDownCtrl.SetActive(true);
     var snipeCtrl = new SnipeController(this.obj, "Over-shoulder player controls");
+    topDownCtrl.SetActive(true);
     this.ctrl = topDownCtrl;
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
+
+    // Allow player to hold space bar to go into a view where they use the mouse to aim within a given window
+    // around the direction they are facing.
+    var aimToggle = Input.CreateInputController(playerCtrlName, KeyMap.SpaceBar);
+    function AimTogglePressed() {
+        that.obj.camera.trfmAxes.SetPosAxes(1.25, 0.0, 2.25);
+        that.obj.camera.trfmAxes.RotateLocalViewX(30);
+        topDownCtrl.SetActive(false);
+        snipeCtrl.SetActive(true);
+        that.ctrl = snipeCtrl;
+    }
+    function AimToggleReleased() {
+        that.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
+        that.obj.camera.trfmAxes.RotateLocalViewX(-30);
+        snipeCtrl.SetActive(false);
+        topDownCtrl.SetActive(true);
+        that.ctrl = topDownCtrl;
+    }
+    aimToggle.SetDownCall(AimTogglePressed);
+    aimToggle.SetUpCallback(AimToggleReleased);
+
     var btnShoot = Input.CreateInputController(playerCtrlName, KeyMap.Shift);
     var btnAmmoScrollLeft = Input.CreateInputController(playerCtrlName, KeyMap.BracketOpen);
     var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
@@ -212,6 +232,7 @@ function Player(hud) {
         }
         PrepAmmo(gameObj, false);
     };
+    // Pop captured object from it's list and shoot forward from right on Tornado
     var Shoot = function() {
         var fwd = that.obj.trfmLocal.GetFwd();
         var gameObj = ammoTypes[ammoIdx].pop();
@@ -224,10 +245,6 @@ function Player(hud) {
     };
 
     // PLAYER METHODS -------------------------------------------------
-    var SwitchControls = function() {
-
-    };
-
     this.LevelUp = function() {
 
     };
@@ -241,11 +258,15 @@ function Player(hud) {
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
-        // Pop captured object from it's list and shoot forward from right on Tornado
+        // Shooting mechanics
         if(btnShoot.pressed) {
             Shoot();
             btnShoot.Release();
         }
+        if(aimToggle.pressed) {
+            //console.log('Aim toggle held. Anything perpetually needed in here?');
+        }
+
         // Change ammo type
         if(btnAmmoScrollLeft.pressed) {
             ammoIdx = (ammoIdx > 0) ? ammoIdx - 1 : ammoTypeCount - 1;

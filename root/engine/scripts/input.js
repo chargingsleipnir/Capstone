@@ -11,6 +11,7 @@ var Input = (function() {
             if (e.keyCode in activeKeyRegistry[o] && activeKeyRegistry[o][e.keyCode].readyLoop)
             {
                 activeKeyRegistry[o][e.keyCode].controller.pressed = true;
+                activeKeyRegistry[o][e.keyCode].controller.DownCallback();
                 activeKeyRegistry[o][e.keyCode].readyLoop = false;
             }
     };
@@ -21,24 +22,33 @@ var Input = (function() {
             if (e.keyCode in activeKeyRegistry[o])
             {
                 activeKeyRegistry[o][e.keyCode].controller.pressed = false;
+                activeKeyRegistry[o][e.keyCode].controller.UpCallback();
                 activeKeyRegistry[o][e.keyCode].readyLoop = true;
             }
     };
 
     var activeMouseRegistry = {};
     var inactiveMouseRegistry = {};
+    function SetMousePos(mouse, event) {
+        if(activeMouseRegistry[mouse].useCanvasCoords) {
+            activeMouseRegistry[mouse].pos.x = event.pageX - ViewMngr.offsetLeft;
+            activeMouseRegistry[mouse].pos.y = event.pageY - ViewMngr.offsetTop;
+        }
+        else {
+            activeMouseRegistry[mouse].pos.x = WndUtils.WndX_To_GLNDCX(event.pageX - ViewMngr.offsetLeft) - 1;
+            activeMouseRegistry[mouse].pos.y = (WndUtils.WndY_To_GLNDCY(event.pageY - ViewMngr.offsetTop) - 1) * -1;
+        }
+    }
 
     function onmousemove(e) {
         for (var o in activeMouseRegistry) {
-            activeMouseRegistry[o].pos.x = e.pageX - ViewMngr.offsetLeft;
-            activeMouseRegistry[o].pos.y = e.pageY - ViewMngr.offsetTop;
+            SetMousePos(o, e);
         }
     }
 
     function onmousedown(e) {
         for (var o in activeMouseRegistry) {
-            activeMouseRegistry[o].pos.x = e.pageX - ViewMngr.offsetLeft;
-            activeMouseRegistry[o].pos.y = e.pageY - ViewMngr.offsetTop;
+            SetMousePos(o, e);
             switch(e.button) {
                 case 0:
                     activeMouseRegistry[o].leftPressed = true;
@@ -55,8 +65,7 @@ var Input = (function() {
 
     function onmouseup(e) {
         for (var o in activeMouseRegistry) {
-            activeMouseRegistry[o].pos.x = e.pageX - ViewMngr.offsetLeft;
-            activeMouseRegistry[o].pos.y = e.pageY - ViewMngr.offsetTop;
+            SetMousePos(o, e);
             switch(e.button) {
                 case 0:
                     activeMouseRegistry[o].leftPressed = false;
@@ -186,6 +195,10 @@ var Input = (function() {
             if(keyMapping) {
                 var keyController = {
                     pressed: false,
+                    DownCallback: function(){},
+                    UpCallback: function(){},
+                    SetDownCall: function(Callback) {this.DownCallback = Callback},
+                    SetUpCallback: function(Callback) {this.UpCallback = Callback},
                     Release: function() { this.pressed = false; }
                 };
 
@@ -215,7 +228,8 @@ var Input = (function() {
                 LeftRelease: function() { this.leftPressed = false; },
                 MiddleRelease: function() { this.middlePressed = false; },
                 RightRelease: function() { this.rightPressed = false; },
-                SetCursor: function(cursorType) { canvasElem.style.cursor = cursorType; }
+                SetCursor: function(cursorType) { canvasElem.style.cursor = cursorType; },
+                useCanvasCoords: true
             };
 
             if (name in activeMouseRegistry) {
