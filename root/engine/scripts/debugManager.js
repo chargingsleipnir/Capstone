@@ -23,6 +23,8 @@ var DebugMngr = {
 
             var grid = new GameObject('grid', Labels.productionEnvironment);
             grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
+            // Just to eliminate multiple things drawing at 0
+            grid.trfmLocal.TranslateBaseByAxes(0.0, -0.01, 0.0);
             grid.SetModel(Primitives.grid);
             grid.Update(grid.trfmGlobal);
             this.grid = grid.mdlHdlr;

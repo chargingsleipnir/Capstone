@@ -31,8 +31,8 @@ function Player(hud) {
     // Basic player obj visual -------------------------------------------------
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
-    this.obj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
-    modelObj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
+    //this.obj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
+    //modelObj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
 
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);

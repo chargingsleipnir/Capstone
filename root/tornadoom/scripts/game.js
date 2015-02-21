@@ -172,6 +172,6 @@ function BuildGame() {
     }
 
     GameMngr.UserUpdate = GameUpdate;
-    GameMngr.assets.sounds['bgMusicLight'].play();
+    //GameMngr.assets.sounds['bgMusicLight'].play();
     GameMngr.BeginLoop();
 }

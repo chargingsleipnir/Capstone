@@ -6,6 +6,32 @@ function BuildScene2(scene) {
     scene.light.pnt.bright = 0.0;
     scene.light.pnt.pos.SetValues(0.0, 0.0, 0.0);
 
+    function RaiseToGruond(obj) {
+        var halfHeight = obj.shapeData.radii.y * obj.trfmLocal.scale.y;
+        obj.trfmLocal.SetBaseTransByAxes(0.0, halfHeight, 0.0);
+    }
+
+    var ground = new GameObject('ground', Labels.none);
+    ground.SetModel(GameMngr.assets.models['ground']);
+    ground.mdlHdlr.SetTexture(GameMngr.assets.textures['groundTex'], TextureFilters.mipmap);
+
+    var fence = new GameObject('fence', Labels.none);
+    fence.SetModel(GameMngr.assets.models['fence']);
+    RaiseToGruond(fence);
+    fence.trfmLocal.TranslateBaseByAxes(0.0, 0.0, 0.6);
+
+    var barn = new GameObject('barn', Labels.none);
+    barn.SetModel(GameMngr.assets.models['barn']);
+    barn.mdlHdlr.SetTexture(GameMngr.assets.textures['barnTex'], TextureFilters.linear);
+    RaiseToGruond(barn);
+    barn.trfmLocal.TranslateBaseByAxes(1.7, 0.0, -8.0);
+
+    var wagon = new GameObject('wagon', Labels.none);
+    wagon.SetModel(GameMngr.assets.models['wagon']);
+    wagon.mdlHdlr.SetTexture(GameMngr.assets.textures['wagonTex'], TextureFilters.linear);
+    RaiseToGruond(wagon);
+    wagon.trfmLocal.TranslateBaseByAxes(-1.5, 0.0, -8.0);
+
     var cows = [];
     var MAX_COWS = 20;
     var bales = [];
@@ -38,6 +64,10 @@ function BuildScene2(scene) {
 
     }
 
+    scene.Add(ground);
+    scene.Add(fence);
+    scene.Add(barn);
+    scene.Add(wagon);
     for(var i = 0; i < MAX_COWS; i++ ) {
         scene.Add(cows[i].obj);
         scene.Add(bales[i].obj);
