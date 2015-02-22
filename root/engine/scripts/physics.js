@@ -1,11 +1,11 @@
 ﻿
-function RigidBody(trfm, modelRadius) {
+function RigidBody(objBaseTrfm, modelRadius) {
     /// <signature>
     ///  <summary>Add physics motion to gameobject</summary>
     ///  <param name="trfm" type="Transform">Transform of GameObject</param>
     ///  <returns type="RigidBody" />
     /// </signature>
-    this.trfm = trfm;
+    this.trfm = objBaseTrfm;
     this.modelRadius = modelRadius;
 
     this.active = true;
@@ -256,7 +256,7 @@ RigidBody.prototype = {
             // LINEAR UPDATE
             this.velI.SetCopy(this.velF);
             //this.trfm.TranslateBaseByVec(this.velF.GetScaleByNum(Time.deltaMilli));
-            this.trfm.TranslateBaseByVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
+            this.trfm.TranslateByVec((this.velI.GetScaleByNum(Time.deltaMilli)).SetAddScaled(this.acc, 0.5 * (Time.deltaMilli * Time.deltaMilli)));
 
             this.acc.SetZero();
             this.acc.SetAddScaled(this.forceAccum, this.massInv);

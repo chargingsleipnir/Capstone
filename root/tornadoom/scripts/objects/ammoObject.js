@@ -9,8 +9,8 @@ function AmmoObject(name, model, texture, mass) {
     this.obj.mdlHdlr.SetTexture(texture, TextureFilters.linear);
 
     //this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
-    this.halfHeight = this.obj.shapeData.radii.y * this.obj.trfmLocal.scale.y;
-    this.obj.trfmLocal.SetBaseTransByAxes(0.0, this.halfHeight, 0);
+    this.halfHeight = this.obj.shapeData.radii.y * this.obj.trfmBase.scale.y;
+    this.obj.trfmBase.SetPosByAxes(0.0, this.halfHeight, 0);
 
     this.obj.AddComponent(Components.rigidBody);
     this.obj.rigidBody.SetMass(mass);
@@ -32,7 +32,7 @@ AmmoObject.prototype = {
         // Land and remove gravity force if not needed
         else if(this.obj.trfmGlobal.pos.y < this.halfHeight) {
             this.obj.rigidBody.dampening = 0.1;
-            this.obj.trfmLocal.SetBaseTransY(this.halfHeight);
+            this.obj.trfmBase.SetPosY(this.halfHeight);
             this.obj.rigidBody.velF.y = 0;
             this.gravForce.active = false;
         }

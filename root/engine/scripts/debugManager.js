@@ -22,11 +22,12 @@ var DebugMngr = {
             this.axes = zeroPointAxes.mdlHdlr;
 
             var grid = new GameObject('grid', Labels.productionEnvironment);
-            grid.trfmLocal.SetScaleAxes(10.0, 0.0, 10.0);
+            grid.parent = new GameObject("Grid Parent", Labels.none);
+            grid.trfmBase.SetScaleAxes(10.0, 0.0, 10.0);
             // Just to eliminate multiple things drawing at 0
-            grid.trfmLocal.TranslateBaseByAxes(0.0, -0.01, 0.0);
+            grid.trfmBase.TranslateByAxes(0.0, -0.01, 0.0);
             grid.SetModel(Primitives.grid);
-            grid.Update(grid.trfmGlobal);
+            grid.Update();
             this.grid = grid.mdlHdlr;
 
             var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), this.dispName);

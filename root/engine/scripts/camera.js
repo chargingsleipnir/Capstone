@@ -154,16 +154,16 @@ Frustum.prototype = {
     }
 };
 
-function Camera(trfmObj) {
+function Camera(objGlobalTrfm) {
 
     this.active = false;
     this.trfmAxes = new TransformAxes();
     this.posGbl = this.trfmAxes.pos.GetCopy();
 
     // If a component of an object, make it act as it's child
-    if(trfmObj) {
-        this.trfmObj = trfmObj;
-        this.trfmAxes.pos.SetCopy(this.trfmObj.pos);
+    if(objGlobalTrfm) {
+        this.objGlobalTrfm = objGlobalTrfm;
+        this.trfmAxes.pos.SetCopy(this.objGlobalTrfm.pos);
         this.posGbl = this.trfmAxes.pos.GetCopy();
         this.Update = this.FollowObjectUpdate;
     }
@@ -216,17 +216,16 @@ Camera.prototype = {
                 this.ctrl.Update();
             }
 
-            if (this.trfmAxes.IsChanging() || this.trfmObj.IsChanging()) {
-
+            if (this.trfmAxes.IsChanging() || this.objGlobalTrfm.active) {
                 this.mtxCam.SetIdentity();
                 // As is in reverse order, translate reversed from the object, then rotate around it, then apply local translation
                 this.mtxCam.SetTranslateVec3(this.trfmAxes.pos.GetNegative());
-                this.mtxCam.SetRotateAbout(this.trfmObj.orient.GetAxis(), -this.trfmObj.orient.GetAngle());
-                this.mtxCam.SetTranslateVec3(this.trfmObj.baseTrans.GetNegative());
+                this.mtxCam.SetRotateAbout(this.objGlobalTrfm.rot.GetAxis(), -this.objGlobalTrfm.rot.GetAngle());
+                this.mtxCam.SetTranslateVec3(this.objGlobalTrfm.pos.GetNegative());
 
                 // Use the obj orientation to rotate the local cam position to ensure it's correct global positioning
-                var newLocalPos = this.trfmObj.orient.GetMultiplyVec3(this.trfmAxes.pos);
-                this.posGbl.SetCopy(newLocalPos.GetAdd(this.trfmObj.baseTrans));
+                var newLocalPos = this.objGlobalTrfm.rot.GetMultiplyVec3(this.trfmAxes.pos);
+                this.posGbl.SetCopy(newLocalPos.GetAdd(this.objGlobalTrfm.pos));
 
                 // This ensures that the cam's axis rotations are properly represented, which is, relative to the base object
                 this.mtxCam.SetMultiply((new Matrix4()).SetOrientation(VEC3_ZERO, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global));
@@ -234,9 +233,9 @@ Camera.prototype = {
                 // The frustum takes camera's directions, rotated by the object's orientation, to align with the mtxCam view.
                 ViewMngr.frustum.CalculatePlanes(
                     this.posGbl,
-                    this.trfmObj.orient.GetMultiplyVec3(this.trfmAxes.fwd),
-                    this.trfmObj.orient.GetMultiplyVec3(this.trfmAxes.up),
-                    this.trfmObj.orient.GetMultiplyVec3(this.trfmAxes.right)
+                    this.objGlobalTrfm.rot.GetMultiplyVec3(this.trfmAxes.fwd),
+                    this.objGlobalTrfm.rot.GetMultiplyVec3(this.trfmAxes.up),
+                    this.objGlobalTrfm.rot.GetMultiplyVec3(this.trfmAxes.right)
                 );
             }
         }

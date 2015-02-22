@@ -996,30 +996,8 @@ Matrix4.prototype = {
         );
         return this;
     },
-    Transform: function(trfmData) {
-        // Full/Final translation
-        this.SetTranslateVec3(trfmData.baseTrans);
-        // Offset transformations
-        this.SetRotateAbout(trfmData.offsetRot.GetAxis(), trfmData.offsetRot.GetAngle());
-        this.SetTranslateVec3(trfmData.offsetTrans);
-        // Base transformations
-        this.SetRotateAbout(trfmData.orient.GetAxis(), trfmData.orient.GetAngle());
-        this.SetScaleVec3(trfmData.scale);
-    },
-
-
-
-
-
-    // NEW TEST MATERIAL
-
-    Transform2: function(globalTrfmData) {
-        // Full/Final translation
-        this.SetTranslateVec3(globalTrfmData.trans);
-        // Offset transformations
-        //this.SetRotateAbout(trfmData.offsetRot.GetAxis(), trfmData.offsetRot.GetAngle());
-        //this.SetTranslateVec3(trfmData.offsetTrans);
-        // Base transformations
+    Transform: function(globalTrfmData) {
+        this.SetTranslateVec3(globalTrfmData.pos);
         this.SetRotateAbout(globalTrfmData.rot.GetAxis(), globalTrfmData.rot.GetAngle());
         this.SetScaleVec3(globalTrfmData.scale);
     }

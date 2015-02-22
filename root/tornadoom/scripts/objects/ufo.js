@@ -7,7 +7,7 @@ function UFO() {
     var hoverHeight = 8.0;
 
     this.obj = new GameObject('ufo', Labels.none);
-    this.obj.trfmLocal.SetBaseTransByAxes(-2.0, hoverHeight, -2.0);
+    this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, -2.0);
 
     var coreObj = new GameObject("ufo core", Labels.none);
     coreObj.SetModel(GameMngr.assets.models['ufoCore']);
@@ -16,7 +16,7 @@ function UFO() {
     saucerObj.SetModel(GameMngr.assets.models['ufoSaucer']);
 
     var ptclObj = new GameObject("ufo tractor beam particle effect", Labels.none);
-    ptclObj.trfmLocal.SetBaseTransByAxes(0.0, -hoverHeight - 1.0, 0);
+    ptclObj.trfmBase.SetPosByAxes(0.0, -hoverHeight - 1.0, 0);
 
     // Not a bad idea, but will not work until I can better control blending issues
     //var beamObj = new GameObject("ufo tractor beam", Labels.none);
@@ -58,7 +58,7 @@ function UFO() {
         if(angle > 360.0)
             angle = 0.0;
 
-        coreObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle);
-        saucerObj.trfmLocal.SetUpdatedOrient(VEC3_UP, -angle);
+        coreObj.trfmBase.SetUpdatedRot(VEC3_UP, angle);
+        saucerObj.trfmBase.SetUpdatedRot(VEC3_UP, -angle);
     }
 }

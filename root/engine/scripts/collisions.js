@@ -1,8 +1,8 @@
 ﻿
 // COLLISION SPHERE INHERITS FROM SPHERE
 function CollisionSphere(objTrfm, radius) {
-    this.trfm = new Transform(Space.local);
-    this.trfm.offsetRot = objTrfm.orient;
+    this.trfm = objTrfm
+    //this.trfm.offsetRot = objTrfm.rot;
     // Possibly create collision enter, active, and exit events.
     //this.collidingLastFrame = false;
     //this.collidingThisFrame = false;
@@ -16,7 +16,7 @@ CollisionSphere.prototype.GetScaled = function() {
     return this.radius * this.trfm.scale.x;
 };
 CollisionSphere.prototype.SetOffsetTrans = function(x, y, z) {
-    this.trfm.SetOffsetTransByAxes(x, y, z);
+    //this.trfm.SetOffsetTransByAxes(x, y, z);
 };
 CollisionSphere.prototype.IntersectsSphere = function(sphere) {
     var radiiSum = this.GetScaled() + sphere.GetScaled();
@@ -25,16 +25,16 @@ CollisionSphere.prototype.IntersectsSphere = function(sphere) {
 CollisionSphere.prototype.Callback = function(collider){};
 CollisionSphere.prototype.Update = function(objTrfm) {
     // Must update here to make sure local trfm.pos is updated
-    this.trfm.SetBaseTransByVec(objTrfm.pos);
+    this.trfm.SetPosByVec(objTrfm.pos);
     this.SetScale(objTrfm.GetLargestScaleValue());
 };
 
 // COLLISION BOX INHERITS FROM OBB
 function CollisionBox(objTrfm, radii) {
-    this.trfm = new Transform(Space.local);
-    this.trfm.scale = objTrfm.scale;
-    this.trfm.offsetRot = objTrfm.orient;
-    OBB.call(this, this.trfm.pos, radii, objTrfm.orient);
+    this.trfm = objTrfm;
+    //this.trfm.scale = objTrfm.scale;
+    //this.trfm.offsetRot = objTrfm.rot;
+    OBB.call(this, this.trfm.pos, radii, objTrfm.rot);
 }
 CollisionBox.prototype = new OBB();
 CollisionBox.prototype.SetScale = function(x, y, z) {
@@ -44,7 +44,7 @@ CollisionBox.prototype.GetScaled = function() {
     return this.radii.GetScaleByVec(this.trfm.scale);
 };
 CollisionBox.prototype.SetOffsetTrans = function(x, y, z) {
-    this.trfm.SetOffsetTransByAxes(x, y, z);
+    //this.trfm.SetOffsetTransByAxes(x, y, z);
 };
 CollisionBox.prototype.IntersectsOBB = function(box) {
 
@@ -52,7 +52,7 @@ CollisionBox.prototype.IntersectsOBB = function(box) {
 CollisionBox.prototype.Callback = function(collider){};
 CollisionBox.prototype.Update = function(objTrfm) {
     // Must update here to make sure local trfm.pos is updated
-    this.trfm.SetBaseTransByVec(objTrfm.pos);
+    this.trfm.SetPosByVec(objTrfm.pos);
 };
 
 function CollisionSystem(shapeData, obj) {

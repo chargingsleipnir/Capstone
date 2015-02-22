@@ -873,8 +873,8 @@ function OBB(pos, radii, orient) {
     if(radii) this.radii = radii;
     else this.radii = new Vector3(1.0, 1.0, 1.0);
 
-    if(orient) this.orient = orient;
-    else this.orient = new Quaternion();
+    if(orient) this.rot = orient;
+    else this.rot = new Quaternion();
 }
 OBB.prototype = {
     SetCopy: function(box) {
@@ -885,14 +885,14 @@ OBB.prototype = {
         /// </signature>
         this.pos.SetCopy(box.pos);
         this.radii.SetCopy(box.radii);
-        this.orient.SetCopy(box.orient);
+        this.rot.SetCopy(box.rot);
     },
     GetCopy: function() {
         /// <signature>
         ///  <summary>Create new copy of this</summary>
         ///  <returns type="OBB" />
         /// </signature>
-        return new OBB(this.pos, this.radii, this.orient);
+        return new OBB(this.pos, this.radii, this.rot);
     },
     SetValues: function(pos, radii, orient) {
         /// <signature>
@@ -903,7 +903,7 @@ OBB.prototype = {
         /// </signature>
         this.pos.SetCopy(pos);
         this.radii.SetCopy(radii);
-        this.orient.SetCopy(orient);
+        this.rot.SetCopy(orient);
     },
     Scale: function(scalar) {
         /// <signature>
@@ -964,9 +964,9 @@ OBB.prototype = {
         var d = pnt.GetSubtract(this.pos);
         // Rotated axes of box
         var u = [
-            this.orient.GetMultiplyVec3(VEC3_RIGHT),
-            this.orient.GetMultiplyVec3(VEC3_UP),
-            this.orient.GetMultiplyVec3(VEC3_FWD)
+            this.rot.GetMultiplyVec3(VEC3_RIGHT),
+            this.rot.GetMultiplyVec3(VEC3_UP),
+            this.rot.GetMultiplyVec3(VEC3_FWD)
         ];
         // half-lengths of box
         var e = this.radii.GetData();
@@ -991,9 +991,9 @@ OBB.prototype = {
         var d = pnt.GetSubtract(this.pos);
         // Rotated axes of box
         var u = [
-            this.orient.GetMultiplyVec3(VEC3_RIGHT),
-            this.orient.GetMultiplyVec3(VEC3_UP),
-            this.orient.GetMultiplyVec3(VEC3_FWD)
+            this.rot.GetMultiplyVec3(VEC3_RIGHT),
+            this.rot.GetMultiplyVec3(VEC3_UP),
+            this.rot.GetMultiplyVec3(VEC3_FWD)
         ];
         // half-lengths of box
         var e = this.radii.GetData();
@@ -1017,9 +1017,9 @@ OBB.prototype = {
     IntersectsPlane: function(plane) {
         // Rotated axes of box
         var u = [
-            this.orient.GetMultiplyVec3(VEC3_RIGHT),
-            this.orient.GetMultiplyVec3(VEC3_UP),
-            this.orient.GetMultiplyVec3(VEC3_FWD)
+            this.rot.GetMultiplyVec3(VEC3_RIGHT),
+            this.rot.GetMultiplyVec3(VEC3_UP),
+            this.rot.GetMultiplyVec3(VEC3_FWD)
         ];
         // half-lengths of box
         var e = this.radii.GetData();

@@ -13,6 +13,8 @@ function Scene(name, sceneType) {
     this.type = sceneType;
 
     this.rootObj = new GameObject("Root", Labels.none);
+    // This is just a placeholder, to avoid having to check at ever parent reference
+    this.rootObj.parent = new GameObject("Root Parent", Labels.none);
 
     this.debug = new DebugHandler();
 
@@ -25,8 +27,6 @@ function Scene(name, sceneType) {
     this.sphereHierRootNodes = [];
     this.drawIndices = [];
     */
-    this.gameObjs = [];
-
     this.models = [];
 
     this.ptclSystems = [];
@@ -76,7 +76,7 @@ Scene.prototype = {
 
         if(DebugMngr.active) {
             // Visual for quaternion orientation
-            var axesLengths = gameObject.shapeData.radii.GetScaleByVec(gameObject.trfmGlobal.scale.SetScaleByNum(1.25));
+            var axesLengths = gameObject.shapeData.radii.GetScaleByVec(gameObject.trfmGlobal.scale.GetScaleByNum(1.25));
             this.debug.AddOrientAxes(new ModelHandler(
                 new Primitives.OrientAxes(axesLengths),
                 gameObject.trfmGlobal,
@@ -134,7 +134,7 @@ Scene.prototype = {
     },
     Update: function() {
         this.LoopCall();
-        this.rootObj.Update(this.rootObj.trfmLocal);
+        this.rootObj.Update();
         this.debug.Update();
         this.collisionNetwork.Update();
         /* Sort everything back to front. This is really needed just for

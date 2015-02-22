@@ -47,24 +47,24 @@ function Player(hud, mouse) {
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
 
-    targetObj.SetModel(EL.assets.models['dimensionBox']);
-    targetObj.trfmLocal.SetBaseTransByAxes(0.0, 0.0, 0.0);
+    targetObj.SetModel(GameMngr.assets.models['crosshair']);
+    targetObj.mdlHdlr.active = false;
+    targetObj.trfmBase.SetPosByAxes(0.0, 0.0, -2.5);
+    //targetObj.trfmOffset.SetPosByAxes(0.0, 0.0, -2.0);
 
     this.obj.AddChild(modelObj);
-    modelObj.AddChild(targetObj);
+    this.obj.AddChild(targetObj);
 
     // Just to help in a few functions below
     var playerPos = this.obj.trfmGlobal.pos;
-    var playerHeight = modelObj.shapeData.radii.y * modelObj.trfmLocal.scale.y * 2;
+    var playerHeight = modelObj.shapeData.radii.y * modelObj.trfmBase.scale.y * 2;
 
     // Tornado collisions -------------------------------------------------
 
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
-    //this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
     this.obj.collider.ScaleSphere(contactScale);
-    //this.obj.collider.OffsetBoxPosAxes(-3.0, 0.0, -3.0);
-    //this.obj.collider.ScaleBox(3.0, 0.5, 0.5);
+
 
     function ObjInRange(collider) {
         var objToEyeVec = new Vector2(playerPos.x - collider.trfm.pos.x, playerPos.z - collider.trfm.pos.z);
@@ -211,12 +211,14 @@ function Player(hud, mouse) {
         that.obj.camera.trfmAxes.RotateLocalViewX(25);
         mouse.SetLeftBtnCalls(null, ChargeShotReleased);
         snipeRayHdlr.active = true;
+        targetObj.mdlHdlr.active = true;
     }
     function AimToggleReleased() {
         that.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
         that.obj.camera.trfmAxes.RotateLocalViewX(-25);
         mouse.SetLeftBtnCalls(null, function(){});
         snipeRayHdlr.active = false;
+        targetObj.mdlHdlr.active = false;
         DropLaunchPower();
     }
     aimToggle.SetBtnCalls(AimTogglePressed, AimToggleReleased);
@@ -281,7 +283,7 @@ function Player(hud, mouse) {
     var Shoot = function(dir) {
         var gameObj = ammoTypes[ammoIdx].pop();
         if(gameObj) {
-            gameObj.trfmLocal.SetBaseTransByVec(playerPos.GetAdd(dir.SetScaleByNum(contactScale + 2.0)));
+            gameObj.trfmBase.SetPosByVec(playerPos.GetAdd(dir.SetScaleByNum(contactScale + 2.0)));
             UpdateHUDAmmoCount(ammoIdx);
             PrepAmmo(gameObj, true);
             gameObj.rigidBody.AddForce(dir.GetScaleByNum(windspeed * massDensity * launchScalar));
@@ -298,16 +300,14 @@ function Player(hud, mouse) {
 
         this.ctrl.Update();
 
-        //modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
+        modelObj.trfmBase.SetUpdatedRot(VEC3_UP, angle * 7.5);
 
         // Shooting mechanics
         if(btnShoot.pressed) {
-            Shoot(this.obj.trfmLocal.GetFwd());
+            Shoot(this.obj.trfmBase.GetFwd());
             btnShoot.Release();
         }
         // Trade-off here, more difficult control, but power can be built
-
-        //targetObj.trfmLocal.SetOffsetRotation(this.obj.trfmLocal.orient);
 
         if(aimToggle.pressed) {
             mouseAimX = mouse.pos.x - ViewMngr.wndWidth/2.0;
@@ -315,7 +315,10 @@ function Player(hud, mouse) {
 
             aimDir.SetValues(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
             aimDir.SetNormalized();
-            aimDir = that.obj.trfmLocal.orient.GetMultiplyVec3(aimDir);
+            targetObj.trfmBase.SetUpdatedRot(new Vector3(-aimDir.y, aimDir.x, 0.0), -45);
+            aimDir = that.obj.trfmGlobal.rot.GetMultiplyVec3(aimDir);
+
+            //targetObj.trfmBase.rot.
 
             // Display sniping sight
             var newVertData = playerPos.GetData();

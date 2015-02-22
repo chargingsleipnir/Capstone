@@ -99,14 +99,14 @@ function BuildGame() {
     /********************************** Global Objects */
 
     var player = new Player(hud, gameMouse);
-    player.obj.trfmLocal.SetBaseTransByAxes(0.0, 1.0, 0.0);
+    player.obj.trfmBase.SetPosByAxes(0.0, 1.0, 0.0);
 
     var ufo = new UFO();
 
     var skyBox = new GameObject('skybox', Labels.none);
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));
     skyBox.mdlHdlr.SetTexture(GameMngr.assets.textures['skyTex'], TextureFilters.nearest);
-    skyBox.trfmLocal.SetScaleAxes(100.0, 100.0, 100.0);
+    skyBox.trfmBase.SetScaleAxes(100.0, 100.0, 100.0);
 
     /********************************** Scenes */
 
@@ -151,7 +151,7 @@ function BuildGame() {
                 player.Update();
                 ufo.Update();
 
-                skyBox.trfmLocal.Rotate(VEC3_FWD, angle);
+                skyBox.trfmBase.SetUpdatedRot(VEC3_FWD, angle);
 
                 // ACTIVATES FULL ENGINE-BUILD VIEW WITH ALL CONTROL SHIFTED TO SEPARATE CAMERA
                 if(switchCam.pressed) {

@@ -217,7 +217,7 @@ function ParticleField(ptclCount, willStagger, fieldLife, effects) {
 }
 ParticleField.prototype = {
     GetObjectTransform: function(trfmObj) {
-        this.trfmObj = trfmObj;
+        this.objGlobalTrfm = trfmObj;
         // Once positions are established, sort from back to front
         // This stays here uniquely because it's using StartPos, not regular pos;
         if(this.needsSorting)
@@ -233,8 +233,8 @@ ParticleField.prototype = {
     SortForLaunch: function(idx) {
         if(idx > 0) {
             do {
-                var distThisPtcl = this.ptcls[idx].startPos.GetAdd(this.trfmObj.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
-                var distPrevPtcl = this.ptcls[idx - 1].startPos.GetAdd(this.trfmObj.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
+                var distThisPtcl = this.ptcls[idx].startPos.GetAdd(this.objGlobalTrfm.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
+                var distPrevPtcl = this.ptcls[idx - 1].startPos.GetAdd(this.objGlobalTrfm.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
 
                 if (distThisPtcl > distPrevPtcl) {
                     RefUtils.Swap(this.ptcls, idx, idx - 1);
@@ -247,8 +247,8 @@ ParticleField.prototype = {
     SortPtcl: function(idx) {
         if(idx > 0) {
             do {
-                var distThisPtcl = this.ptcls[idx].pos.GetAdd(this.trfmObj.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
-                var distPrevPtcl = this.ptcls[idx - 1].pos.GetAdd(this.trfmObj.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
+                var distThisPtcl = this.ptcls[idx].pos.GetAdd(this.objGlobalTrfm.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
+                var distPrevPtcl = this.ptcls[idx - 1].pos.GetAdd(this.objGlobalTrfm.pos).SetSubtract(ViewMngr.activeCam.posGbl).GetMagSqr();
 
                 if (distThisPtcl > distPrevPtcl) {
                     RefUtils.Swap(this.ptcls, idx, idx - 1);
@@ -472,7 +472,7 @@ FlatTail.prototype = {
 /******************************** Particle Management *****************************************/
 
 function ParticleSystem(trfmObj) {
-    this.trfmObj = trfmObj;
+    this.objGlobalTrfm = trfmObj;
     this.active = true;
 
     this.fields = [];
@@ -481,10 +481,10 @@ function ParticleSystem(trfmObj) {
 ParticleSystem.prototype = {
     AddField: function(field) {
         this.fields.push(field);
-        field.GetObjectTransform(this.trfmObj);
+        field.GetObjectTransform(this.objGlobalTrfm);
     },
     AddTail: function(ptclCount, fieldLife, effects) {
-        this.tails.push(new FlatTail(this.trfmObj, ptclCount, fieldLife, effects));
+        this.tails.push(new FlatTail(this.objGlobalTrfm, ptclCount, fieldLife, effects));
     },
     RemoveField: function(field) {
         var index = this.fields.indexOf(field);

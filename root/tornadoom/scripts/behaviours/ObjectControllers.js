@@ -25,24 +25,24 @@ function TopDownController(obj, ctrlName) {
 
         if(active) {
             if (ctrl.moveLeft.pressed) {
-                obj.trfmLocal.TranslateBaseRight(-moveSpeed * Time.deltaMilli);
+                obj.trfmBase.TranslateRight(-moveSpeed * Time.deltaMilli);
             }
             else if (ctrl.moveRight.pressed) {
-                obj.trfmLocal.TranslateBaseRight(moveSpeed * Time.deltaMilli);
+                obj.trfmBase.TranslateRight(moveSpeed * Time.deltaMilli);
             }
             if (ctrl.moveForth.pressed) {
-                obj.trfmLocal.TranslateBaseFwd(moveSpeed * Time.deltaMilli);
+                obj.trfmBase.TranslateFwd(moveSpeed * Time.deltaMilli);
             }
             else if (ctrl.moveBack.pressed) {
-                obj.trfmLocal.TranslateBaseFwd(-moveSpeed * Time.deltaMilli);
+                obj.trfmBase.TranslateFwd(-moveSpeed * Time.deltaMilli);
             }
             if(ctrl.yawLeft.pressed) {
                 yawAngle++;
-                obj.trfmLocal.SetUpdatedOrient(VEC3_UP, yawAngle);
+                obj.trfmBase.SetUpdatedRot(VEC3_UP, yawAngle);
             }
             else if(ctrl.yawRight.pressed) {
                 yawAngle--;
-                obj.trfmLocal.SetUpdatedOrient(VEC3_UP, yawAngle);
+                obj.trfmBase.SetUpdatedRot(VEC3_UP, yawAngle);
             }
         }
     }

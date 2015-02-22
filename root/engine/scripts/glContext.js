@@ -456,11 +456,11 @@ var GL = {
             var simpleFields = scene.ptclSystems[i].GetSimpleFields();
 
             this.mtxModel.SetIdentity();
-            this.mtxModel.Transform(scene.ptclSystems[i].trfmObj);
+            this.mtxModel.Transform(scene.ptclSystems[i].objGlobalTrfm);
             this.mtxModel.SetMultiply(mtxVP);
 
             // Used to shrink point size
-            var dist = ViewMngr.activeCam.posGbl.GetSubtract(scene.ptclSystems[i].trfmObj.pos).GetMag();
+            var dist = ViewMngr.activeCam.posGbl.GetSubtract(scene.ptclSystems[i].objGlobalTrfm.pos).GetMag();
             var distCalc = 1 - (dist / ViewMngr.farCullDist);
 
             for (var j = 0; j < simpleFields.length; j++)
