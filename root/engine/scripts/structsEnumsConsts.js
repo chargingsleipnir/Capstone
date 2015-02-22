@@ -57,6 +57,7 @@ function BufferData() {
     this.lenTexCoords;
     this.lenNormAxes;
 }
+
 function ControlScheme() {
     this.moveLeft;
     this.moveRight;

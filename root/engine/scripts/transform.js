@@ -264,6 +264,8 @@ Transform.prototype = {
 
         if (this.active) {
 
+            this.UpdatePos();
+
             if(this.space == Space.local)
                 this.active = false;
 
@@ -387,6 +389,216 @@ TransformAxes.prototype = {
     IsChanging: function() {
         if (this.active) {
             this.active = false;
+            return true;
+        }
+        return false;
+    }
+};
+
+
+// NEW TEST MATERIAL
+
+function TransformData() {
+    this.trans = new Vector3();
+    this.rot = new Quaternion();
+    this.scale = new Vector3(1.0, 1.0, 1.0);
+}
+TransformData.prototype = {
+    SetDefault: function() {
+        this.trans.SetZero();
+        this.rot.SetIdentity();
+        this.scale.SetOne();
+    },
+    GetLargestScaleValue: function() {
+        if (this.scale.x > this.scale.y && this.scale.x > this.scale.z)
+            return this.scale.x;
+        else if (this.scale.y > this.scale.z)
+            return this.scale.y;
+        else
+            return this.scale.z;
+    },
+    SetTransX: function(x) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.x = x;
+    },
+    SetTransY: function(y) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="y" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.y = y;
+    },
+    SetTransZ: function(z) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.z = z;
+    },
+    SetTransByAxes: function(x, y, z) {
+        ///  <summary>Set a new position</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.SetValues(x, y, z);
+    },
+    SetTransByVec: function(newBaseTrans) {
+        /// <signature>
+        ///  <summary>Set a new position</summary>
+        ///  <param name="position" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.SetCopy(newBaseTrans);
+    },
+    TranslateByAxes: function(x, y, z) {
+        ///  <summary>Move position by amount given</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.x += x;
+        this.trans.y += y;
+        this.trans.z += z;
+    },
+    TranslateByVec: function(translation) {
+        /// <signature>
+        ///  <summary>Move position by amount given</summary>
+        ///  <param name="translation" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.SetAdd(translation);
+    },
+    TranslateFwd: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.SetAdd(this.rot.GetMultiplyVec3(VEC3_FWD).GetScaleByNum(speed));
+    },
+    TranslateUp: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.SetAdd(this.orient.GetMultiplyVec3(VEC3_UP).GetScaleByNum(speed));
+    },
+    TranslateRight: function(speed) {
+        /// <signature>
+        ///  <summary>Move position forward by amount given</summary>
+        ///  <param name="speed" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.trans.SetAdd(this.orient.GetMultiplyVec3(VEC3_RIGHT).GetScaleByNum(speed));
+    },
+    SetRotByAxisAngle: function(axis, thetaDeg) {
+        /// <signature>
+        ///  <summary>Set Rotation around given axis by given angle</summary>
+        ///  <param name="axis" type="Vector3">Axis around which to rotate</param>
+        ///  <param name="thetaDeg" type="decimal">Angle in degrees</param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.rot.SetFromAxisAngle(axis, thetaDeg);
+    },
+    SetRotByQuat: function(quat) {
+        this.rot.SetCopy(quat);
+    },
+    SetUpdatedRot: function(normAxis, thetaDeg) {
+        this.rot.UpdateAxisAngle(normAxis, thetaDeg);
+    },
+    AddRotByAxisAngle: function(axis, thetaDeg) {
+        /// <signature>
+        ///  <summary>Apply Rotation around given axis by given angle</summary>
+        ///  <param name="axis" type="Vector3">Axis around which to rotate</param>
+        ///  <param name="thetaDeg" type="decimal">Angle in degrees</param>
+        ///  <returns type="void" />
+        /// </signature>
+        var rotation = new Quaternion();
+        this.rot.SetMultiplyQuat(rotation.SetFromAxisAngle(axis, thetaDeg));
+    },
+    GetFwd: function() {
+        return this.rot.GetMultiplyVec3(VEC3_FWD);
+    },
+    GetRight: function() {
+        return this.rot.GetMultiplyVec3(VEC3_RIGHT);
+    },
+    SetScaleAxes: function(x, y, z) {
+        /// <summary>Set a new scale</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.scale.x = x;
+        this.scale.y = y;
+        this.scale.z = z;
+    },
+    SetScaleByVec: function(scaleVec) {
+        /// <signature>
+        ///  <summary>Set a new scale</summary>
+        ///  <param name="scaleVec" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.scale.SetCopy(scaleVec);
+    },
+    ScaleByAxes: function(x, y, z) {
+        /// <summary>Grow/shrink by value given</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.scale.x += x;
+        this.scale.y += y;
+        this.scale.z += z;
+    },
+    ScaleByVec3: function(scaleVec) {
+        /// <signature>
+        ///  <summary>Grow/shrink by value given</summary>
+        ///  <param name="scaleVec" type="Vector3"></param>
+        ///  <returns type="void" />
+        /// </signature>
+        this.scale.SetAdd(scaleVec);
+    }
+};
+
+
+// This may be useless
+
+function Transform2() {
+    // Start in standard position facing down -z
+    this.base = new TransformData();
+    this.offset = new TransformData();
+    this.final = new TransformData();
+    this.active = false;
+}
+Transform2.prototype = {
+    SetDefault: function() {
+        this.base.SetDefault();
+        this.offset.SetDefault();
+        this.final.SetDefault();
+        this.active = true;
+    },
+    UpdateFinal: function() {
+        //this.pos.SetCopy(this.offsetRot.GetMultiplyVec3(this.offsetTrans).SetAdd(this.baseTrans));
+        // would need to do more to account for base Rotation?
+    },
+    IsChanging: function() {
+
+        if (this.active) {
+
+            this.UpdatePos();
+
+            if(this.space == Space.local)
+                this.active = false;
+
             return true;
         }
         return false;

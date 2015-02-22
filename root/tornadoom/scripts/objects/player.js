@@ -42,12 +42,16 @@ function Player(hud, mouse) {
 
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
-    //this.obj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
-    //modelObj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
+    var targetObj = new GameObject("targeting reticule", Labels.none);
 
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
+
+    targetObj.SetModel(EL.assets.models['dimensionBox']);
+    targetObj.trfmLocal.SetBaseTransByAxes(0.0, 0.0, 0.0);
+
     this.obj.AddChild(modelObj);
+    modelObj.AddChild(targetObj);
 
     // Just to help in a few functions below
     var playerPos = this.obj.trfmGlobal.pos;
@@ -294,7 +298,7 @@ function Player(hud, mouse) {
 
         this.ctrl.Update();
 
-        modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
+        //modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
         // Shooting mechanics
         if(btnShoot.pressed) {
@@ -302,6 +306,9 @@ function Player(hud, mouse) {
             btnShoot.Release();
         }
         // Trade-off here, more difficult control, but power can be built
+
+        //targetObj.trfmLocal.SetOffsetRotation(this.obj.trfmLocal.orient);
+
         if(aimToggle.pressed) {
             mouseAimX = mouse.pos.x - ViewMngr.wndWidth/2.0;
             mouseAimY = (mouse.pos.y - ViewMngr.wndHeight/2.0) * -1;
