@@ -30,14 +30,8 @@ var Input = (function() {
     var activeMouseRegistry = {};
     var inactiveMouseRegistry = {};
     function SetMousePos(mouse, event) {
-        if(activeMouseRegistry[mouse].useCanvasCoords) {
-            activeMouseRegistry[mouse].pos.x = event.pageX - ViewMngr.offsetLeft;
-            activeMouseRegistry[mouse].pos.y = event.pageY - ViewMngr.offsetTop;
-        }
-        else {
-            activeMouseRegistry[mouse].pos.x = WndUtils.WndX_To_GLNDCX(event.pageX - ViewMngr.offsetLeft) - 1;
-            activeMouseRegistry[mouse].pos.y = (WndUtils.WndY_To_GLNDCY(event.pageY - ViewMngr.offsetTop) - 1) * -1;
-        }
+        activeMouseRegistry[mouse].pos.x = event.pageX - ViewMngr.offsetLeft;
+        activeMouseRegistry[mouse].pos.y = event.pageY - ViewMngr.offsetTop;
     }
 
     function onmousemove(e) {
@@ -52,6 +46,7 @@ var Input = (function() {
             switch(e.button) {
                 case 0:
                     activeMouseRegistry[o].leftPressed = true;
+                    activeMouseRegistry[o].LeftDownCallback();
                     break;
                 case 1:
                     activeMouseRegistry[o].middlePressed = true;
@@ -69,6 +64,7 @@ var Input = (function() {
             switch(e.button) {
                 case 0:
                     activeMouseRegistry[o].leftPressed = false;
+                    activeMouseRegistry[o].LeftUpCallback();
                     break;
                 case 1:
                     activeMouseRegistry[o].middlePressed = false;
@@ -197,8 +193,10 @@ var Input = (function() {
                     pressed: false,
                     DownCallback: function(){},
                     UpCallback: function(){},
-                    SetDownCall: function(Callback) {this.DownCallback = Callback},
-                    SetUpCallback: function(Callback) {this.UpCallback = Callback},
+                    SetBtnCalls: function(downCallback, upCallback) {
+                        if(downCallback) this.DownCallback = downCallback;
+                        if(upCallback) this.UpCallback = upCallback
+                    },
                     Release: function() { this.pressed = false; }
                 };
 
@@ -228,8 +226,13 @@ var Input = (function() {
                 LeftRelease: function() { this.leftPressed = false; },
                 MiddleRelease: function() { this.middlePressed = false; },
                 RightRelease: function() { this.rightPressed = false; },
-                SetCursor: function(cursorType) { canvasElem.style.cursor = cursorType; },
-                useCanvasCoords: true
+                LeftDownCallback: function() {},
+                LeftUpCallback: function() {},
+                SetLeftBtnCalls: function(downCallback, upCallback) {
+                    if(downCallback) this.LeftDownCallback = downCallback;
+                    if(upCallback) this.LeftUpCallback = upCallback;
+                },
+                SetCursor: function(cursorType) { canvasElem.style.cursor = cursorType; }
             };
 
             if (name in activeMouseRegistry) {

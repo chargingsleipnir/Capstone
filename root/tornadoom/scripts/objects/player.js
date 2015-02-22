@@ -2,7 +2,7 @@
  * Created by Devin on 2015-01-16.
  */
 
-function Player(hud) {
+function Player(hud, mouse) {
 
     // Player characteristics -------------------------------------------------
     var windspeed = 7.5;
@@ -11,7 +11,9 @@ function Player(hud) {
     var contactScale = 2.0;
     var drawScale = 1.0;
     var captureRadius = 0.75;
-    var launchScalar = 1000;
+    var LAUNCH_SCALAR_MIN = 500;
+    var LAUNCH_SCALAR_MAX = 750;
+    var launchScalar = LAUNCH_SCALAR_MIN;
 
     var massMax = 200;
     var massHeld = 0.0;
@@ -25,6 +27,13 @@ function Player(hud) {
         caughtCows,
         caughtHayBales
     ];
+
+    // The X and Y are just the mouses screen coords, assuming (0,0) at the centre
+    // The Z and scalar are values used to try to control how steep the new direction becomes
+    var mouseAimX = 0;
+    var mouseAimY = 0;
+    var mouseAimZ = -75;
+    var mouseAimScalar = 0.1;
 
     var that = this;
 
@@ -137,7 +146,7 @@ function Player(hud) {
     style.fontColour = new Vector3(0.0, 0.0, 0.0);
     style.textMaxWidth = 15;
     style.textAlignWidth = Alignment.right;
-    style.textAlignHeight = Alignment.bottom;
+    style.textAlignHeight = Alignment.centre;
     style.bgColour = new Vector3(0.0, 0.0, 0.0);
     style.textLineSpacing = 0.0;
     style.margin = 15.0;
@@ -159,16 +168,22 @@ function Player(hud) {
         caughtBaleInfo
     ];
 
-    // Add controls -------------------------------------------------
+    style.textMaxWidth = 20;
+    style.textAlignWidth = Alignment.left;
+    style.bgTexture = null;
+    style.fontColour = new Vector3(1.0, 1.0, 1.0);
+    var launchPowerMsg = new GUIObject(new WndRect(0, 0, 375, 68), "Extra Power: 000", style);
+    hud.AddGUIObject(launchPowerMsg);
+    launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
+
+        // Add controls -------------------------------------------------
     this.obj.AddComponent(Components.camera);
     this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
     this.obj.camera.trfmAxes.RotateLocalViewX(-15);
     ViewMngr.SetActiveCamera(this.obj.camera);
 
-    var topDownCtrl = new TopDownController(this.obj, "Top-down player controls");
-    var snipeCtrl = new SnipeController(this.obj, "Over-shoulder player controls");
-    topDownCtrl.SetActive(true);
-    this.ctrl = topDownCtrl;
+    var ctrl = new TopDownController(this.obj, "Top-down player controls");
+    ctrl.SetActive(true);
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
@@ -178,20 +193,24 @@ function Player(hud) {
     var aimToggle = Input.CreateInputController(playerCtrlName, KeyMap.SpaceBar);
     function AimTogglePressed() {
         that.obj.camera.trfmAxes.SetPosAxes(1.25, 0.0, 2.25);
-        that.obj.camera.trfmAxes.RotateLocalViewX(30);
-        topDownCtrl.SetActive(false);
-        snipeCtrl.SetActive(true);
-        that.ctrl = snipeCtrl;
+        that.obj.camera.trfmAxes.RotateLocalViewX(25);
+        mouse.SetLeftBtnCalls(null, ChargeShotReleased);
     }
     function AimToggleReleased() {
         that.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
-        that.obj.camera.trfmAxes.RotateLocalViewX(-30);
-        snipeCtrl.SetActive(false);
-        topDownCtrl.SetActive(true);
-        that.ctrl = topDownCtrl;
+        that.obj.camera.trfmAxes.RotateLocalViewX(-25);
+        DropLaunchPower();
+        mouse.SetLeftBtnCalls(null, function(){});
     }
-    aimToggle.SetDownCall(AimTogglePressed);
-    aimToggle.SetUpCallback(AimToggleReleased);
+    aimToggle.SetBtnCalls(AimTogglePressed, AimToggleReleased);
+
+    // When in this mode, the left mouse button can also be held to charge up the shot.
+    // Shoot when released
+    function ChargeShotReleased() {
+        var aimDir = new Vector3(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
+        aimDir.SetNormalized();
+        Shoot(that.obj.trfmLocal.orient.GetMultiplyVec3(aimDir));
+    }
 
     var btnShoot = Input.CreateInputController(playerCtrlName, KeyMap.Shift);
     var btnAmmoScrollLeft = Input.CreateInputController(playerCtrlName, KeyMap.BracketOpen);
@@ -233,38 +252,50 @@ function Player(hud) {
         PrepAmmo(gameObj, false);
     };
     // Pop captured object from it's list and shoot forward from right on Tornado
-    var Shoot = function() {
-        var fwd = that.obj.trfmLocal.GetFwd();
+    var RaiseLaunchPower = function() {
+        launchScalar += 2.0;
+        if(launchScalar > LAUNCH_SCALAR_MAX)
+            launchScalar = LAUNCH_SCALAR_MAX;
+
+        launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
+    };
+    var DropLaunchPower = function() {
+        launchScalar = LAUNCH_SCALAR_MIN;
+        launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
+    };
+    var Shoot = function(dir) {
         var gameObj = ammoTypes[ammoIdx].pop();
         if(gameObj) {
-            gameObj.trfmLocal.SetBaseTransByVec(playerPos.GetAdd(fwd.SetScaleByNum(contactScale + 2.0)));
+            gameObj.trfmLocal.SetBaseTransByVec(playerPos.GetAdd(dir.SetScaleByNum(contactScale + 2.0)));
             UpdateHUDAmmoCount(ammoIdx);
             PrepAmmo(gameObj, true);
-            gameObj.rigidBody.AddForce(fwd.GetScaleByNum(windspeed * massDensity * launchScalar));
+            gameObj.rigidBody.AddForce(dir.GetScaleByNum(windspeed * massDensity * launchScalar));
         }
+        DropLaunchPower();
     };
 
     // PLAYER METHODS -------------------------------------------------
-    this.LevelUp = function() {
-
-    };
     var angle = 0.0;
     this.Update = function() {
         angle++;
         if(angle > 360.0)
             angle = 0.0;
 
-        this.ctrl.Update();
+        ctrl.Update();
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
         // Shooting mechanics
         if(btnShoot.pressed) {
-            Shoot();
+            Shoot(this.obj.trfmLocal.GetFwd());
             btnShoot.Release();
         }
+        // Trade-off here, more difficult control, but power can be built
         if(aimToggle.pressed) {
-            //console.log('Aim toggle held. Anything perpetually needed in here?');
+            mouseAimX = mouse.pos.x - ViewMngr.wndWidth/2.0;
+            mouseAimY = (mouse.pos.y - ViewMngr.wndHeight/2.0) * -1;
+            if(mouse.leftPressed)
+                RaiseLaunchPower();
         }
 
         // Change ammo type

@@ -20,7 +20,7 @@ function BuildGame() {
     var gameMouseCtrlName = "GameMouse";
     Input.RegisterControlScheme(gameMouseCtrlName, true, InputTypes.mouse);
     var gameMouse = Input.CreateInputController(gameMouseCtrlName);
-    gameMouse.SetCursor(CursorTypes.crosshair);
+    gameMouse.SetCursor(CursorTypes.none);
 
     var gameKeyCtrlName = "SceneAndMenuNav";
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
@@ -98,7 +98,7 @@ function BuildGame() {
 
     /********************************** Global Objects */
 
-    var player = new Player(hud);
+    var player = new Player(hud, gameMouse);
     player.obj.trfmLocal.SetBaseTransByAxes(0.0, 1.0, 0.0);
 
     var ufo = new UFO();
@@ -129,7 +129,7 @@ function BuildGame() {
         GUINetwork.SetActive(menuSysName, menuToggle);
         GameMngr.TogglePause();
         if (menuToggle) gameMouse.SetCursor(CursorTypes.normal);
-        else gameMouse.SetCursor(CursorTypes.crosshair);
+        else gameMouse.SetCursor(CursorTypes.none);
     }
 
     function GameUpdate() {

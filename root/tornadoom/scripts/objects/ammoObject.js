@@ -40,7 +40,7 @@ AmmoObject.prototype = {
 };
 
 function HayBale() {
-    AmmoObject.call(this, 'hay bale', GameMngr.assets.models['hayBale'], GameMngr.assets.textures['hayBaleTex'], 40.0);
+    AmmoObject.call(this, 'hay bale', GameMngr.assets.models['hayBale'], GameMngr.assets.textures['hayBaleTex'], 30.0);
 }
 HayBale.prototype = AmmoObject.prototype;
 
