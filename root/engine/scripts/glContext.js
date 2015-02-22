@@ -248,105 +248,107 @@ var GL = {
         /******************* GameObject Models *************************/
         for (var i = 0; i < scene.models.length; i++)
         {
-            if (scene.models[i].active && ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere))
+            if (scene.models[i].active)
             {
-                //frustumTestCount++;
+                if(ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere)) {
+                    //frustumTestCount++;
 
-                this.mtxModel.SetIdentity();
-                this.mtxModel.Transform(scene.models[i].trfm);
+                    this.mtxModel.SetIdentity();
+                    this.mtxModel.Transform(scene.models[i].trfm);
 
-                // These just allow everything to be better read
-                shdr = scene.models[i].shaderData;
-                buff = scene.models[i].bufferData;
+                    // These just allow everything to be better read
+                    shdr = scene.models[i].shaderData;
+                    buff = scene.models[i].bufferData;
 
-                if(testBool) {
+                    if (testBool) {
 
-                    if(i >= scene.models.length -1)
-                        testBool = false;
-                }
-
-                // USE PROGRAM AND VBO
-                this.ctx.useProgram(shdr.program);
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-                if (shdr.a_Col != -1) {
-                    this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-                }
-                if (shdr.a_TexCoord != -1) {
-                    this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                    this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-                    if (buff.texID) {
-                        this.ctx.activeTexture(this.ctx.TEXTURE0);
-                        this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                        this.ctx.uniform1i(shdr.u_Sampler, 0);
-                        // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
+                        if (i >= scene.models.length - 1)
+                            testBool = false;
                     }
+
+                    // USE PROGRAM AND VBO
+                    this.ctx.useProgram(shdr.program);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                    if (shdr.a_Col != -1) {
+                        this.ctx.enableVertexAttribArray(shdr.a_Col);
+                        this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                    }
+                    if (shdr.a_TexCoord != -1) {
+                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+                        if (buff.texID) {
+                            this.ctx.activeTexture(this.ctx.TEXTURE0);
+                            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                            this.ctx.uniform1i(shdr.u_Sampler, 0);
+                            // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
+                        }
+                    }
+                    if (shdr.a_Norm != -1) {
+                        this.ctx.enableVertexAttribArray(shdr.a_Norm);
+                        this.ctx.vertexAttribPointer(shdr.a_Norm, 3, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems + buff.lenTexCoords) * buff.VAOBytes);
+
+                        // Diffuse
+                        // Diff col and int are multiplied before exporting
+                        this.ctx.uniform3fv(shdr.u_DiffColWeight, scene.models[i].mat.diff.colWeight);
+                        // Specular
+                        this.ctx.uniform3fv(shdr.u_SpecCol, scene.models[i].mat.spec.col);
+                        this.ctx.uniform1f(shdr.u_SpecInt, scene.models[i].mat.spec.int);
+
+                        //gl.uniform1f(shdr.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
+                        // Mirror
+                        //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
+                        //gl.uniform1f(shdr.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
+                        //gl.uniform1f(shdr.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
+                        // Shading
+                        //gl.uniform1f(shdr.u_Shading_Ambient, renderers[i].materials[0].shading.ambient);
+                        //gl.uniform1f(shdr.u_Shading_Emit, renderers[i].materials[0].shading.emit);
+                        //gl.uniform1f(shdr.u_Shading_Translucent, renderers[i].materials[0].shading.translucent);
+                        // Other
+                        this.ctx.uniform1f(shdr.u_Alpha, scene.models[i].mat.alpha);
+                        //gl.uniform1f(shdr.u_Darkness, renderers[i].materials[0].darkness);
+
+                        this.ctx.uniform1f(shdr.u_AmbBright, scene.light.amb.bright);
+                        this.ctx.uniform1f(shdr.u_DirBright, scene.light.dir.bright);
+                        this.ctx.uniform3fv(shdr.u_DirDir, scene.light.dir.dir.GetNegative().GetData());
+                        this.ctx.uniform1f(shdr.u_PntBright, scene.light.pnt.bright);
+                        this.ctx.uniform3fv(shdr.u_PntPos, scene.light.pnt.pos.GetData());
+                        this.ctx.uniform3fv(shdr.u_CamPos, ViewMngr.activeCam.posGbl.GetData());
+
+
+                        /* If there's lighting, than the model and view-proj matrices
+                         * are sent up independently. The lighting calculations require
+                         * holding onto the verts modified from the model-matrix. */
+                        this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, this.mtxModel.data);
+                        this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+                        // Normal Matrix  GetInvMtx3
+                        var mtxNorm = this.mtxModel.GetInvMtx3();
+                        mtxNorm.Transpose();
+                        this.ctx.uniformMatrix3fv(shdr.u_MtxNorm, false, mtxNorm.data);
+                    }
+                    else {
+                        this.mtxModel.SetMultiply(mtxVP);
+                        this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
+                    }
+                    this.ctx.uniform4fv(shdr.u_Tint, scene.models[i].tint.GetData());
+
+                    // Draw calls
+                    if (buff.EABO) {
+                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                        this.ctx.drawElements(scene.models[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                    }
+                    else {
+                        this.ctx.drawArrays(scene.models[i].drawMethod, 0, buff.numVerts);
+                    }
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
-                if (shdr.a_Norm != -1) {
-                    this.ctx.enableVertexAttribArray(shdr.a_Norm);
-                    this.ctx.vertexAttribPointer(shdr.a_Norm, 3, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems + buff.lenTexCoords) * buff.VAOBytes);
-
-                    // Diffuse
-                    // Diff col and int are multiplied before exporting
-                    this.ctx.uniform3fv(shdr.u_DiffColWeight, scene.models[i].mat.diff.colWeight);
-                    // Specular
-                    this.ctx.uniform3fv(shdr.u_SpecCol, scene.models[i].mat.spec.col);
-                    this.ctx.uniform1f(shdr.u_SpecInt, scene.models[i].mat.spec.int);
-
-                    //gl.uniform1f(shdr.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
-                    // Mirror
-                    //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
-                    //gl.uniform1f(shdr.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
-                    //gl.uniform1f(shdr.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
-                    // Shading
-                    //gl.uniform1f(shdr.u_Shading_Ambient, renderers[i].materials[0].shading.ambient);
-                    //gl.uniform1f(shdr.u_Shading_Emit, renderers[i].materials[0].shading.emit);
-                    //gl.uniform1f(shdr.u_Shading_Translucent, renderers[i].materials[0].shading.translucent);
-                    // Other
-                    this.ctx.uniform1f(shdr.u_Alpha, scene.models[i].mat.alpha);
-                    //gl.uniform1f(shdr.u_Darkness, renderers[i].materials[0].darkness);
-
-                    this.ctx.uniform1f(shdr.u_AmbBright, scene.light.amb.bright);
-                    this.ctx.uniform1f(shdr.u_DirBright, scene.light.dir.bright);
-                    this.ctx.uniform3fv(shdr.u_DirDir, scene.light.dir.dir.GetNegative().GetData());
-                    this.ctx.uniform1f(shdr.u_PntBright, scene.light.pnt.bright);
-                    this.ctx.uniform3fv(shdr.u_PntPos, scene.light.pnt.pos.GetData());
-                    this.ctx.uniform3fv(shdr.u_CamPos, ViewMngr.activeCam.posGbl.GetData());
-                    
-
-                    /* If there's lighting, than the model and view-proj matrices
-                     * are sent up independently. The lighting calculations require
-                     * holding onto the verts modified from the model-matrix. */
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxM, false, this.mtxModel.data);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-                    // Normal Matrix  GetInvMtx3
-                    var mtxNorm = this.mtxModel.GetInvMtx3();
-                    mtxNorm.Transpose();
-                    this.ctx.uniformMatrix3fv(shdr.u_MtxNorm, false, mtxNorm.data);
-                }
-                else {
-                    this.mtxModel.SetMultiply(mtxVP);
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
-                }
-                this.ctx.uniform4fv(shdr.u_Tint, scene.models[i].tint.GetData());
-
-                // Draw calls
-                if (buff.EABO) {
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(scene.models[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-                }
-                else {
-                    this.ctx.drawArrays(scene.models[i].drawMethod, 0, buff.numVerts);
-                }
-
-                // Unbind buffers after use
-                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
 
@@ -528,6 +530,47 @@ var GL = {
         }
         //console.log(fieldCount);
 
+
+
+        // ELIMINATE THIS ASAP
+
+        if(this.SpecialRayHdlr != null) {
+            var shdr = EL.assets.shaderPrograms['ray'];
+            this.ctx.useProgram(shdr.program);
+            // This uniform can come out here because it's common to everything in this shader program
+            this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+
+            if (this.SpecialRayHdlr.active) {
+
+                var buff = this.SpecialRayHdlr.bufferData;
+
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Col);
+                this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
         /******************* GUI DRAWING *************************/
 
         var guiSystems = GUINetwork.GetActiveSystems();
@@ -603,5 +646,6 @@ var GL = {
             }
         }
         this.ctx.enable(this.ctx.DEPTH_TEST);
-    }
+    },
+    SpecialRayHdlr: null
 };

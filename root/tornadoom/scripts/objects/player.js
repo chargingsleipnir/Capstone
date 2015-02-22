@@ -5,6 +5,7 @@
 function Player(hud, mouse) {
 
     // Player characteristics -------------------------------------------------
+
     var windspeed = 7.5;
     var massDensity = 1.205;
 
@@ -32,12 +33,13 @@ function Player(hud, mouse) {
     // The Z and scalar are values used to try to control how steep the new direction becomes
     var mouseAimX = 0;
     var mouseAimY = 0;
-    var mouseAimZ = -75;
+    var mouseAimZ = -50;
     var mouseAimScalar = 0.1;
 
     var that = this;
 
     // Basic player obj visual -------------------------------------------------
+
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
     //this.obj.trfmLocal.SetScaleAxes(1.5, 1.0, 1.5);
@@ -52,6 +54,7 @@ function Player(hud, mouse) {
     var playerHeight = modelObj.shapeData.radii.y * modelObj.trfmLocal.scale.y * 2;
 
     // Tornado collisions -------------------------------------------------
+
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
     //this.obj.collider.OffsetSpherePosAxes(3.0, 0.0, -3.0);
@@ -88,6 +91,7 @@ function Player(hud, mouse) {
     */
 
     // Add particle effects -------------------------------------------------
+
     this.obj.AddComponent(Components.particleSystem);
 
     var effects = new PtclSpiralEffects();
@@ -141,6 +145,7 @@ function Player(hud, mouse) {
     this.obj.ptclSys.AddField(collectionVisual);
 
     // Add to HUD -------------------------------------------------
+
     var style = new MsgBoxStyle();
     style.fontSize = 30;
     style.fontColour = new Vector3(0.0, 0.0, 0.0);
@@ -176,17 +181,23 @@ function Player(hud, mouse) {
     hud.AddGUIObject(launchPowerMsg);
     launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
 
-        // Add controls -------------------------------------------------
+
+    // Add controls -------------------------------------------------
+
     this.obj.AddComponent(Components.camera);
     this.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
     this.obj.camera.trfmAxes.RotateLocalViewX(-15);
     ViewMngr.SetActiveCamera(this.obj.camera);
 
-    var ctrl = new TopDownController(this.obj, "Top-down player controls");
-    ctrl.SetActive(true);
+    this.ctrl = new TopDownController(this.obj, "Top-down player controls");
+    this.ctrl.SetActive(true);
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
+
+    var btnShoot = Input.CreateInputController(playerCtrlName, KeyMap.Shift);
+    var btnAmmoScrollLeft = Input.CreateInputController(playerCtrlName, KeyMap.BracketOpen);
+    var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
 
     // Allow player to hold space bar to go into a view where they use the mouse to aim within a given window
     // around the direction they are facing.
@@ -195,26 +206,26 @@ function Player(hud, mouse) {
         that.obj.camera.trfmAxes.SetPosAxes(1.25, 0.0, 2.25);
         that.obj.camera.trfmAxes.RotateLocalViewX(25);
         mouse.SetLeftBtnCalls(null, ChargeShotReleased);
+        snipeRayHdlr.active = true;
     }
     function AimToggleReleased() {
         that.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
         that.obj.camera.trfmAxes.RotateLocalViewX(-25);
-        DropLaunchPower();
         mouse.SetLeftBtnCalls(null, function(){});
+        snipeRayHdlr.active = false;
+        DropLaunchPower();
     }
     aimToggle.SetBtnCalls(AimTogglePressed, AimToggleReleased);
 
     // When in this mode, the left mouse button can also be held to charge up the shot.
     // Shoot when released
+    var aimDir = new Vector3();
     function ChargeShotReleased() {
-        var aimDir = new Vector3(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
-        aimDir.SetNormalized();
-        Shoot(that.obj.trfmLocal.orient.GetMultiplyVec3(aimDir));
+        Shoot(aimDir);
     }
 
-    var btnShoot = Input.CreateInputController(playerCtrlName, KeyMap.Shift);
-    var btnAmmoScrollLeft = Input.CreateInputController(playerCtrlName, KeyMap.BracketOpen);
-    var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
+    var snipeRayHdlr = new RayCastHandler(new Primitives.Ray());
+    GL.SpecialRayHdlr = snipeRayHdlr;
 
 
     // HELPER FUNCTIONS -------------------------------------------------
@@ -281,7 +292,7 @@ function Player(hud, mouse) {
         if(angle > 360.0)
             angle = 0.0;
 
-        ctrl.Update();
+        this.ctrl.Update();
 
         modelObj.trfmLocal.SetUpdatedOrient(VEC3_UP, angle * 7.5);
 
@@ -294,6 +305,16 @@ function Player(hud, mouse) {
         if(aimToggle.pressed) {
             mouseAimX = mouse.pos.x - ViewMngr.wndWidth/2.0;
             mouseAimY = (mouse.pos.y - ViewMngr.wndHeight/2.0) * -1;
+
+            aimDir.SetValues(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
+            aimDir.SetNormalized();
+            aimDir = that.obj.trfmLocal.orient.GetMultiplyVec3(aimDir);
+
+            // Display sniping sight
+            var newVertData = playerPos.GetData();
+            newVertData = newVertData.concat(playerPos.GetAdd(aimDir.GetScaleByNum(5.0)).GetData());
+            snipeRayHdlr.RewriteVerts(newVertData);
+
             if(mouse.leftPressed)
                 RaiseLaunchPower();
         }
