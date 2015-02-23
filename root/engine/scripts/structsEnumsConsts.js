@@ -105,6 +105,14 @@ function MsgBoxStyle(style) {
     }
 }
 
+function PtclSimpleEffects() {
+    this.colourBtm = new Vector3();
+    this.colourTop = new Vector3(1.0, 1.0, 1.0);
+    this.lineLength = 0.0;
+    this.texture = null;
+    this.size = 1.0;
+    this.alphaStart = 1.0;
+}
 function PtclPhysicsEffects() {
     this.travelTime = 5.0;
     this.startDist = 0.0;

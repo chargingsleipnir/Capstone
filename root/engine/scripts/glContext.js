@@ -531,46 +531,6 @@ var GL = {
         //console.log(fieldCount);
 
 
-
-        // ELIMINATE THIS ASAP
-
-        if(this.SpecialRayHdlr != null) {
-            var shdr = EL.assets.shaderPrograms['ray'];
-            this.ctx.useProgram(shdr.program);
-            // This uniform can come out here because it's common to everything in this shader program
-            this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-
-            if (this.SpecialRayHdlr.active) {
-
-                var buff = this.SpecialRayHdlr.bufferData;
-
-                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                this.ctx.enableVertexAttribArray(shdr.a_Col);
-                this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-
-                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-
-                // Unbind buffers after use
-                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
         /******************* GUI DRAWING *************************/
 
         var guiSystems = GUINetwork.GetActiveSystems();

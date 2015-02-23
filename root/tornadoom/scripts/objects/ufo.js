@@ -48,8 +48,8 @@ function UFO() {
     effects.fadePoint = 0.5;
     effects.alphaEnd = 0.5;
     effects.size = 0.0;
-    var tractorBeamVisual = new ParticleField(100.0, true, null, effects);
-    ptclObj.ptclSys.AddField(tractorBeamVisual);
+    var tractorBeamVisual = new ParticleFieldAutomated(100.0, true, null, effects);
+    ptclObj.ptclSys.AddAutoField(tractorBeamVisual);
     tractorBeamVisual.Run();
 
     var angle = 0.0;

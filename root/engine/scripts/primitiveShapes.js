@@ -1,5 +1,31 @@
 ﻿
 var Primitives = {
+    PointSeries: function(pt1, pt2, numPtsBetween) {
+        // Create arrays
+        var posCoords = [];
+        var colours = [];
+        //Add the first point
+        posCoords = posCoords.concat(pt1.GetData());
+        colours = colours.concat([0.5, 0.5, 1.0, 1.0]);
+        // Add all the points in between those two, based on numPtsBetween
+        var diff = pt2.GetSubtract(pt1);
+        var vecIncr = diff.GetScaleByNum(1 / (numPtsBetween + 2));
+        for(var i = 1; i <= numPtsBetween; i++) {
+            posCoords = posCoords.concat(pt1.GetAdd(vecIncr.GetScaleByNum(i)).GetData());
+            colours = colours.concat([0.5, 0.5, 1.0, 1.0]);
+        }
+        // Add the last point
+        posCoords = posCoords.concat(pt2.GetData());
+        colours = colours.concat([0.5, 0.5, 1.0, 1.0]);
+
+        return {
+            count: 2,
+            posCoords: posCoords,
+            colElems: colours,
+            texCoords: [],
+            normAxes: []
+        };
+    },
     Ray: function(pt1, pt2) {
         var posCoords = [];
 

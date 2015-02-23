@@ -114,7 +114,9 @@ ParticleSpiral.prototype = {
     }
 };
 
-function ParticleField(ptclCount, willStagger, fieldLife, effects) {
+/************************** Field for Point and line Particles with defined motion ***********************************/
+
+function ParticleFieldAutomated(ptclCount, willStagger, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
     this.fieldLifeTime = this.counter = fieldLife;
 
@@ -215,7 +217,7 @@ function ParticleField(ptclCount, willStagger, fieldLife, effects) {
         this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.lines);
     }
 }
-ParticleField.prototype = {
+ParticleFieldAutomated.prototype = {
     GetObjectTransform: function(trfmObj) {
         this.objGlobalTrfm = trfmObj;
         // Once positions are established, sort from back to front
@@ -359,6 +361,80 @@ ParticleField.prototype = {
     }
 };
 
+/************************** Field for Point and line Particles with controlled motion ***********************************/
+
+function ParticleFieldControled(ptclCount, effects) {
+    this.ptclCount = ptclCount || 10;
+
+    this.active = false;
+
+    var posCoords = [];
+    var colours = [];
+
+    for(var i = 0; i <= this.ptclCount; i++) {
+        var randomX = Math.random(),
+            randomY = Math.random(),
+            randomZ = Math.random();
+
+        // Set all particles off screen until their configuration is determined later
+        posCoords = posCoords.concat([999.0, 999.0, 999.0]);
+        colours = colours.concat([
+            (effects.colourTop.x - effects.colourBtm.x) * randomX + effects.colourBtm.x,
+            (effects.colourTop.y - effects.colourBtm.y) * randomY + effects.colourBtm.y,
+            (effects.colourTop.z - effects.colourBtm.z) * randomZ + effects.colourBtm.z,
+            effects.alphaStart
+        ]);
+    }
+
+    // Containers for drawing
+    this.ptcls = [];
+    var ptclVerts = {
+        count: this.ptclCount,
+        posCoords: posCoords,
+        colElems: colours,
+        texCoords: [],
+        normAxes: []
+    };
+
+    if(effects.lineLength <= 0.0) {
+        this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.points);
+        if(effects.texture != null)
+            this.fieldHdlr.SetTexture(effects.texture, TextureFilters.linear);
+
+        this.fieldHdlr.pntSize = effects.size;
+    }
+    else {
+        ptclVerts.count *= 2;
+        this.fieldHdlr = new PtclFieldHandler(ptclVerts, DrawMethods.lines);
+    }
+
+    this.Callback = function() {};
+}
+ParticleFieldControled.prototype = {
+    ApplyEvenLine: function(firstPtclPt, lastPtclPt) {
+        // Ordering done by user
+        // Set first vet into place
+        var newVertData = firstPtclPt.GetData();
+        // Add all the points in between those two, based on numPtsBetween
+        var diff = lastPtclPt.GetSubtract(firstPtclPt);
+        var vecIncr = diff.GetScaleByNum(1.0 / this.ptclCount);
+        // One off the bottom and top so as not to include those, which will be added separately
+        for(var i = 1; i < this.ptclCount - 1; i++) {
+            newVertData = newVertData.concat(firstPtclPt.GetAdd(vecIncr.GetScaleByNum(i)).GetData());
+        }
+        // Add the last point
+        newVertData = newVertData.concat(lastPtclPt.GetData());
+
+        this.fieldHdlr.RewriteVerts(newVertData);
+    },
+    Run: function() {
+        this.active = true;
+    },
+    Stop: function() {
+        this.active = false;
+    }
+};
+
 /******************************** Particle Tail *****************************************/
 
 function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
@@ -479,9 +555,12 @@ function ParticleSystem(trfmObj) {
     this.tails = [];
 }
 ParticleSystem.prototype = {
-    AddField: function(field) {
+    AddAutoField: function(field) {
         this.fields.push(field);
         field.GetObjectTransform(this.objGlobalTrfm);
+    },
+    AddCtrlField: function(field) {
+        this.fields.push(field);
     },
     AddTail: function(ptclCount, fieldLife, effects) {
         this.tails.push(new FlatTail(this.objGlobalTrfm, ptclCount, fieldLife, effects));

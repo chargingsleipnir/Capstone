@@ -35,6 +35,7 @@ function Player(hud, mouse) {
     var mouseAimY = 0;
     var mouseAimZ = -50;
     var mouseAimScalar = 0.1;
+    var crosshairLength = 5.0;
 
     var that = this;
 
@@ -42,18 +43,10 @@ function Player(hud, mouse) {
 
     this.obj = new GameObject('Player01', Labels.player);
     var modelObj = new GameObject("Player01 model", Labels.none);
-    var targetObj = new GameObject("targeting reticule", Labels.none);
-
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
 
-    targetObj.SetModel(GameMngr.assets.models['crosshair']);
-    targetObj.mdlHdlr.active = false;
-    targetObj.trfmBase.SetPosByAxes(0.0, 0.0, -2.5);
-    //targetObj.trfmOffset.SetPosByAxes(0.0, 0.0, -2.0);
-
     this.obj.AddChild(modelObj);
-    this.obj.AddChild(targetObj);
 
     // Just to help in a few functions below
     var playerPos = this.obj.trfmGlobal.pos;
@@ -116,8 +109,8 @@ function Player(hud, mouse) {
     effects.alphaEnd = 0.0;
 
     // Inner dust effect
-    var dustVisual1 = new ParticleField(40, true, null, effects);
-    this.obj.ptclSys.AddField(dustVisual1);
+    var dustVisual1 = new ParticleFieldAutomated(40, true, null, effects);
+    this.obj.ptclSys.AddAutoField(dustVisual1);
     dustVisual1.Run();
 
     // Outer dust effect
@@ -126,8 +119,8 @@ function Player(hud, mouse) {
     effects.scaleDiam = 0.85;
     effects.scaleLen = 0.1;
     effects.size = 20.0;
-    var dustVisual2 = new ParticleField(30, true, null, effects);
-    this.obj.ptclSys.AddField(dustVisual2);
+    var dustVisual2 = new ParticleFieldAutomated(30, true, null, effects);
+    this.obj.ptclSys.AddAutoField(dustVisual2);
     dustVisual2.Run();
 
     effects = new PtclPhysicsEffects();
@@ -145,8 +138,19 @@ function Player(hud, mouse) {
     effects.fadePoint = 0.5;
     effects.alphaEnd = 0.0;
     effects.size = 5.0;
-    var collectionVisual = new ParticleField(50, false, 0.25, effects);
-    this.obj.ptclSys.AddField(collectionVisual);
+    var collectionVisual = new ParticleFieldAutomated(50, false, 0.25, effects);
+    this.obj.ptclSys.AddAutoField(collectionVisual);
+
+    effects = new PtclSimpleEffects();
+    effects.colourBtm.SetValues(0.0, 0.0, 0.0);
+    effects.colourTop.SetValues(0.0, 0.0, 0.0);
+    effects.lineLength = 0.0;
+    effects.size = 30.0;
+    effects.texture = GameMngr.assets.textures['crosshair'];
+    effects.alphaStart = 1.0;
+    var aimDirVisual = new ParticleFieldControled(10, effects);
+    this.obj.ptclSys.AddCtrlField(aimDirVisual);
+
 
     // Add to HUD -------------------------------------------------
 
@@ -210,15 +214,13 @@ function Player(hud, mouse) {
         that.obj.camera.trfmAxes.SetPosAxes(1.25, 0.0, 2.25);
         that.obj.camera.trfmAxes.RotateLocalViewX(25);
         mouse.SetLeftBtnCalls(null, ChargeShotReleased);
-        snipeRayHdlr.active = true;
-        targetObj.mdlHdlr.active = true;
+        aimDirVisual.Run();
     }
     function AimToggleReleased() {
         that.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
         that.obj.camera.trfmAxes.RotateLocalViewX(-25);
         mouse.SetLeftBtnCalls(null, function(){});
-        snipeRayHdlr.active = false;
-        targetObj.mdlHdlr.active = false;
+        aimDirVisual.Stop();
         DropLaunchPower();
     }
     aimToggle.SetBtnCalls(AimTogglePressed, AimToggleReleased);
@@ -229,10 +231,6 @@ function Player(hud, mouse) {
     function ChargeShotReleased() {
         Shoot(aimDir);
     }
-
-    var snipeRayHdlr = new RayCastHandler(new Primitives.Ray());
-    GL.SpecialRayHdlr = snipeRayHdlr;
-
 
     // HELPER FUNCTIONS -------------------------------------------------
 
@@ -315,15 +313,10 @@ function Player(hud, mouse) {
 
             aimDir.SetValues(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
             aimDir.SetNormalized();
-            targetObj.trfmBase.SetUpdatedRot(new Vector3(-aimDir.y, aimDir.x, 0.0), -45);
+            // Send these positions, as obj's model matrix is used to achieve pos and rot
+            aimDirVisual.ApplyEvenLine(aimDir.GetScaleByNum(crosshairLength), VEC3_ZERO);
+            // Finish aim adjustment for local force application
             aimDir = that.obj.trfmGlobal.rot.GetMultiplyVec3(aimDir);
-
-            //targetObj.trfmBase.rot.
-
-            // Display sniping sight
-            var newVertData = playerPos.GetData();
-            newVertData = newVertData.concat(playerPos.GetAdd(aimDir.GetScaleByNum(5.0)).GetData());
-            snipeRayHdlr.RewriteVerts(newVertData);
 
             if(mouse.leftPressed)
                 RaiseLaunchPower();
