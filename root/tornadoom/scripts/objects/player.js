@@ -12,8 +12,8 @@ function Player(hud, mouse) {
     var contactScale = 2.0;
     var drawScale = 1.0;
     var captureRadius = 0.75;
-    var LAUNCH_SCALAR_MIN = 500;
-    var LAUNCH_SCALAR_MAX = 750;
+    var LAUNCH_SCALAR_MIN = 750;
+    var LAUNCH_SCALAR_MAX = 1000;
     var launchScalar = LAUNCH_SCALAR_MIN;
 
     var massMax = 200;

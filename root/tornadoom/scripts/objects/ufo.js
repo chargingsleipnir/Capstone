@@ -41,8 +41,8 @@ function UFO() {
     effects.speed = 3.0;
     effects.acc.SetValues(0.0, 0.0, 0.0);
     effects.dampening = 1.0;
-    effects.colourBtm.SetValues(0.0, 1.0, 0.0);
-    effects.colourTop.SetValues(1.0, 1.0, 0.0);
+    effects.colourBtm.SetValues(0.25, 0.25, 0.25);
+    effects.colourTop.SetValues(1.0, 0.75, 0.75);
     effects.lineLength = 0.25;
     effects.alphaStart = 0.5;
     effects.fadePoint = 0.5;

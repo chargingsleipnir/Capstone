@@ -17,6 +17,7 @@ function BuildScene2(scene) {
 
     var fence = new GameObject('fence', Labels.none);
     fence.SetModel(GameMngr.assets.models['fence']);
+    fence.mdlHdlr.SetTexture(GameMngr.assets.textures['fenceTex'], TextureFilters.mipmap);
     RaiseToGruond(fence);
     fence.trfmBase.TranslateByAxes(0.0, 0.0, 0.6);
 

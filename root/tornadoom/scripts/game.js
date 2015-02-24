@@ -106,7 +106,7 @@ function BuildGame() {
     var skyBox = new GameObject('skybox', Labels.none);
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));
     skyBox.mdlHdlr.SetTexture(GameMngr.assets.textures['skyTex'], TextureFilters.nearest);
-    skyBox.trfmBase.SetScaleAxes(100.0, 100.0, 100.0);
+    skyBox.trfmBase.SetScaleAxes(150.0, 150.0, 150.0);
 
     /********************************** Scenes */
 
@@ -123,7 +123,7 @@ function BuildGame() {
     BuildScene2(lvl01);
     SceneMngr.AddScene(lvl01, false);
 
-    var angle = 0.01;
+    var angle = 0.00;
     function DisplayOptionMenu() {
         menuToggle = !menuToggle;
         GUINetwork.SetActive(menuSysName, menuToggle);
@@ -151,6 +151,7 @@ function BuildGame() {
                 player.Update();
                 ufo.Update();
 
+                angle += 0.01;
                 skyBox.trfmBase.SetUpdatedRot(VEC3_FWD, angle);
 
                 // ACTIVATES FULL ENGINE-BUILD VIEW WITH ALL CONTROL SHIFTED TO SEPARATE CAMERA
