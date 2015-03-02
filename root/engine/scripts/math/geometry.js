@@ -639,6 +639,69 @@ Sphere.prototype = {
     */
 };
 
+// SPHERE-SWEPT VOLUMES ---------------------------------------------------
+
+// This represents a sphere that exists freely along a given axis.
+function Capsule(pos, radius, majorAxisDir, majorAxisHalfLength, rot) {
+
+    this.axis = majorAxisDir;
+    this.halfLen = majorAxisHalfLength;
+    this.rot = rot;
+    Sphere.call(this, pos, radius);
+}
+Capsule.prototype = new Sphere();
+Capsule.prototype.SetCopy = function() {
+
+};
+Capsule.prototype.GetPointPos = function() {
+    var rotAxis = this.rot.GetMultiplyVec3(this.axis);
+    return this.pos.GetAdd(rotAxis.GetScaleByNum(this.halfLen));
+};
+Capsule.prototype.GetPointNeg = function() {
+    var rotAxis = this.rot.GetMultiplyVec3(this.axis);
+    return this.pos.GetSubtract(rotAxis.GetScaleByNum(this.halfLen));
+};
+Capsule.prototype.IntersectsSphere = function(sphere) {
+    // Compute dist between sphere and capsule line segment
+    var distSqr = GeomUtils.DistPointSegmentSqr(this.GetPointPos(), this.GetPointNeg(), sphere.pos);
+    // If sqr dist is smaller than sqr sum of radii, they collide
+    var radius = sphere.radius + this.radius;
+    return distSqr <= radius * radius;
+};
+Capsule.prototype.IntersectsCapsule = function(capsule) {
+    // Compute sqr dist between inner structures of the capsules
+    var st = new Vector2();
+    var c1 = new Vector3(),
+        c2 = new Vector3();
+
+    var distSqr = GeomUtils.ClosestPntsSegmentToSegment(
+        this.GetPointPos(),
+        this.GetPointNeg(),
+        capsule.GetPointPos(),
+        capsule.GetPointNeg(),
+        st,
+        c1,
+        c2
+    );
+    // If sqr dist is smaller than sqr sum of radii, they collide
+    var radius = this.radius + capsule.radius;
+    return distSqr <= radius * radius;
+};
+
+// This represents a capsule rotated freely about one end.
+function RadialCapsule(pos, radius, majorAxisDir, majorAxisLength, axisOfRot) {
+
+    this.axis = majorAxisDir;
+    this.len = majorAxisLength;
+    this.axisOfRot = axisOfRot;
+    Sphere.call(this, pos, radius);
+}
+RadialCapsule.prototype = new Sphere();
+RadialCapsule.prototype.SetCopy = function() {
+
+};
+
+
 function Cylinder(pos, radius, normAxis, halfLength) {
     /// <signature>
     ///  <summary>Defined by position and radius</summary>

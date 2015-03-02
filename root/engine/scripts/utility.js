@@ -161,6 +161,11 @@ var MathUtils = {
             out *= 2;
         }
         return out;
+    },
+    Clamp: function(n, min, max) {
+        if(n < min) return min;
+        if(n > max) return max;
+        return n;
     }
 };
 
@@ -223,6 +228,94 @@ var GeomUtils = {
         shape.radius = Math.sqrt(squaredLength);
 
         return shape;
+    },
+    DistPointSegmentSqr: function(segPntA, segPntB, pntC) {
+        var ab = segPntB.GetSubtract(segPntA),
+            ac = pntC.GetSubtract(segPntA),
+            bc = pntC.GetSubtract(segPntB);
+
+        var e = ac.GetDot(ab);
+
+        // Handle cases of c projecting outside ab
+        if(e <= 0.0)
+            return ac.GetDot(ac);
+        var f = ab.GetDot(ab);
+        if(e >= f)
+            return bc.GetDot(bc);
+
+        // Handle case where c projects onto ab
+        return ac.GetDot(ac) - e * e / f;
+    },
+    // Computes closet points C1 and C2 of S1(s) = P1 + s * (Q1 - P1) and S2(t) = P2 + t * (Q2 - P2),
+    // returning s and t. Function result is squared dist between S1(s) ans S2(t).
+    ClosestPntsSegmentToSegment: function(p1, q1, p2, q2, outVecST, outC1, outC2) {
+        var d1 = q1.GetSubtract(p1), // Dir of segment 1
+            d2 = q2.GetSubtract(p2), // Dir of segment 2
+            r = p1.GetSubtract(p2);
+
+        var a = d1.GetDot(d1), // Sqr length of segment 1
+            e = d2.GetDot(d2), // Sqr length of segment 2
+            f = d2.GetDot(r);
+
+        var outS, outT, distVec;
+
+        // Check if either or both points degenerate into points
+        if(a <= INFINITESIMAL && e <= INFINITESIMAL) {
+            outVecST.SetZero();
+            outC1 = p1.GetCopy();
+            outC2 = p2.GetCopy();
+            distVec = outC1.GetSubtract(outC2);
+            return distVec.GetDot(distVec);
+        }
+        if(a <= INFINITESIMAL) {
+            // First segment degenerates into a point
+            outS = 0.0;
+            outT = f / e; // s = 0 => t = (b*s + f) / e = f / e
+            outT = MathUtils.Clamp(outT, 0.0, 1.0);
+        }
+        else {
+            var c = d1.GetDot(r);
+            if(e <= INFINITESIMAL) {
+                // Second segment degenerates into a point
+                outT = 0.0;
+                outS = MathUtils.Clamp(-c / a, 0.0, 1.0); // t = 0 => s = (b*t - c) / a = -c / a
+            }
+            else {
+                // Start of general non-degenerate case
+                var b = d1.GetDot(d2);
+                var denom = a * e - b * b; // Always non-negative
+
+                // If segments are not parallel, compute closest point on L1 and L2 and clamp to segment S1,
+                // else pick arbitrary s (here 0)
+                if(denom != 0.0)
+                    outS = MathUtils.Clamp((b*f - c*e) / denom, 0.0, 1.0);
+                else
+                    outS = 0.0;
+
+                // Compute point on L2 closest to S1(s) using t = Dot((P1 + D1*s) - P2,D2) / Dot(D2,D2) = (b*s + f) / e
+                // Deffer the division by e until we know 0 < t < 1
+                var tnom = b * outS + f;
+
+                // If 0 < t < 1, done, else clamp t, and recompute s for the new value of t using
+                // s = Dot((P2 + D2*t) - P1,D1) / Dot(D1,D1)= (t*b - c) / a and clamp 0 < s < 1
+                if(tnom < 0.0) {
+                    outT = 0.0;
+                    outS = MathUtils.Clamp(-c / a, 0.0, 1.0);
+                }
+                else if(tnom > e) {
+                    outT = 1.0;
+                    outS = MathUtils.Clamp((b - c) / a, 0.0, 1.0);
+                }
+                else {
+                    outT = tnom / e;
+                }
+            }
+        }
+        outC1 = p1.GetAdd(d1).SetScaleByNum(outS);
+        outC2 = p2.GetAdd(d2).SetScaleByNum(outT);
+        outVecST.SetValues(outS, outT);
+        distVec = outC1.GetSubtract(outC2);
+        return distVec.GetDot(distVec);
     }
 };
 

@@ -25,7 +25,7 @@ function BuildScene1(scene) {
     style.fontSize = 30;
     style.bold = true;
     var titleMsg = new GUIObject(
-        new WndRect(title.rectGlobal.w, title.rectLocal.y + title.rectLocal.h + 20, 700, 100),
+        new WndRect(title.rectGlobal.x - 150, title.rectLocal.y + title.rectLocal.h + 20, 700, 100),
         "Press enter to start the game!",
         style
     );
