@@ -262,8 +262,8 @@ var GeomUtils = {
         // Check if either or both points degenerate into points
         if(a <= INFINITESIMAL && e <= INFINITESIMAL) {
             outVecST.SetZero();
-            outC1 = p1.GetCopy();
-            outC2 = p2.GetCopy();
+            outC1.SetCopy(p1);
+            outC2.SetCopy(p2);
             distVec = outC1.GetSubtract(outC2);
             return distVec.GetDot(distVec);
         }
@@ -311,8 +311,8 @@ var GeomUtils = {
                 }
             }
         }
-        outC1 = p1.GetAdd(d1).SetScaleByNum(outS);
-        outC2 = p2.GetAdd(d2).SetScaleByNum(outT);
+        outC1.SetCopy(p1.GetAdd(d1.SetScaleByNum(outS)));
+        outC2.SetCopy(p2.GetAdd(d2.SetScaleByNum(outT)));
         outVecST.SetValues(outS, outT);
         distVec = outC1.GetSubtract(outC2);
         return distVec.GetDot(distVec);

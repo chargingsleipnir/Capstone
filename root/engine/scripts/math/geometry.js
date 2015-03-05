@@ -147,6 +147,10 @@ Plane.prototype = {
         var magInv = this.norm.GetMagInv();
         return new Plane(this.norm.GetScaleByNum(magInv), this.dist * magInv);
     },
+    GetClosestPointToPoint: function(point) {
+        var t = (this.norm.GetDot(point) - this.dist);
+        return point.GetSubtract(this.norm.GetScaleByNum(t));
+    },
     DistanceTo: function(point) {
         /// <signature>
         ///  <summary>Get the shortest distance from the point to the plane. Sign is relative to norm direction</summary>
@@ -643,7 +647,6 @@ Sphere.prototype = {
 
 // This represents a sphere that exists freely along a given axis.
 function Capsule(pos, radius, majorAxisDir, majorAxisHalfLength, rot) {
-
     this.axis = majorAxisDir;
     this.halfLen = majorAxisHalfLength;
     this.rot = rot;
@@ -685,19 +688,59 @@ Capsule.prototype.IntersectsCapsule = function(capsule) {
     );
     // If sqr dist is smaller than sqr sum of radii, they collide
     var radius = this.radius + capsule.radius;
-    return distSqr <= radius * radius;
+
+    // If contact is true, contact point will be the centre of the line connecting c1 and c2
+    //console.log(c1.GetData());
+    //console.log(c2.GetData());
+    return distSqr <=  radius * radius;
 };
 
 // This represents a capsule rotated freely about one end.
-function RadialCapsule(pos, radius, majorAxisDir, majorAxisLength, axisOfRot) {
-
-    this.axis = majorAxisDir;
-    this.len = majorAxisLength;
-    this.axisOfRot = axisOfRot;
+function Donut(pos, radius, planeNorm, planarRadius, rot) {
+    /// <signature>
+    ///  <summary>Sphere that can travel anywhere on a given circle on a plane</summary>
+    ///  <param name="position" type="Vector3"></param>
+    ///  <param name="radius" type="decimal"></param>
+    ///  <param name="plane" type="Plane"></param>
+    ///  <param name="planarRadius" type="decimal"></param>
+    ///  <param name="rot" type="Quaternion"></param>
+    ///  <returns type="Donut" />
+    /// </signature>
+    this.originPlane = new Plane(planeNorm, 0.0);
+    this.planarRadius = planarRadius;
+    this.rot = rot;
     Sphere.call(this, pos, radius);
 }
-RadialCapsule.prototype = new Sphere();
-RadialCapsule.prototype.SetCopy = function() {
+Donut.prototype = new Sphere();
+Donut.prototype.SetCopy = function() {
+
+};
+Donut.prototype.IntersectsSphere = function(sphere) {
+    // Get the closest point from the object to the plane at the origin
+    var closestPnt = this.originPlane.GetClosestPointToPoint(sphere.pos);
+    // Translate that to be the closest point on the donut's plane
+    var donutDist = this.originPlane.DistanceTo(this.pos);
+    closestPnt.SetAdd(this.originPlane.norm.GetScaleByNum(donutDist));
+
+    // Get the point closest to that point from the donut's plane point
+    var distVec = closestPnt.GetSubtract(this.pos);
+    var magToSphereSqr = distVec.GetMagSqr();
+
+    // If the sphere's plane point is further than the donut's planar radius,
+    // Use the point at the end of the radius
+    // Otherwise, just test against the dropped point!
+    if(magToSphereSqr >= this.planarRadius * this.planarRadius) {
+        // change to direction vector
+        distVec.SetScaleByNum(1.0 / Math.sqrt(magToSphereSqr));
+        closestPnt = this.pos.GetAdd(distVec.SetScaleByNum(this.planarRadius));
+    }
+
+    // Check radii from there
+    var collisionDist = closestPnt.GetSubtract(sphere.pos);
+    return collisionDist.GetMagSqr() <= Math.pow(this.radius + sphere.radius, 2);
+};
+
+Donut.prototype.IntersectsCapsule = function(capsule) {
 
 };
 

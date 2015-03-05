@@ -110,6 +110,7 @@ function BuildGame() {
 
     /********************************** Scenes */
 
+        /*
     // Title screen just has gui elements
     var title = new Scene("Title Screen", SceneTypes.menu);
     BuildScene1(title);
@@ -122,6 +123,11 @@ function BuildGame() {
     lvl01.Add(skyBox);
     BuildScene2(lvl01);
     SceneMngr.AddScene(lvl01, false);
+    */
+
+    var testScene = new Scene("Test", SceneTypes.cutScene);
+    BuildScene3(testScene);
+    SceneMngr.AddScene(testScene, true);
 
     var angle = 0.00;
     function DisplayOptionMenu() {
