@@ -34,9 +34,9 @@ function BuildScene2(scene) {
     wagon.trfmBase.TranslateByAxes(-1.5, 0.0, -8.0);
 
     var cows = [];
-    var MAX_COWS = 20;
+    var MAX_COWS = 1;
     var bales = [];
-    var MAX_BALES = 20;
+    var MAX_BALES = 0;
 
     for(var i = 0; i < MAX_COWS; i++ ) {
         cows[i] = new Cow();

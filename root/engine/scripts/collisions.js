@@ -1,5 +1,6 @@
 ﻿
-// COLLISION SPHERE INHERITS FROM SPHERE
+// COLLISION SPHERE INHERITS FROM SPHERE -----------------------------------------
+
 function CollisionSphere(objTrfm, radius) {
     this.trfm = objTrfm
     //this.trfm.offsetRot = objTrfm.rot;
@@ -29,7 +30,50 @@ CollisionSphere.prototype.Update = function(objTrfm) {
     this.SetScale(objTrfm.GetLargestScaleValue());
 };
 
-// COLLISION BOX INHERITS FROM OBB
+// COLLISION CAPSULE INHERITS FROM CAPSULE -----------------------------------------
+
+function CollisionCapsule(obj) {
+    this.trfm = obj.trfmGlobal;
+
+    var longAxis = obj.shapeData.GetLongestAxis();
+    var axis;
+    var radius;
+    var halfLength;
+    if (longAxis == Axes.x) {
+        axis = new Vector3(1.0, 0.0, 0.0);
+        radius = obj.shapeData.radii.z;
+        if(obj.shapeData.radii.y > obj.shapeData.radii.z)
+            radius = obj.shapeData.radii.y;
+
+        halfLength = obj.shapeData.radii.x - radius;
+    }
+    else if (longAxis == Axes.y) {
+        axis = new Vector3(0.0, 1.0, 0.0);
+        radius = obj.shapeData.radii.z;
+        if(obj.shapeData.radii.x > obj.shapeData.radii.z)
+            radius = obj.shapeData.radii.x;
+
+        halfLength = obj.shapeData.radii.y - radius;
+    }
+    else {
+        axis = new Vector3(0.0, 0.0, -1.0);
+        radius = obj.shapeData.radii.y;
+        if(obj.shapeData.radii.x > obj.shapeData.radii.y)
+            radius = obj.shapeData.radii.x;
+
+        halfLength = obj.shapeData.radii.z - radius;
+    }
+
+    Capsule.call(this, this.trfm.pos, radius, axis, halfLength, this.trfm.rot);
+}
+CollisionCapsule.prototype = Capsule.prototype;
+/*
+CollisionCapsule.prototype.Callback = function(collider){};
+CollisionCapsule.prototype.Update = function(objTrfm) {};
+ */
+
+// COLLISION BOX INHERITS FROM OBB -----------------------------------------
+
 function CollisionBox(objTrfm, radii) {
     this.trfm = objTrfm;
     //this.trfm.scale = objTrfm.scale;
@@ -55,6 +99,10 @@ CollisionBox.prototype.Update = function(objTrfm) {
     this.trfm.SetPosByVec(objTrfm.pos);
 };
 
+
+
+// -----------------------------------------
+
 function CollisionSystem(shapeData, obj) {
     /// <signature>
     ///  <summary>Add collision body to gameobject</summary>
@@ -75,8 +123,16 @@ function CollisionSystem(shapeData, obj) {
     this.active = true;
 
     this.rigidBody = new RigidBody(new Transform(), 1.0);
+
+    this.suppShapeList = [];
 }
 CollisionSystem.prototype = {
+    AddCollisionShape: function(collisionShapeType, obj) {
+        this.suppShapeList.push({
+            shapeType: collisionShapeType,
+            obj: obj
+        });
+    },
     SetRigidBody: function(rigidBody) {
         /// <signature>
         ///  <summary>Adding rigidbody will automatically switch detectOnly off and use collision response as well as detection</summary>

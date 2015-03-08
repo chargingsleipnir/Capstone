@@ -365,10 +365,16 @@ Vector3.prototype = {
         return new Vector3(-this.x, -this.y, -this.z);
     },
     GetOrthoAxis: function() {
+        // Is this sufficiently random enough?
+        var otherAxis = new Vector3(this.z * 3, -this.x / 2, this.y * 2);
+        var orthoAxis = this.GetCross(otherAxis);
+        return orthoAxis.SetNormalized();
+        /*
         var rotMtx = new Matrix2();
         rotMtx.SetRotation(90);
         var rotatedAxis = rotMtx.MultiplyVec2(new Vector2(this.x, this.y));
         return (new Vector3(rotatedAxis.x, rotatedAxis.y, this.z)).SetNormalized();
+        */
     },
     SetAdd: function(vec3) {
         /// <signature>

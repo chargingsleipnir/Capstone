@@ -21,6 +21,14 @@ AAShapeData3D.prototype = {
         this.centre.SetValues((this.max.x + this.min.x) / 2, (this.max.y + this.min.y) / 2, (this.max.z + this.min.z) / 2);
         this.radii.SetValues(this.max.x - this.centre.x, this.max.y - this.centre.y, this.max.z - this.centre.z);
         this.radius = Math.sqrt(Math.pow(this.radii.x, 2), Math.pow(this.radii.y, 2), Math.pow(this.radii.z, 2));
+    },
+    GetLongestAxis: function() {
+        if (this.radii.x > this.radii.y && this.radii.x > this.radii.z)
+            return Axes.x;
+        else if (this.radii.y > this.radii.z)
+            return Axes.y;
+        else
+            return Axes.z;
     }
 };
 

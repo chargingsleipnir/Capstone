@@ -1203,5 +1203,128 @@ var Primitives = {
         return {
 
         };
+    },
+    WireCapsule: function (radius, axis, halfLength, numBodyLines, numCircles) {
+
+        var posCoords = [];
+        // Use this for circumference of capsule
+        var sideAxis = axis.GetOrthoAxis();
+        sideAxis.SetNormalized();
+        sideAxis.SetScaleByNum(radius);
+        var backEnd = axis.GetScaleByNum(-halfLength);
+        var frontEnd = axis.GetScaleByNum(halfLength);
+
+        var angle = 360 / numBodyLines;
+        for(var i = 0; i < numBodyLines; i++) {
+            posCoords = posCoords.concat(backEnd.GetAdd(sideAxis).GetData());
+            posCoords = posCoords.concat(frontEnd.GetAdd(sideAxis).GetData());
+            sideAxis.SetRotated(angle, axis);
+        }
+
+        var capAxis = axis.GetScaleByNum(radius);
+        var capAngle = 90 / numCircles;
+        var rearCapCoords = [];
+        for(var i = 0; i < numCircles; i++) {
+            capAxis.SetRotated(capAngle, sideAxis);
+
+            // FRONT CAP
+            // Add one on both ends to account for ends of line connectivity. [0,1  1,2  2,3  etc.]
+            posCoords = posCoords.concat(frontEnd.GetAdd(capAxis).GetData());
+            rearCapCoords = rearCapCoords.concat(backEnd.GetSubtract(capAxis).GetData());
+            for(var j = 0; j < numBodyLines; j++) {
+                capAxis.SetRotated(angle, axis);
+                posCoords = posCoords.concat(frontEnd.GetAdd(capAxis).GetData());
+                posCoords = posCoords.concat(frontEnd.GetAdd(capAxis).GetData());
+                rearCapCoords = rearCapCoords.concat(backEnd.GetSubtract(capAxis).GetData());
+                rearCapCoords = rearCapCoords.concat(backEnd.GetSubtract(capAxis).GetData());
+            }
+            posCoords = posCoords.concat(frontEnd.GetAdd(capAxis).GetData());
+            rearCapCoords = rearCapCoords.concat(backEnd.GetSubtract(capAxis).GetData());
+        }
+        posCoords = posCoords.concat(rearCapCoords);
+
+        var colours = [];
+        for (var i = 0; i < posCoords.length; i += 3) {
+            colours = colours.concat([0.0, 0.0, 0.0, 1.0]);
+        }
+        return {
+            name: "Capsule",
+            numTris: 0,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: (numBodyLines * 2) + ((numCircles * (numBodyLines*2 + 2) * 2)),
+                    posCoords: posCoords,
+                    colElems: colours,
+                    texCoords: [],
+                    normAxes: []
+                },
+                byFaces: {
+                    count: numBodyLines * 2,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.lines
+        };
+    },
+    WireDonut: function (radii) {
+
+        var w, h, d;
+        if(radii) {
+            w = radii.x;
+            h = radii.y;
+            d = radii.z;
+        }
+        else
+            w = h = d = 1.0;
+
+        var posCoords = [
+            -w, h, -d,
+            -w, -h, -d,
+            w, -h, -d,
+            w, h, -d,
+
+            -w, h, d,
+            -w, -h, d,
+            w, -h, d,
+            w, h, d
+        ];
+        var colours = [];
+        for (var i = 0; i < posCoords.length; i += 3) {
+            colours = colours.concat([0.0, 0.0, 0.0, 1.0]);
+        }
+        return {
+            name: "Donut",
+            numTris: 12,
+            materials: [],
+            vertices: {
+                byMesh: {
+                    count: 8,
+                    posCoords: posCoords,
+                    colElems: colours,
+                    texCoords: [],
+                    normAxes: [],
+                    indices: [
+                        // back
+                        0, 1,   1, 2,   2, 3,   3, 0,
+                        // front
+                        4, 5,   5, 6,   6, 7,   7, 4,
+                        // connections
+                        0, 4,   1, 5,   2, 6,   3, 7
+                    ]
+                },
+                byFaces: {
+                    count: 36,
+                    posCoords: [],
+                    colElems: [],
+                    texCoords: [],
+                    normAxes: []
+                }
+            },
+            drawMethod: DrawMethods.lines
+        };
     }
 };

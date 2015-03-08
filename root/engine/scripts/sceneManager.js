@@ -51,6 +51,7 @@ function Scene(name, sceneType) {
     this.LoopCall = function() {};
     this.ExitCall = function() {};
 }
+var testOnce = true;
 Scene.prototype = {
     Add: function(gameObject) {
         /// <signature>
@@ -92,7 +93,8 @@ Scene.prototype = {
                 );
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
-                this.debug.AddBoundingShell(sphereShell);
+                //this.debug.AddBoundingShell(sphereShell);
+
                 // Visual for bounding box
                 var boxShell = new ModelHandler(
                     new Primitives.WireCube(gameObject.collider.collBox.radii),
@@ -100,7 +102,27 @@ Scene.prototype = {
                     gameObject.collider.collBox.radii.GetMag()
                 );
                 boxShell.SetTintRGB(0.0, 1.0, 1.0);
-                this.debug.AddBoundingShell(boxShell);
+                //this.debug.AddBoundingShell(boxShell);
+
+                // Visual for capsules, donuts, and anything else that comes up
+                var suppShapes = gameObject.collider.suppShapeList;
+                for(var i = 0; i < suppShapes.length; i++) {
+                    if(suppShapes[i].shapeType == BoundingShapes.capsule) {
+                        var pillShell = new ModelHandler(
+                            new Primitives.WireCapsule(
+                                suppShapes[i].obj.radius,
+                                suppShapes[i].obj.axis,
+                                suppShapes[i].obj.halfLen, 20, 15),
+                            suppShapes[i].obj.trfm,
+                            suppShapes[i].obj.halfLen + suppShapes[i].obj.radius
+                        );
+                        pillShell.SetTintRGB(1.0, 1.0, 1.0);
+                        this.debug.AddBoundingShell(pillShell);
+                    }
+                    else if(suppShapes[i].shapeType == BoundingShapes.donut) {
+
+                    }
+                }
             }
             if(gameObject.rigidBody) {
                 // Visual for velocities

@@ -8,7 +8,7 @@ function AmmoObject(name, model, texture, mass) {
     this.obj.SetModel(model);
     this.obj.mdlHdlr.SetTexture(texture, TextureFilters.linear);
 
-    //this.obj.trfmLocal.SetScaleAxes(0.25, 0.25, 0.25);
+    this.obj.trfmBase.SetScaleAxes(4, 4, 4);
     this.halfHeight = this.obj.shapeData.radii.y * this.obj.trfmBase.scale.y;
     this.obj.trfmBase.SetPosByAxes(0.0, this.halfHeight, 0);
 
@@ -21,6 +21,10 @@ function AmmoObject(name, model, texture, mass) {
     this.gravForce.active = false;
 
     this.obj.AddComponent(Components.collisionSystem);
+    // Secondary collider, must be fully implemented here for now.
+    var capsule = new CollisionCapsule(this.obj);
+    // Just for debug drawing
+    this.obj.collider.AddCollisionShape(BoundingShapes.capsule, capsule);
 }
 AmmoObject.prototype = {
     Update: function() {
