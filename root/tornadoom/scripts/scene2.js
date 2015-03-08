@@ -34,17 +34,17 @@ function BuildScene2(scene) {
     wagon.trfmBase.TranslateByAxes(-1.5, 0.0, -8.0);
 
     var cows = [];
-    var MAX_COWS = 1;
+    var MAX_COWS = 10;
     var bales = [];
-    var MAX_BALES = 0;
+    var MAX_BALES = 10;
 
     for(var i = 0; i < MAX_COWS; i++ ) {
         cows[i] = new Cow();
-        if(i < 10) cows[i].obj.trfmBase.TranslateByAxes(3.0, 0.0, -i * 6);
+        if(i < 5) cows[i].obj.trfmBase.TranslateByAxes(3.0, 0.0, -i * 6);
         else cows[i].obj.trfmBase.TranslateByAxes(-3.0, 0.0, ((-i + (MAX_COWS / 2)) * 6));
 
         bales[i] = new HayBale();
-        if(i < 10) bales[i].obj.trfmBase.TranslateByAxes(6.0, 0.0, -i * 6);
+        if(i < 5) bales[i].obj.trfmBase.TranslateByAxes(6.0, 0.0, -i * 6);
         else bales[i].obj.trfmBase.TranslateByAxes(-6.0, 0.0, ((-i + (MAX_BALES / 2)) * 6));
     }
 

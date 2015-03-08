@@ -8,7 +8,7 @@ function AmmoObject(name, model, texture, mass) {
     this.obj.SetModel(model);
     this.obj.mdlHdlr.SetTexture(texture, TextureFilters.linear);
 
-    this.obj.trfmBase.SetScaleAxes(4, 4, 4);
+    //this.obj.trfmBase.SetScaleAxes(3, 3, 3);
     this.halfHeight = this.obj.shapeData.radii.y * this.obj.trfmBase.scale.y;
     this.obj.trfmBase.SetPosByAxes(0.0, this.halfHeight, 0);
 

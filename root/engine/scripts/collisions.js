@@ -1,5 +1,5 @@
 ﻿
-// COLLISION SPHERE INHERITS FROM SPHERE -----------------------------------------
+// COLLISION SPHERE -----------------------------------------
 
 function CollisionSphere(objTrfm, radius) {
     this.trfm = objTrfm
@@ -30,7 +30,7 @@ CollisionSphere.prototype.Update = function(objTrfm) {
     this.SetScale(objTrfm.GetLargestScaleValue());
 };
 
-// COLLISION CAPSULE INHERITS FROM CAPSULE -----------------------------------------
+// COLLISION CAPSULE -----------------------------------------
 
 function CollisionCapsule(obj) {
     this.trfm = obj.trfmGlobal;
@@ -72,7 +72,62 @@ CollisionCapsule.prototype.Callback = function(collider){};
 CollisionCapsule.prototype.Update = function(objTrfm) {};
  */
 
-// COLLISION BOX INHERITS FROM OBB -----------------------------------------
+// COLLISION DONUT -----------------------------------------
+
+function CollisionDonut(obj) {
+    this.trfm = obj.trfmGlobal;
+
+    var longAxis = obj.shapeData.GetLongestAxis();
+    var shortAxis = obj.shapeData.GetShortestAxis();
+    var planeNorm;
+    var radius;
+    var planarRadius;
+    if (shortAxis == Axes.x) {
+        planeNorm = new Vector3(1.0, 0.0, 0.0);
+        radius = obj.shapeData.radii.x;
+        switch(longAxis) {
+            case Axes.y:
+                planarRadius = obj.shapeData.radii.y - radius;
+                break;
+            case Axes.z:
+                planarRadius = obj.shapeData.radii.z - radius;
+                break;
+        }
+    }
+    else if (shortAxis == Axes.y) {
+        planeNorm = new Vector3(0.0, 1.0, 0.0);
+        radius = obj.shapeData.radii.y;
+        switch(longAxis) {
+            case Axes.x:
+                planarRadius = obj.shapeData.radii.x - radius;
+                break;
+            case Axes.z:
+                planarRadius = obj.shapeData.radii.z - radius;
+                break;
+        }
+    }
+    else {
+        planeNorm = new Vector3(0.0, 0.0, -1.0);
+        radius = obj.shapeData.radii.z;
+        switch(longAxis) {
+            case Axes.x:
+                planarRadius = obj.shapeData.radii.x - radius;
+                break;
+            case Axes.y:
+                planarRadius = obj.shapeData.radii.y - radius;
+                break;
+        }
+    }
+
+    Donut.call(this, this.trfm.pos, radius, planeNorm, planarRadius, this.trfm.rot);
+}
+CollisionDonut.prototype = Donut.prototype;
+/*
+ CollisionDonut.prototype.Callback = function(collider){};
+ CollisionDonut.prototype.Update = function(objTrfm) {};
+ */
+
+// COLLISION OBB -----------------------------------------
 
 function CollisionBox(objTrfm, radii) {
     this.trfm = objTrfm;

@@ -29,6 +29,14 @@ AAShapeData3D.prototype = {
             return Axes.y;
         else
             return Axes.z;
+    },
+    GetShortestAxis: function() {
+        if (this.radii.x < this.radii.y && this.radii.x < this.radii.z)
+            return Axes.x;
+        else if (this.radii.y < this.radii.z)
+            return Axes.y;
+        else
+            return Axes.z;
     }
 };
 

@@ -81,7 +81,7 @@ Scene.prototype = {
             this.debug.AddOrientAxes(new ModelHandler(
                 new Primitives.OrientAxes(axesLengths),
                 gameObject.trfmGlobal,
-                gameObject.shapeData.radius)
+                gameObject.shapeData.radius * gameObject.trfmBase.GetLargestScaleValue())
             );
 
             if(gameObject.collider) {
@@ -89,20 +89,20 @@ Scene.prototype = {
                 var sphereShell = new ModelHandler(
                     new Primitives.IcoSphere(2, gameObject.collider.collSphere.radius),
                     gameObject.collider.collSphere.trfm,
-                    gameObject.collider.collSphere.radius
+                    gameObject.collider.collSphere.radius * gameObject.trfmBase.GetLargestScaleValue()
                 );
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
-                //this.debug.AddBoundingShell(sphereShell);
+                this.debug.AddBoundingShell(sphereShell);
 
                 // Visual for bounding box
                 var boxShell = new ModelHandler(
                     new Primitives.WireCube(gameObject.collider.collBox.radii),
                     gameObject.collider.collBox.trfm,
-                    gameObject.collider.collBox.radii.GetMag()
+                    gameObject.collider.collBox.radii.GetMag() * gameObject.trfmBase.GetLargestScaleValue()
                 );
                 boxShell.SetTintRGB(0.0, 1.0, 1.0);
-                //this.debug.AddBoundingShell(boxShell);
+                this.debug.AddBoundingShell(boxShell);
 
                 // Visual for capsules, donuts, and anything else that comes up
                 var suppShapes = gameObject.collider.suppShapeList;
@@ -114,13 +114,22 @@ Scene.prototype = {
                                 suppShapes[i].obj.axis,
                                 suppShapes[i].obj.halfLen, 20, 15),
                             suppShapes[i].obj.trfm,
-                            suppShapes[i].obj.halfLen + suppShapes[i].obj.radius
+                            (suppShapes[i].obj.halfLen + suppShapes[i].obj.radius) * gameObject.trfmBase.GetLargestScaleValue()
                         );
                         pillShell.SetTintRGB(1.0, 1.0, 1.0);
                         this.debug.AddBoundingShell(pillShell);
                     }
                     else if(suppShapes[i].shapeType == BoundingShapes.donut) {
-
+                        var donutShell = new ModelHandler(
+                            new Primitives.WireDonut(
+                                suppShapes[i].obj.radius,
+                                suppShapes[i].obj.baseNormal,
+                                suppShapes[i].obj.planarRadius, 20, 36),
+                            suppShapes[i].obj.trfm,
+                            (suppShapes[i].obj.planarRadius + suppShapes[i].obj.radius) * gameObject.trfmBase.GetLargestScaleValue()
+                        );
+                        donutShell.SetTintRGB(1.0, 0.6, 0.9);
+                        this.debug.AddBoundingShell(donutShell);
                     }
                 }
             }

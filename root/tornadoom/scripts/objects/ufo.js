@@ -52,6 +52,15 @@ function UFO() {
     ptclObj.ptclSys.AddAutoField(tractorBeamVisual);
     tractorBeamVisual.Run();
 
+    // Collisions -------------------------------------------------
+    coreObj.AddComponent(Components.collisionSystem);
+    var coreCapsule = new CollisionCapsule(coreObj);
+    coreObj.collider.AddCollisionShape(BoundingShapes.capsule, coreCapsule);
+
+    saucerObj.AddComponent(Components.collisionSystem);
+    var saucerDonut = new CollisionDonut(saucerObj);
+    saucerObj.collider.AddCollisionShape(BoundingShapes.donut, saucerDonut);
+
     var angle = 0.0;
     this.Update = function() {
         angle++;

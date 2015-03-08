@@ -1205,7 +1205,6 @@ var Primitives = {
         };
     },
     WireCapsule: function (radius, axis, halfLength, numBodyLines, numCircles) {
-
         var posCoords = [];
         // Use this for circumference of capsule
         var sideAxis = axis.GetOrthoAxis();
@@ -1270,54 +1269,82 @@ var Primitives = {
             drawMethod: DrawMethods.lines
         };
     },
-    WireDonut: function (radii) {
+    WireDonut: function (radius, normAxis, planarRadius, numplanarRings, numEdgeCurves) {
+        var posCoords = [];
 
-        var w, h, d;
-        if(radii) {
-            w = radii.x;
-            h = radii.y;
-            d = radii.z;
+        // Use this for circumference of donut
+        var planeAxis = normAxis.GetCopy();
+        planeAxis.SetNormalized();
+        planeAxis.SetScaleByNum(radius);
+        var sideAxis = normAxis.GetOrthoAxis();
+
+        // Start getting coords for rings
+        var angle = 360 / numEdgeCurves;
+        var ringDist = planarRadius / numplanarRings;
+        var upperRingCoords = [];
+        var lowerRingCoords = [];
+        for(var i = 0; i < numplanarRings; i++) {
+            sideAxis.SetNormalized();
+            sideAxis.SetScaleByNum(ringDist * (i+1));
+
+            upperRingCoords = upperRingCoords.concat(sideAxis.GetAdd(planeAxis).GetData());
+            lowerRingCoords = lowerRingCoords.concat(sideAxis.GetSubtract(planeAxis).GetData());
+            for (var j = 0; j < numEdgeCurves; j++) {
+                sideAxis.SetRotated(angle, planeAxis);
+                upperRingCoords = upperRingCoords.concat(sideAxis.GetAdd(planeAxis).GetData());
+                upperRingCoords = upperRingCoords.concat(sideAxis.GetAdd(planeAxis).GetData());
+                lowerRingCoords = lowerRingCoords.concat(sideAxis.GetSubtract(planeAxis).GetData());
+                lowerRingCoords = lowerRingCoords.concat(sideAxis.GetSubtract(planeAxis).GetData());
+            }
+            upperRingCoords = upperRingCoords.concat(sideAxis.GetAdd(planeAxis).GetData());
+            lowerRingCoords = lowerRingCoords.concat(sideAxis.GetSubtract(planeAxis).GetData());
         }
-        else
-            w = h = d = 1.0;
+        posCoords = upperRingCoords;
+        posCoords = posCoords.concat(lowerRingCoords);
 
-        var posCoords = [
-            -w, h, -d,
-            -w, -h, -d,
-            w, -h, -d,
-            w, h, -d,
+        // NOW THE SIDE CURVES
 
-            -w, h, d,
-            -w, -h, d,
-            w, -h, d,
-            w, h, d
-        ];
+        sideAxis.SetNormalized();
+        sideAxis.SetScaleByNum(planarRadius);
+
+        var sideCurveCoords = [];
+        var curveAxis = planeAxis.GetCopy();
+        var sideOfSideAxis;
+        var curveAngle = 180 / numplanarRings;
+        for(var i = 0; i < numEdgeCurves; i++) {
+            curveAxis.SetCopy(planeAxis);
+            sideOfSideAxis = planeAxis.GetCross(sideAxis);
+            sideOfSideAxis.SetNormalized();
+
+            sideCurveCoords = sideCurveCoords.concat(sideAxis.GetAdd(curveAxis).GetData());
+            for (var j = 0; j < numplanarRings; j++) {
+                curveAxis.SetRotated(curveAngle, sideOfSideAxis);
+                sideCurveCoords = sideCurveCoords.concat(sideAxis.GetAdd(curveAxis).GetData());
+                sideCurveCoords = sideCurveCoords.concat(sideAxis.GetAdd(curveAxis).GetData());
+            }
+            sideCurveCoords = sideCurveCoords.concat(sideAxis.GetAdd(curveAxis).GetData());
+            sideAxis.SetRotated(angle, planeAxis);
+        }
+        posCoords = posCoords.concat(sideCurveCoords);
+
         var colours = [];
         for (var i = 0; i < posCoords.length; i += 3) {
             colours = colours.concat([0.0, 0.0, 0.0, 1.0]);
         }
         return {
             name: "Donut",
-            numTris: 12,
+            numTris: 0,
             materials: [],
             vertices: {
                 byMesh: {
-                    count: 8,
+                    count: (numplanarRings * ((numEdgeCurves*2 + 2) * 2)) + (numEdgeCurves * (numplanarRings*2 + 2)),
                     posCoords: posCoords,
                     colElems: colours,
                     texCoords: [],
-                    normAxes: [],
-                    indices: [
-                        // back
-                        0, 1,   1, 2,   2, 3,   3, 0,
-                        // front
-                        4, 5,   5, 6,   6, 7,   7, 4,
-                        // connections
-                        0, 4,   1, 5,   2, 6,   3, 7
-                    ]
+                    normAxes: []
                 },
                 byFaces: {
-                    count: 36,
+                    count: 0,
                     posCoords: [],
                     colElems: [],
                     texCoords: [],
