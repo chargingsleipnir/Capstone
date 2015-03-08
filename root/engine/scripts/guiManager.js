@@ -16,6 +16,7 @@ function GUIObject(wndRect, msg, style) {
     this.rectGlobal = wndRect.GetCopy();
     this.msg = msg;
     this.style = new MsgBoxStyle(style);
+    this.active = true;
 
     /* Might be able to create a range of depth within the NDC, and in front
      * of everything else being affected by transformations. Maybe convert the
@@ -135,35 +136,47 @@ GUIObject.prototype = {
         }
     },
     UpdateMsg: function(msg) {
-
-        var newVerts = this.charBlockModel.posCoords;
-        for(var i = 0; i < this.numChars; i++) {
-            newVerts = newVerts.concat(FontMap.texCoords[msg[i] || ' ']);
+        if(this.active) {
+            var newVerts = this.charBlockModel.posCoords;
+            for (var i = 0; i < this.numChars; i++) {
+                newVerts = newVerts.concat(FontMap.texCoords[msg[i] || ' ']);
+            }
+            this.strHdl.RewriteVerts(newVerts);
         }
-        this.strHdl.RewriteVerts(newVerts);
     },
     AsButton: function(mousePos, clicked, Callback) {
-        this.boxHdl.SetTintRGB(this.style.bgColour);
-        this.strHdl.SetTintRGB(this.style.fontColour);
-        if(this.rectGlobal.ContainsPoint(mousePos)) {
-            this.boxHdl.SetTintRGB(this.style.bgHoverColour);
-            this.strHdl.SetTintRGB(this.style.fontHoverColour);
-            if(clicked) {
-                Callback();
+        if(this.active) {
+            this.boxHdl.SetTintRGB(this.style.bgColour);
+            this.strHdl.SetTintRGB(this.style.fontColour);
+            if (this.rectGlobal.ContainsPoint(mousePos)) {
+                this.boxHdl.SetTintRGB(this.style.bgHoverColour);
+                this.strHdl.SetTintRGB(this.style.fontHoverColour);
+                if (clicked) {
+                    Callback();
+                }
             }
         }
     },
     FadeBackground: function(incr) {
-        this.boxHdl.tint.w += incr;
-        return this.boxHdl.tint.w;
+        if(this.active) {
+            this.boxHdl.tint.w += incr;
+            return this.boxHdl.tint.w;
+        }
     },
     FadeMsg: function(incr) {
-        this.strHdl.tint.w += incr;
-        return this.strHdl.tint.w;
+        if(this.active) {
+            this.strHdl.tint.w += incr;
+            return this.strHdl.tint.w;
+        }
     },
     SetObjectFade: function(alpha) {
         this.boxHdl.tint.w = alpha;
         this.strHdl.tint.w = alpha;
+    },
+    SetActive: function(beActive) {
+        this.active = beActive;
+        this.boxHdl.active = beActive;
+        this.strHdl.active = beActive;
     }
 };
 

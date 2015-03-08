@@ -7,7 +7,7 @@ function BuildGame() {
     /********************************** GLOBAL GAME SETUP **********************************/
 
 
-    /********************************** Env. Init */
+    /********************************** Environment Init **********************************/
 
     // This is temporary, just to view the world and build scenes easier.
     ViewMngr.camera.trfmAxes.SetPosAxes(0.0, 5.0, 0.0);
@@ -15,7 +15,7 @@ function BuildGame() {
     var camToggle = true;
     var gizmoToggle = true;
 
-    /********************************** Global Input */
+    /********************************** Global Input **********************************/
 
     var gameMouseCtrlName = "GameMouse";
     Input.RegisterControlScheme(gameMouseCtrlName, true, InputTypes.mouse);
@@ -30,8 +30,9 @@ function BuildGame() {
     var showGizmos = Input.CreateInputController(gameKeyCtrlName, KeyMap.G);
     var switchCam = Input.CreateInputController(gameKeyCtrlName, KeyMap.C);
 
-    /********************************** Main Menu */
+    /********************************** GUI **********************************/
 
+    /********************************** Main menu */
     var menuSysName = "Main Menu";
     var mainMenu = new GUISystem(new WndRect(ViewMngr.wndWidth/2 - 200, ViewMngr.wndHeight/2 - 300, 400, 600), menuSysName );
 
@@ -57,46 +58,107 @@ function BuildGame() {
     style.fontAlpha = 1.0;
     style.bold = true;
 
-    // Menu buttons and callback functions
+    // FIRST PAGE MENU BUTTONS
     var resumeBtn = new GUIObject(
         new WndRect(20, 20, backDrop.rectGlobal.w - 40, 50),
         "Resume Game",
         style
     );
+    function ResumeCallback() {
+        gameMouse.LeftRelease();
+        menuBtn.pressed = true;
+        GameMngr.assets.sounds['tick'].play();
+    }
+    // ----------
     var quitBtn = new GUIObject(
         new WndRect(20, 90, resumeBtn.rectGlobal.w, resumeBtn.rectGlobal.h),
         "Quit Game",
         style
     );
-    function resumeCallback() {
+    function QuitCallback() {
         gameMouse.LeftRelease();
-        menuBtn.pressed = true;
-        GameMngr.assets.sounds['tick'].play();
-    }
-    function quitCallback() {
-        gameMouse.LeftRelease();
-
         // Make sure all other restart logic is sound here
-
         DisplayOptionMenu();
         SceneMngr.SetActive("Title Screen");
         GameMngr.assets.sounds['tick'].play();
     }
+    // ----------
+    var devBtn = new GUIObject(
+        new WndRect(20, 160, quitBtn.rectGlobal.w, quitBtn.rectGlobal.h),
+        "Developer Tools",
+        style
+    );
+    function DevCallback() {
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+
+        resumeBtn.SetActive(false);
+        quitBtn.SetActive(false);
+        devBtn.SetActive(false);
+
+        camChangeBtn.SetActive(true);
+    }
+
+    // DEV CONTROL PAGE
+    var camChangeBtn = new GUIObject(
+        new WndRect(20, 20, backDrop.rectGlobal.w - 40, 50),
+        "Free camera",
+        style
+    );
+    function CamChangeCallback() {
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+    }
+    /*
+    // ----------
+    style.bgColour.SetValues(0.6, 0.85, 0.85);
+    style.margin = 5.0;
+    style.fontSize = 30;
+    style.fontColour.SetValues(0.0, 0.0, 0.0);
+    style.fontHoverColour.SetValues(0.5, 0.1, 0.9);
+    style.bgHoverColour.SetValues(0.7, 0.6, 0.5);
+    style.textMaxWidth = 200;
+    style.textAlignWidth = Alignment.centre;
+    style.textAlignHeight = Alignment.centre;
+    style.fontAlpha = 1.0;
+    style.bold = true;
+    var debugDrawHeader = new GUIObject(
+        new WndRect(20, 90, camChangeBtn.rectGlobal.w, camChangeBtn.rectGlobal.h),
+        "Debug Visuals",
+        style
+    );
+    // ----------
+    var backBtn = new GUIObject(
+        new WndRect(20, 160, quitBtn.rectGlobal.w, quitBtn.rectGlobal.h),
+        "Back",
+        style
+    );
+    function backCallback() {
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+        resumeBtn.SetActive(true);
+        quitBtn.SetActive(true);
+        devBtn.SetActive(true);
+    }
+    */
 
     mainMenu.AddGUIObject(backDrop);
     mainMenu.AddGUIObject(resumeBtn);
     mainMenu.AddGUIObject(quitBtn);
+    mainMenu.AddGUIObject(devBtn);
+    mainMenu.AddGUIObject(camChangeBtn);
+    camChangeBtn.SetActive(false);
 
     GUINetwork.AddSystem(mainMenu, false);
     var menuToggle = false;
 
-    /******************************** HUD *************************************************/
 
+    /********************************** HUD */
     var hud = new GUISystem(new WndRect(20, 20, ViewMngr.wndWidth - 40, ViewMngr.wndHeight - 40), "in-game HUD");
     // Only added to in Player so far
     GUINetwork.AddSystem(hud, true);
 
-    /********************************** Global Objects */
+    /********************************** Global Objects **********************************/
 
     var player = new Player(hud, gameMouse);
     player.obj.trfmBase.SetPosByAxes(0.0, 1.0, 0.0);
@@ -108,7 +170,7 @@ function BuildGame() {
     skyBox.mdlHdlr.SetTexture(GameMngr.assets.textures['skyTex'], TextureFilters.nearest);
     skyBox.trfmBase.SetScaleAxes(150.0, 150.0, 150.0);
 
-    /********************************** Scenes */
+    /********************************** Scenes **********************************/
 
     // Title screen just has gui elements
     var title = new Scene("Title Screen", SceneTypes.menu);
@@ -129,10 +191,16 @@ function BuildGame() {
     SceneMngr.AddScene(testScene, true);
     */
 
+    /********************************** Game Functions **********************************/
+
     var angle = 0.00;
     function DisplayOptionMenu() {
         menuToggle = !menuToggle;
         GUINetwork.SetActive(menuSysName, menuToggle);
+        resumeBtn.SetActive(true);
+        quitBtn.SetActive(true);
+        devBtn.SetActive(true);
+        camChangeBtn.SetActive(false);
         GameMngr.TogglePause();
         if (menuToggle) gameMouse.SetCursor(CursorTypes.normal);
         else gameMouse.SetCursor(CursorTypes.none);
@@ -148,8 +216,10 @@ function BuildGame() {
         }
 
         if(GUINetwork.CheckActive(menuSysName)) {
-            resumeBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, resumeCallback);
-            quitBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, quitCallback);
+            resumeBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, ResumeCallback);
+            quitBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, QuitCallback);
+            devBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, DevCallback);
+            camChangeBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, CamChangeCallback);
         }
 
         if(!GameMngr.paused) {
