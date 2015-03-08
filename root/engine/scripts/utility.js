@@ -229,6 +229,21 @@ var GeomUtils = {
 
         return shape;
     },
+    ClosestPntSegmentToPoint: function(segPntA, segPntB, pntC) {
+        var ab = segPntB.GetSubtract(segPntA);
+        var t = pntC.GetSubtract(segPntA).GetDot(ab);
+        if(t <= 0.0)
+            return segPntA.GetCopy();
+        else {
+            var denom = ab.GetDot(ab);
+            if(t >= denom)
+                return segPntB.GetCopy();
+            else {
+                t = t / denom;
+                return segPntA.GetAdd(ab.SetScaleByNum(t));
+            }
+        }
+    },
     DistPointSegmentSqr: function(segPntA, segPntB, pntC) {
         var ab = segPntB.GetSubtract(segPntA),
             ac = pntC.GetSubtract(segPntA),

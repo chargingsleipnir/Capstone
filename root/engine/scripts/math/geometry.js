@@ -158,6 +158,14 @@ Plane.prototype = {
         ///  <returns type="decimal" />
         /// </signature>
         return this.norm.GetDot(point) + this.dist;
+    },
+    DistanceTo2: function(point) {
+        /// <signature>
+        ///  <summary>Get the shortest distance from the point to the plane. Sign is relative to norm direction</summary>
+        ///  <param name="point" type="Vector3"></param>
+        ///  <returns type="decimal" />
+        /// </signature>
+        return this.norm.GetDot(point) - this.dist;
     }
 };
 
@@ -648,6 +656,7 @@ Sphere.prototype = {
 // This represents a sphere that exists freely along a given axis.
 function Capsule(pos, radius, majorAxisDir, majorAxisHalfLength, rot) {
     this.axis = majorAxisDir;
+    this.axis.SetNormalized();
     this.halfLen = majorAxisHalfLength;
     this.rot = rot;
     Sphere.call(this, pos, radius);
@@ -663,6 +672,9 @@ Capsule.prototype.GetPointPos = function() {
 Capsule.prototype.GetPointNeg = function() {
     var rotAxis = this.rot.GetMultiplyVec3(this.axis);
     return this.pos.GetSubtract(rotAxis.GetScaleByNum(this.halfLen));
+};
+Capsule.prototype.GetAxis = function() {
+    return this.rot.GetMultiplyVec3(this.axis);
 };
 Capsule.prototype.IntersectsSphere = function(sphere) {
     // Compute dist between sphere and capsule line segment
@@ -706,21 +718,28 @@ function Donut(pos, radius, planeNorm, planarRadius, rot) {
     ///  <param name="rot" type="Quaternion"></param>
     ///  <returns type="Donut" />
     /// </signature>
-    this.originPlane = new Plane(planeNorm, 0.0);
+
+    // baseNormal is that at zero quaternion rotation
+    planeNorm.SetNormalized();
+    this.baseNormal = planeNorm.GetCopy();
+    this.plane = new Plane(planeNorm, 0.0);
     this.planarRadius = planarRadius;
     this.rot = rot;
     Sphere.call(this, pos, radius);
+
+    this.UpdatePlane();
 }
 Donut.prototype = new Sphere();
 Donut.prototype.SetCopy = function() {
 
 };
-Donut.prototype.IntersectsSphere = function(sphere) {
-    // Get the closest point from the object to the plane at the origin
-    var closestPnt = this.originPlane.GetClosestPointToPoint(sphere.pos);
-    // Translate that to be the closest point on the donut's plane
-    var donutDist = this.originPlane.DistanceTo(this.pos);
-    closestPnt.SetAdd(this.originPlane.norm.GetScaleByNum(donutDist));
+Donut.prototype.UpdatePlane = function() {
+    this.plane.norm = this.rot.GetMultiplyVec3(this.baseNormal);
+    this.plane.dist = this.plane.norm.GetDot(this.pos);
+};
+Donut.prototype.CheckSphere = function(pos, radius) {
+    // Get the closest point from the object to the plane
+    var closestPnt = this.plane.GetClosestPointToPoint(pos);
 
     // Get the point closest to that point from the donut's plane point
     var distVec = closestPnt.GetSubtract(this.pos);
@@ -736,12 +755,75 @@ Donut.prototype.IntersectsSphere = function(sphere) {
     }
 
     // Check radii from there
-    var collisionDist = closestPnt.GetSubtract(sphere.pos);
-    return collisionDist.GetMagSqr() <= Math.pow(this.radius + sphere.radius, 2);
+    var collisionDist = closestPnt.GetSubtract(pos);
+    return collisionDist.GetMagSqr() <= Math.pow(this.radius + radius, 2);
 };
-
+Donut.prototype.IntersectsSphere = function(sphere) {
+    this.UpdatePlane();
+    return this.CheckSphere(sphere.pos, sphere.radius);
+};
 Donut.prototype.IntersectsCapsule = function(capsule) {
+    this.UpdatePlane();
 
+    // Get the point on the capsule's axis that are within range of the plane,
+    // then use the closest point to determine where checking should happen
+
+    var norm = this.plane.norm;
+    var dist = this.plane.dist;
+    console.log("Donut plane norm: " + norm.GetData() + ", and dist: " + dist);
+
+    var upperCheckPnt,
+        lowerCheckPnt;
+
+    // Distal ends of the capsule
+    var capsulePntPos = capsule.GetPointPos(),
+        capsulePntNeg = capsule.GetPointNeg();
+    console.log("Capsule pos end: " + capsulePntPos.GetData() + ", Capsule neg end: " + capsulePntNeg.GetData());
+    // Furthest points above and below donut, including radii
+    var upperPlanePnt = this.pos.GetAdd(norm.GetScaleByNum(this.radius + capsule.radius)),
+        lowerPlanePnt = this.pos.GetSubtract(norm.GetScaleByNum(this.radius + capsule.radius));
+    console.log("Donut + radii: " + upperPlanePnt.GetData() + ", Donut - radii: " + lowerPlanePnt.GetData());
+
+    var cPosDist = this.plane.DistanceTo2(capsulePntPos),
+        cNegDist = this.plane.DistanceTo2(capsulePntNeg),
+        dPosDist = this.plane.DistanceTo2(upperPlanePnt),
+        dNegDist = this.plane.DistanceTo2(lowerPlanePnt);
+    console.log("cPosDist: " + cPosDist + ", cNegDist: " + cNegDist + ", dPosDist: " + dPosDist + ", dNegDist: " + dNegDist);
+
+    // Capsule to fully outside of donut plane +- radii
+    if((cPosDist > dPosDist && cNegDist > dPosDist) || (cNegDist < dNegDist && cPosDist < dNegDist)) {
+        console.log("Capsule outside distal planes - early exit");
+        return false;
+    }
+
+    // Get slope vector of capsule
+    var slopeVec = capsulePntPos.GetSubtract(capsulePntNeg);
+    console.log("Capsule slope: " + slopeVec.GetData());
+
+    // If ends of capsule are aligned enough with donut plane, use given ends
+    if(cPosDist < dPosDist && cPosDist > dNegDist)
+        upperCheckPnt = capsulePntPos;
+    else {
+        var upperPntPct = (dPosDist - cNegDist) / (cPosDist - cNegDist);
+        upperCheckPnt = capsulePntNeg.GetAddScaled(slopeVec, upperPntPct);
+        console.log("Upper fraction of slope projection: " + upperPntPct);
+        console.log("Upper pnt on original segment: " + upperCheckPnt.GetData());
+    }
+    if(cNegDist < dPosDist && cNegDist > dNegDist)
+        lowerCheckPnt = capsulePntNeg;
+    else {
+        var lowerPntPct = (dNegDist - cNegDist) / (cPosDist - cNegDist);
+        lowerCheckPnt = capsulePntNeg.GetAddScaled(slopeVec, lowerPntPct);
+        console.log("Lower fraction of slope projection: " + lowerPntPct);
+        console.log("Lower pnt on original segment: " + lowerCheckPnt.GetData());
+    }
+
+    // This is the location of the closest point on the capsule to the donut.
+    // Check a sphere here, to the one within the donut
+    var capsuleFinalCheckPnt = GeomUtils.ClosestPntSegmentToPoint(lowerCheckPnt, upperCheckPnt, this.pos);
+    console.log("Pnt on capsule to use: " + capsuleFinalCheckPnt.GetData());
+
+    return this.CheckSphere(capsuleFinalCheckPnt, capsule.radius);
 };
 
 
