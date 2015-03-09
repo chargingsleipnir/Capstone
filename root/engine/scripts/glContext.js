@@ -540,13 +540,13 @@ var GL = {
         this.ctx.disable(this.ctx.DEPTH_TEST);
         // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
         for(var sys in guiSystems) {
-            for(var j = 0; j < guiSystems[sys].textBlocks.length; j++) {
+            for(var j = 0; j < guiSystems[sys].guiObjs.length; j++) {
 
                 /******************* TEXT BOXES *************************/
-                if(guiSystems[sys].boxMdls[j].active) {
+                if(guiSystems[sys].guiObjs[j].active) {
 
-                    shdr = guiSystems[sys].boxMdls[j].shaderData;
-                    buff = guiSystems[sys].boxMdls[j].bufferData;
+                    shdr = guiSystems[sys].guiObjs[j].boxHdl.shaderData;
+                    buff = guiSystems[sys].guiObjs[j].boxHdl.bufferData;
 
                     this.ctx.useProgram(shdr.program);
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
@@ -566,7 +566,7 @@ var GL = {
                         }
                     }
 
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].boxMdls[j].tint.GetData());
+                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiObjs[j].boxHdl.tint.GetData());
 
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                     this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -574,13 +574,11 @@ var GL = {
                     // Unbind buffers after use
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-                }
 
                 /******************* TEXT BLOCKS *************************/
-                if(guiSystems[sys].textBlocks[j].active) {
                     /* This shader is very specific to gui text, having no matrices, and with textures*/
                     shdr = EL.assets.shaderPrograms['guiText'];
-                    buff = guiSystems[sys].textBlocks[j].bufferData;
+                    buff = guiSystems[sys].guiObjs[j].strHdl.bufferData;
 
                     this.ctx.useProgram(shdr.program);
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
@@ -597,7 +595,7 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                     this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].textBlocks[j].tint.GetData());
+                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiObjs[j].strHdl.tint.GetData());
 
                     this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 

@@ -119,7 +119,6 @@ function GUIBoxHandler(boxVerts) {
 
     this.shaderData = EL.assets.shaderPrograms['guiBoxTint'];
     this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
-    this.active = true;
 }
 GUIBoxHandler.prototype = {
     SetTintRGB: function(RGBvec3) {
@@ -143,7 +142,6 @@ function StringDisplayHandler(stringLine) {
 
     this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
     this.bufferData.texID = GL.CreateTextureObject(EL.assets.textures['fontMapBasic'], TextureFilters.nearest);
-    this.active = true;
 }
 StringDisplayHandler.prototype = {
     SetTintRGB: function(RGBvec3) {

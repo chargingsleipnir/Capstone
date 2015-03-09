@@ -175,8 +175,6 @@ GUIObject.prototype = {
     },
     SetActive: function(beActive) {
         this.active = beActive;
-        this.boxHdl.active = beActive;
-        this.strHdl.active = beActive;
     }
 };
 
@@ -190,8 +188,7 @@ function GUISystem(wndRect, name) {
     /// </signature>
     this.sysRect = wndRect;
     this.name = name;
-    this.boxMdls = [];
-    this.textBlocks = [];
+    this.guiObjs = [];
 }
 GUISystem.prototype = {
     AddGUIObject: function(guiObj) {
@@ -201,8 +198,7 @@ GUISystem.prototype = {
         /// </signature>
         guiObj.UpdateGlobalRect(this.sysRect);
         guiObj.InstantiateDisplay();
-        this.boxMdls.push(guiObj.boxHdl);
-        this.textBlocks.push(guiObj.strHdl);
+        this.guiObjs.push(guiObj);
     }
 };
 
