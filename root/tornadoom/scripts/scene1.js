@@ -31,7 +31,7 @@ function BuildScene1(scene) {
     );
 
     style.bgAlpha = 1.0;
-    style.bgTexture = EL.assets.textures['lava'];
+    style.bgTextures = [EL.assets.textures['lava']];
     var background = new GUIObject(
         titleScreen.sysRect,
         "",

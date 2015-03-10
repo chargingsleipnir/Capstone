@@ -71,22 +71,6 @@ function ControlScheme() {
     this.yawRight;
 }
 function MsgBoxStyle(style) {
-    // This is height in px. Width will be 2/3 this value
-    this.fontSize = 20.0;
-    this.fontColour = new Vector3();
-    this.fontHoverColour = new Vector3();
-    this.fontAlpha = 1.0;
-    this.textMaxWidth = 100;
-    this.textAlignWidth = Alignment.centre;
-    this.textAlignHeight = Alignment.centre;
-    this.textLineSpacing = 0.0;
-    this.bgTexture = null;
-    this.bgColour = new Vector3();
-    this.bgHoverColour = new Vector3();
-    this.bgAlpha = 1.0;
-    this.margin = 0.0;
-    this.bold = false;
-
     if(style) {
         this.fontSize = style.fontSize;
         this.fontColour = style.fontColour.GetCopy();
@@ -96,12 +80,29 @@ function MsgBoxStyle(style) {
         this.textAlignWidth = style.textAlignWidth;
         this.textAlignHeight = style.textAlignHeight;
         this.textLineSpacing = style.textLineSpacing;
-        this.bgTexture = style.bgTexture;
+        this.bgTextures = style.bgTextures.slice();
         this.bgColour = style.bgColour.GetCopy();
         this.bgHoverColour = style.bgHoverColour.GetCopy();
         this.bgAlpha = style.bgAlpha;
         this.margin = style.margin;
         this.bold = style.bold;
+    }
+    else {
+        // This is height in px. Width will be 2/3 this value
+        this.fontSize = 20.0;
+        this.fontColour = new Vector3();
+        this.fontHoverColour = new Vector3();
+        this.fontAlpha = 1.0;
+        this.textMaxWidth = 100;
+        this.textAlignWidth = Alignment.centre;
+        this.textAlignHeight = Alignment.centre;
+        this.textLineSpacing = 0.0;
+        this.bgTextures = [];
+        this.bgColour = new Vector3();
+        this.bgHoverColour = new Vector3();
+        this.bgAlpha = 1.0;
+        this.margin = 0.0;
+        this.bold = false;
     }
 }
 

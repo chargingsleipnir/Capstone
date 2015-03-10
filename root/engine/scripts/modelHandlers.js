@@ -119,6 +119,8 @@ function GUIBoxHandler(boxVerts) {
 
     this.shaderData = EL.assets.shaderPrograms['guiBoxTint'];
     this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);
+
+    this.texIDs = [];
 }
 GUIBoxHandler.prototype = {
     SetTintRGB: function(RGBvec3) {
@@ -129,9 +131,15 @@ GUIBoxHandler.prototype = {
     SetTintAlpha: function(a) {
         this.tint.w = a;
     },
-    SetTexture: function(texture, texFilter) {
-        this.bufferData.texID = GL.CreateTextureObject(texture, texFilter);
+    SetTextures: function(textures, texFilter) {
+        for(var i = 0; i < textures.length; i++)
+            this.texIDs[i] = GL.CreateTextureObject(textures[i], texFilter);
+
+        this.bufferData.texID = this.texIDs[0];
         this.shaderData = EL.assets.shaderPrograms['guiBoxTintTex'];
+    },
+    UseTexture: function(idIndex) {
+        this.bufferData.texID = this.texIDs[idIndex];
     }
 };
 

@@ -166,12 +166,12 @@ function Player(hud, mouse) {
     style.bgAlpha = 1.0;
     style.bold = false;
 
-    style.bgTexture = GameMngr.assets.textures['baleIcon'];
+    style.bgTextures = [GameMngr.assets.textures['baleIcon']];
     var caughtBaleInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 68, 132, 68), "00", style);
     hud.AddGUIObject(caughtBaleInfo);
     caughtBaleInfo.UpdateMsg('0');
 
-    style.bgTexture = GameMngr.assets.textures['cowIcon'];
+    style.bgTextures = [GameMngr.assets.textures['cowIcon']];
     var caughtCowInfo = new GUIObject(new WndRect(0, caughtBaleInfo.rectLocal.y - 78, 132, 68), "00", style);
     hud.AddGUIObject(caughtCowInfo);
     caughtCowInfo.UpdateMsg('0');
@@ -183,7 +183,7 @@ function Player(hud, mouse) {
 
     style.textMaxWidth = 20;
     style.textAlignWidth = Alignment.left;
-    style.bgTexture = null;
+    style.bgTextures = [];
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
     var launchPowerMsg = new GUIObject(new WndRect(0, 0, 375, 68), "Extra Power: 000", style);
     hud.AddGUIObject(launchPowerMsg);

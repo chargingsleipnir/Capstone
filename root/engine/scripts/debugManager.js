@@ -2,6 +2,10 @@
 var DebugMngr = {
     active: false,
     dispOrientAxes: false,
+    dispSpheres: false,
+    dispCapsules: false,
+    dispDonuts: false,
+    dispBoxes: false,
     dispShells: false,
     dispRays: false,
     dispAxes: false,
@@ -101,6 +105,9 @@ DebugHandler.prototype =  {
         this.dispObjs.rayCasts.rays.push(ray);
         this.dispObjs.rayCasts.pos.push(pos);
         this.dispObjs.rayCasts.slopes.push(slope);
+    },
+    GetModels: function() {
+
     },
     Update: function () {
         if(DebugMngr.active) {

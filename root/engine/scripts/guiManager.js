@@ -71,8 +71,8 @@ GUIObject.prototype = {
         this.boxHdl = new GUIBoxHandler(boxModel.vertices.byMesh);
         this.boxHdl.SetTintRGB(this.style.bgColour);
         this.boxHdl.SetTintAlpha(this.style.bgAlpha);
-        if (this.style.bgTexture) {
-            this.boxHdl.SetTexture(this.style.bgTexture, TextureFilters.linear);
+        if (this.style.bgTextures.length > 0) {
+            this.boxHdl.SetTextures(this.style.bgTextures, TextureFilters.linear);
         }
 
 
@@ -172,6 +172,9 @@ GUIObject.prototype = {
     SetObjectFade: function(alpha) {
         this.boxHdl.tint.w = alpha;
         this.strHdl.tint.w = alpha;
+    },
+    UseTexture: function(index) {
+        this.boxHdl.UseTexture(index);
     },
     SetActive: function(beActive) {
         this.active = beActive;

@@ -19,7 +19,7 @@ function BuildScene2(scene) {
     fence.SetModel(GameMngr.assets.models['fence']);
     fence.mdlHdlr.SetTexture(GameMngr.assets.textures['fenceTex'], TextureFilters.mipmap);
     RaiseToGruond(fence);
-    fence.trfmBase.TranslateByAxes(0.0, 0.0, 0.6);
+    fence.trfmBase.TranslateByAxes(0.0, 0.0, 0.0);
 
     var barn = new GameObject('barn', Labels.none);
     barn.SetModel(GameMngr.assets.models['barn']);

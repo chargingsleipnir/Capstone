@@ -12,8 +12,6 @@ function BuildGame() {
     ViewMngr.camera.trfmAxes.RotateLocalViewX(-10);
     ViewMngr.camera.FreeControlUpdate();
 
-    var gizmoToggle = true;
-
     /********************************** Global Input **********************************/
 
     var gameMouseCtrlName = "GameMouse";
@@ -24,9 +22,6 @@ function BuildGame() {
     var gameKeyCtrlName = "SceneAndMenuNav";
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
     var menuBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Esc);
-
-    // Controls for engine display
-    var showGizmos = Input.CreateInputController(gameKeyCtrlName, KeyMap.G);
 
     /********************************** HUD */
     var hud = new GUISystem(new WndRect(20, 20, ViewMngr.wndWidth - 40, ViewMngr.wndHeight - 40), "in-game HUD");
@@ -88,13 +83,6 @@ function BuildGame() {
 
                 angle += 0.01;
                 skyBox.trfmBase.SetUpdatedRot(VEC3_FWD, angle);
-
-                // ACTIVATES FULL ENGINE-BUILD VIEW WITH ALL
-                if(showGizmos.pressed) {
-                    DebugMngr.SetFullActive(gizmoToggle);
-                    gizmoToggle = !gizmoToggle;
-                    showGizmos.Release();
-                }
             }
         }
     }

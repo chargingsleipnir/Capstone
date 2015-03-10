@@ -5,48 +5,60 @@
 function InGameMenu(gameMouse, player) {
 
     var that = this;
+    var pages = { main: 0, devContol: 1 };
+    var ActivePageUpdate; // Function holder
 
     var camToggle = true;
     var menuToggle = false;
     var menuSysName = "Main Menu";
-    var pages = { main: 0, devContol: 1 };
     var mainMenu = new GUISystem(new WndRect(ViewMngr.wndWidth/2 - 200, ViewMngr.wndHeight/2 - 300, 400, 600), menuSysName );
 
+    // System to add a diode to anything I want to use as a switch ----------------
+    var diodeStyle = new MsgBoxStyle();
+    diodeStyle.bgTextures = [
+        GameMngr.assets.textures['switchUnlit'],
+        GameMngr.assets.textures['switchLit']
+    ];
+    function AttachDiodeAtEnd(rect, diodesObj, name, margin) {
+        var diam = rect.h - margin * 2;
+        diodesObj[name] = new GUIObject(new WndRect(rect.x + rect.w - margin - diam, rect.y + margin, diam, diam), "", diodeStyle);
+    }
+    // -----------------------------------------------------------------------------
+
     var style = new MsgBoxStyle();
-    style.bgColour = new Vector3(0.85, 0.6, 0.85);
-    style.bgAlpha = 0.75;
+    style.bgColour = new Vector3(0.1, 0.1, 0.1);
+    style.bgAlpha = 0.9;
 
-    var backDrop = new GUIObject(
-        new WndRect(0, 0, mainMenu.sysRect.w, mainMenu.sysRect.h),
-        "",
-        style
-    );
+    var backDrop = new GUIObject(new WndRect(0, 0, mainMenu.sysRect.w, mainMenu.sysRect.h), "", style);
 
-    style.bgColour.SetValues(0.6, 0.85, 0.85);
+    style.bgColour.SetValues(0.8, 0.5, 0.2);
     style.margin = 5.0;
     style.fontSize = 30;
     style.fontColour.SetValues(0.0, 0.0, 0.0);
-    style.fontHoverColour.SetValues(0.5, 0.1, 0.9);
-    style.bgHoverColour.SetValues(0.7, 0.6, 0.5);
+    style.fontHoverColour.SetValues(0.1, 0.1, 0.1);
+    style.bgHoverColour.SetValues(0.9, 0.6, 0.3);
     style.textMaxWidth = 200;
     style.textAlignWidth = Alignment.centre;
     style.textAlignHeight = Alignment.centre;
     style.fontAlpha = 1.0;
-    style.bold = true;
+    style.bold = false;
 
-    // FIRST PAGE MENU BUTTONS
-    var resumeBtn = new GUIObject(
-        new WndRect(20, 20, backDrop.rectGlobal.w - 40, 50),
-        "Resume Game", style );
+    // FIRST PAGE MENU BUTTONS ---------------------------
+    var contW = backDrop.rectGlobal.w;
+    var contH = backDrop.rectGlobal.h;
+    var btnH = 50;
+    var mainPageObjs = [
+        new GUIObject(new WndRect(20, 20, contW - 40, btnH), "Resume Game", style),
+        new GUIObject(new WndRect(20, 90, contW - 40, btnH), "Quit Game", style),
+        new GUIObject(new WndRect(20, 160, contW - 40, btnH), "Developer Tools", style)
+    ];
+
+    // Callbacks
     function ResumeCallback() {
         gameMouse.LeftRelease();
         that.ToggleActive();
         GameMngr.assets.sounds['tick'].play();
     }
-    // ----------
-    var quitBtn = new GUIObject(
-        new WndRect(20, 90, resumeBtn.rectGlobal.w, resumeBtn.rectGlobal.h),
-        "Quit Game", style );
     function QuitCallback() {
         gameMouse.LeftRelease();
         // Make sure all other restart logic is sound here
@@ -54,72 +66,109 @@ function InGameMenu(gameMouse, player) {
         SceneMngr.SetActive("Title Screen");
         GameMngr.assets.sounds['tick'].play();
     }
-    // ----------
-    var devBtn = new GUIObject(
-        new WndRect(20, 160, quitBtn.rectGlobal.w, quitBtn.rectGlobal.h),
-        "Developer Tools", style );
-    function DevCallback() {
+    function ToDevPageCallback() {
         gameMouse.LeftRelease();
         GameMngr.assets.sounds['tick'].play();
         ActivatePage(pages.devContol);
     }
 
-    // DEV CONTROL PAGE
+    // DEV CONTROL PAGE ---------------------------
 
-    var devBackBtn = new GUIObject(
-        new WndRect(backDrop.rectGlobal.w - 120, backDrop.rectGlobal.h - 70, 100, 50),
-        "Back", style );
-    function MainPageCallback() {
+    var devPageObjs = [];
+    var devPageDiodes = {};
+
+    // Back button
+    devPageObjs.push(new GUIObject( new WndRect(contW - 120, contH - 70, 100, btnH), "Back", style ));
+
+    // Create all of the switches
+    style.textAlignWidth = Alignment.left;
+    style.fontSize = 20;
+    style.bold = true;
+    var devPageSwitches = [
+        new GUIObject(new WndRect(20, 20, contW - 40, btnH - 10), "Free camera", style ),
+        new GUIObject(new WndRect(20, 150, (contW - 60) / 2, btnH - 10), "Obj Axes", style ),
+        new GUIObject(new WndRect(20, 200, (contW - 60) / 2, btnH - 10), "Spheres", style )
+    ];
+    // Add a diode to each switch
+    var switchNames = ['freeCam', 'orientAxes', 'collSpheres'];
+    for(var i = 0; i < devPageSwitches.length; i++)
+        AttachDiodeAtEnd(devPageSwitches[i].rectGlobal, devPageDiodes, switchNames[i], 5);
+    // Add them to the list of page objects
+    devPageObjs = devPageObjs.concat(devPageSwitches);
+    // Add all diodes belonging to this page
+    for(var i in devPageDiodes)
+        devPageObjs.push(devPageDiodes[i]);
+
+    // Header to debug visual switches
+    style.fontSize = 30;
+    style.bgAlpha = 0.0;
+    style.bold = true;
+    style.fontColour.SetValues(0.8, 0.8, 0.8);
+    style.bgTextures = [];
+    devPageObjs.push(new GUIObject( new WndRect(20, 80, contW - 40, btnH), "Debug Visuals", style ));
+
+    // Callbacks
+    function ToMainPageCallback() {
         ActivatePage(pages.main);
         gameMouse.LeftRelease();
         GameMngr.assets.sounds['tick'].play();
     }
-
-    /*
-    style.bgColour.SetValues(0.6, 0.85, 0.85);
-    style.margin = 5.0;
-    style.fontSize = 24;
-    style.fontColour.SetValues(0.0, 0.0, 0.0);
-    style.fontHoverColour.SetValues(0.5, 0.1, 0.9);
-    style.bgHoverColour.SetValues(0.7, 0.6, 0.5);
-    style.textMaxWidth = 200;
-    style.textAlignWidth = Alignment.centre;
-    style.textAlignHeight = Alignment.centre;
-    style.fontAlpha = 1.0;
-    style.bold = false;
-    */
-
-    var camChangeBtn = new GUIObject(
-        new WndRect(20, 20, backDrop.rectGlobal.w - 40, 50),
-        "Free camera", style );
     function CamChangeCallback() {
         // CONTROL SHIFTED TO SEPARATE CAMERA
         camToggle = !camToggle;
         if(camToggle) {
             player.ctrl.SetActive(true);
             ViewMngr.SetActiveCamera(player.obj.camera);
+            devPageDiodes['freeCam'].UseTexture(0);
         }
         else {
             player.ctrl.SetActive(false);
             ViewMngr.SetActiveCamera();
+            devPageDiodes['freeCam'].UseTexture(1);
         }
         gameMouse.LeftRelease();
         GameMngr.assets.sounds['tick'].play();
     }
-    // ----------
-    var debugDispHeader = new GUIObject(
-    new WndRect(20, 90, camChangeBtn.rectGlobal.w, camChangeBtn.rectGlobal.h),
-    "Debug Visuals", style );
+    function DispOrientAxesCallback() {
+        DebugMngr.dispOrientAxes = !DebugMngr.dispOrientAxes;
+        DebugMngr.dispOrientAxes ? devPageDiodes['orientAxes'].UseTexture(1) : devPageDiodes['orientAxes'].UseTexture(0);
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+    }
+    function DispCollSpheresCallback() {
+        DebugMngr.dispShells = !DebugMngr.dispShells;
+        DebugMngr.dispShells ? devPageDiodes['collSpheres'].UseTexture(1) : devPageDiodes['collSpheres'].UseTexture(0);
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+    }
+    /*
+    dispShells: false,
+    dispRays: false,
+    dispAxes: false,
+    dispGrid: false,
+    */
 
+    // ADD GUI OBJS TO WHOLE MENU ---------------------------
     mainMenu.AddGUIObject(backDrop);
-    mainMenu.AddGUIObject(resumeBtn);
-    mainMenu.AddGUIObject(quitBtn);
-    mainMenu.AddGUIObject(devBtn);
-    mainMenu.AddGUIObject(camChangeBtn);
-    mainMenu.AddGUIObject(debugDispHeader);
-    mainMenu.AddGUIObject(devBackBtn);
-
+    for(var i = 0; i < mainPageObjs.length; i++)
+        mainMenu.AddGUIObject(mainPageObjs[i]);
+    for(var i = 0; i < devPageObjs.length; i++) {
+        mainMenu.AddGUIObject(devPageObjs[i]);
+    }
+    // Add to game's GUI network
     GUINetwork.AddSystem(mainMenu, false);
+
+    function UpdatePageMain() {
+        mainPageObjs[0].AsButton(gameMouse.pos, gameMouse.leftPressed, ResumeCallback);
+        mainPageObjs[1].AsButton(gameMouse.pos, gameMouse.leftPressed, QuitCallback);
+        mainPageObjs[2].AsButton(gameMouse.pos, gameMouse.leftPressed, ToDevPageCallback);
+    }
+    function UpdatePageDevControl() {
+        devPageObjs[0].AsButton(gameMouse.pos, gameMouse.leftPressed, ToMainPageCallback);
+        devPageObjs[1].AsButton(gameMouse.pos, gameMouse.leftPressed, CamChangeCallback);
+        devPageObjs[2].AsButton(gameMouse.pos, gameMouse.leftPressed, DispOrientAxesCallback);
+        devPageObjs[3].AsButton(gameMouse.pos, gameMouse.leftPressed, DispCollSpheresCallback);
+    }
 
     function ActivatePage(page) {
         for(var i = 0; i < mainMenu.guiObjs.length; i++)
@@ -129,18 +178,17 @@ function InGameMenu(gameMouse, player) {
 
         switch(page) {
             case pages.main:
-                resumeBtn.SetActive(true);
-                quitBtn.SetActive(true);
-                devBtn.SetActive(true);
+                for(var i = 0; i < mainPageObjs.length; i++)
+                    mainPageObjs[i].SetActive(true);
+                ActivePageUpdate = UpdatePageMain;
                 break;
             case pages.devContol:
-                camChangeBtn.SetActive(true);
-                debugDispHeader.SetActive(true);
-                devBackBtn.SetActive(true);
+                for(var i = 0; i < devPageObjs.length; i++)
+                    devPageObjs[i].SetActive(true);
+                ActivePageUpdate = UpdatePageDevControl;
                 break;
         }
     }
-
     ActivatePage(pages.main);
 
     this.ToggleActive = function() {
@@ -152,12 +200,7 @@ function InGameMenu(gameMouse, player) {
         else gameMouse.SetCursor(CursorTypes.none);
     };
     this.Update = function() {
-        if(GUINetwork.CheckActive(menuSysName)) {
-            resumeBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, ResumeCallback);
-            quitBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, QuitCallback);
-            devBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, DevCallback);
-            camChangeBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, CamChangeCallback);
-            devBackBtn.AsButton(gameMouse.pos, gameMouse.leftPressed, MainPageCallback);
-        }
+        if(GUINetwork.CheckActive(menuSysName))
+            ActivePageUpdate();
     };
 }
