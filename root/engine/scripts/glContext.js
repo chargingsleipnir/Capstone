@@ -358,12 +358,7 @@ var GL = {
         if (DebugMngr.active) {
 
             // Debug models
-            var dispObjs = [];
-            if(DebugMngr.dispOrientAxes) {
-                dispObjs = scene.debug.dispObjs.orientAxes.models;
-            }
-            if(DebugMngr.dispShells)
-                dispObjs = dispObjs.concat(scene.debug.dispObjs.shells.models);
+            var dispObjs = scene.debug.GetActiveDispObjs();
             if(DebugMngr.dispAxes)
                 dispObjs.push(DebugMngr.axes);
             if(DebugMngr.dispGrid)
@@ -417,7 +412,7 @@ var GL = {
 
             // Ray casts
             if(DebugMngr.dispRays) {
-                dispObjs = scene.debug.dispObjs.rayCasts.rays;
+                dispObjs = scene.debug.GetRays();
 
                 shdr = EL.assets.shaderPrograms['ray'];
                 this.ctx.useProgram(shdr.program);

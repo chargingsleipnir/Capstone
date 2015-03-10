@@ -78,7 +78,7 @@ Scene.prototype = {
         if(DebugMngr.active) {
             // Visual for quaternion orientation
             var axesLengths = gameObject.shapeData.radii.GetScaleByVec(gameObject.trfmGlobal.scale.GetScaleByNum(1.25));
-            this.debug.AddOrientAxes(new ModelHandler(
+            this.debug.orientAxes.push(new ModelHandler(
                 new Primitives.OrientAxes(axesLengths),
                 gameObject.trfmGlobal,
                 gameObject.shapeData.radius * gameObject.trfmBase.GetLargestScaleValue())
@@ -93,7 +93,7 @@ Scene.prototype = {
                 );
                 sphereShell.MakeWireFrame();
                 sphereShell.SetTintRGB(1.0, 1.0, 0.0);
-                this.debug.AddBoundingShell(sphereShell);
+                this.debug.collSpheres.push(sphereShell);
 
                 // Visual for bounding box
                 var boxShell = new ModelHandler(
@@ -102,7 +102,7 @@ Scene.prototype = {
                     gameObject.collider.collBox.radii.GetMag() * gameObject.trfmBase.GetLargestScaleValue()
                 );
                 boxShell.SetTintRGB(0.0, 1.0, 1.0);
-                this.debug.AddBoundingShell(boxShell);
+                this.debug.collBoxes.push(boxShell);
 
                 // Visual for capsules, donuts, and anything else that comes up
                 var suppShapes = gameObject.collider.suppShapeList;
@@ -117,7 +117,7 @@ Scene.prototype = {
                             (suppShapes[i].obj.halfLen + suppShapes[i].obj.radius) * gameObject.trfmBase.GetLargestScaleValue()
                         );
                         pillShell.SetTintRGB(1.0, 1.0, 1.0);
-                        this.debug.AddBoundingShell(pillShell);
+                        this.debug.collCapsules.push(pillShell);
                     }
                     else if(suppShapes[i].shapeType == BoundingShapes.donut) {
                         var donutShell = new ModelHandler(
@@ -129,7 +129,7 @@ Scene.prototype = {
                             (suppShapes[i].obj.planarRadius + suppShapes[i].obj.radius) * gameObject.trfmBase.GetLargestScaleValue()
                         );
                         donutShell.SetTintRGB(1.0, 0.6, 0.9);
-                        this.debug.AddBoundingShell(donutShell);
+                        this.debug.collDonuts.push(donutShell);
                     }
                 }
             }

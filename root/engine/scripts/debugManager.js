@@ -6,10 +6,10 @@ var DebugMngr = {
     dispCapsules: false,
     dispDonuts: false,
     dispBoxes: false,
-    dispShells: false,
     dispRays: false,
     dispAxes: false,
     dispGrid: false,
+    dispInfo: false,
     axes: null,
     grid: null,
     dispName: "Performance Data",
@@ -64,7 +64,7 @@ var DebugMngr = {
     frameRateCapture: 0,
     counter: 0,
     Update: function() {
-        if(this.active) {
+        if(this.active && this.dispInfo) {
             if (this.frameRateMsg != null) {
                 this.counter += Time.deltaMilli;
                 if (this.counter > 0.25) {
@@ -80,42 +80,50 @@ var DebugMngr = {
 };
 
 function DebugHandler() {
-    this.dispObjs = {
-        orientAxes: {
-            models: []
-        },
-        shells: {
-            models: []
-        },
-        rayCasts: {
-            rays: [],
-            pos: [],
-            slopes: []
-        }
+    this.orientAxes = [];
+    this.collSpheres = [];
+    this.collCapsules = [];
+    this.collDonuts = [];
+    this.collBoxes = [];
+    this.velRays = {
+        rays: [],
+        pos: [],
+        slopes: []
     };
+    this.activeDispObjs = [];
 }
 DebugHandler.prototype =  {
-    AddOrientAxes: function(model) {
-        this.dispObjs.orientAxes.models.push(model);
-    },
-    AddBoundingShell: function(model) {
-        this.dispObjs.shells.models.push(model);
-    },
     AddRayCast: function(ray, pos, slope) {
-        this.dispObjs.rayCasts.rays.push(ray);
-        this.dispObjs.rayCasts.pos.push(pos);
-        this.dispObjs.rayCasts.slopes.push(slope);
+        this.velRays.rays.push(ray);
+        this.velRays.pos.push(pos);
+        this.velRays.slopes.push(slope);
     },
-    GetModels: function() {
-
+    UpdateActiveDispObjs: function() {
+        this.activeDispObjs = [];
+        if(DebugMngr.dispOrientAxes)
+            this.activeDispObjs = this.activeDispObjs.concat(this.orientAxes);
+        if(DebugMngr.dispSpheres)
+            this.activeDispObjs = this.activeDispObjs.concat(this.collSpheres);
+        if(DebugMngr.dispCapsules)
+            this.activeDispObjs = this.activeDispObjs.concat(this.collCapsules);
+        if(DebugMngr.dispDonuts)
+            this.activeDispObjs = this.activeDispObjs.concat(this.collDonuts);
+        if(DebugMngr.dispBoxes)
+            this.activeDispObjs = this.activeDispObjs.concat(this.collBoxes);
+    },
+    GetActiveDispObjs: function() {
+        return this.activeDispObjs.slice();
+    },
+    GetRays: function() {
+        return this.velRays.rays;
     },
     Update: function () {
         if(DebugMngr.active) {
             if(DebugMngr.dispRays) {
-                for (var i = 0; i < this.dispObjs.rayCasts.rays.length; i++) {
-                    var newVertData = this.dispObjs.rayCasts.pos[i].GetData();
-                    newVertData = newVertData.concat(this.dispObjs.rayCasts.pos[i].GetAdd(this.dispObjs.rayCasts.slopes[i]).GetData());
-                    this.dispObjs.rayCasts.rays[i].RewriteVerts(newVertData);
+                for (var i = 0; i < this.velRays.rays.length; i++) {
+                    var newVertData = this.velRays.pos[i].GetData();
+                    newVertData = newVertData.concat(this.velRays.pos[i].GetAdd(this.velRays.slopes[i]).GetData());
+                    this.velRays.rays[i].RewriteVerts(newVertData);
                 }
             }
         }

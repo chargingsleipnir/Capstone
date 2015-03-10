@@ -84,13 +84,32 @@ function InGameMenu(gameMouse, player) {
     style.textAlignWidth = Alignment.left;
     style.fontSize = 20;
     style.bold = true;
+    var smallBtnW = (contW - 50) / 2;
     var devPageSwitches = [
         new GUIObject(new WndRect(20, 20, contW - 40, btnH - 10), "Free camera", style ),
-        new GUIObject(new WndRect(20, 150, (contW - 60) / 2, btnH - 10), "Obj Axes", style ),
-        new GUIObject(new WndRect(20, 200, (contW - 60) / 2, btnH - 10), "Spheres", style )
+        new GUIObject(new WndRect(20, 150, smallBtnW, btnH - 10), "Obj Axes", style ),
+        new GUIObject(new WndRect(20, 200, smallBtnW, btnH - 10), "Spheres", style ),
+        new GUIObject(new WndRect(20, 250, smallBtnW, btnH - 10), "Capsules", style ),
+        new GUIObject(new WndRect(20, 300, smallBtnW, btnH - 10), "Donuts", style ),
+        new GUIObject(new WndRect(20, 350, smallBtnW, btnH - 10), "Boxes", style ),
+        new GUIObject(new WndRect(20, 400, smallBtnW, btnH - 10), "Vel Rays", style ),
+        new GUIObject(new WndRect(contW - smallBtnW - 20, 150, smallBtnW, btnH - 10), "World Axes", style ),
+        new GUIObject(new WndRect(contW - smallBtnW - 20, 200, smallBtnW, btnH - 10), "Grid", style ),
+        new GUIObject(new WndRect(contW - smallBtnW - 20, 250, smallBtnW, btnH - 10), "Game Data", style )
     ];
     // Add a diode to each switch
-    var switchNames = ['freeCam', 'orientAxes', 'collSpheres'];
+    var switchNames = [
+        'freeCam',
+        'orientAxes',
+        'collSpheres',
+        'collCapsules',
+        'collDonuts',
+        'collBoxes',
+        'velRays',
+        'worldAxes',
+        'grid',
+        'gameData'
+    ];
     for(var i = 0; i < devPageSwitches.length; i++)
         AttachDiodeAtEnd(devPageSwitches[i].rectGlobal, devPageDiodes, switchNames[i], 5);
     // Add them to the list of page objects
@@ -132,21 +151,60 @@ function InGameMenu(gameMouse, player) {
     function DispOrientAxesCallback() {
         DebugMngr.dispOrientAxes = !DebugMngr.dispOrientAxes;
         DebugMngr.dispOrientAxes ? devPageDiodes['orientAxes'].UseTexture(1) : devPageDiodes['orientAxes'].UseTexture(0);
-        gameMouse.LeftRelease();
-        GameMngr.assets.sounds['tick'].play();
+        MenuDebugUpdate();
     }
     function DispCollSpheresCallback() {
-        DebugMngr.dispShells = !DebugMngr.dispShells;
-        DebugMngr.dispShells ? devPageDiodes['collSpheres'].UseTexture(1) : devPageDiodes['collSpheres'].UseTexture(0);
+        DebugMngr.dispSpheres = !DebugMngr.dispSpheres;
+        DebugMngr.dispSpheres ? devPageDiodes['collSpheres'].UseTexture(1) : devPageDiodes['collSpheres'].UseTexture(0);
+        MenuDebugUpdate();
+    }
+    function DispCollCapsulesCallback() {
+        DebugMngr.dispCapsules = !DebugMngr.dispCapsules;
+        DebugMngr.dispCapsules ? devPageDiodes['collCapsules'].UseTexture(1) : devPageDiodes['collCapsules'].UseTexture(0);
+        MenuDebugUpdate();
+    }
+    function DispCollDonutsCallback() {
+        DebugMngr.dispDonuts = !DebugMngr.dispDonuts;
+        DebugMngr.dispDonuts ? devPageDiodes['collDonuts'].UseTexture(1) : devPageDiodes['collDonuts'].UseTexture(0);
+        MenuDebugUpdate();
+    }
+    function DispCollBoxesCallback() {
+        DebugMngr.dispBoxes = !DebugMngr.dispBoxes;
+        DebugMngr.dispBoxes ? devPageDiodes['collBoxes'].UseTexture(1) : devPageDiodes['collBoxes'].UseTexture(0);
+        MenuDebugUpdate();
+    }
+    function DispVelocityRaysCallback() {
+        DebugMngr.dispRays = !DebugMngr.dispRays;
+        DebugMngr.dispRays ? devPageDiodes['velRays'].UseTexture(1) : devPageDiodes['velRays'].UseTexture(0);
+        MenuDebugUpdate();
+    }
+    function DispWorldAxesCallback() {
+        DebugMngr.dispAxes = !DebugMngr.dispAxes;
+        DebugMngr.dispAxes ? devPageDiodes['worldAxes'].UseTexture(1) : devPageDiodes['worldAxes'].UseTexture(0);
         gameMouse.LeftRelease();
         GameMngr.assets.sounds['tick'].play();
     }
-    /*
-    dispShells: false,
-    dispRays: false,
-    dispAxes: false,
-    dispGrid: false,
-    */
+    function DispGridCallback() {
+        DebugMngr.dispGrid = !DebugMngr.dispGrid;
+        DebugMngr.dispGrid ? devPageDiodes['grid'].UseTexture(1) : devPageDiodes['grid'].UseTexture(0);
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+    }
+    function DispGameDataCallback() {
+        DebugMngr.dispInfo = !DebugMngr.dispInfo;
+        DebugMngr.dispInfo ? devPageDiodes['gameData'].UseTexture(1) : devPageDiodes['gameData'].UseTexture(0);
+        GUINetwork.SetActive("Performance Data", DebugMngr.dispInfo);
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+    }
+    // Not a callback, helper function
+    function MenuDebugUpdate() {
+        var scene = SceneMngr.GetActiveScene();
+        scene.debug.UpdateActiveDispObjs();
+        gameMouse.LeftRelease();
+        GameMngr.assets.sounds['tick'].play();
+    }
+
 
     // ADD GUI OBJS TO WHOLE MENU ---------------------------
     mainMenu.AddGUIObject(backDrop);
@@ -168,6 +226,13 @@ function InGameMenu(gameMouse, player) {
         devPageObjs[1].AsButton(gameMouse.pos, gameMouse.leftPressed, CamChangeCallback);
         devPageObjs[2].AsButton(gameMouse.pos, gameMouse.leftPressed, DispOrientAxesCallback);
         devPageObjs[3].AsButton(gameMouse.pos, gameMouse.leftPressed, DispCollSpheresCallback);
+        devPageObjs[4].AsButton(gameMouse.pos, gameMouse.leftPressed, DispCollCapsulesCallback);
+        devPageObjs[5].AsButton(gameMouse.pos, gameMouse.leftPressed, DispCollDonutsCallback);
+        devPageObjs[6].AsButton(gameMouse.pos, gameMouse.leftPressed, DispCollBoxesCallback);
+        devPageObjs[7].AsButton(gameMouse.pos, gameMouse.leftPressed, DispVelocityRaysCallback);
+        devPageObjs[8].AsButton(gameMouse.pos, gameMouse.leftPressed, DispWorldAxesCallback);
+        devPageObjs[9].AsButton(gameMouse.pos, gameMouse.leftPressed, DispGridCallback);
+        devPageObjs[10].AsButton(gameMouse.pos, gameMouse.leftPressed, DispGameDataCallback);
     }
 
     function ActivatePage(page) {
