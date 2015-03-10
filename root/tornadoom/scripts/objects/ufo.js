@@ -7,7 +7,7 @@ function UFO() {
     var hoverHeight = 8.0;
 
     this.obj = new GameObject('ufo', Labels.none);
-    this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, -2.0);
+    this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, -6.0);
 
     var coreObj = new GameObject("ufo core", Labels.none);
     coreObj.SetModel(GameMngr.assets.models['ufoCore']);
@@ -54,12 +54,41 @@ function UFO() {
 
     // Collisions -------------------------------------------------
     coreObj.AddComponent(Components.collisionSystem);
-    var coreCapsule = new CollisionCapsule(coreObj);
-    coreObj.collider.AddCollisionShape(BoundingShapes.capsule, coreCapsule);
+    var coreCapsuleCollider = new CollisionCapsule(coreObj);
+    coreObj.collider.AddCollisionShape(BoundingShapes.capsule, coreCapsuleCollider);
 
     saucerObj.AddComponent(Components.collisionSystem);
-    var saucerDonut = new CollisionDonut(saucerObj);
-    saucerObj.collider.AddCollisionShape(BoundingShapes.donut, saucerDonut);
+    var saucerDonutCollider = new CollisionDonut(saucerObj);
+    saucerObj.collider.AddCollisionShape(BoundingShapes.donut, saucerDonutCollider);
+
+    // Collision callbacks
+    var coefOfRest = 0.5;
+    function CoreCollision(collider) {
+        var collisionDist = coreObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
+        var netVel = coreObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
+        if (netVel.GetDot(collisionDist) < 0) {
+            if (collider.gameObj.label == Labels.ammo) {
+                collisionDist = coreCapsuleCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
+                if (collisionDist && netVel.GetDot(collisionDist) < 0) {
+                    coreObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                }
+            }
+        }
+    }
+    coreObj.collider.SetSphereCall(CoreCollision);
+    function SaucerCollision(collider) {
+        var collisionDist = saucerObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
+        var netVel = saucerObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
+        if (netVel.GetDot(collisionDist) < 0) {
+            if (collider.gameObj.label == Labels.ammo) {
+                collisionDist = saucerDonutCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
+                if (collisionDist && netVel.GetDot(collisionDist) < 0) {
+                    saucerObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                }
+            }
+        }
+    }
+    saucerObj.collider.SetSphereCall(SaucerCollision);
 
     var angle = 0.0;
     this.Update = function() {

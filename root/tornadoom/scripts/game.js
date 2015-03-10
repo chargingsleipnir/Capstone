@@ -68,7 +68,6 @@ function BuildGame() {
 
     var angle = 0.00;
     function GameUpdate() {
-
         if(SceneMngr.GetActiveScene().type == SceneTypes.gameplay) {
 
             inGameMenu.Update();

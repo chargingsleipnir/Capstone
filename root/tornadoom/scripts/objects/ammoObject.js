@@ -3,7 +3,10 @@
  */
 
 function AmmoObject(name, model, texture, mass) {
-    this.obj = new GameObject(name, Labels.movable);
+
+    var that = this;
+
+    this.obj = new GameObject(name, Labels.ammo);
 
     this.obj.SetModel(model);
     this.obj.mdlHdlr.SetTexture(texture, TextureFilters.linear);
@@ -15,6 +18,7 @@ function AmmoObject(name, model, texture, mass) {
     this.obj.AddComponent(Components.rigidBody);
     this.obj.rigidBody.SetMass(mass);
     this.obj.rigidBody.dampening = 0.1;
+    this.obj.rigidBody.SetInertiaTensor(this.obj.shapeData.radius);
 
     this.gravForce = new ForceGenerators.Gravity(VEC3_GRAVITY);
     this.obj.rigidBody.AddForceGenerator(this.gravForce);
@@ -22,9 +26,24 @@ function AmmoObject(name, model, texture, mass) {
 
     this.obj.AddComponent(Components.collisionSystem);
     // Secondary collider, must be fully implemented here for now.
-    var capsule = new CollisionCapsule(this.obj);
-    // Just for debug drawing
-    this.obj.collider.AddCollisionShape(BoundingShapes.capsule, capsule);
+    // Adding it to this.obj is really Just for debug drawing
+    this.capsuleCollider = new CollisionCapsule(this.obj);
+    this.obj.collider.AddCollisionShape(BoundingShapes.capsule, this.capsuleCollider);
+
+    var coefOfRest = 0.5;
+    function ImpulseDeflection(collider) {
+        var collisionDist = that.obj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
+        var netVel = that.obj.rigidBody.GetNetVelocity(collider.rigidBody);
+        if (netVel.GetDot(collisionDist) < 0) {
+            if (collider.gameObj.label == Labels.ammo) {
+                collisionDist = that.capsuleCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
+                if (collisionDist && netVel.GetDot(collisionDist) < 0) {
+                    that.obj.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                }
+            }
+        }
+    }
+    this.obj.collider.SetSphereCall(ImpulseDeflection);
 }
 AmmoObject.prototype = {
     Update: function() {

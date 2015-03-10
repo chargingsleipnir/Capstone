@@ -181,11 +181,13 @@ function Player(hud, mouse) {
         caughtBaleInfo
     ];
 
-    style.textMaxWidth = 20;
+    style.fontSize = 24;
+    style.margin = 5.0;
+    style.textMaxWidth = 25;
     style.textAlignWidth = Alignment.left;
     style.bgTextures = [];
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
-    var launchPowerMsg = new GUIObject(new WndRect(0, 0, 375, 68), "Extra Power: 000", style);
+    var launchPowerMsg = new GUIObject(new WndRect(0, 0, 285, 40), "Extra Power: 000", style);
     hud.AddGUIObject(launchPowerMsg);
     launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
 
