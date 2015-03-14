@@ -23,15 +23,16 @@ function BuildGame() {
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
     var menuBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Esc);
 
-    /********************************** HUD */
+    /********************************** HUD **********************************/
+
     var hud = new GUISystem(new WndRect(20, 20, ViewMngr.wndWidth - 40, ViewMngr.wndHeight - 40), "in-game HUD");
-    // Only added to in Player so far
     GUINetwork.AddSystem(hud, true);
 
     /********************************** Global Objects **********************************/
 
-    var player = new Player(hud, gameMouse);
+    var player = new Player(gameMouse);
     player.obj.trfmBase.SetPosByAxes(0.0, 1.0, 0.0);
+
 
     var ufo = new UFO();
     var barn = new Barn();
@@ -62,7 +63,7 @@ function BuildGame() {
     lvl01.Add(barn.obj);
     lvl01.Add(skyBox);
     lvl01.Add(ground);
-    BuildScene2(lvl01, player, ufo, barn);
+    BuildScene2(lvl01, player, ufo, barn, hud);
     SceneMngr.AddScene(lvl01, false);
 
     /*

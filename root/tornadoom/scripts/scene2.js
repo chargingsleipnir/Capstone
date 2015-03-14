@@ -1,4 +1,4 @@
-function BuildScene2(scene, player, ufo, barn) {
+function BuildScene2(scene, player, ufo, barn, hud) {
 
     scene.light.amb.bright = 0.5;
     scene.light.dir.bright = 0.25;
@@ -41,7 +41,66 @@ function BuildScene2(scene, player, ufo, barn) {
         else bales[i].obj.trfmBase.TranslateByAxes(-6.0, 0.0, ((-i + (MAX_BALES / 2)) * 6));
     }
 
+    // BUILD UP HUD FOR THIS SCENE -------------------------------------------------------
+
+    var ammoTypes = { cow: 0, hayBale: 1 };
+
+    var style = new MsgBoxStyle();
+    style.fontSize = 30;
+    style.fontColour = new Vector3(0.0, 0.0, 0.0);
+    style.textMaxWidth = 15;
+    style.textAlignWidth = Alignment.right;
+    style.textAlignHeight = Alignment.centre;
+    style.bgColour = new Vector3(0.0, 0.0, 0.0);
+    style.textLineSpacing = 0.0;
+    style.margin = 15.0;
+    style.bgAlpha = 1.0;
+    style.bold = false;
+
+    style.bgTextures = [GameMngr.assets.textures['baleIcon']];
+    var caughtBaleInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 68, 132, 68), "00", style);
+    hud.AddGUIObject(caughtBaleInfo);
+    caughtBaleInfo.UpdateMsg('0');
+
+    style.bgTextures = [GameMngr.assets.textures['cowIcon']];
+    var caughtCowInfo = new GUIObject(new WndRect(0, caughtBaleInfo.rectLocal.y - 78, 132, 68), "00", style);
+    hud.AddGUIObject(caughtCowInfo);
+    caughtCowInfo.UpdateMsg('0');
+
+    var hudAmmoMsgs = [
+        caughtCowInfo,
+        caughtBaleInfo
+    ];
+
+    style.fontSize = 24;
+    style.margin = 5.0;
+    style.textMaxWidth = 25;
+    style.textAlignWidth = Alignment.left;
+    style.bgTextures = [];
+    style.fontColour = new Vector3(1.0, 1.0, 1.0);
+    var launchPowerMsg = new GUIObject(new WndRect(0, 0, 285, 40), "Extra Power: 000", style);
+    hud.AddGUIObject(launchPowerMsg);
+    launchPowerMsg.UpdateMsg("Extra Power: " + 0);
+
+    var UpdateHUDAmmoSelection = function(ammoIdx) {
+        for(var i = 0; i < hudAmmoMsgs.length; i++) {
+            hudAmmoMsgs[i].SetObjectFade(0.66);
+        }
+        hudAmmoMsgs[ammoIdx].SetObjectFade(1.0);
+    };
+    var UpdateHUDAmmoCount = function(ammoIdx, count) {
+        hudAmmoMsgs[ammoIdx].UpdateMsg("" + count);
+    };
+    var UpdateHUDPowerLevel = function(power) {
+        launchPowerMsg.UpdateMsg("Extra Power: " + power);
+    };
+    player.SetAmmoSelectionCallback(UpdateHUDAmmoSelection);
+    player.SetAmmoCountChangeCallback(UpdateHUDAmmoCount);
+    player.SetPowerChangeCallback(UpdateHUDPowerLevel);
+
+
     // SCENE OBJECT INTERACTIONS ---------------------------------------------------------
+
     var abductee = null;
     var ufoToCowDistSqr = 0.0;
     var ufoToCowDirVec = new Vector2();
@@ -64,6 +123,8 @@ function BuildScene2(scene, player, ufo, barn) {
             (gameObj.trfmGlobal.pos.z > backWall - gameObj.shapeData.radii.z && gameObj.rigidBody.velF.z > 0))
             gameObj.rigidBody.velF.z = -gameObj.rigidBody.velF.z;
     }
+
+    // Barn collisions
     function BarnCollCallback(collider) {
         if(collider.gameObj.name == "cow") {
             var abductee = null;
@@ -87,13 +148,41 @@ function BuildScene2(scene, player, ufo, barn) {
     }
     barn.obj.collider.SetSphereCall(BarnCollCallback);
 
+    // Player collisions
+    function PlayerCollCallback(collider) {
+        if(collider.gameObj.label == Labels.ammo) {
+            var objToEyeVec = new Vector2(player.obj.trfmGlobal.pos.x - collider.trfm.pos.x, player.obj.trfmGlobal.pos.z - collider.trfm.pos.z);
+            var objToEyeDistSqr = objToEyeVec.GetMagSqr();
+
+            // This format allows not only for objects to only be captured if they are within the given radius,
+            // but ensures that their velocities don't explode at heights above the tornado:
+            // No force is applied if they're directly above the funnel.
+            if (objToEyeDistSqr < player.captureRadius * player.captureRadius) {
+                if (collider.trfm.pos.y < player.height) {
+                    if(collider.gameObj.name == "cow")
+                        player.Capture(ammoTypes.cow, collider.gameObj);
+                    else if(collider.gameObj.name == "hay bale")
+                        player.Capture(ammoTypes.hayBale, collider.gameObj);
+                }
+            }
+            else {
+                player.Twist(collider.rigidBody, objToEyeVec, objToEyeDistSqr);
+            }
+        }
+    }
+    player.obj.collider.SetSphereCall(PlayerCollCallback);
+
     // -----------------------------------------------------------------------------------
 
     function Start() {
-        ufo.SetActive(true);
-        for(var i = 0; i < MAX_COWS; i++ ) {
 
-        }
+        player.AddAmmoContainer(ammoTypes.cow);
+        player.AddAmmoContainer(ammoTypes.hayBale);
+
+        ufo.SetActive(true);
+        //for(var i = 0; i < MAX_COWS; i++ ) {
+
+        //}
     }
 
     function Update() {

@@ -2,7 +2,7 @@
  * Created by Devin on 2015-01-16.
  */
 
-function Player(hud, mouse) {
+function Player(mouse) {
 
     // Player characteristics -------------------------------------------------
 
@@ -11,7 +11,7 @@ function Player(hud, mouse) {
 
     var contactScale = 2.0;
     var drawScale = 1.0;
-    var captureRadius = 0.75;
+    this.captureRadius = 0.75;
     var LAUNCH_SCALAR_MIN = 750;
     var LAUNCH_SCALAR_MAX = 1000;
     var launchScalar = LAUNCH_SCALAR_MIN;
@@ -19,15 +19,12 @@ function Player(hud, mouse) {
     var massMax = 200;
     var massHeld = 0.0;
 
+    var ammoCont = [];
     var ammoIdx = 0;
-    var ammoTypeCount = 2;
-    var caughtCows = [];
-    var caughtHayBales = [];
-    //var caughtDebris = [];
-    var ammoTypes = [
-        caughtCows,
-        caughtHayBales
-    ];
+    var ammoTypeCount = 0;
+    var AmmoSelectionCallback = function(){};
+    var AmmoCountChangeCallback = function(){};
+    var PowerChangeCallback = function(){};
 
     // The X and Y are just the mouses screen coords, assuming (0,0) at the centre
     // The Z and scalar are values used to try to control how steep the new direction becomes
@@ -50,7 +47,7 @@ function Player(hud, mouse) {
 
     // Just to help in a few functions below
     var playerPos = this.obj.trfmGlobal.pos;
-    var playerHeight = modelObj.shapeData.radii.y * modelObj.trfmBase.scale.y * 2;
+    this.height = modelObj.shapeData.radii.y * modelObj.trfmBase.scale.y * 2;
 
     this.obj.AddComponent(Components.rigidBody);
     this.obj.rigidBody.SetMass(1.0);
@@ -62,31 +59,9 @@ function Player(hud, mouse) {
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
     this.obj.collider.ScaleSphere(contactScale);
 
-    function ObjInRange(collider) {
-        if(collider.gameObj.label == Labels.ammo) {
-            var objToEyeVec = new Vector2(playerPos.x - collider.trfm.pos.x, playerPos.z - collider.trfm.pos.z);
-            var objToEyeDistSqr = objToEyeVec.GetMagSqr();
-
-            // This format allows not only for objects to only be captured if they are within the given radius,
-            // but ensures that their velocities don't explode at heights above the tornado:
-            // No force is applied if they're directly above the funnel.
-            if (objToEyeDistSqr < captureRadius * captureRadius) {
-                if (collider.trfm.pos.y < playerHeight) {
-                    Capture(collider.gameObj);
-                }
-            }
-            else {
-                collider.rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
-                // Perfect lift right away, slowing once obj's gravity is re-applied.
-                collider.rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
-            }
-        }
-    }
-    this.obj.collider.SetSphereCall(ObjInRange);
-
     // Set capsule collider around funnel
-    var coreCapsuleCollider = new CollisionCapsule(modelObj);
-    this.obj.collider.AddCollisionShape(BoundingShapes.capsule, coreCapsuleCollider);
+    var funnelCapsuleCollider = new CollisionCapsule(modelObj);
+    this.obj.collider.AddCollisionShape(BoundingShapes.capsule, funnelCapsuleCollider);
 
     // Add particle effects -------------------------------------------------
 
@@ -153,46 +128,6 @@ function Player(hud, mouse) {
     this.obj.ptclSys.AddCtrlField(aimDirVisual);
 
 
-    // Add to HUD -------------------------------------------------
-
-    var style = new MsgBoxStyle();
-    style.fontSize = 30;
-    style.fontColour = new Vector3(0.0, 0.0, 0.0);
-    style.textMaxWidth = 15;
-    style.textAlignWidth = Alignment.right;
-    style.textAlignHeight = Alignment.centre;
-    style.bgColour = new Vector3(0.0, 0.0, 0.0);
-    style.textLineSpacing = 0.0;
-    style.margin = 15.0;
-    style.bgAlpha = 1.0;
-    style.bold = false;
-
-    style.bgTextures = [GameMngr.assets.textures['baleIcon']];
-    var caughtBaleInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 68, 132, 68), "00", style);
-    hud.AddGUIObject(caughtBaleInfo);
-    caughtBaleInfo.UpdateMsg('0');
-
-    style.bgTextures = [GameMngr.assets.textures['cowIcon']];
-    var caughtCowInfo = new GUIObject(new WndRect(0, caughtBaleInfo.rectLocal.y - 78, 132, 68), "00", style);
-    hud.AddGUIObject(caughtCowInfo);
-    caughtCowInfo.UpdateMsg('0');
-
-    var hudAmmoMsgs = [
-        caughtCowInfo,
-        caughtBaleInfo
-    ];
-
-    style.fontSize = 24;
-    style.margin = 5.0;
-    style.textMaxWidth = 25;
-    style.textAlignWidth = Alignment.left;
-    style.bgTextures = [];
-    style.fontColour = new Vector3(1.0, 1.0, 1.0);
-    var launchPowerMsg = new GUIObject(new WndRect(0, 0, 285, 40), "Extra Power: 000", style);
-    hud.AddGUIObject(launchPowerMsg);
-    launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
-
-
     // Add controls -------------------------------------------------
 
     this.obj.AddComponent(Components.camera);
@@ -237,37 +172,11 @@ function Player(hud, mouse) {
 
     // HELPER FUNCTIONS -------------------------------------------------
 
-    var UpdateHUDAmmoCount = function(idx) {
-        hudAmmoMsgs[idx].UpdateMsg("" + ammoTypes[idx].length);
-    };
-    var UpdateHUDAmmoSelection = function() {
-        for(var i = 0; i < hudAmmoMsgs.length; i++) {
-            hudAmmoMsgs[i].SetObjectFade(0.66);
-        }
-        hudAmmoMsgs[ammoIdx].SetObjectFade(1.0);
-    };
-    UpdateHUDAmmoSelection();
     var PrepAmmo = function(gameObj, isVisible) {
         if(gameObj.mdlHdlr)
             gameObj.mdlHdlr.active = isVisible;
         for (var i in gameObj.components)
             gameObj.components[i].SetActive(isVisible);
-    };
-    var Capture = function(gameObj) {
-        // Small particle visual
-        collectionVisual.Run();
-        // Determine object captured
-        switch(gameObj.name) {
-            case 'cow':
-                caughtCows.push(gameObj);
-                UpdateHUDAmmoCount(0);
-                break;
-            case 'hay bale':
-                caughtHayBales.push(gameObj);
-                UpdateHUDAmmoCount(1);
-                break;
-        }
-        PrepAmmo(gameObj, false);
     };
     // Pop captured object from it's list and shoot forward from right on Tornado
     var RaiseLaunchPower = function() {
@@ -275,17 +184,17 @@ function Player(hud, mouse) {
         if(launchScalar > LAUNCH_SCALAR_MAX)
             launchScalar = LAUNCH_SCALAR_MAX;
 
-        launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
+        PowerChangeCallback(launchScalar - LAUNCH_SCALAR_MIN);
     };
     var DropLaunchPower = function() {
         launchScalar = LAUNCH_SCALAR_MIN;
-        launchPowerMsg.UpdateMsg("Extra Power: " + (launchScalar - LAUNCH_SCALAR_MIN));
+        PowerChangeCallback(launchScalar - LAUNCH_SCALAR_MIN);
     };
     var Shoot = function(dir) {
-        var gameObj = ammoTypes[ammoIdx].pop();
+        var gameObj = ammoCont[ammoIdx].pop();
         if(gameObj) {
             gameObj.trfmBase.SetPosByVec(playerPos.GetAdd(dir.SetScaleByNum(contactScale + 2.0)));
-            UpdateHUDAmmoCount(ammoIdx);
+            AmmoCountChangeCallback(ammoIdx, ammoCont[ammoIdx].length);
             PrepAmmo(gameObj, true);
             gameObj.rigidBody.AddForce(dir.GetScaleByNum(windspeed * massDensity * launchScalar));
         }
@@ -294,6 +203,38 @@ function Player(hud, mouse) {
 
     // PLAYER METHODS -------------------------------------------------
     var angle = 0.0;
+
+    this.AddAmmoContainer = function(index) {
+        ammoCont[index] = [];
+        ammoTypeCount++;
+    };
+    this.RemoveAmmoContainer = function(index) {
+        ammoCont[index] = null;
+        ammoTypeCount--;
+    };
+    this.SetAmmoSelectionCallback = function(Callback) {
+        AmmoSelectionCallback = Callback;
+        AmmoSelectionCallback(ammoIdx);
+    };
+    this.SetAmmoCountChangeCallback = function(Callback) {
+        AmmoCountChangeCallback = Callback;
+    };
+    this.SetPowerChangeCallback = function(Callback) {
+        PowerChangeCallback = Callback;
+    };
+    this.Capture = function(index, gameObj) {
+        // Small particle visual
+        collectionVisual.Run();
+        // Determine object captured
+        ammoCont[index].push(gameObj);
+        AmmoCountChangeCallback(index, ammoCont[index].length);
+        PrepAmmo(gameObj, false);
+    };
+    this.Twist = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
+        rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
+        // Perfect lift right away, slowing once obj's gravity is re-applied.
+        rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
+    };
     this.Update = function() {
         angle++;
         if(angle > 360.0)
@@ -302,7 +243,7 @@ function Player(hud, mouse) {
         this.ctrl.Update();
 
         modelObj.trfmBase.SetUpdatedRot(VEC3_UP, angle * 7.5);
-        this.obj.trfmBase.SetPosY(playerHeight * 0.5);
+        this.obj.trfmBase.SetPosY(this.height * 0.5);
 
         // Shooting mechanics
         if(btnShoot.pressed) {
@@ -326,23 +267,22 @@ function Player(hud, mouse) {
                 RaiseLaunchPower();
         }
 
-        // Keep cows positioned on player
-        for(var i = 0; i < caughtCows.length; i++) {
-            caughtCows[i].trfmBase.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
-        }
-        for(var i = 0; i < caughtHayBales.length; i++) {
-            caughtHayBales[i].trfmBase.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
+        // Keep all ammo positioned on player
+        for(var i = 0; i < ammoCont.length; i++) {
+            for(var j = 0; j < ammoCont[i].length; j++) {
+                ammoCont[i][j].trfmBase.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
+            }
         }
 
         // Change ammo type
         if(btnAmmoScrollLeft.pressed) {
             ammoIdx = (ammoIdx > 0) ? ammoIdx - 1 : ammoTypeCount - 1;
-            UpdateHUDAmmoSelection();
+            AmmoSelectionCallback(ammoIdx);
             btnAmmoScrollLeft.Release();
         }
         if(btnAmmoScrollRight.pressed) {
             ammoIdx = (ammoIdx + 1) % ammoTypeCount;
-            UpdateHUDAmmoSelection();
+            AmmoSelectionCallback(ammoIdx);
             btnAmmoScrollRight.Release();
         }
     }
