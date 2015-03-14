@@ -52,12 +52,15 @@ function Player(hud, mouse) {
     var playerPos = this.obj.trfmGlobal.pos;
     var playerHeight = modelObj.shapeData.radii.y * modelObj.trfmBase.scale.y * 2;
 
+    this.obj.AddComponent(Components.rigidBody);
+    this.obj.rigidBody.SetMass(1.0);
+    this.obj.rigidBody.dampening = 0.25;
+
     // Tornado collisions -------------------------------------------------
 
     this.obj.AddComponent(Components.collisionSystem);
     this.obj.collider.ResizeBoundingShapes(modelObj.shapeData);
     this.obj.collider.ScaleSphere(contactScale);
-
 
     function ObjInRange(collider) {
         if(collider.gameObj.label == Labels.ammo) {
@@ -81,13 +84,9 @@ function Player(hud, mouse) {
     }
     this.obj.collider.SetSphereCall(ObjInRange);
 
-    /*
-    function ObjInFunnel(collider) {
-        console.log("Player box colliding");
-        // remove obj, add to gui
-    }
-    this.obj.collider.SetBoxCall(ObjInFunnel);
-    */
+    // Set capsule collider around funnel
+    var coreCapsuleCollider = new CollisionCapsule(modelObj);
+    this.obj.collider.AddCollisionShape(BoundingShapes.capsule, coreCapsuleCollider);
 
     // Add particle effects -------------------------------------------------
 
@@ -303,6 +302,7 @@ function Player(hud, mouse) {
         this.ctrl.Update();
 
         modelObj.trfmBase.SetUpdatedRot(VEC3_UP, angle * 7.5);
+        this.obj.trfmBase.SetPosY(playerHeight * 0.5);
 
         // Shooting mechanics
         if(btnShoot.pressed) {
@@ -328,7 +328,10 @@ function Player(hud, mouse) {
 
         // Keep cows positioned on player
         for(var i = 0; i < caughtCows.length; i++) {
-            caughtCows[i].trfmGlobal.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
+            caughtCows[i].trfmBase.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
+        }
+        for(var i = 0; i < caughtHayBales.length; i++) {
+            caughtHayBales[i].trfmBase.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
         }
 
         // Change ammo type

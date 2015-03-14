@@ -3,7 +3,7 @@ function TopDownController(obj, ctrlName) {
     var active = false;
 
     var ctrl = new ControlScheme();
-    var moveSpeed = 5;
+    var moveSpeed = 15;
     var yawAngle = 0.0;
 
     // Control object
@@ -16,6 +16,8 @@ function TopDownController(obj, ctrlName) {
     ctrl.yawLeft = Input.CreateInputController(keyName, KeyMap.ArrowLeft);
     ctrl.yawRight = Input.CreateInputController(keyName, KeyMap.ArrowRight);
 
+    var dir;
+
     this.SetActive = function(isActive) {
         active = isActive;
         Input.SetActive(keyName, isActive);
@@ -25,16 +27,20 @@ function TopDownController(obj, ctrlName) {
 
         if(active) {
             if (ctrl.moveLeft.pressed) {
-                obj.trfmBase.TranslateRight(-moveSpeed * Time.deltaMilli);
+                dir = obj.trfmGlobal.GetRight();
+                obj.rigidBody.AddForce(dir.SetScaleByNum(-moveSpeed));
             }
             else if (ctrl.moveRight.pressed) {
-                obj.trfmBase.TranslateRight(moveSpeed * Time.deltaMilli);
+                dir = obj.trfmGlobal.GetRight();
+                obj.rigidBody.AddForce(dir.SetScaleByNum(moveSpeed));
             }
             if (ctrl.moveForth.pressed) {
-                obj.trfmBase.TranslateFwd(moveSpeed * Time.deltaMilli);
+                dir = obj.trfmGlobal.GetFwd();
+                obj.rigidBody.AddForce(dir.SetScaleByNum(moveSpeed));
             }
             else if (ctrl.moveBack.pressed) {
-                obj.trfmBase.TranslateFwd(-moveSpeed * Time.deltaMilli);
+                dir = obj.trfmGlobal.GetFwd();
+                obj.rigidBody.AddForce(dir.SetScaleByNum(-moveSpeed));
             }
             if(ctrl.yawLeft.pressed) {
                 yawAngle++;

@@ -49,6 +49,44 @@ function BuildScene2(scene, player, ufo, barn) {
 
     var cowsAbducted = 0,
         cowsSaved = 0;
+
+    // Arena containment
+    var leftWall = fence.shapeData.min.x,
+        rightWall = fence.shapeData.max.x,
+        backWall = fence.shapeData.max.z,
+        frontWall = fence.shapeData.min.z;
+    function ContainRigidBody(gameObj) {
+        if((gameObj.trfmGlobal.pos.x < leftWall + gameObj.shapeData.radii.x && gameObj.rigidBody.velF.x < 0) ||
+            (gameObj.trfmGlobal.pos.x > rightWall - gameObj.shapeData.radii.x && gameObj.rigidBody.velF.x > 0))
+            gameObj.rigidBody.velF.x = -gameObj.rigidBody.velF.x;
+
+        if((gameObj.trfmGlobal.pos.z < frontWall + gameObj.shapeData.radii.z && gameObj.rigidBody.velF.z < 0) ||
+            (gameObj.trfmGlobal.pos.z > backWall - gameObj.shapeData.radii.z && gameObj.rigidBody.velF.z > 0))
+            gameObj.rigidBody.velF.z = -gameObj.rigidBody.velF.z;
+    }
+    function BarnCollCallback(collider) {
+        if(collider.gameObj.name == "cow") {
+            var abductee = null;
+            for (var i = 0; i < cows.length; i++)
+                if (cows[i].obj == collider.gameObj)
+                    abductee = cows[i];
+
+            if(abductee) {
+                cowsSaved++;
+                console.log("Cows saved: " + cowsSaved);
+                cows.splice(cows.indexOf(abductee), 1);
+                abductee.SetVisible(false);
+            }
+        }
+        else {
+            if(collider.suppShapeList[0].obj.IntersectsSphere(barn.obj.collider.collSphere)) {
+                var repelVel = collider.trfm.pos.GetSubtract(barn.obj.trfmGlobal.pos);
+                collider.rigidBody.velF = repelVel;
+            }
+        }
+    }
+    barn.obj.collider.SetSphereCall(BarnCollCallback);
+
     // -----------------------------------------------------------------------------------
 
     function Start() {
@@ -59,10 +97,13 @@ function BuildScene2(scene, player, ufo, barn) {
     }
 
     function Update() {
+        ContainRigidBody(player.obj);
+
         if(cows.length > 0) {
             ufoToCowDistSqr = 999999;
             for (var i = 0; i < cows.length; i++) {
                 cows[i].Update();
+                ContainRigidBody(cows[i].obj);
 
                 // Which cow to go after
                 tempDirVec.SetValues(
@@ -77,14 +118,15 @@ function BuildScene2(scene, player, ufo, barn) {
             }
             if(ufo.Abduct(abductee, ufoToCowDistSqr, ufoToCowDirVec)) {
                 cowsAbducted++;
+                console.log("Cows abducted: " + cowsAbducted);
                 cows.splice(cows.indexOf(abductee), 1);
-                console.log(cowsAbducted);
                 abductee.SetVisible(false);
             }
         }
 
         for(var i = 0; i < bales.length; i++ ) {
             bales[i].Update();
+            ContainRigidBody(bales[i].obj);
         }
     }
 

@@ -3,17 +3,21 @@
  */
 
 function Barn() {
+
+    var that = this;
+
     this.obj = new GameObject('barn', Labels.none);
     this.obj.SetModel(GameMngr.assets.models['barn']);
     this.obj.mdlHdlr.SetTexture(GameMngr.assets.textures['barnTex'], TextureFilters.linear);
 
+    // Particle effect ----------------------------------------------------------
     var ptclRotObj = new GameObject("tail particle rotation", Labels.none);
     ptclRotObj.AddComponent(Components.particleSystem);
-    ptclRotObj.trfmOffset.SetPosByAxes(3.0, -1.0, 0.0);
+    ptclRotObj.trfmOffset.SetPosByAxes(3.0, -1.5, 0.0);
 
     var effects = new FlatTailEffects();
     effects.colour = new Vector3(1.0, 0.7, 0.9);
-    effects.thickness = 2.0;
+    effects.thickness = 0.5;
     effects.axis = Axes.y;
     effects.alphaStart = 0.5;
     effects.fadePoint = 0.25;
@@ -23,6 +27,9 @@ function Barn() {
     barnTail.Run();
 
     this.obj.AddChild(ptclRotObj);
+
+    this.obj.AddComponent(Components.collisionSystem);
+
 
     var angle = 0.00;
     this.Update = function() {
