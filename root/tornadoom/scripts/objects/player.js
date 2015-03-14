@@ -60,21 +60,23 @@ function Player(hud, mouse) {
 
 
     function ObjInRange(collider) {
-        var objToEyeVec = new Vector2(playerPos.x - collider.trfm.pos.x, playerPos.z - collider.trfm.pos.z);
-        var objToEyeDistSqr = objToEyeVec.GetMagSqr();
+        if(collider.gameObj.label == Labels.ammo) {
+            var objToEyeVec = new Vector2(playerPos.x - collider.trfm.pos.x, playerPos.z - collider.trfm.pos.z);
+            var objToEyeDistSqr = objToEyeVec.GetMagSqr();
 
-        // This format allows not only for objects to only be captured if they are within the given radius,
-        // but ensures that their velocities don't explode at heights above the tornado:
-        // No force is applied if they're directly above the funnel.
-        if(objToEyeDistSqr < captureRadius * captureRadius) {
-            if(collider.trfm.pos.y < playerHeight) {
-                Capture(collider.gameObj);
+            // This format allows not only for objects to only be captured if they are within the given radius,
+            // but ensures that their velocities don't explode at heights above the tornado:
+            // No force is applied if they're directly above the funnel.
+            if (objToEyeDistSqr < captureRadius * captureRadius) {
+                if (collider.trfm.pos.y < playerHeight) {
+                    Capture(collider.gameObj);
+                }
             }
-        }
-        else {
-            collider.rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
-            // Perfect lift right away, slowing once obj's gravity is re-applied.
-            collider.rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
+            else {
+                collider.rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
+                // Perfect lift right away, slowing once obj's gravity is re-applied.
+                collider.rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
+            }
         }
     }
     this.obj.collider.SetSphereCall(ObjInRange);
@@ -322,6 +324,11 @@ function Player(hud, mouse) {
 
             if(mouse.leftPressed)
                 RaiseLaunchPower();
+        }
+
+        // Keep cows positioned on player
+        for(var i = 0; i < caughtCows.length; i++) {
+            caughtCows[i].trfmGlobal.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
         }
 
         // Change ammo type

@@ -4,10 +4,12 @@
 
 function UFO() {
 
+    var that = this;
+
     var hoverHeight = 8.0;
 
     this.obj = new GameObject('ufo', Labels.none);
-    this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, -6.0);
+    this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, 20.0);
 
     var coreObj = new GameObject("ufo core", Labels.none);
     coreObj.SetModel(GameMngr.assets.models['ufoCore']);
@@ -15,8 +17,11 @@ function UFO() {
     var saucerObj = new GameObject("ufo saucer", Labels.none);
     saucerObj.SetModel(GameMngr.assets.models['ufoSaucer']);
 
-    var ptclObj = new GameObject("ufo tractor beam particle effect", Labels.none);
-    ptclObj.trfmBase.SetPosByAxes(0.0, -hoverHeight - 1.0, 0);
+    var ptclObjTractorLift = new GameObject("ufo tractor beam particle effect", Labels.none);
+    ptclObjTractorLift.trfmBase.SetPosByAxes(0.0, -hoverHeight - 1.0, 0);
+
+    //var ptclObjTractorRot = new GameObject("tail particle rotation", Labels.none);
+    //ptclObjTractorRot.trfmOffset.SetPosByAxes(1.25, -hoverHeight / 2, 0.0);
 
     // Not a bad idea, but will not work until I can better control blending issues
     //var beamObj = new GameObject("ufo tractor beam", Labels.none);
@@ -26,12 +31,11 @@ function UFO() {
 
     this.obj.AddChild(coreObj);
     this.obj.AddChild(saucerObj);
-    this.obj.AddChild(ptclObj);
-    //this.obj.AddChild(beamObj);
+    this.obj.AddChild(ptclObjTractorLift);
+    //this.obj.AddChild(ptclObjTractorRot);
 
     // Add particle effects -------------------------------------------------
-    ptclObj.AddComponent(Components.particleSystem);
-
+    ptclObjTractorLift.AddComponent(Components.particleSystem);
     var effects = new PtclPhysicsEffects();
     effects.travelTime = 2.5;
     effects.startDist = 1.25;
@@ -49,20 +53,54 @@ function UFO() {
     effects.alphaEnd = 0.5;
     effects.size = 0.0;
     var tractorBeamVisual = new ParticleFieldAutomated(100.0, true, null, effects);
-    ptclObj.ptclSys.AddAutoField(tractorBeamVisual);
-    tractorBeamVisual.Run();
+    ptclObjTractorLift.ptclSys.AddAutoField(tractorBeamVisual);
+
+    var spiralEffects = new PtclSpiralEffects();
+    spiralEffects.travelTime = 5.5;
+    spiralEffects.startDist = 0.0;
+    spiralEffects.dir = new Vector3(0.0, 1.0, 0.0);
+    spiralEffects.range = 15.0;
+    spiralEffects.scaleAngle = 5.0;
+    spiralEffects.scaleDiam = 1.25;
+    spiralEffects.scaleLen = 1.5;
+    spiralEffects.colourBtm = new Vector3(0.25, 0.25, 0.25);
+    spiralEffects.colourTop = new Vector3(1.0, 0.75, 0.75);
+    spiralEffects.lineLength = 0.0;
+    spiralEffects.size = 40.0;
+    spiralEffects.texture = GameMngr.assets.textures['starPtcl'];
+    spiralEffects.alphaStart = 0.75;
+    spiralEffects.fadePoint = 1.0;
+    spiralEffects.alphaEnd = 0.75;
+    // rising star effect
+    var starVisual = new ParticleFieldAutomated(40, true, null, spiralEffects);
+    ptclObjTractorLift.ptclSys.AddAutoField(starVisual);
+
+    /*
+    ptclObjTractorRot.AddComponent(Components.particleSystem);
+    var tailEffects = new FlatTailEffects();
+    tailEffects.colour = new Vector3(0.5, 0.9, 0.1);
+    tailEffects.thickness = hoverHeight;
+    tailEffects.axis = Axes.y;
+    tailEffects.alphaStart = 0.25;
+    tailEffects.fadePoint = 0.5;
+    tailEffects.alphaEnd = 0.0;
+    var tractorWall = new FlatTail(10, null, tailEffects);
+    ptclObjTractorRot.ptclSys.AddTail(tractorWall);
+    */
 
     // Collisions -------------------------------------------------
     coreObj.AddComponent(Components.collisionSystem);
+    coreObj.collider.rigidBody.SetMass(2000.0);
     var coreCapsuleCollider = new CollisionCapsule(coreObj);
     coreObj.collider.AddCollisionShape(BoundingShapes.capsule, coreCapsuleCollider);
 
     saucerObj.AddComponent(Components.collisionSystem);
+    saucerObj.collider.rigidBody.SetMass(2000.0);
     var saucerDonutCollider = new CollisionDonut(saucerObj);
     saucerObj.collider.AddCollisionShape(BoundingShapes.donut, saucerDonutCollider);
 
     // Collision callbacks
-    var coefOfRest = 0.5;
+    var coefOfRest = 0.1;
     function CoreCollision(collider) {
         var collisionDist = coreObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
         var netVel = coreObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
@@ -90,13 +128,81 @@ function UFO() {
     }
     saucerObj.collider.SetSphereCall(SaucerCollision);
 
+    // AI -------------------------------------------------
+
+    var TRACTOR_RANGE = 0.5;
+    var TRACTOR_PULL_SPEED = 0.020;
+    var ufoStates = {dormant: 0, abducting: 1, stunned: 2};
+    var currState = ufoStates.dormant;
+    var moveSpeed = 0.05;
+
+    function SeekAcrossXZ(dir, speed) {
+        var velocity = dir.GetScaleByNum(speed);
+        // 2D movement for object in 3D world;
+        that.obj.trfmBase.TranslateByAxes(velocity.x, 0.0, velocity.y);
+    }
+    function Tractor(abductee) {
+        // Without physics
+        abductee.SetGravBlock(true);
+        abductee.obj.trfmBase.TranslateUp(TRACTOR_PULL_SPEED);
+    }
+    function BeStunned() {
+
+    }
+
+    this.Abduct = function(abductee, distSqr2D, dirVec) {
+        //tractorWall.Stop();
+        tractorBeamVisual.Stop();
+        starVisual.Stop();
+        switch(currState) {
+            case ufoStates.abducting:
+                // Don't stop travelling the second it starts tractoring. Keep trying to be right on top of it.
+                if(distSqr2D > VERY_SMALL)
+                    SeekAcrossXZ(dirVec.SetScaleByNum(1.0 / Math.sqrt(distSqr2D)), moveSpeed);
+                // Start tractoring from a larger radius though
+                if(distSqr2D < TRACTOR_RANGE) {
+                    //tractorWall.Run();
+                    tractorBeamVisual.Run();
+                    starVisual.Run();
+                    var dY = this.obj.trfmGlobal.pos.y - abductee.obj.trfmGlobal.pos.y;
+                    if(dY > VERY_SMALL)
+                        Tractor(abductee);
+                    else {
+                        tractorBeamVisual.Stop();
+                        starVisual.Stop();
+                        return true;
+                    }
+                }
+                break;
+            case ufoStates.stunned:
+                // count down timer which is set based on impact force in collision functions above
+                // when timer reaches zero, switch state back to abducting
+                break;
+            case ufoStates.dormant:
+                break;
+            default:
+                currState = ufoStates.dormant;
+                break;
+        }
+        return false;
+    };
+
+    this.SetActive = function(isActive) {
+        if(isActive)
+            currState = ufoStates.abducting;
+        else
+            currState = ufoStates.dormant;
+    };
+
+    // Update -------------------------------------------------
     var angle = 0.0;
     this.Update = function() {
         angle++;
         if(angle > 360.0)
             angle = 0.0;
 
-        coreObj.trfmBase.SetUpdatedRot(VEC3_UP, angle);
+        coreObj.trfmBase.SetUpdatedRot(VEC3_UP, angle * 2);
         saucerObj.trfmBase.SetUpdatedRot(VEC3_UP, -angle);
+        //ptclObjTractorRot.trfmOffset.SetUpdatedRot(VEC3_UP, angle * 4);
     }
 }

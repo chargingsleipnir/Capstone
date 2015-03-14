@@ -198,6 +198,7 @@ var KeyMap = {
 /***** CONSTS *****/
 var DEG_TO_RAD = Math.PI / 180.0;
 var RAD_TO_DEG = 180.0 / Math.PI;
+var VERY_SMALL = 0.001;
 var INFINITESIMAL = 1.0e-9;
 var VEC3_ZERO = new Vector3();
 var VEC3_GRAVITY = new Vector3(0.0, -10.0, 0.0);

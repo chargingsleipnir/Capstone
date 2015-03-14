@@ -230,7 +230,7 @@ ParticleFieldAutomated.prototype = {
         this.active = true;
     },
     Stop: function() {
-        this.counter = 0.0;
+        this.active = false;
     },
     SortForLaunch: function(idx) {
         if(idx > 0) {
@@ -437,11 +437,9 @@ ParticleFieldControled.prototype = {
 
 /******************************** Particle Tail *****************************************/
 
-function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
-    this.trfm = trfmObj;
+function FlatTail(ptclCount, fieldLife, effects) {
     this.ptclCount = ptclCount || 10;
-    this.fieldLifeTime = fieldLife || 20.0;
-    this.counter = this.fieldLifeTime;
+    this.fieldLifeTime = this.counter = fieldLife;
 
     this.axis = new Vector3();
     if(effects.axis == Axes.x)
@@ -476,10 +474,9 @@ function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
     this.posCoords = [];
     var colElems = [];
     for(var i = 0; i < this.ptclCount; i++) {
-        this.posCoords.push(this.trfm.pos.x + this.axis.x);
-        this.posCoords.push(this.trfm.pos.y + this.axis.y);
-        this.posCoords.push(this.trfm.pos.z + this.axis.z);
-        this.axis.SetNegative();
+        this.posCoords.push(999);
+        this.posCoords.push(999);
+        this.posCoords.push(999);
 
         colElems = colElems.concat(effects.colour.GetData());
         colElems.push(alphas[i]);
@@ -496,17 +493,39 @@ function FlatTail(trfmObj, ptclCount, fieldLife, effects) {
     this.trailHdlr = new RayCastHandler(ptclVerts);
 }
 FlatTail.prototype = {
+    GetObjectTransform: function(trfmObj) {
+        this.objGlobalTrfm = trfmObj;
+        // Once positions are established, sort from back to front
+        // This stays here uniquely because it's using StartPos, not regular pos;
+        this.posCoords = [];
+        for(var i = 0; i < this.ptclCount; i++) {
+            this.posCoords.push(this.objGlobalTrfm.pos.x + this.axis.x);
+            this.posCoords.push(this.objGlobalTrfm.pos.y + this.axis.y);
+            this.posCoords.push(this.objGlobalTrfm.pos.z + this.axis.z);
+            this.axis.SetNegative();
+        }
+        this.trailHdlr.RewriteVerts(this.posCoords);
+    },
+    Run: function() {
+        this.active = true;
+    },
+    Stop: function() {
+        this.active = false;
+        //this.counter = 0.0;
+    },
     CheckEnd: function() {
-        this.counter -= Time.deltaMilli;
-        if(this.counter <= 0)
-            this.Callback = this.Terminate;
+        if(this.counter != null) {
+            this.counter -= Time.deltaMilli;
+            if (this.counter <= 0)
+                this.Callback = this.Terminate;
+        }
     },
     Launch: function() {
         this.posCoords = [];
         for(var i = 0; i < this.ptclCount; i++) {
-            this.posCoords.push(this.trfm.pos.x + this.axis.x);
-            this.posCoords.push(this.trfm.pos.y + this.axis.y);
-            this.posCoords.push(this.trfm.pos.z + this.axis.z);
+            this.posCoords.push(this.objGlobalTrfm.pos.x + this.axis.x);
+            this.posCoords.push(this.objGlobalTrfm.pos.y + this.axis.y);
+            this.posCoords.push(this.objGlobalTrfm.pos.z + this.axis.z);
             this.axis.SetNegative();
         }
         this.trailHdlr.RewriteVerts(this.posCoords);
@@ -521,9 +540,9 @@ FlatTail.prototype = {
         this.posCoords.pop();
         this.posCoords.pop();
         this.posCoords.unshift(
-            this.trfm.pos.x + this.axis.x,
-            this.trfm.pos.y + this.axis.y,
-            this.trfm.pos.z + this.axis.z
+            this.objGlobalTrfm.pos.x + this.axis.x,
+            this.objGlobalTrfm.pos.y + this.axis.y,
+            this.objGlobalTrfm.pos.z + this.axis.z
         );
         this.axis.SetNegative();
         this.trailHdlr.RewriteVerts(this.posCoords);
@@ -532,9 +551,9 @@ FlatTail.prototype = {
     Terminate: function() {
         this.posCoords = [];
         for(var i = 0; i < this.ptclCount; i++) {
-            this.posCoords.push(this.trfm.pos.x);
+            this.posCoords.push(this.objGlobalTrfm.pos.x);
             this.posCoords.push(999.0);
-            this.posCoords.push(this.trfm.pos.z);
+            this.posCoords.push(this.objGlobalTrfm.pos.z);
         }
         this.trailHdlr.RewriteVerts(this.posCoords);
 
@@ -562,8 +581,9 @@ ParticleSystem.prototype = {
     AddCtrlField: function(field) {
         this.fields.push(field);
     },
-    AddTail: function(ptclCount, fieldLife, effects) {
-        this.tails.push(new FlatTail(this.objGlobalTrfm, ptclCount, fieldLife, effects));
+    AddTail: function(tail) {
+        this.tails.push(tail);
+        tail.GetObjectTransform(this.objGlobalTrfm);
     },
     RemoveField: function(field) {
         var index = this.fields.indexOf(field);

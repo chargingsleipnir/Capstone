@@ -34,6 +34,11 @@ function BuildGame() {
     player.obj.trfmBase.SetPosByAxes(0.0, 1.0, 0.0);
 
     var ufo = new UFO();
+    var barn = new Barn();
+
+    var ground = new GameObject('ground', Labels.none);
+    ground.SetModel(GameMngr.assets.models['ground']);
+    ground.mdlHdlr.SetTexture(GameMngr.assets.textures['groundTex'], TextureFilters.mipmap);
 
     var skyBox = new GameObject('skybox', Labels.none);
     skyBox.SetModel(new Primitives.IcoSphere(2, 1));
@@ -54,8 +59,10 @@ function BuildGame() {
     var lvl01 = new Scene("Level 01", SceneTypes.gameplay);
     lvl01.Add(player.obj);
     lvl01.Add(ufo.obj);
+    lvl01.Add(barn.obj);
     lvl01.Add(skyBox);
-    BuildScene2(lvl01);
+    lvl01.Add(ground);
+    BuildScene2(lvl01, player, ufo, barn);
     SceneMngr.AddScene(lvl01, false);
 
     /*
@@ -79,6 +86,7 @@ function BuildGame() {
             if(!GameMngr.paused) {
                 player.Update();
                 ufo.Update();
+                barn.Update();
 
                 angle += 0.01;
                 skyBox.trfmBase.SetUpdatedRot(VEC3_FWD, angle);

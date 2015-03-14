@@ -7,10 +7,11 @@ TODO
 5. Get this thing online, and test all browsers
 6. Fix ParticleForceGenerator Buoancy to take actual submerged volume into account.
 7. 3D local rotations
-8. Improve collisions with 2nd tier shapes and spatial partitioning.
-9. Setup inheritance for ammo types
+8. Spatial partitioning.
+9. MAke level template to inherit from
 
 BUGS
 
 1. Multiple light sources of the same type - Build this in. This might be finite, as individual lights may require hard-coding.
 2. Objects with many textures - Test how to ensure the right textures end up in the right place.
+3. Particle re-ordering no longer seems to be working. It once was... what the hell happened?

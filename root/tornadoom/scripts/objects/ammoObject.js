@@ -23,6 +23,7 @@ function AmmoObject(name, model, texture, mass) {
     this.gravForce = new ForceGenerators.Gravity(VEC3_GRAVITY);
     this.obj.rigidBody.AddForceGenerator(this.gravForce);
     this.gravForce.active = false;
+    this.gravBlock = false;
 
     this.obj.AddComponent(Components.collisionSystem);
     // Secondary collider, must be fully implemented here for now.
@@ -46,26 +47,39 @@ function AmmoObject(name, model, texture, mass) {
     this.obj.collider.SetSphereCall(ImpulseDeflection);
 }
 AmmoObject.prototype = {
+    SetGravBlock: function(isBlocked) {
+        this.gravBlock = isBlocked;
+    },
+    SetVisible: function(isVisible) {
+        this.obj.mdlHdlr.active = isVisible;
+        for (var i in this.obj.components)
+            this.obj.components[i].SetActive(isVisible);
+    },
     Update: function() {
         // Apply gravity when in the air
-        if(this.obj.trfmGlobal.pos.y > this.halfHeight) {
-            this.obj.rigidBody.dampening = 1.0;
-            this.gravForce.active = true;
-        }
-        // Land and remove gravity force if not needed
-        else if(this.obj.trfmGlobal.pos.y < this.halfHeight) {
-            this.obj.rigidBody.dampening = 0.1;
-            this.obj.trfmBase.SetPosY(this.halfHeight);
-            this.obj.rigidBody.velF.y = 0;
-            this.gravForce.active = false;
-        }
+            if (this.obj.trfmGlobal.pos.y > this.halfHeight && !this.gravBlock) {
+                this.obj.rigidBody.dampening = 1.0;
+                this.gravForce.active = true;
+            }
+            // Land and remove gravity force if not needed
+            else if (this.obj.trfmGlobal.pos.y < this.halfHeight) {
+                this.obj.rigidBody.dampening = 0.1;
+                this.obj.trfmBase.SetPosY(this.halfHeight);
+                this.obj.rigidBody.velF.y = 0;
+                this.gravForce.active = false;
+            }
+        this.gravBlock = false;
     }
 };
+
+
 
 function HayBale() {
     AmmoObject.call(this, 'hay bale', GameMngr.assets.models['hayBale'], GameMngr.assets.textures['hayBaleTex'], 30.0);
 }
 HayBale.prototype = AmmoObject.prototype;
+
+
 
 function Cow() {
     AmmoObject.call(this, 'cow', GameMngr.assets.models['cow'], GameMngr.assets.textures['cowTex'], 20.0);

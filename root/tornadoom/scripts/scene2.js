@@ -1,4 +1,4 @@
-function BuildScene2(scene) {
+function BuildScene2(scene, player, ufo, barn) {
 
     scene.light.amb.bright = 0.5;
     scene.light.dir.bright = 0.25;
@@ -11,27 +11,20 @@ function BuildScene2(scene) {
         obj.trfmBase.SetPosByAxes(0.0, halfHeight, 0.0);
     }
 
-    var ground = new GameObject('ground', Labels.none);
-    ground.SetModel(GameMngr.assets.models['ground']);
-    ground.mdlHdlr.SetTexture(GameMngr.assets.textures['groundTex'], TextureFilters.mipmap);
-
     var fence = new GameObject('fence', Labels.none);
     fence.SetModel(GameMngr.assets.models['fence']);
     fence.mdlHdlr.SetTexture(GameMngr.assets.textures['fenceTex'], TextureFilters.mipmap);
     RaiseToGruond(fence);
     fence.trfmBase.TranslateByAxes(0.0, 0.0, 0.0);
 
-    var barn = new GameObject('barn', Labels.none);
-    barn.SetModel(GameMngr.assets.models['barn']);
-    barn.mdlHdlr.SetTexture(GameMngr.assets.textures['barnTex'], TextureFilters.linear);
-    RaiseToGruond(barn);
-    barn.trfmBase.TranslateByAxes(1.7, 0.0, -8.0);
-
     var wagon = new GameObject('wagon', Labels.none);
     wagon.SetModel(GameMngr.assets.models['wagon']);
     wagon.mdlHdlr.SetTexture(GameMngr.assets.textures['wagonTex'], TextureFilters.linear);
     RaiseToGruond(wagon);
     wagon.trfmBase.TranslateByAxes(-1.5, 0.0, -8.0);
+
+    RaiseToGruond(barn.obj);
+    barn.obj.trfmBase.TranslateByAxes(1.7, 0.0, -8.0);
 
     var cows = [];
     var MAX_COWS = 10;
@@ -48,15 +41,49 @@ function BuildScene2(scene) {
         else bales[i].obj.trfmBase.TranslateByAxes(-6.0, 0.0, ((-i + (MAX_BALES / 2)) * 6));
     }
 
+    // SCENE OBJECT INTERACTIONS ---------------------------------------------------------
+    var abductee = null;
+    var ufoToCowDistSqr = 0.0;
+    var ufoToCowDirVec = new Vector2();
+    var tempDirVec = new Vector2();
+
+    var cowsAbducted = 0,
+        cowsSaved = 0;
+    // -----------------------------------------------------------------------------------
+
     function Start() {
+        ufo.SetActive(true);
         for(var i = 0; i < MAX_COWS; i++ ) {
 
         }
     }
 
     function Update() {
-        for(var i = 0; i < MAX_COWS; i++ ) {
-            cows[i].Update();
+        if(cows.length > 0) {
+            ufoToCowDistSqr = 999999;
+            for (var i = 0; i < cows.length; i++) {
+                cows[i].Update();
+
+                // Which cow to go after
+                tempDirVec.SetValues(
+                    cows[i].obj.trfmGlobal.pos.x - ufo.obj.trfmGlobal.pos.x,
+                    cows[i].obj.trfmGlobal.pos.z - ufo.obj.trfmGlobal.pos.z);
+                var tempDistSqr = tempDirVec.GetMagSqr();
+                if (tempDistSqr < ufoToCowDistSqr) {
+                    ufoToCowDistSqr = tempDistSqr;
+                    abductee = cows[i];
+                    ufoToCowDirVec.SetCopy(tempDirVec);
+                }
+            }
+            if(ufo.Abduct(abductee, ufoToCowDistSqr, ufoToCowDirVec)) {
+                cowsAbducted++;
+                cows.splice(cows.indexOf(abductee), 1);
+                console.log(cowsAbducted);
+                abductee.SetVisible(false);
+            }
+        }
+
+        for(var i = 0; i < bales.length; i++ ) {
             bales[i].Update();
         }
     }
@@ -65,9 +92,7 @@ function BuildScene2(scene) {
 
     }
 
-    scene.Add(ground);
     scene.Add(fence);
-    scene.Add(barn);
     scene.Add(wagon);
     for(var i = 0; i < MAX_COWS; i++ ) {
         scene.Add(cows[i].obj);
