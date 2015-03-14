@@ -212,6 +212,9 @@ function Player(mouse) {
         ammoCont[index] = null;
         ammoTypeCount--;
     };
+    this.GetAmmoIdx = function(ammoTypeIdx, gameObj) {
+        return ammoCont[ammoTypeIdx].indexOf(gameObj);
+    };
     this.SetAmmoSelectionCallback = function(Callback) {
         AmmoSelectionCallback = Callback;
         AmmoSelectionCallback(ammoIdx);
@@ -229,6 +232,14 @@ function Player(mouse) {
         ammoCont[index].push(gameObj);
         AmmoCountChangeCallback(index, ammoCont[index].length);
         PrepAmmo(gameObj, false);
+    };
+    this.ReleaseAmmoAbove = function(ammoContIdx, ammoIdx) {
+        var gameObj = (ammoCont[ammoContIdx].splice(ammoIdx, 1)).pop();
+        if(gameObj) {
+            gameObj.trfmBase.SetPosByVec(playerPos.GetAdd(VEC3_UP.GetScaleByNum(this.height / 2.0)));
+            AmmoCountChangeCallback(ammoContIdx, ammoCont[ammoContIdx].length);
+            PrepAmmo(gameObj, true);
+        }
     };
     this.Twist = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
         rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);

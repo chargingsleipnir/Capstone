@@ -172,6 +172,19 @@ function BuildScene2(scene, player, ufo, barn, hud) {
     }
     player.obj.collider.SetSphereCall(PlayerCollCallback);
 
+
+    // Pulling cow from Player
+    var cowSoughtFromPlayerIdx = -1;
+    var cowSceneListIdx = -1;
+    var ReleaseCowCallback = function() {
+        if(cowSoughtFromPlayerIdx != -1) {
+            player.ReleaseAmmoAbove(ammoTypes.cow, cowSoughtFromPlayerIdx);
+            cows[cowSceneListIdx].SetGravBlock(true);
+            cows[cowSceneListIdx].gravForce.active = false;
+        }
+    };
+    ufo.SetTractorBeamingCallback(ReleaseCowCallback);
+
     // -----------------------------------------------------------------------------------
 
     function Start() {
@@ -205,6 +218,10 @@ function BuildScene2(scene, player, ufo, barn, hud) {
                     ufoToCowDirVec.SetCopy(tempDirVec);
                 }
             }
+            // If abductee is in the tornado, remove from tornado's ammo
+            cowSoughtFromPlayerIdx = player.GetAmmoIdx(ammoTypes.cow, abductee.obj);
+            cowSceneListIdx = (cowSoughtFromPlayerIdx != -1) ? cows.indexOf(abductee) : -1;
+
             if(ufo.Abduct(abductee, ufoToCowDistSqr, ufoToCowDirVec)) {
                 cowsAbducted++;
                 console.log("Cows abducted: " + cowsAbducted);

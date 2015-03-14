@@ -7,6 +7,7 @@ function UFO() {
     var that = this;
 
     var hoverHeight = 8.0;
+    var TractorBeamingCallback = function(){};
 
     this.obj = new GameObject('ufo', Labels.none);
     this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, 20.0);
@@ -109,6 +110,7 @@ function UFO() {
                 collisionDist = coreCapsuleCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
                 if (collisionDist && netVel.GetDot(collisionDist) < 0) {
                     coreObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                    BecomeStunned();
                 }
             }
         }
@@ -122,6 +124,7 @@ function UFO() {
                 collisionDist = saucerDonutCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
                 if (collisionDist && netVel.GetDot(collisionDist) < 0) {
                     saucerObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                    BecomeStunned();
                 }
             }
         }
@@ -136,6 +139,9 @@ function UFO() {
     var currState = ufoStates.dormant;
     var moveSpeed = 0.05;
 
+    var stunCounter = 0.0;
+    var STUN_TIME_MAX = 5.0;
+
     function SeekAcrossXZ(dir, speed) {
         var velocity = dir.GetScaleByNum(speed);
         // 2D movement for object in 3D world;
@@ -146,10 +152,16 @@ function UFO() {
         abductee.SetGravBlock(true);
         abductee.obj.trfmBase.TranslateUp(TRACTOR_PULL_SPEED);
     }
-    function BeStunned() {
-
+    function BecomeStunned() {
+        stunCounter = STUN_TIME_MAX;
+        currState = ufoStates.stunned;
     }
 
+    // UFO METHODS -------------------------------------------------
+
+    this.SetTractorBeamingCallback = function(Callback) {
+        TractorBeamingCallback = Callback;
+    };
     this.Abduct = function(abductee, distSqr2D, dirVec) {
         //tractorWall.Stop();
         tractorBeamVisual.Stop();
@@ -164,6 +176,7 @@ function UFO() {
                     //tractorWall.Run();
                     tractorBeamVisual.Run();
                     starVisual.Run();
+                    TractorBeamingCallback();
                     var dY = this.obj.trfmGlobal.pos.y - abductee.obj.trfmGlobal.pos.y;
                     if(dY > VERY_SMALL)
                         Tractor(abductee);
@@ -175,8 +188,9 @@ function UFO() {
                 }
                 break;
             case ufoStates.stunned:
-                // count down timer which is set based on impact force in collision functions above
-                // when timer reaches zero, switch state back to abducting
+                stunCounter -= Time.deltaMilli;
+                if(stunCounter <= 0.0)
+                    currState = ufoStates.abducting;
                 break;
             case ufoStates.dormant:
                 break;
