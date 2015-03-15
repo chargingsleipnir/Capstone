@@ -214,13 +214,16 @@ function BuildScene2(scene, player, ufo, barn, hud) {
                 var tempDistSqr = tempDirVec.GetMagSqr();
                 if (tempDistSqr < ufoToCowDistSqr) {
                     ufoToCowDistSqr = tempDistSqr;
-                    abductee = cows[i];
                     ufoToCowDirVec.SetCopy(tempDirVec);
+                    if(!ufo.tractoring)
+                        abductee = cows[i];
                 }
             }
-            // If abductee is in the tornado, remove from tornado's ammo
-            cowSoughtFromPlayerIdx = player.GetAmmoIdx(ammoTypes.cow, abductee.obj);
-            cowSceneListIdx = (cowSoughtFromPlayerIdx != -1) ? cows.indexOf(abductee) : -1;
+            if(!ufo.tractoring) {
+                // If abductee is in the tornado, remove from tornado's ammo
+                cowSoughtFromPlayerIdx = player.GetAmmoIdx(ammoTypes.cow, abductee.obj);
+                cowSceneListIdx = (cowSoughtFromPlayerIdx != -1) ? cows.indexOf(abductee) : -1;
+            }
 
             if(ufo.Abduct(abductee, ufoToCowDistSqr, ufoToCowDirVec)) {
                 cowsAbducted++;

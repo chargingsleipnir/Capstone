@@ -7,7 +7,7 @@ function UFO() {
     var that = this;
 
     var hoverHeight = 8.0;
-    var TractorBeamingCallback = function(){};
+    var TractoringCallback = function(){};
 
     this.obj = new GameObject('ufo', Labels.none);
     this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, 20.0);
@@ -20,6 +20,9 @@ function UFO() {
 
     var ptclObjTractorLift = new GameObject("ufo tractor beam particle effect", Labels.none);
     ptclObjTractorLift.trfmBase.SetPosByAxes(0.0, -hoverHeight - 1.0, 0);
+
+    var currAbductee = null;
+    this.tractoring = false;
 
     //var ptclObjTractorRot = new GameObject("tail particle rotation", Labels.none);
     //ptclObjTractorRot.trfmOffset.SetPosByAxes(1.25, -hoverHeight / 2, 0.0);
@@ -103,28 +106,34 @@ function UFO() {
     // Collision callbacks
     var coefOfRest = 0.1;
     function CoreCollision(collider) {
-        var collisionDist = coreObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
-        var netVel = coreObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
-        if (netVel.GetDot(collisionDist) < 0) {
-            if (collider.gameObj.label == Labels.ammo) {
-                collisionDist = coreCapsuleCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
-                if (collisionDist && netVel.GetDot(collisionDist) < 0) {
-                    coreObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
-                    BecomeStunned();
+        // Don't assess collisions on the one being tractored in
+        if(!that.tractoring || !(currAbductee.obj == collider.gameObj)) {
+            var collisionDist = coreObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
+            var netVel = coreObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
+            if (netVel.GetDot(collisionDist) < 0) {
+                if (collider.gameObj.label == Labels.ammo) {
+                    collisionDist = coreCapsuleCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
+                    if (collisionDist && netVel.GetDot(collisionDist) < 0) {
+                        coreObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                        BecomeStunned();
+                    }
                 }
             }
         }
     }
     coreObj.collider.SetSphereCall(CoreCollision);
     function SaucerCollision(collider) {
-        var collisionDist = saucerObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
-        var netVel = saucerObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
-        if (netVel.GetDot(collisionDist) < 0) {
-            if (collider.gameObj.label == Labels.ammo) {
-                collisionDist = saucerDonutCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
-                if (collisionDist && netVel.GetDot(collisionDist) < 0) {
-                    saucerObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
-                    BecomeStunned();
+        // Don't assess collisions on the one being tractored in
+        if(!that.tractoring || !(currAbductee.obj == collider.gameObj)) {
+            var collisionDist = saucerObj.trfmGlobal.pos.GetSubtract(collider.trfm.pos);
+            var netVel = saucerObj.collider.rigidBody.GetNetVelocity(collider.rigidBody);
+            if (netVel.GetDot(collisionDist) < 0) {
+                if (collider.gameObj.label == Labels.ammo) {
+                    collisionDist = saucerDonutCollider.IntersectsCapsule(collider.suppShapeList[0].obj);
+                    if (collisionDist && netVel.GetDot(collisionDist) < 0) {
+                        saucerObj.collider.rigidBody.CalculateImpulse(collider.rigidBody, collisionDist, coefOfRest);
+                        BecomeStunned();
+                    }
                 }
             }
         }
@@ -147,25 +156,34 @@ function UFO() {
         // 2D movement for object in 3D world;
         that.obj.trfmBase.TranslateByAxes(velocity.x, 0.0, velocity.y);
     }
-    function Tractor(abductee) {
+    function StartTractoring() {
+        that.tractoring = true;
+        tractorBeamVisual.Run();
+        starVisual.Run();
+    }
+    function Lift(abductee) {
         // Without physics
         abductee.SetGravBlock(true);
         abductee.obj.trfmBase.TranslateUp(TRACTOR_PULL_SPEED);
     }
+    function StopTractoring() {
+        that.tractoring = false;
+        tractorBeamVisual.Stop();
+        starVisual.Stop();
+    }
     function BecomeStunned() {
         stunCounter = STUN_TIME_MAX;
         currState = ufoStates.stunned;
+        StopTractoring();
     }
 
     // UFO METHODS -------------------------------------------------
 
     this.SetTractorBeamingCallback = function(Callback) {
-        TractorBeamingCallback = Callback;
+        TractoringCallback = Callback;
     };
+
     this.Abduct = function(abductee, distSqr2D, dirVec) {
-        //tractorWall.Stop();
-        tractorBeamVisual.Stop();
-        starVisual.Stop();
         switch(currState) {
             case ufoStates.abducting:
                 // Don't stop travelling the second it starts tractoring. Keep trying to be right on top of it.
@@ -173,18 +191,22 @@ function UFO() {
                     SeekAcrossXZ(dirVec.SetScaleByNum(1.0 / Math.sqrt(distSqr2D)), moveSpeed);
                 // Start tractoring from a larger radius though
                 if(distSqr2D < TRACTOR_RANGE) {
-                    //tractorWall.Run();
-                    tractorBeamVisual.Run();
-                    starVisual.Run();
-                    TractorBeamingCallback();
+                    // Used to avoid collision with just this one.
+                    if(!this.tractoring) {
+                        TractoringCallback();
+                        currAbductee = abductee;
+                    }
+                    StartTractoring();
                     var dY = this.obj.trfmGlobal.pos.y - abductee.obj.trfmGlobal.pos.y;
                     if(dY > VERY_SMALL)
-                        Tractor(abductee);
+                        Lift(abductee);
                     else {
-                        tractorBeamVisual.Stop();
-                        starVisual.Stop();
+                        StopTractoring();
                         return true;
                     }
+                }
+                else {
+                    StopTractoring();
                 }
                 break;
             case ufoStates.stunned:
