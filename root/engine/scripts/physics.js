@@ -146,7 +146,7 @@ RigidBody.prototype = {
         force.y = liquidDensity * volume * (depth - maxDepth - liquidHeight) / 2 * maxDepth;
         this.forceAccum.SetAdd(force);
     },
-    ApplyTornadoMotion: function(objToEyeVec, objToEyeDistSqr, windspeed, c, drawScalar) {
+    ApplyTornadoMotion: function(objToEyeVec, objToEyeDistSqr, windspeed, c, drawScalar, maxForceMagSqr) {
         // c  = drag coefficient, uses rho, mass density
         // fv = viscous drag force
 
@@ -158,6 +158,7 @@ RigidBody.prototype = {
         var centripetal = objToEyeVec.GetScaleByNum(1.0 / objToEyeDist);
 
         // Control force application, so the velocity doesn't get out of hand.
+
         var objVelSqr = this.velF.GetMagSqr();
         var angVel = objVelSqr / objToEyeDistSqr;
         var angVelScalar = 1.0 - (angVel / windspeed);
@@ -192,10 +193,21 @@ RigidBody.prototype = {
 
         // Apply the force to the object
         var force2D = tanDir.GetAdd(centripetal);
-        this.forceAccum.SetAdd(new Vector3(force2D.x, 0.0, force2D.y));
+        var forceMagSqr = force2D.GetMagSqr();
+        if(forceMagSqr > maxForceMagSqr)
+            force2D.SetScaleByNum(maxForceMagSqr / forceMagSqr);
+
+        this.forceAccum.SetAddByAxes(force2D.x, 0.0, force2D.y);
     },
     GetNetVelocity: function(rigidBody) {
         return this.velF.GetSubtract(rigidBody.velF);
+    },
+    GetForceFromVelocity: function() {
+        // Commented is the proper way to get this force, but I believe getting the difference
+        // in velocities is what's screwing up the results.
+        //var accel = this.velF.GetSubtract(this.velI).SetScaleByNum(1.0 / Time.deltaMilli);
+        //return accel.SetScaleByNum(this.GetMass());
+        return this.velF.GetScaleByNum(this.GetMass());
     },
     OnCollisionHeadingWith: function(rigidBody) {
         var collisionDist = this.trfm.pos.GetSubtract(rigidBody.trfm.pos);

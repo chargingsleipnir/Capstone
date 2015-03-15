@@ -10,7 +10,7 @@ var ViewMngr = {
     mtxProj: new Matrix4(),
     activeCam: null,
     frustum: null,
-    farCullDist: 200.0,
+    farCullDist: 300.0,
     lightProps: {
         useFragLighting: false,
         model: LightModels.phong

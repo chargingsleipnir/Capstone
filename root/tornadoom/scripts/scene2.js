@@ -24,7 +24,8 @@ function BuildScene2(scene, player, ufo, barn, hud) {
     wagon.trfmBase.TranslateByAxes(-1.5, 0.0, -8.0);
 
     RaiseToGruond(barn.obj);
-    barn.obj.trfmBase.TranslateByAxes(1.7, 0.0, -8.0);
+    barn.obj.trfmBase.TranslateByAxes(0.0, 0.0, 20.0);
+    barn.obj.trfmBase.SetUpdatedRot(VEC3_UP, 115);
 
     var cows = [];
     var MAX_COWS = 10;
@@ -57,21 +58,41 @@ function BuildScene2(scene, player, ufo, barn, hud) {
     style.bgAlpha = 1.0;
     style.bold = false;
 
-    style.bgTextures = [GameMngr.assets.textures['baleIcon']];
-    var caughtBaleInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 68, 132, 68), "00", style);
-    hud.AddGUIObject(caughtBaleInfo);
-    caughtBaleInfo.UpdateMsg('0');
-
+    // Ammo Details
     style.bgTextures = [GameMngr.assets.textures['cowIcon']];
-    var caughtCowInfo = new GUIObject(new WndRect(0, caughtBaleInfo.rectLocal.y - 78, 132, 68), "00", style);
+    var caughtCowInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 64, 128, 64), "00", style);
     hud.AddGUIObject(caughtCowInfo);
     caughtCowInfo.UpdateMsg('0');
+
+    style.bgTextures = [GameMngr.assets.textures['baleIcon']];
+    var caughtBaleInfo = new GUIObject(new WndRect(0, caughtCowInfo.rectLocal.y - 69, 128, 64), "00", style);
+    hud.AddGUIObject(caughtBaleInfo);
+    caughtBaleInfo.UpdateMsg('0');
 
     var hudAmmoMsgs = [
         caughtCowInfo,
         caughtBaleInfo
     ];
 
+    // Abduction Details
+    style.textAlignWidth = Alignment.centre;
+    style.textAlignHeight = Alignment.bottom;
+    style.fontSize = 24;
+    // The images are 64 x 128, but with the bottom 28 clear, to not waste space,
+    // Thus this margin needs to be here to elevate the text to compensate for the clear space.
+    style.margin = 12.0;
+
+    style.bgTextures = [GameMngr.assets.textures['rescueIcon']];
+    var rescueInfo = new GUIObject(new WndRect(hud.sysRect.w - 64, 0, 64, 128), "00", style);
+    hud.AddGUIObject(rescueInfo);
+    rescueInfo.UpdateMsg('0');
+
+    style.bgTextures = [GameMngr.assets.textures['abductIcon']];
+    var abductionInfo = new GUIObject(new WndRect(rescueInfo.rectLocal.x - 69, 0, 64, 128), "00", style);
+    hud.AddGUIObject(abductionInfo);
+    abductionInfo.UpdateMsg('0');
+
+    // Power info
     style.fontSize = 24;
     style.margin = 5.0;
     style.textMaxWidth = 25;
@@ -90,6 +111,10 @@ function BuildScene2(scene, player, ufo, barn, hud) {
     };
     var UpdateHUDAmmoCount = function(ammoIdx, count) {
         hudAmmoMsgs[ammoIdx].UpdateMsg("" + count);
+    };
+    var UpdateHUDAbductionCount = function() {
+        rescueInfo.UpdateMsg("" + cowsSaved);
+        abductionInfo.UpdateMsg("" + cowsAbducted);
     };
     var UpdateHUDPowerLevel = function(power) {
         launchPowerMsg.UpdateMsg("Extra Power: " + power);
@@ -134,7 +159,7 @@ function BuildScene2(scene, player, ufo, barn, hud) {
 
             if(abductee) {
                 cowsSaved++;
-                console.log("Cows saved: " + cowsSaved);
+                UpdateHUDAbductionCount();
                 cows.splice(cows.indexOf(abductee), 1);
                 abductee.SetVisible(false);
             }
@@ -157,16 +182,17 @@ function BuildScene2(scene, player, ufo, barn, hud) {
             // This format allows not only for objects to only be captured if they are within the given radius,
             // but ensures that their velocities don't explode at heights above the tornado:
             // No force is applied if they're directly above the funnel.
-            if (objToEyeDistSqr < player.captureRadius * player.captureRadius) {
-                if (collider.trfm.pos.y < player.height) {
-                    if(collider.gameObj.name == "cow")
+            if (collider.trfm.pos.y < player.height) {
+                if (objToEyeDistSqr < player.captureRadius * player.captureRadius) {
+
+                    if (collider.gameObj.name == "cow")
                         player.Capture(ammoTypes.cow, collider.gameObj);
-                    else if(collider.gameObj.name == "hay bale")
+                    else if (collider.gameObj.name == "hay bale")
                         player.Capture(ammoTypes.hayBale, collider.gameObj);
                 }
-            }
-            else {
-                player.Twist(collider.rigidBody, objToEyeVec, objToEyeDistSqr);
+                else {
+                    player.Twister(collider.rigidBody, objToEyeVec, objToEyeDistSqr);
+                }
             }
         }
     }
@@ -227,7 +253,7 @@ function BuildScene2(scene, player, ufo, barn, hud) {
 
             if(ufo.Abduct(abductee, ufoToCowDistSqr, ufoToCowDirVec)) {
                 cowsAbducted++;
-                console.log("Cows abducted: " + cowsAbducted);
+                UpdateHUDAbductionCount();
                 cows.splice(cows.indexOf(abductee), 1);
                 abductee.SetVisible(false);
             }

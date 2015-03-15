@@ -3,7 +3,7 @@ function TopDownController(obj, ctrlName) {
     var active = false;
 
     var ctrl = new ControlScheme();
-    var moveSpeed = 15;
+    var moveSpeed = 1250;
     var yawAngle = 0.0;
 
     // Control object

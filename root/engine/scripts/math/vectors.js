@@ -387,6 +387,19 @@ Vector3.prototype = {
         this.z += vec3.z;
         return this;
     },
+    SetAddByAxes: function(x, y, z) {
+        /// <signature>
+        ///  <summary>Add the passed vector to this</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="z" type="decimal"></param>
+        ///  <returns type="Vector3" />
+        /// </signature>
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        return this;
+    },
     GetAdd: function(vec3) {
         /// <signature>
         ///  <summary>Return this vector plus the passed vector</summary>

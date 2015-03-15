@@ -6,12 +6,17 @@ function Player(mouse) {
 
     // Player characteristics -------------------------------------------------
 
-    var windspeed = 7.5;
-    var massDensity = 1.205;
+    var windspeed = 10.0;
+    var massDensity = 4.82;    // 1.205; Normal for air?
 
-    var contactScale = 2.0;
-    var drawScale = 1.0;
+    var contactScale = 2.5;
+    var drawScale = 1.05;
+    var maxForceMagSqr = 750.0 * 750.0;
     this.captureRadius = 0.75;
+
+    //var springConstant = 3.0;
+    //var restLength = contactScale / 4.0;
+
     var LAUNCH_SCALAR_MIN = 750;
     var LAUNCH_SCALAR_MAX = 1000;
     var launchScalar = LAUNCH_SCALAR_MIN;
@@ -50,8 +55,8 @@ function Player(mouse) {
     this.height = modelObj.shapeData.radii.y * modelObj.trfmBase.scale.y * 2;
 
     this.obj.AddComponent(Components.rigidBody);
-    this.obj.rigidBody.SetMass(1.0);
-    this.obj.rigidBody.dampening = 0.25;
+    this.obj.rigidBody.SetMass(100.0);
+    this.obj.rigidBody.dampening = 0.2;
 
     // Tornado collisions -------------------------------------------------
 
@@ -196,7 +201,7 @@ function Player(mouse) {
             gameObj.trfmBase.SetPosByVec(playerPos.GetAdd(dir.SetScaleByNum(contactScale + 2.0)));
             AmmoCountChangeCallback(ammoIdx, ammoCont[ammoIdx].length);
             PrepAmmo(gameObj, true);
-            gameObj.rigidBody.AddForce(dir.GetScaleByNum(windspeed * massDensity * launchScalar));
+            gameObj.rigidBody.AddForce(dir.GetScaleByNum(windspeed * launchScalar));
         }
         DropLaunchPower();
     };
@@ -241,8 +246,11 @@ function Player(mouse) {
             PrepAmmo(gameObj, true);
         }
     };
-    this.Twist = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
-        rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale);
+    this.Twister = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
+        // Have objs keep relative velocity with tornado.
+        //rigidBody.AddForce(this.obj.rigidBody.GetForceFromVelocity().SetScaleByNum(0.5));
+        rigidBody.ApplyTornadoMotion(objToEyeVec, objToEyeDistSqr, windspeed, massDensity, drawScale, maxForceMagSqr);
+        //rigidBody.ApplySpring(playerPos, springConstant, restLength);
         // Perfect lift right away, slowing once obj's gravity is re-applied.
         rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
     };
