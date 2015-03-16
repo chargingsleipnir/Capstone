@@ -60,13 +60,13 @@ function BuildScene2(scene, player, ufo, barn, hud) {
 
     // Ammo Details
     style.bgTextures = [GameMngr.assets.textures['cowIcon']];
-    var caughtCowInfo = new GUIObject(new WndRect(0, hud.sysRect.h - 64, 128, 64), "00", style);
-    hud.AddGUIObject(caughtCowInfo);
+    var caughtCowInfo = new GUITextObject(new WndRect(0, hud.sysRect.h - 64, 128, 64), "00", style);
+    hud.AddTextObject(caughtCowInfo);
     caughtCowInfo.UpdateMsg('0');
 
     style.bgTextures = [GameMngr.assets.textures['baleIcon']];
-    var caughtBaleInfo = new GUIObject(new WndRect(0, caughtCowInfo.rectLocal.y - 69, 128, 64), "00", style);
-    hud.AddGUIObject(caughtBaleInfo);
+    var caughtBaleInfo = new GUITextObject(new WndRect(0, caughtCowInfo.rectLocal.y - 69, 128, 64), "00", style);
+    hud.AddTextObject(caughtBaleInfo);
     caughtBaleInfo.UpdateMsg('0');
 
     var hudAmmoMsgs = [
@@ -83,25 +83,39 @@ function BuildScene2(scene, player, ufo, barn, hud) {
     style.margin = 12.0;
 
     style.bgTextures = [GameMngr.assets.textures['rescueIcon']];
-    var rescueInfo = new GUIObject(new WndRect(hud.sysRect.w - 64, 0, 64, 128), "00", style);
-    hud.AddGUIObject(rescueInfo);
+    var rescueInfo = new GUITextObject(new WndRect(hud.sysRect.w - 64, 0, 64, 128), "00", style);
+    hud.AddTextObject(rescueInfo);
     rescueInfo.UpdateMsg('0');
 
     style.bgTextures = [GameMngr.assets.textures['abductIcon']];
-    var abductionInfo = new GUIObject(new WndRect(rescueInfo.rectLocal.x - 69, 0, 64, 128), "00", style);
-    hud.AddGUIObject(abductionInfo);
+    var abductionInfo = new GUITextObject(new WndRect(rescueInfo.rectLocal.x - 69, 0, 64, 128), "00", style);
+    hud.AddTextObject(abductionInfo);
     abductionInfo.UpdateMsg('0');
 
+
     // Power info
-    style.fontSize = 24;
+    var powerBarStyle = new ProgressObjStyle();
+    powerBarStyle.bgColour.SetValues(0.1, 0.1, 0.1);
+    powerBarStyle.fgColour.SetValues(0.8, 0.5, 0.2);
+    var barRect = new WndRect((hud.sysRect.w / 2) - 200, hud.sysRect.h - 30, 400, 20);
+    var launchPowerBar = new GUIProgressBar(barRect, Axes.x, powerBarStyle);
+    hud.AddProgressObject(launchPowerBar);
+    launchPowerBar.UpdateValue(0.0);
+
+    style.fontSize = 20;
     style.margin = 5.0;
     style.textMaxWidth = 25;
-    style.textAlignWidth = Alignment.left;
+    style.textAlignHeight = Alignment.centre;
     style.bgTextures = [];
-    style.fontColour = new Vector3(1.0, 1.0, 1.0);
-    var launchPowerMsg = new GUIObject(new WndRect(0, 0, 285, 40), "Extra Power: 000", style);
-    hud.AddGUIObject(launchPowerMsg);
-    launchPowerMsg.UpdateMsg("Extra Power: " + 0);
+    style.bgAlpha = 0.5;
+    style.bgColour.SetValues(1.0, 1.0, 1.0);
+    style.fontColour.SetValues(0.0, 0.0, 0.0);
+    var launchPowerMsg = new GUITextObject(new WndRect(barRect.x + 110, barRect.y - 35, barRect.w - 220, 30), "Extra Power", style);
+    hud.AddTextObject(launchPowerMsg);
+
+    launchPowerBar.SetActive(false);
+    launchPowerMsg.SetActive(false);
+
 
     var UpdateHUDAmmoSelection = function(ammoIdx) {
         for(var i = 0; i < hudAmmoMsgs.length; i++) {
@@ -117,7 +131,7 @@ function BuildScene2(scene, player, ufo, barn, hud) {
         abductionInfo.UpdateMsg("" + cowsAbducted);
     };
     var UpdateHUDPowerLevel = function(power) {
-        launchPowerMsg.UpdateMsg("Extra Power: " + power);
+        launchPowerBar.UpdateValue(power);
     };
     player.SetAmmoSelectionCallback(UpdateHUDAmmoSelection);
     player.SetAmmoCountChangeCallback(UpdateHUDAmmoCount);
@@ -226,6 +240,15 @@ function BuildScene2(scene, player, ufo, barn, hud) {
 
     function Update() {
         ContainRigidBody(player.obj);
+
+        if(player.GetAimToggleHeld()) {
+            launchPowerBar.SetActive(true);
+            launchPowerMsg.SetActive(true);
+        }
+        else {
+            launchPowerBar.SetActive(false);
+            launchPowerMsg.SetActive(false);
+        }
 
         if(cows.length > 0) {
             ufoToCowDistSqr = 999999;

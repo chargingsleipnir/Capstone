@@ -12,7 +12,7 @@ function BuildScene1(scene) {
     style.margin = 20.0;
     style.bgAlpha = 1.0;
     style.bold = false;
-    var title = new GUIObject(
+    var title = new GUITextObject(
         new WndRect(titleScreen.sysRect.w/2 - 200, titleScreen.sysRect.h/2 - 100, 400, 200),
         "TORNADOOM",
         style
@@ -24,7 +24,7 @@ function BuildScene1(scene) {
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
     style.fontSize = 30;
     style.bold = true;
-    var titleMsg = new GUIObject(
+    var titleMsg = new GUITextObject(
         new WndRect(title.rectGlobal.x - 150, title.rectLocal.y + title.rectLocal.h + 20, 700, 100),
         "Press enter to start the game!",
         style
@@ -32,15 +32,15 @@ function BuildScene1(scene) {
 
     style.bgAlpha = 1.0;
     style.bgTextures = [EL.assets.textures['lava']];
-    var background = new GUIObject(
+    var background = new GUITextObject(
         titleScreen.sysRect,
         "",
         style
     );
 
-    titleScreen.AddGUIObject(background);
-    titleScreen.AddGUIObject(title);
-    titleScreen.AddGUIObject(titleMsg);
+    titleScreen.AddTextObject(background);
+    titleScreen.AddTextObject(title);
+    titleScreen.AddTextObject(titleMsg);
 
     GUINetwork.AddSystem(titleScreen, false);
 

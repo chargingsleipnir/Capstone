@@ -21,7 +21,7 @@ function InGameMenu(gameMouse, player) {
     ];
     function AttachDiodeAtEnd(rect, diodesObj, name, margin) {
         var diam = rect.h - margin * 2;
-        diodesObj[name] = new GUIObject(new WndRect(rect.x + rect.w - margin - diam, rect.y + margin, diam, diam), "", diodeStyle);
+        diodesObj[name] = new GUITextObject(new WndRect(rect.x + rect.w - margin - diam, rect.y + margin, diam, diam), "", diodeStyle);
     }
     // -----------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ function InGameMenu(gameMouse, player) {
     style.bgColour = new Vector3(0.1, 0.1, 0.1);
     style.bgAlpha = 0.9;
 
-    var backDrop = new GUIObject(new WndRect(0, 0, mainMenu.sysRect.w, mainMenu.sysRect.h), "", style);
+    var backDrop = new GUITextObject(new WndRect(0, 0, mainMenu.sysRect.w, mainMenu.sysRect.h), "", style);
 
     style.bgColour.SetValues(0.8, 0.5, 0.2);
     style.margin = 5.0;
@@ -48,9 +48,9 @@ function InGameMenu(gameMouse, player) {
     var contH = backDrop.rectGlobal.h;
     var btnH = 50;
     var mainPageObjs = [
-        new GUIObject(new WndRect(20, 20, contW - 40, btnH), "Resume Game", style),
-        new GUIObject(new WndRect(20, 90, contW - 40, btnH), "Quit Game", style),
-        new GUIObject(new WndRect(20, 160, contW - 40, btnH), "Developer Tools", style)
+        new GUITextObject(new WndRect(20, 20, contW - 40, btnH), "Resume Game", style),
+        new GUITextObject(new WndRect(20, 90, contW - 40, btnH), "Quit Game", style),
+        new GUITextObject(new WndRect(20, 160, contW - 40, btnH), "Developer Tools", style)
     ];
 
     // Callbacks
@@ -78,7 +78,7 @@ function InGameMenu(gameMouse, player) {
     var devPageDiodes = {};
 
     // Back button
-    devPageObjs.push(new GUIObject( new WndRect(contW - 120, contH - 70, 100, btnH), "Back", style ));
+    devPageObjs.push(new GUITextObject( new WndRect(contW - 120, contH - 70, 100, btnH), "Back", style ));
 
     // Create all of the switches
     style.textAlignWidth = Alignment.left;
@@ -86,16 +86,16 @@ function InGameMenu(gameMouse, player) {
     style.bold = true;
     var smallBtnW = (contW - 50) / 2;
     var devPageSwitches = [
-        new GUIObject(new WndRect(20, 20, contW - 40, btnH - 10), "Free camera", style ),
-        new GUIObject(new WndRect(20, 150, smallBtnW, btnH - 10), "Obj Axes", style ),
-        new GUIObject(new WndRect(20, 200, smallBtnW, btnH - 10), "Spheres", style ),
-        new GUIObject(new WndRect(20, 250, smallBtnW, btnH - 10), "Capsules", style ),
-        new GUIObject(new WndRect(20, 300, smallBtnW, btnH - 10), "Donuts", style ),
-        new GUIObject(new WndRect(20, 350, smallBtnW, btnH - 10), "Boxes", style ),
-        new GUIObject(new WndRect(20, 400, smallBtnW, btnH - 10), "Vel Rays", style ),
-        new GUIObject(new WndRect(contW - smallBtnW - 20, 150, smallBtnW, btnH - 10), "World Axes", style ),
-        new GUIObject(new WndRect(contW - smallBtnW - 20, 200, smallBtnW, btnH - 10), "Grid", style ),
-        new GUIObject(new WndRect(contW - smallBtnW - 20, 250, smallBtnW, btnH - 10), "Game Data", style )
+        new GUITextObject(new WndRect(20, 20, contW - 40, btnH - 10), "Free camera", style ),
+        new GUITextObject(new WndRect(20, 150, smallBtnW, btnH - 10), "Obj Axes", style ),
+        new GUITextObject(new WndRect(20, 200, smallBtnW, btnH - 10), "Spheres", style ),
+        new GUITextObject(new WndRect(20, 250, smallBtnW, btnH - 10), "Capsules", style ),
+        new GUITextObject(new WndRect(20, 300, smallBtnW, btnH - 10), "Donuts", style ),
+        new GUITextObject(new WndRect(20, 350, smallBtnW, btnH - 10), "Boxes", style ),
+        new GUITextObject(new WndRect(20, 400, smallBtnW, btnH - 10), "Vel Rays", style ),
+        new GUITextObject(new WndRect(contW - smallBtnW - 20, 150, smallBtnW, btnH - 10), "World Axes", style ),
+        new GUITextObject(new WndRect(contW - smallBtnW - 20, 200, smallBtnW, btnH - 10), "Grid", style ),
+        new GUITextObject(new WndRect(contW - smallBtnW - 20, 250, smallBtnW, btnH - 10), "Game Data", style )
     ];
     // Add a diode to each switch
     var switchNames = [
@@ -124,7 +124,7 @@ function InGameMenu(gameMouse, player) {
     style.bold = true;
     style.fontColour.SetValues(0.8, 0.8, 0.8);
     style.bgTextures = [];
-    devPageObjs.push(new GUIObject( new WndRect(20, 80, contW - 40, btnH), "Debug Visuals", style ));
+    devPageObjs.push(new GUITextObject( new WndRect(20, 80, contW - 40, btnH), "Debug Visuals", style ));
 
     // Callbacks
     function ToMainPageCallback() {
@@ -207,11 +207,11 @@ function InGameMenu(gameMouse, player) {
 
 
     // ADD GUI OBJS TO WHOLE MENU ---------------------------
-    mainMenu.AddGUIObject(backDrop);
+    mainMenu.AddTextObject(backDrop);
     for(var i = 0; i < mainPageObjs.length; i++)
-        mainMenu.AddGUIObject(mainPageObjs[i]);
+        mainMenu.AddTextObject(mainPageObjs[i]);
     for(var i = 0; i < devPageObjs.length; i++) {
-        mainMenu.AddGUIObject(devPageObjs[i]);
+        mainMenu.AddTextObject(devPageObjs[i]);
     }
     // Add to game's GUI network
     GUINetwork.AddSystem(mainMenu, false);
@@ -236,8 +236,8 @@ function InGameMenu(gameMouse, player) {
     }
 
     function ActivatePage(page) {
-        for(var i = 0; i < mainMenu.guiObjs.length; i++)
-            mainMenu.guiObjs[i].SetActive(false);
+        for(var i = 0; i < mainMenu.guiTextObjs.length; i++)
+            mainMenu.guiTextObjs[i].SetActive(false);
 
         backDrop.SetActive(true);
 

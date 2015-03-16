@@ -535,13 +535,13 @@ var GL = {
         this.ctx.disable(this.ctx.DEPTH_TEST);
         // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
         for(var sys in guiSystems) {
-            for(var j = 0; j < guiSystems[sys].guiObjs.length; j++) {
+            for(var j = 0; j < guiSystems[sys].guiTextObjs.length; j++) {
 
                 /******************* TEXT BOXES *************************/
-                if(guiSystems[sys].guiObjs[j].active) {
+                if(guiSystems[sys].guiTextObjs[j].active) {
 
-                    shdr = guiSystems[sys].guiObjs[j].boxHdl.shaderData;
-                    buff = guiSystems[sys].guiObjs[j].boxHdl.bufferData;
+                    shdr = guiSystems[sys].guiTextObjs[j].boxHdl.shaderData;
+                    buff = guiSystems[sys].guiTextObjs[j].boxHdl.bufferData;
 
                     this.ctx.useProgram(shdr.program);
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
@@ -561,7 +561,7 @@ var GL = {
                         }
                     }
 
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiObjs[j].boxHdl.tint.GetData());
+                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiTextObjs[j].boxHdl.tint.GetData());
 
                     this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
                     this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
@@ -573,7 +573,7 @@ var GL = {
                 /******************* TEXT BLOCKS *************************/
                     /* This shader is very specific to gui text, having no matrices, and with textures*/
                     shdr = EL.assets.shaderPrograms['guiText'];
-                    buff = guiSystems[sys].guiObjs[j].strHdl.bufferData;
+                    buff = guiSystems[sys].guiTextObjs[j].strHdl.bufferData;
 
                     this.ctx.useProgram(shdr.program);
                     this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
@@ -590,7 +590,7 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                     this.ctx.uniform1i(shdr.u_Sampler, 0);
 
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiObjs[j].strHdl.tint.GetData());
+                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiTextObjs[j].strHdl.tint.GetData());
 
                     this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
 
@@ -599,8 +599,52 @@ var GL = {
                     this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
             }
+            // Progress bars
+            for(var j = 0; j < guiSystems[sys].guiProgObjs.length; j++) {
+
+                /******************* PROGRESS BAR BOXES *************************/
+                if(guiSystems[sys].guiProgObjs[j].active) {
+
+                    // BG BOX ------------------------------------------------
+
+                    shdr = guiSystems[sys].guiProgObjs[j].bgBoxHdl.shaderData;
+                    buff = guiSystems[sys].guiProgObjs[j].bgBoxHdl.bufferData;
+
+                    this.ctx.useProgram(shdr.program);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiProgObjs[j].bgBoxHdl.tint.GetData());
+
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+
+                    // FG BOX ------------------------------------------------
+
+                    shdr = guiSystems[sys].guiProgObjs[j].fgBoxHdl.shaderData;
+                    buff = guiSystems[sys].guiProgObjs[j].fgBoxHdl.bufferData;
+
+                    this.ctx.useProgram(shdr.program);
+                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiProgObjs[j].fgBoxHdl.tint.GetData());
+
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                    // Unbind buffers after use
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                }
+            }
         }
         this.ctx.enable(this.ctx.DEPTH_TEST);
-    },
-    SpecialRayHdlr: null
+    }
 };

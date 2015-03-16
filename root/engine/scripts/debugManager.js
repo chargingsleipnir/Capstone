@@ -34,7 +34,7 @@ var DebugMngr = {
             grid.Update();
             this.grid = grid.mdlHdlr;
 
-            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, 20, 300, 120), this.dispName);
+            var performanceData = new GUISystem(new WndRect(ViewMngr.wndWidth - 320, ViewMngr.wndHeight - 110, 300, 120), this.dispName);
 
             var style = new MsgBoxStyle();
             style.fontSize = 20;
@@ -48,12 +48,12 @@ var DebugMngr = {
             style.margin = 5.0;
             style.bgAlpha = 0.5;
             style.bold = false;
-            this.gameTimer = new GUIObject(new WndRect(0, 0, 300, 30), "GameTime: 00.00", style);
-            this.frameRateMsg = new GUIObject(new WndRect(0, 30, 300, 30), "FrameRt", style);
-            this.mousePosMsg = new GUIObject(new WndRect(0, 60, 300, 30), "000000000000000000000", style);
-            performanceData.AddGUIObject(this.gameTimer);
-            performanceData.AddGUIObject(this.frameRateMsg);
-            performanceData.AddGUIObject(this.mousePosMsg);
+            this.gameTimer = new GUITextObject(new WndRect(0, 0, 300, 30), "GameTime: 00.00", style);
+            this.frameRateMsg = new GUITextObject(new WndRect(0, 30, 300, 30), "FrameRt", style);
+            this.mousePosMsg = new GUITextObject(new WndRect(0, 60, 300, 30), "000000000000000000000", style);
+            performanceData.AddTextObject(this.gameTimer);
+            performanceData.AddTextObject(this.frameRateMsg);
+            performanceData.AddTextObject(this.mousePosMsg);
             GUINetwork.AddSystem(performanceData, false);
 
             Input.RegisterControlScheme("GUIMouseTracking", true, InputTypes.mouse);

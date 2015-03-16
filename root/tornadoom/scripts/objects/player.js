@@ -17,8 +17,9 @@ function Player(mouse) {
     //var springConstant = 3.0;
     //var restLength = contactScale / 4.0;
 
-    var LAUNCH_SCALAR_MIN = 750;
-    var LAUNCH_SCALAR_MAX = 1000;
+    var LAUNCH_SCALAR_MIN = 400;
+    var LAUNCH_SCALAR_MAX = 650;
+    var launchScalarDiffMaxInv = 1.0 / (LAUNCH_SCALAR_MAX - LAUNCH_SCALAR_MIN);
     var launchScalar = LAUNCH_SCALAR_MIN;
 
     var massMax = 200;
@@ -27,9 +28,9 @@ function Player(mouse) {
     var ammoCont = [];
     var ammoIdx = 0;
     var ammoTypeCount = 0;
-    var AmmoSelectionCallback = function(){};
-    var AmmoCountChangeCallback = function(){};
-    var PowerChangeCallback = function(){};
+    var AmmoSelectionCallback = function(){},
+        AmmoCountChangeCallback = function(){},
+        PowerChangeCallback = function(){};
 
     // The X and Y are just the mouses screen coords, assuming (0,0) at the centre
     // The Z and scalar are values used to try to control how steep the new direction becomes
@@ -154,7 +155,7 @@ function Player(mouse) {
     // around the direction they are facing.
     var aimToggle = Input.CreateInputController(playerCtrlName, KeyMap.SpaceBar);
     function AimTogglePressed() {
-        that.obj.camera.trfmAxes.SetPosAxes(1.25, 0.0, 2.25);
+        that.obj.camera.trfmAxes.SetPosAxes(1.0, -0.25, 2.25);
         that.obj.camera.trfmAxes.RotateLocalViewX(25);
         mouse.SetLeftBtnCalls(null, ChargeShotReleased);
         aimDirVisual.Run();
@@ -189,11 +190,11 @@ function Player(mouse) {
         if(launchScalar > LAUNCH_SCALAR_MAX)
             launchScalar = LAUNCH_SCALAR_MAX;
 
-        PowerChangeCallback(launchScalar - LAUNCH_SCALAR_MIN);
+        PowerChangeCallback((launchScalar - LAUNCH_SCALAR_MIN) * launchScalarDiffMaxInv);
     };
     var DropLaunchPower = function() {
         launchScalar = LAUNCH_SCALAR_MIN;
-        PowerChangeCallback(launchScalar - LAUNCH_SCALAR_MIN);
+        PowerChangeCallback((launchScalar - LAUNCH_SCALAR_MIN) * launchScalarDiffMaxInv);
     };
     var Shoot = function(dir) {
         var gameObj = ammoCont[ammoIdx].pop();
@@ -229,6 +230,9 @@ function Player(mouse) {
     };
     this.SetPowerChangeCallback = function(Callback) {
         PowerChangeCallback = Callback;
+    };
+    this.GetAimToggleHeld = function() {
+        return aimToggle.pressed;
     };
     this.Capture = function(index, gameObj) {
         // Small particle visual

@@ -131,6 +131,9 @@ GUIBoxHandler.prototype = {
     SetTintAlpha: function(a) {
         this.tint.w = a;
     },
+    RewriteVerts: function(vertArray) {
+        GL.RewriteVAO(this.bufferData.VBO, new Float32Array(vertArray));
+    },
     SetTextures: function(textures, texFilter) {
         for(var i = 0; i < textures.length; i++)
             this.texIDs[i] = GL.CreateTextureObject(textures[i], texFilter);

@@ -106,6 +106,21 @@ function MsgBoxStyle(style) {
     }
 }
 
+function ProgressObjStyle(style) {
+    if(style) {
+        this.fgColour = style.fgColour.GetCopy();
+        this.bgColour = style.bgColour.GetCopy();
+        this.fgAlpha = style.fgAlpha;
+        this.bgAlpha = style.bgAlpha;
+    }
+    else {
+        this.fgColour = new Vector3();
+        this.bgColour = new Vector3();
+        this.fgAlpha = 1.0;
+        this.bgAlpha = 1.0;
+    }
+}
+
 function PtclSimpleEffects() {
     this.colourBtm = new Vector3();
     this.colourTop = new Vector3(1.0, 1.0, 1.0);
