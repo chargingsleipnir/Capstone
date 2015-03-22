@@ -24,6 +24,7 @@ function ShaderProgramData() {
 
     this.u_Tint;
     this.u_Sampler;
+    this.u_SamplerCube;
     this.u_PntSize;
 
     this.u_DiffColWeight;
@@ -49,6 +50,7 @@ function BufferData() {
     this.VBO;
     this.EABO;
     this.texID;
+    this.texCubeID;
     // Use these to jump certain distance into buffer
     this.VAOBytes;
     this.numVerts;
@@ -252,7 +254,8 @@ var ShdrLines = {
         mtxMVP: "uniform mat4 u_MtxMVP;\n",
         mtxNorm: "uniform mat3 u_MtxNorm;\n",
         tint: "uniform vec4 u_Tint;\n",
-        sampler: "uniform sampler2D u_Sampler;\n",
+        sampler2D: "uniform sampler2D u_Sampler;\n",
+        samplerCube: "uniform samplerCube u_SamplerCube;\n",
         lighting: "uniform vec3 u_DiffColWeight;\n" +
             "uniform vec3 u_SpecCol;\n" +
             "uniform float u_SpecInt;\n\n" +
@@ -270,7 +273,8 @@ var ShdrLines = {
             MVP: "gl_Position = u_MtxMVP * vec4(a_Pos, 1.0);\n",
             Split: "gl_Position = u_MtxVP * v_Pos;\n"
         },
-        texCol: "vec4 texColour = texture2D(u_Sampler, vec2(v_TexCoord.s, v_TexCoord.t));\n",
+        tex2DCol: "vec4 texColour = texture2D(u_Sampler, vec2(v_TexCoord.s, v_TexCoord.t));\n",
+        texCubeCol: "vec4 texCubeColour = textureCube(u_SamplerCube, v_TrfmNorm);\n",
         normalizeNorm: "vec3 normal = normalize(v_TrfmNorm);\n",
         lighting: "float dirWeight = 0.0;\n" +
             "float pntWeight = 0.0;\n" +
@@ -308,7 +312,8 @@ var ShdrLines = {
             start: "gl_FragColor = vec4(",
             tintCol: "u_Tint.rgb",
             col: " + v_Col.rgb",
-            texCol: " + texColour.rgb",
+            tex2DCol: " + texColour.rgb",
+            texCubeCol: " + texCubeColour.rgb",
             colA: " * v_Col.a",
             texA: " * texColour.a",
             light: " * v_LightWeight",

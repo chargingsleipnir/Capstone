@@ -33,7 +33,6 @@ function BuildGame() {
     var player = new Player(gameMouse);
     player.obj.trfmBase.SetPosByAxes(0.0, 1.0, 0.0);
 
-
     var ufo = new UFO();
     var barn = new Barn();
 
@@ -63,6 +62,7 @@ function BuildGame() {
     lvl01.Add(barn.obj);
     lvl01.Add(skyBox);
     lvl01.Add(ground);
+
     BuildScene2(lvl01, player, ufo, barn, hud);
     SceneMngr.AddScene(lvl01, false);
 

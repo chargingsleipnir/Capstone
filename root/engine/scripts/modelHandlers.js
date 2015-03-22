@@ -16,6 +16,18 @@ function ModelHandler(model, trfmGlobal, radius) {
     if(model.materials[0]) {
         this.mat = model.materials[0];
         this.tint = new Vector4(0.0, 0.0, 0.0, model.materials[0].alpha);
+
+        if(this.mat.mirr.refl > 0.0) {
+            var cubeTextures = [
+                GameMngr.assets.textures['redFace'],
+                GameMngr.assets.textures['orangeFace'],
+                GameMngr.assets.textures['yellowFace'],
+                GameMngr.assets.textures['greenFace'],
+                GameMngr.assets.textures['blueFace'],
+                GameMngr.assets.textures['purpleFace']
+            ];
+            this.bufferData.texCubeID = GL.CreateTextureCube(cubeTextures);
+        }
     }
     else {
         this.tint = new Vector4(0.0, 0.0, 0.0, 1.0);

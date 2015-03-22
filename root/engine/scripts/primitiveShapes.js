@@ -854,7 +854,7 @@ var Primitives = {
                 byMesh: {
                     count: 8,
                     posCoords: posCoords,
-                    colElems: colours,
+                    colElems: [],
                     texCoords: [],
                     normAxes: normals,
                     indices: [
@@ -925,7 +925,7 @@ var Primitives = {
                         w, -h, d
                     ],
                     colElems: [],
-                    texCoords: texCoords,
+                    texCoords: [],
                     normAxes: []
                 }
             },

@@ -1,7 +1,4 @@
-﻿
-var testBool = true;
-
-var GL = {
+﻿var GL = {
     ctx: null,
     Initialize: function(contextWebGL) {
         /// <signature>
@@ -67,6 +64,7 @@ var GL = {
             // Uniforms will return uniform object, null if not found
             programData.u_Tint = ctx.getUniformLocation(program, "u_Tint");
             programData.u_Sampler = ctx.getUniformLocation(program, "u_Sampler");
+            programData.u_SamplerCube = ctx.getUniformLocation(program, "u_SamplerCube");
             programData.u_PntSize = ctx.getUniformLocation(program, "u_PntSize");
             // MATERIALS
             // Colour is multiplied by intensity immediately, before exporting model. No reason to hold values separately
@@ -197,6 +195,34 @@ var GL = {
             gl.bindTexture(gl.TEXTURE_2D, null);
         }*/
     },
+    CreateTextureCube: function(faceTextures) {
+        var texCubeID = this.ctx.createTexture();
+        this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, texCubeID);
+        this.ctx.texParameteri(this.ctx.TEXTURE_CUBE_MAP, this.ctx.TEXTURE_WRAP_S, this.ctx.CLAMP_TO_EDGE);
+        this.ctx.texParameteri(this.ctx.TEXTURE_CUBE_MAP, this.ctx.TEXTURE_WRAP_T, this.ctx.CLAMP_TO_EDGE);
+        this.ctx.texParameteri(this.ctx.TEXTURE_CUBE_MAP, this.ctx.TEXTURE_MIN_FILTER, this.ctx.LINEAR);
+        this.ctx.texParameteri(this.ctx.TEXTURE_CUBE_MAP, this.ctx.TEXTURE_MAG_FILTER, this.ctx.LINEAR);
+
+        var faces = [
+            this.ctx.TEXTURE_CUBE_MAP_POSITIVE_X,
+            this.ctx.TEXTURE_CUBE_MAP_NEGATIVE_X,
+            this.ctx.TEXTURE_CUBE_MAP_POSITIVE_Y,
+            this.ctx.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            this.ctx.TEXTURE_CUBE_MAP_POSITIVE_Z,
+            this.ctx.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+        ];
+
+        //this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, texCubeID);
+        this.ctx.pixelStorei(this.ctx.UNPACK_FLIP_Y_WEBGL, true);
+        for(var i = 0; i < 6; i++)
+            this.ctx.texImage2D(faces[i], 0, this.ctx.RGBA, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, faceTextures[i]);
+
+        this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, null);
+        return texCubeID;
+    },
+    CreateTextureFrameBuffer: function() {
+
+    },
     GetDrawMethod: function(drawMethod) {
         /// <signature>
         ///  <summary>Get webGL Drawtype enum value</summary>
@@ -218,53 +244,30 @@ var GL = {
         }
     },
     mtxModel: new Matrix4(),
-    RenderJSONModel: function() {
-
+    DrawElements: function(drawMethod, buff) {
+        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+        this.ctx.drawElements(drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
     },
-    RenderBasicShapes: function() {
-
+    DrawArrays: function(drawMethod, buff) {
+        this.ctx.drawArrays(drawMethod, 0, buff.numVerts);
+        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
     },
-    RenderParticles: function() {
-
-    },
-    RenderGUIElemenets: function() {
-
-    },
-    RenderScene: function() {
-        /// <signature>
-        ///  <summary>Render every object in the scene</summary>
-        /// </signature>
-        var shdr;
-        var buff;
-        
-        // Clear the scene for new draw call
-        this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
-
-        var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
-
-        //var frustumTestCount = 0;
-        var scene = SceneMngr.GetActiveScene();
-
-        /******************* GameObject Models *************************/
-        for (var i = 0; i < scene.models.length; i++)
+    RenderJSONModels: function(jsonModels, light, mtxVP) {
+        for (var i = 0; i < jsonModels.length; i++)
         {
-            if (scene.models[i].active)
+            if (jsonModels[i].active)
             {
-                if(ViewMngr.frustum.IntersectsSphere(scene.models[i].drawSphere)) {
+                if(ViewMngr.frustum.IntersectsSphere(jsonModels[i].drawSphere)) {
                     //frustumTestCount++;
 
                     this.mtxModel.SetIdentity();
-                    this.mtxModel.Transform(scene.models[i].trfm);
+                    this.mtxModel.Transform(jsonModels[i].trfm);
 
                     // These just allow everything to be better read
-                    shdr = scene.models[i].shaderData;
-                    buff = scene.models[i].bufferData;
-
-                    if (testBool) {
-
-                        if (i >= scene.models.length - 1)
-                            testBool = false;
-                    }
+                    var shdr = jsonModels[i].shaderData;
+                    var buff = jsonModels[i].bufferData;
 
                     // USE PROGRAM AND VBO
                     this.ctx.useProgram(shdr.program);
@@ -291,31 +294,37 @@ var GL = {
                         this.ctx.enableVertexAttribArray(shdr.a_Norm);
                         this.ctx.vertexAttribPointer(shdr.a_Norm, 3, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems + buff.lenTexCoords) * buff.VAOBytes);
 
+                        // Cube mapping for reflections
+                        if(buff.texCubeID) {
+                            this.ctx.activeTexture(this.ctx.TEXTURE0);
+                            this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, buff.texCubeID);
+                            this.ctx.uniform1i(shdr.u_SamplerCube, 0);
+
+                            // Mirror
+                            //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
+                            //gl.uniform1f(shdr.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
+                            //gl.uniform1f(shdr.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
+                        }
                         // Diffuse
                         // Diff col and int are multiplied before exporting
-                        this.ctx.uniform3fv(shdr.u_DiffColWeight, scene.models[i].mat.diff.colWeight);
+                        this.ctx.uniform3fv(shdr.u_DiffColWeight, jsonModels[i].mat.diff.colWeight);
                         // Specular
-                        this.ctx.uniform3fv(shdr.u_SpecCol, scene.models[i].mat.spec.col);
-                        this.ctx.uniform1f(shdr.u_SpecInt, scene.models[i].mat.spec.int);
-
+                        this.ctx.uniform3fv(shdr.u_SpecCol, jsonModels[i].mat.spec.col);
+                        this.ctx.uniform1f(shdr.u_SpecInt, jsonModels[i].mat.spec.int);
                         //gl.uniform1f(shdr.u_Specular_Hardness, renderers[i].materials[0].specular.hardness);
-                        // Mirror
-                        //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
-                        //gl.uniform1f(shdr.u_Mirror_Distance, renderers[i].materials[0].mirror.distance);
-                        //gl.uniform1f(shdr.u_Mirror_Reflectivity, renderers[i].materials[0].mirror.reflectivity);
                         // Shading
                         //gl.uniform1f(shdr.u_Shading_Ambient, renderers[i].materials[0].shading.ambient);
                         //gl.uniform1f(shdr.u_Shading_Emit, renderers[i].materials[0].shading.emit);
                         //gl.uniform1f(shdr.u_Shading_Translucent, renderers[i].materials[0].shading.translucent);
                         // Other
-                        this.ctx.uniform1f(shdr.u_Alpha, scene.models[i].mat.alpha);
+                        this.ctx.uniform1f(shdr.u_Alpha, jsonModels[i].mat.alpha);
                         //gl.uniform1f(shdr.u_Darkness, renderers[i].materials[0].darkness);
 
-                        this.ctx.uniform1f(shdr.u_AmbBright, scene.light.amb.bright);
-                        this.ctx.uniform1f(shdr.u_DirBright, scene.light.dir.bright);
-                        this.ctx.uniform3fv(shdr.u_DirDir, scene.light.dir.dir.GetNegative().GetData());
-                        this.ctx.uniform1f(shdr.u_PntBright, scene.light.pnt.bright);
-                        this.ctx.uniform3fv(shdr.u_PntPos, scene.light.pnt.pos.GetData());
+                        this.ctx.uniform1f(shdr.u_AmbBright, light.amb.bright);
+                        this.ctx.uniform1f(shdr.u_DirBright, light.dir.bright);
+                        this.ctx.uniform3fv(shdr.u_DirDir, light.dir.dir.GetNegative().GetData());
+                        this.ctx.uniform1f(shdr.u_PntBright, light.pnt.bright);
+                        this.ctx.uniform3fv(shdr.u_PntPos, light.pnt.pos.GetData());
                         this.ctx.uniform3fv(shdr.u_CamPos, ViewMngr.activeCam.posGbl.GetData());
 
 
@@ -333,15 +342,15 @@ var GL = {
                         this.mtxModel.SetMultiply(mtxVP);
                         this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
                     }
-                    this.ctx.uniform4fv(shdr.u_Tint, scene.models[i].tint.GetData());
+                    this.ctx.uniform4fv(shdr.u_Tint, jsonModels[i].tint.GetData());
 
                     // Draw calls
                     if (buff.EABO) {
                         this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                        this.ctx.drawElements(scene.models[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                        this.ctx.drawElements(jsonModels[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
                     }
                     else {
-                        this.ctx.drawArrays(scene.models[i].drawMethod, 0, buff.numVerts);
+                        this.ctx.drawArrays(jsonModels[i].drawMethod, 0, buff.numVerts);
                     }
 
                     // Unbind buffers after use
@@ -351,299 +360,306 @@ var GL = {
                 }
             }
         }
-
-
-        /******************* DEBUG DRAWING *************************/
-
-        if (DebugMngr.active) {
-
-            // Debug models
-            var dispObjs = scene.debug.GetActiveDispObjs();
-            if(DebugMngr.dispAxes)
-                dispObjs.push(DebugMngr.axes);
-            if(DebugMngr.dispGrid)
-                dispObjs.push(DebugMngr.grid);
-
-            for (var i = 0; i < dispObjs.length; i++)
-            {
-                if(dispObjs[i].active && ViewMngr.frustum.IntersectsSphere(dispObjs[i].drawSphere))
-                {
-                    //frustumTestCount++;
-
-                    shdr = dispObjs[i].shaderData;
-                    buff = dispObjs[i].bufferData;
-
-                    // USE PROGRAM AND VBO
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-                    if (shdr.a_Col != -1) {
-                        this.ctx.enableVertexAttribArray(shdr.a_Col);
-                        this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-                    }
-
-                    this.mtxModel.SetIdentity();
-                    this.mtxModel.Transform(dispObjs[i].trfm);
-                    this.mtxModel.SetMultiply(mtxVP);
-
-                    // SEND UP UNIFORMS
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
-                    this.ctx.uniform4fv(shdr.u_Tint, dispObjs[i].tint.GetData());
-
-                    // Draw calls
-                    if (buff.EABO) {
-                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                        this.ctx.drawElements(dispObjs[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-                    }
-                    else {
-                        this.ctx.drawArrays(dispObjs[i].drawMethod, 0, buff.numVerts);
-                    }
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                }
-            }
-            //console.log(frustumTestCount);
-
-
-            // Ray casts
-            if(DebugMngr.dispRays) {
-                dispObjs = scene.debug.GetRays();
-
-                shdr = EL.assets.shaderPrograms['ray'];
-                this.ctx.useProgram(shdr.program);
-                // This uniform can come out here because it's common to everything in this shader program
-                this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-
-                for (var i = 0; i < dispObjs.length; i++) {
-                    if (dispObjs[i].active) {
-
-                        buff = dispObjs[i].bufferData;
-
-                        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                        // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                        this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                        this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                        this.ctx.enableVertexAttribArray(shdr.a_Col);
-                        this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
-
-                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                        this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-
-                        // Unbind buffers after use
-                        this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-                    }
-                }
-            }
-        }
-
-        /******************* GameObject Particle Systems *************************/
-        //var fieldCount = 0;
-        for (var i = 0; i < scene.ptclSystems.length; i++)
+    },
+    RenderBasicModels: function(basicModels, mtxVP) {
+        for (var i = 0; i < basicModels.length; i++)
         {
-            // Always pull the active fields, as they could add and drop quite often
-            var simpleFields = scene.ptclSystems[i].GetSimpleFields();
-
-            this.mtxModel.SetIdentity();
-            this.mtxModel.Transform(scene.ptclSystems[i].objGlobalTrfm);
-            this.mtxModel.SetMultiply(mtxVP);
-
-            // Used to shrink point size
-            var dist = ViewMngr.activeCam.posGbl.GetSubtract(scene.ptclSystems[i].objGlobalTrfm.pos).GetMag();
-            var distCalc = 1 - (dist / ViewMngr.farCullDist);
-
-            for (var j = 0; j < simpleFields.length; j++)
+            if(basicModels[i].active && ViewMngr.frustum.IntersectsSphere(basicModels[i].drawSphere))
             {
-                if(simpleFields[j].active) {
-                    //fieldCount++;
+                //frustumTestCount++;
 
-                    // Covers points, lines, and textured points
-                    shdr = simpleFields[j].fieldHdlr.shaderData;
-                    buff = simpleFields[j].fieldHdlr.bufferData;
+                var shdr = basicModels[i].shaderData;
+                var buff = basicModels[i].bufferData;
 
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+                // USE PROGRAM AND VBO
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
-                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                if (shdr.a_Col != -1) {
                     this.ctx.enableVertexAttribArray(shdr.a_Col);
                     this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                }
 
-                    if(buff.texID) {
+                this.mtxModel.SetIdentity();
+                this.mtxModel.Transform(basicModels[i].trfm);
+                this.mtxModel.SetMultiply(mtxVP);
+
+                // SEND UP UNIFORMS
+                this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
+                this.ctx.uniform4fv(shdr.u_Tint, basicModels[i].tint.GetData());
+
+                // Draw calls
+                if (buff.EABO) {
+                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                    this.ctx.drawElements(basicModels[i].drawMethod, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                }
+                else {
+                    this.ctx.drawArrays(basicModels[i].drawMethod, 0, buff.numVerts);
+                }
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+            }
+        }
+    },
+    RenderRays: function(rays, mtxVP) {
+
+        var shdr = EL.assets.shaderPrograms['ray'];
+        this.ctx.useProgram(shdr.program);
+        this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+
+        for (var i = 0; i < rays.length; i++) {
+            if (rays[i].active) {
+
+                buff = rays[i].bufferData;
+
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Col);
+                this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                this.ctx.drawElements(this.ctx.LINES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+            }
+        }
+    },
+    RenderParticleFields: function(fields, gblTrfm, mtxVP) {
+        this.mtxModel.SetIdentity();
+        this.mtxModel.Transform(gblTrfm);
+        this.mtxModel.SetMultiply(mtxVP);
+
+        // Used to shrink point size
+        var dist = ViewMngr.activeCam.posGbl.GetSubtract(gblTrfm.pos).GetMag();
+        var distCalc = 1 - (dist / ViewMngr.farCullDist);
+
+        for (var j = 0; j < fields.length; j++)
+        {
+            if(fields[j].active) {
+                //fieldCount++;
+
+                // Covers points, lines, and textured points
+                var shdr = fields[j].fieldHdlr.shaderData;
+                var buff = fields[j].fieldHdlr.bufferData;
+
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Col);
+                this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                if(buff.texID) {
+                    this.ctx.activeTexture(this.ctx.TEXTURE0);
+                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                    this.ctx.uniform1i(shdr.u_Sampler, 0);
+                }
+
+                this.ctx.uniform1f(shdr.u_PntSize, fields[j].fieldHdlr.pntSize * (distCalc * distCalc * distCalc));
+                this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
+
+                this.ctx.drawArrays(fields[j].fieldHdlr.drawMethod, 0, buff.numVerts);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
+            }
+        }
+    },
+    RenderParticleTails: function(tails, mtxVP) {
+
+        var shdr = EL.assets.shaderPrograms['ray'];
+        this.ctx.useProgram(shdr.program);
+        this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
+
+        for (var j = 0; j < tails.length; j++)
+        {
+            if(tails[j].active) {
+                //fieldCount++;
+                // These just allow everything to be better read
+                var buff = tails[j].trailHdlr.bufferData;
+
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Col);
+                this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+
+                this.ctx.drawArrays(this.ctx.TRIANGLE_STRIP, 0, buff.numVerts);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+            }
+        }
+    },
+    RenderGUITextBoxes: function(textObjs) {
+        // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
+        for(var j = 0; j < textObjs.length; j++) {
+
+            /******************* TEXT BOXES *************************/
+            if(textObjs[j].active) {
+
+                shdr = textObjs[j].boxHdl.shaderData;
+                buff = textObjs[j].boxHdl.bufferData;
+
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                // MAY HAVE TEXTURES - NO VERT COLOURS
+                if (shdr.a_TexCoord != -1) {
+                    this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                    this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+                    if (buff.texID) {
                         this.ctx.activeTexture(this.ctx.TEXTURE0);
                         this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
                         this.ctx.uniform1i(shdr.u_Sampler, 0);
+                        // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
                     }
-
-                    this.ctx.uniform1f(shdr.u_PntSize, simpleFields[j].fieldHdlr.pntSize * (distCalc * distCalc * distCalc));
-                    this.ctx.uniformMatrix4fv(shdr.u_MtxMVP, false, this.mtxModel.data);
-
-                    this.ctx.drawArrays(simpleFields[j].fieldHdlr.drawMethod, 0, buff.numVerts);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
                 }
-            }
 
-            var tails = scene.ptclSystems[i].GetTails();
-            shdr = EL.assets.shaderPrograms['ray'];
-            this.ctx.useProgram(shdr.program);
-            this.ctx.uniformMatrix4fv(shdr.u_MtxVP, false, mtxVP.data);
-            for (var j = 0; j < tails.length; j++)
-            {
-                if(tails[j].active) {
-                    //fieldCount++;
-                    // These just allow everything to be better read
-                    buff = tails[j].trailHdlr.bufferData;
+                this.ctx.uniform4fv(shdr.u_Tint, textObjs[j].boxHdl.tint.GetData());
 
-                    // USE PROGRAM AND VBO
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
 
-                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
 
-                    this.ctx.enableVertexAttribArray(shdr.a_Col);
-                    this.ctx.vertexAttribPointer(shdr.a_Col, 4, this.ctx.FLOAT, false, 0, buff.lenPosCoords * buff.VAOBytes);
+                /******************* TEXT BLOCKS *************************/
+                /* This shader is very specific to gui text, having no matrices, and with textures*/
+                var shdr = EL.assets.shaderPrograms['guiText'];
+                var buff = textObjs[j].strHdl.bufferData;
 
-                    this.ctx.drawArrays(this.ctx.TRIANGLE_STRIP, 0, buff.numVerts);
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
 
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                }
+                // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 2, this.ctx.FLOAT, false, 0, 0);
+
+                // ALWAYS HAS TEXTURES
+                this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
+                this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
+
+                this.ctx.activeTexture(this.ctx.TEXTURE0);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
+                this.ctx.uniform1i(shdr.u_Sampler, 0);
+
+                this.ctx.uniform4fv(shdr.u_Tint, textObjs[j].strHdl.tint.GetData());
+
+                this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
+
+                // Unbind buffers after use
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
+                this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
             }
         }
-        //console.log(fieldCount);
+    },
+    RenderGUIProgressBars: function(progBarObjs) {
+        for(var j = 0; j < progBarObjs.length; j++) {
 
+            /******************* PROGRESS BAR BOXES *************************/
+            if(progBarObjs[j].active) {
+
+                // BG BOX ------------------------------------------------
+                var shdr = progBarObjs[j].bgBoxHdl.shaderData;
+                var buff = progBarObjs[j].bgBoxHdl.bufferData;
+
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                this.ctx.uniform4fv(shdr.u_Tint, progBarObjs[j].bgBoxHdl.tint.GetData());
+
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+
+                // FG BOX ------------------------------------------------
+                shdr = progBarObjs[j].fgBoxHdl.shaderData;
+                buff = progBarObjs[j].fgBoxHdl.bufferData;
+
+                this.ctx.useProgram(shdr.program);
+                this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
+
+                this.ctx.enableVertexAttribArray(shdr.a_Pos);
+                this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
+
+                this.ctx.uniform4fv(shdr.u_Tint, progBarObjs[j].fgBoxHdl.tint.GetData());
+
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
+                this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
+                this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
+            }
+        }
+    },
+    RenderScene: function() {
+        /// <signature>
+        ///  <summary>Render every object in the scene</summary>
+        /// </signature>
+
+        // Clear the scene for new draw call
+        this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
+        var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
+        var scene = SceneMngr.GetActiveScene();
+
+        /******************* GameObject Models *************************/
+        this.RenderJSONModels(scene.models, scene.light, mtxVP);
+
+        /******************* DEBUG DRAWING *************************/
+        if (DebugMngr.active) {
+            // Debug models
+            var debugObjs = scene.debug.GetActiveDispObjs();
+            if (DebugMngr.dispAxes)
+                debugObjs.push(DebugMngr.axes);
+            if (DebugMngr.dispGrid)
+                debugObjs.push(DebugMngr.grid);
+
+            this.RenderBasicModels(debugObjs, mtxVP);
+
+            // Ray casts
+            if(DebugMngr.dispRays)
+                this.RenderRays(scene.debug.GetRays(), mtxVP);
+        }
+
+        /******************* GameObject Particle Systems *************************/
+        for (var i = 0; i < scene.ptclSystems.length; i++)
+        {
+            this.RenderParticleFields(scene.ptclSystems[i].GetSimpleFields(), scene.ptclSystems[i].objGlobalTrfm, mtxVP);
+            this.RenderParticleTails(scene.ptclSystems[i].GetTails(), mtxVP);
+        }
 
         /******************* GUI DRAWING *************************/
 
         var guiSystems = GUINetwork.GetActiveSystems();
 
-        /* Disable depth testing to ensure proper message structure. Always draw the text immediately after the box
-         * to ensure the two stay together, and the user must add their guiObjects in the order they want them to overlap. */
+        /* Disable depth testing to ensure proper message structure.*/
         this.ctx.disable(this.ctx.DEPTH_TEST);
-        // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
         for(var sys in guiSystems) {
-            for(var j = 0; j < guiSystems[sys].guiTextObjs.length; j++) {
-
-                /******************* TEXT BOXES *************************/
-                if(guiSystems[sys].guiTextObjs[j].active) {
-
-                    shdr = guiSystems[sys].guiTextObjs[j].boxHdl.shaderData;
-                    buff = guiSystems[sys].guiTextObjs[j].boxHdl.bufferData;
-
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                    // MAY HAVE TEXTURES - NO VERT COLOURS
-                    if (shdr.a_TexCoord != -1) {
-                        this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                        this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-                        if (buff.texID) {
-                            this.ctx.activeTexture(this.ctx.TEXTURE0);
-                            this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                            this.ctx.uniform1i(shdr.u_Sampler, 0);
-                            // This 0 supposedly relates to the this.ctx.TEXTURE0, and up to 32 textures can be sent at once.
-                        }
-                    }
-
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiTextObjs[j].boxHdl.tint.GetData());
-
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-
-                /******************* TEXT BLOCKS *************************/
-                    /* This shader is very specific to gui text, having no matrices, and with textures*/
-                    shdr = EL.assets.shaderPrograms['guiText'];
-                    buff = guiSystems[sys].guiTextObjs[j].strHdl.bufferData;
-
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    // SEND VERTEX DATA FROM BUFFER - Position, Colour, TextureCoords, Normals
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 2, this.ctx.FLOAT, false, 0, 0);
-
-                    // ALWAYS HAS TEXTURES
-                    this.ctx.enableVertexAttribArray(shdr.a_TexCoord);
-                    this.ctx.vertexAttribPointer(shdr.a_TexCoord, 2, this.ctx.FLOAT, false, 0, (buff.lenPosCoords + buff.lenColElems) * buff.VAOBytes);
-
-                    this.ctx.activeTexture(this.ctx.TEXTURE0);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, buff.texID);
-                    this.ctx.uniform1i(shdr.u_Sampler, 0);
-
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiTextObjs[j].strHdl.tint.GetData());
-
-                    this.ctx.drawArrays(this.ctx.TRIANGLES, 0, buff.numVerts);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, null);
-                    this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
-                }
-            }
-            // Progress bars
-            for(var j = 0; j < guiSystems[sys].guiProgObjs.length; j++) {
-
-                /******************* PROGRESS BAR BOXES *************************/
-                if(guiSystems[sys].guiProgObjs[j].active) {
-
-                    // BG BOX ------------------------------------------------
-
-                    shdr = guiSystems[sys].guiProgObjs[j].bgBoxHdl.shaderData;
-                    buff = guiSystems[sys].guiProgObjs[j].bgBoxHdl.bufferData;
-
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiProgObjs[j].bgBoxHdl.tint.GetData());
-
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-
-                    // FG BOX ------------------------------------------------
-
-                    shdr = guiSystems[sys].guiProgObjs[j].fgBoxHdl.shaderData;
-                    buff = guiSystems[sys].guiProgObjs[j].fgBoxHdl.bufferData;
-
-                    this.ctx.useProgram(shdr.program);
-                    this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, buff.VBO);
-
-                    this.ctx.enableVertexAttribArray(shdr.a_Pos);
-                    this.ctx.vertexAttribPointer(shdr.a_Pos, 3, this.ctx.FLOAT, false, 0, 0);
-
-                    this.ctx.uniform4fv(shdr.u_Tint, guiSystems[sys].guiProgObjs[j].fgBoxHdl.tint.GetData());
-
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, buff.EABO);
-                    this.ctx.drawElements(this.ctx.TRIANGLES, buff.numVerts, this.ctx.UNSIGNED_SHORT, 0);
-
-                    // Unbind buffers after use
-                    this.ctx.bindBuffer(this.ctx.ELEMENT_ARRAY_BUFFER, null);
-                }
-            }
+            this.RenderGUITextBoxes(guiSystems[sys].guiTextObjs);
+            this.RenderGUIProgressBars(guiSystems[sys].guiProgObjs);
         }
         this.ctx.enable(this.ctx.DEPTH_TEST);
     }

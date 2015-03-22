@@ -387,26 +387,27 @@ var ModelUtils = {
             texture = vertData.texCoords.length > 0,
             light = materials.length > 0;
 
+        var reflection = false;
+        if(light)
+            reflection = materials[0].mirr.refl > 0.0;
+
         var declaration, mainFunc, fragColour;
 
 
         /******************** VERTEX SHADER ********************/
 
         declaration = ShdrLines.attr.pos;
-
         mainFunc = ShdrLines.main.start;
         mainFunc += ShdrLines.main.pntSize;
 
         if(colour) {
             declaration += ShdrLines.attr.col;
             declaration += ShdrLines.vary.col;
-
             mainFunc += ShdrLines.vary.sendCol;
         }
         if(texture) {
             declaration += ShdrLines.attr.tex;
             declaration += ShdrLines.vary.tex;
-
             mainFunc += ShdrLines.vary.sendTex;
         }
         if(!light) {
@@ -476,16 +477,18 @@ var ModelUtils = {
 
         if(colour) {
             declaration += ShdrLines.vary.col;
-
             fragColour += ShdrLines.main.glFrag.col;
         }
         if(texture) {
             declaration += ShdrLines.vary.tex;
-            declaration += ShdrLines.unif.sampler;
-
-            mainFunc += ShdrLines.main.texCol;
-
-            fragColour += ShdrLines.main.glFrag.texCol;
+            declaration += ShdrLines.unif.sampler2D;
+            mainFunc += ShdrLines.main.tex2DCol;
+            fragColour += ShdrLines.main.glFrag.tex2DCol;
+        }
+        if(reflection) {
+            declaration += ShdrLines.unif.samplerCube;
+            mainFunc += ShdrLines.main.texCubeCol;
+            fragColour += ShdrLines.main.glFrag.texCubeCol;
         }
         if(!light) {
             fragColour += ")";
