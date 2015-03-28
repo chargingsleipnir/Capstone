@@ -56,7 +56,8 @@ var GameMngr = {
                 ViewMngr.Update();
             }
             that.UserUpdate();
-            GL.RenderScene();
+            GL.RenderScene(ViewMngr.activeCam.mtxCam);
+            GL.RenderGUI();
         }
         LoopGame();
     }

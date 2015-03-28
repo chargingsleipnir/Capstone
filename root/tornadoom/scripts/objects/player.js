@@ -221,6 +221,9 @@ function Player(mouse) {
     this.GetAmmoIdx = function(ammoTypeIdx, gameObj) {
         return ammoCont[ammoTypeIdx].indexOf(gameObj);
     };
+    this.GetAmmoCount = function(ammoTypeIdx) {
+        return ammoCont[ammoTypeIdx].length;
+    };
     this.SetAmmoSelectionCallback = function(Callback) {
         AmmoSelectionCallback = Callback;
         AmmoSelectionCallback(ammoIdx);
@@ -257,6 +260,18 @@ function Player(mouse) {
         //rigidBody.ApplySpring(playerPos, springConstant, restLength);
         // Perfect lift right away, slowing once obj's gravity is re-applied.
         rigidBody.ApplyGravity(VEC3_GRAVITY.GetNegative());
+    };
+    this.ResetMotion = function() {
+        this.obj.trfmBase.SetDefault();
+        GameUtils.RaiseToGroundLevel(this.obj);
+        this.obj.rigidBody.Reset();
+        this.ctrl.Reset();
+    };
+    this.ResetAll = function() {
+        ammoCont = [];
+        ammoIdx = 0;
+        ammoTypeCount = 0;
+        this.ResetMotion();
     };
     this.Update = function() {
         angle++;

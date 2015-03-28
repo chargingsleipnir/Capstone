@@ -171,7 +171,6 @@ function Camera(objGlobalTrfm) {
     this.hasKeyCtrl = false;
 
     this.mtxCam = new Matrix4();
-    ViewMngr.frustum.CalculatePlanes(this.trfmAxes.pos, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right);
 }
 Camera.prototype = {
     ToDefaultOrientation: function() {
@@ -192,6 +191,28 @@ Camera.prototype = {
         this.active = boolActive;
         if(!boolActive)
             ViewMngr.SetActiveCamera();
+    },
+    AsReflectiveCam: function(objPos, dir) {
+        this.trfmAxes.pos = objPos;
+        if(dir.right)
+            this.trfmAxes.RotateLocalViewY(90);
+        else if(dir.left)
+            this.trfmAxes.RotateLocalViewY(-90);
+        else if(dir.up)
+            this.trfmAxes.RotateLocalViewX(90);
+        else if(dir.down)
+            this.trfmAxes.RotateLocalViewX(-90);
+        else if(dir.back)
+            this.trfmAxes.RotateLocalViewY(180);
+
+        this.Update = this.ReflectiveCamUpdate;
+    },
+    ReflectiveCamUpdate: function() {
+        if(this.active) {
+            this.posGbl.SetCopy(this.trfmAxes.pos);
+            // Update game view - Most/only important thing here
+            this.mtxCam.SetOrientation(this.posGbl, this.trfmAxes.fwd, this.trfmAxes.up, this.trfmAxes.right, Space.global);
+        }
     },
     FreeControlUpdate: function() {
         // Update controls

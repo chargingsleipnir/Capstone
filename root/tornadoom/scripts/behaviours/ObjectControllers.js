@@ -23,6 +23,10 @@ function TopDownController(obj, ctrlName) {
         Input.SetActive(keyName, isActive);
     };
 
+    this.Reset = function() {
+        yawAngle = 0.0;
+    };
+
     this.Update = function() {
 
         if(active) {

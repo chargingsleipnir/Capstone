@@ -51,9 +51,9 @@ var DebugMngr = {
             this.gameTimer = new GUITextObject(new WndRect(0, 0, 300, 30), "GameTime: 00.00", style);
             this.frameRateMsg = new GUITextObject(new WndRect(0, 30, 300, 30), "FrameRt", style);
             this.mousePosMsg = new GUITextObject(new WndRect(0, 60, 300, 30), "000000000000000000000", style);
-            performanceData.AddTextObject(this.gameTimer);
-            performanceData.AddTextObject(this.frameRateMsg);
-            performanceData.AddTextObject(this.mousePosMsg);
+            performanceData.AddTextObject("gameTimer", this.gameTimer);
+            performanceData.AddTextObject("frameRateMsg", this.frameRateMsg);
+            performanceData.AddTextObject("mousePosMsg", this.mousePosMsg);
             GUINetwork.AddSystem(performanceData, false);
 
             Input.RegisterControlScheme("GUIMouseTracking", true, InputTypes.mouse);

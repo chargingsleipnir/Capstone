@@ -325,23 +325,23 @@ function GUISystem(wndRect, name) {
     /// </signature>
     this.sysRect = wndRect;
     this.name = name;
-    this.guiTextObjs = [];
-    this.guiProgObjs = [];
+    this.guiTextObjs = {};
+    this.guiProgObjs = {};
 }
 GUISystem.prototype = {
-    AddTextObject: function(textObj) {
+    AddTextObject: function(name, textObj) {
         /// <signature>
         ///  <summary>Add GUI objects to be a part of this systems. Objects are updated and their visuals prepared when added</summary>
         ///  <param name="textObj" type="GUITextObject"></param>
         /// </signature>
         textObj.UpdateGlobalRect(this.sysRect);
         textObj.InstantiateDisplay();
-        this.guiTextObjs.push(textObj);
+        this.guiTextObjs[name] = textObj;
     },
-    AddProgressObject: function(progressObj) {
+    AddProgressObject: function(name, progressObj) {
         progressObj.UpdateGlobalRect(this.sysRect);
         progressObj.InstantiateDisplay();
-        this.guiProgObjs.push(progressObj);
+        this.guiProgObjs[name] = progressObj;
     }
 };
 

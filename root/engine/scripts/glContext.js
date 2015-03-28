@@ -209,16 +209,43 @@
             this.ctx.TEXTURE_CUBE_MAP_POSITIVE_Y,
             this.ctx.TEXTURE_CUBE_MAP_NEGATIVE_Y,
             this.ctx.TEXTURE_CUBE_MAP_POSITIVE_Z,
-            this.ctx.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+            this.ctx.TEXTURE_CUBE_MAP_NEGATIVE_Z
         ];
 
         //this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, texCubeID);
         this.ctx.pixelStorei(this.ctx.UNPACK_FLIP_Y_WEBGL, true);
         for(var i = 0; i < 6; i++)
+            //this.ctx.texImage2D(faces[i], 0, this.ctx.RGBA, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, null);
             this.ctx.texImage2D(faces[i], 0, this.ctx.RGBA, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, faceTextures[i]);
 
         this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, null);
         return texCubeID;
+    },
+    CreateFrameBuffers: function() {
+        var framebuffer = this.ctx.createFramebuffer();
+        //this.ctx.bindFramebuffer(this.ctx.FRAMEBUFFER, framebuffer);
+        //framebuffer.width = 512;
+        //framebuffer.height = 512;
+        //
+        //var texture = gl.createTexture();
+        //this.ctx.bindTexture(this.ctx.TEXTURE_2D, texture);
+        //this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MAG_FILTER, this.ctx.LINEAR);
+        //this.ctx.texParameteri(this.ctx.TEXTURE_2D, this.ctx.TEXTURE_MIN_FILTER, this.ctx.LINEAR_MIPMAP_NEAREST);
+        //this.ctx.generateMipmap(this.ctx.TEXTURE_2D);
+        //this.ctx.texImage2D(this.ctx.TEXTURE_2D, 0, this.ctx.RGBA, framebuffer.width, framebuffer.height, 0, this.ctx.RGBA, this.ctx.UNSIGNED_BYTE, null);
+        //
+        //var renderbuffer = this.ctx.createRenderbuffer();
+        //this.ctx.bindRenderbuffer(this.ctx.RENDERBUFFER, renderbuffer);
+        //this.ctx.renderbufferStorage(this.ctx.RENDERBUFFER, this.ctx.DEPTH_COMPONENT16, framebuffer.width, framebuffer.height);
+
+        //this.ctx.framebufferTexture2D(this.ctx.FRAMEBUFFER, this.ctx.COLOR_ATTACHMENT0, this.ctx.TEXTURE_2D, texture, 0);
+        //this.ctx.framebufferRenderbuffer(this.ctx.FRAMEBUFFER, this.ctx.DEPTH_ATTACHMENT, this.ctx.RENDERBUFFER, renderbuffer);
+
+        //this.ctx.bindTexture(this.ctx.TEXTURE_2D, null);
+        //this.ctx.bindRenderbuffer(this.ctx.RENDERBUFFER, null);
+        //this.ctx.bindFramebuffer(this.ctx.FRAMEBUFFER, null);
+
+        return framebuffer;
     },
     CreateTextureFrameBuffer: function() {
 
@@ -296,9 +323,21 @@
 
                         // Cube mapping for reflections
                         if(buff.texCubeID) {
+                            // Deactivate so as not to come back in here during recursion
+                            //jsonModels[i].active = false;
+                            //
+                            //this.ctx.bindFramebuffer(this.ctx.FRAMEBUFFER, buff.FBOs[0]);
+                            //for(var j = 0; j < 6; j++ ) {
+                            //    this.ctx.framebufferTexture2D(this.ctx.FRAMEBUFFER, this.ctx.COLOR_ATTACHMENT0, this.ctx.TEXTURE_CUBE_MAP_POSITIVE_X + j, buff.texCubeID, 0);
+                            //    this.RenderScene(jsonModels[i].reflCamsMatrices[j]);
+                            //}
+                            //this.ctx.bindFramebuffer(this.ctx.FRAMEBUFFER, null);
+                            //
                             this.ctx.activeTexture(this.ctx.TEXTURE0);
                             this.ctx.bindTexture(this.ctx.TEXTURE_CUBE_MAP, buff.texCubeID);
                             this.ctx.uniform1i(shdr.u_SamplerCube, 0);
+                            //
+                            //jsonModels[i].active = true;
 
                             // Mirror
                             //gl.uniform3fv(shdr.u_Mirror_Color, renderers[i].materials[0].mirror.color);
@@ -510,7 +549,7 @@
     },
     RenderGUITextBoxes: function(textObjs) {
         // Text and boxes are drawn in the same loop so as to ensure that proper overlapping takes place.
-        for(var j = 0; j < textObjs.length; j++) {
+        for(var j in textObjs) {
 
             /******************* TEXT BOXES *************************/
             if(textObjs[j].active) {
@@ -576,7 +615,7 @@
         }
     },
     RenderGUIProgressBars: function(progBarObjs) {
-        for(var j = 0; j < progBarObjs.length; j++) {
+        for(var j in progBarObjs) {
 
             /******************* PROGRESS BAR BOXES *************************/
             if(progBarObjs[j].active) {
@@ -615,14 +654,14 @@
             }
         }
     },
-    RenderScene: function() {
+    RenderScene: function(mtxCam) {
         /// <signature>
         ///  <summary>Render every object in the scene</summary>
         /// </signature>
 
         // Clear the scene for new draw call
         this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
-        var mtxVP = ViewMngr.activeCam.mtxCam.GetMultiply(ViewMngr.mtxProj);
+        var mtxVP = mtxCam.GetMultiply(ViewMngr.mtxProj);
         var scene = SceneMngr.GetActiveScene();
 
         /******************* GameObject Models *************************/
@@ -650,11 +689,9 @@
             this.RenderParticleFields(scene.ptclSystems[i].GetSimpleFields(), scene.ptclSystems[i].objGlobalTrfm, mtxVP);
             this.RenderParticleTails(scene.ptclSystems[i].GetTails(), mtxVP);
         }
-
-        /******************* GUI DRAWING *************************/
-
+    },
+    RenderGUI: function() {
         var guiSystems = GUINetwork.GetActiveSystems();
-
         /* Disable depth testing to ensure proper message structure.*/
         this.ctx.disable(this.ctx.DEPTH_TEST);
         for(var sys in guiSystems) {

@@ -110,6 +110,18 @@ GameObject.prototype = {
         this.shapeData = GeomUtils.GetShapeData3D(vertData.posCoords, true);
 
         this.mdlHdlr = new ModelHandler(this.model, this.trfmGlobal, this.shapeData.radius);
+        if(this.model.materials[0]) {
+            if(this.model.materials[0].mirr.refl > 0.0) {
+                var reflectionCams = [];
+                for(var i = 0; i < 6; i++) {
+                    reflectionCams[i] = new Camera();
+                    // The "dir" parameter takes the Dir enum values, which are 0 - 5 anyway, so using i within loop
+                    reflectionCams[i].AsReflectiveCam(this.trfmGlobal.pos, i);
+                    this.components.push(reflectionCams[i]);
+                }
+                this.mdlHdlr.SetReflectionCams(reflectionCams);
+            }
+        }
 
         if(this.collisionSystem) {
             this.collisionSystem.ResizeBoundingShapes(this.shapeData);

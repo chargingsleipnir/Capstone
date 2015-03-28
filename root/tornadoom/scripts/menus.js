@@ -2,7 +2,7 @@
  * Created by Devin on 2015-03-08.
  */
 
-function InGameMenu(gameMouse, player) {
+function InGameMenu(gameMouse, player, ResetCallback) {
 
     var that = this;
     var pages = { main: 0, devContol: 1 };
@@ -61,10 +61,9 @@ function InGameMenu(gameMouse, player) {
     }
     function QuitCallback() {
         gameMouse.LeftRelease();
-        // Make sure all other restart logic is sound here
         that.ToggleActive();
-        SceneMngr.SetActive("Title Screen");
         GameMngr.assets.sounds['tick'].play();
+        ResetCallback();
     }
     function ToDevPageCallback() {
         gameMouse.LeftRelease();
@@ -207,11 +206,11 @@ function InGameMenu(gameMouse, player) {
 
 
     // ADD GUI OBJS TO WHOLE MENU ---------------------------
-    mainMenu.AddTextObject(backDrop);
+    mainMenu.AddTextObject("backdrop", backDrop);
     for(var i = 0; i < mainPageObjs.length; i++)
-        mainMenu.AddTextObject(mainPageObjs[i]);
+        mainMenu.AddTextObject("mainPageObj" + i, mainPageObjs[i]);
     for(var i = 0; i < devPageObjs.length; i++) {
-        mainMenu.AddTextObject(devPageObjs[i]);
+        mainMenu.AddTextObject("devPageObj" + i, devPageObjs[i]);
     }
     // Add to game's GUI network
     GUINetwork.AddSystem(mainMenu, false);
@@ -236,7 +235,7 @@ function InGameMenu(gameMouse, player) {
     }
 
     function ActivatePage(page) {
-        for(var i = 0; i < mainMenu.guiTextObjs.length; i++)
+        for(var i in mainMenu.guiTextObjs)
             mainMenu.guiTextObjs[i].SetActive(false);
 
         backDrop.SetActive(true);

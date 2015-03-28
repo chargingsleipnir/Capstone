@@ -248,6 +248,11 @@ RigidBody.prototype = {
             this.velF.SetZero();
         }
     },
+    Reset: function() {
+        this.ClearAccumulators();
+        this.velI.SetZero();
+        this.velF.SetZero();
+    },
     Update: function() {
 
         if(this.active) {

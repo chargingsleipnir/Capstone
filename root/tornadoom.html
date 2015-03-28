@@ -37,8 +37,12 @@
     <script type="text/javascript" src="tornadoom/scripts/objects/ammoObject.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/behaviours/ObjectControllers.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/game.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/gameUtils.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/menus.js"></script>
-    <script type="text/javascript" src="tornadoom/scripts/scene1.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/sceneTitle.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/sceneLvl01.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/sceneLvl02.js"></script>
+    <script type="text/javascript" src="tornadoom/scripts/sceneLvl03.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/scene2.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/scene3.js"></script>
     <script type="text/javascript" src="tornadoom/scripts/scene4.js"></script>
@@ -55,6 +59,7 @@
         function Initialize() {
 
             var textureNamesFilepaths = [
+                ['title', 'tornadoom/assets/images/title.png'],
                 ['skyTex', 'tornadoom/assets/images/sky.jpg'],
                 ['funnelTex', 'tornadoom/assets/images/tornadoFunnel.jpg'],
                 ['dustPtcl', 'tornadoom/assets/images/smokeParticle2.png'],
@@ -88,10 +93,12 @@
                 ['ufoCore', 'tornadoom/assets/models/GameObjects_UFOCore.json'],
                 ['ufoBeam', 'tornadoom/assets/models/GameObjects_UFOTractorBeam.json'],
                 ['crosshair', 'tornadoom/assets/models/GameObjects_CrossHair.json'],
-                ['fence', 'tornadoom/assets/models/Level01_FenceSquare.json'],
-                ['wagon', 'tornadoom/assets/models/Level01_Wagon.json'],
-                ['barn', 'tornadoom/assets/models/Level01_Barn.json'],
-                ['ground', 'tornadoom/assets/models/Level01_Ground.json']
+                ['wagon', 'tornadoom/assets/models/LevelCommon_Wagon.json'],
+                ['barn', 'tornadoom/assets/models/LevelCommon_Barn.json'],
+                ['ground', 'tornadoom/assets/models/LevelCommon_Ground.json'],
+                ['lvl01Fence', 'tornadoom/assets/models/Level01_FenceSquare.json'],
+                ['lvl02Fence', 'tornadoom/assets/models/Level02_FenceSquare.002.json'],
+                ['lvl03Fence', 'tornadoom/assets/models/Level03_FenceSquare.003.json']
             ];
             var audioNamesFilepaths = [
                 ['tick', "tornadoom/assets/sounds/Tick.ogg"],

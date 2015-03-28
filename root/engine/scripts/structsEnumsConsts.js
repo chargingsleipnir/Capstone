@@ -49,6 +49,7 @@ function BufferData() {
     /// </signature>
     this.VBO;
     this.EABO;
+    this.FBOs = [];
     this.texID;
     this.texCubeID;
     // Use these to jump certain distance into buffer
@@ -194,6 +195,7 @@ var MoveMethod = { input: 0, physics: 1, script: 2 };
 var TextureFilters = { nearest: 0, linear: 1, mipmap: 2 };
 var Alignment = { left: 0, centre: 0.5, right: 1, bottom: 1, top: 0 };
 var Axes = { x: 0, y: 1, z: 2 };
+var Directions = { right: 0, left: 1, up: 2, down: 3, back: 4, fwd: 5 };
 var SceneTypes = { menu: 0, cutScene: 1, gameplay: 2 };
 var CursorTypes = { none: "none", normal: "auto", crosshair: "crosshair" };
 var InputTypes = { keyboard: 0, mouse: 1, gamepad: 2 };

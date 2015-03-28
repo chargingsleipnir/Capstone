@@ -29,8 +29,7 @@ var EL = {
             ['guiBoxTintTex', 'engine/assets/shaders/guiBoxTintTex.vshdr', 'engine/assets/shaders/guiBoxTintTex.fshdr'],
             ['guiText', 'engine/assets/shaders/guiText.vshdr', 'engine/assets/shaders/guiText.fshdr'],
             ['pntCol', 'engine/assets/shaders/pntCol.vshdr', 'engine/assets/shaders/pntCol.fshdr'],
-            ['pntColTex', 'engine/assets/shaders/pntColTex.vshdr', 'engine/assets/shaders/pntColTex.fshdr'], // Special for textured particles
-            ['colCubeTex', 'engine/assets/shaders/colCubeTex.vshdr', 'engine/assets/shaders/colCubeTex.fshdr'] // Special for cube texturing
+            ['pntColTex', 'engine/assets/shaders/pntColTex.vshdr', 'engine/assets/shaders/pntColTex.fshdr'] // Special for textured particles
 
             /*
             ['col', 'engine/assets/shaders/col.vshdr', 'engine/assets/shaders/col.fshdr'],
