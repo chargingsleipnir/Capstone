@@ -78,6 +78,9 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud) {
     }
 
     function Update() {
+        player.Update();
+        barn.Update();
+
         GameUtils.ContainInLevelBoundsUpdate(player.obj);
 
         for (var i = 0; i < activeCows.length; i++) {

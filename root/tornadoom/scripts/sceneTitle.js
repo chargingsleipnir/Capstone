@@ -1,4 +1,4 @@
-function BuildScene1(scene) {
+function BuildScene1(scene, nextBtn) {
     var titleScreen = new GUISystem(new WndRect(0, 0, ViewMngr.wndWidth, ViewMngr.wndHeight), "Title screen");
 
     var style = new MsgBoxStyle();
@@ -44,10 +44,6 @@ function BuildScene1(scene) {
 
     GUINetwork.AddSystem(titleScreen, false);
 
-    var ctrlSchemeName = "Title screen transition";
-    Input.RegisterControlScheme(ctrlSchemeName, false, InputTypes.keyboard);
-    var nextSceneBtn = Input.CreateInputController(ctrlSchemeName, KeyMap.Enter);
-
     var fadingIn;
 
     function Start() {
@@ -55,12 +51,11 @@ function BuildScene1(scene) {
         nextSceneMsg.strHdl.SetTintAlpha(0.0);
         fadingIn = true;
         GUINetwork.SetActive(titleScreen.name, true);
-        Input.SetActive(ctrlSchemeName, true);
     }
 
     function Update() {
-        if(nextSceneBtn.pressed) {
-            nextSceneBtn.Release();
+        if(nextBtn.pressed) {
+            nextBtn.Release();
             SceneMngr.SetActive("Level 01");
         }
         if(fadingIn)
@@ -71,7 +66,6 @@ function BuildScene1(scene) {
 
     function End() {
         GUINetwork.SetActive(titleScreen.name, false);
-        Input.SetActive(ctrlSchemeName, false);
     }
 
     scene.SetCallbacks(Start, Update, End);

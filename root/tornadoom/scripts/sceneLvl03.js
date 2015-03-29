@@ -40,7 +40,7 @@ function BuildLvl03(scene, player, barn, cows, haybales, ufo, hud) {
         [13.0, 0.0, -8.0],
         [-4.0, 0.0, -21.0],
         [2.0, 0.0, -6.0],
-        [14.0, 0.0, -3.0],
+        [14.0, 0.0, -1.0],
         [25.0, 0.0, -8.0],
         [-11.0, 0.0, -6.0]
     ];
@@ -79,7 +79,7 @@ function BuildLvl03(scene, player, barn, cows, haybales, ufo, hud) {
     // Level Repeat functions ==========================================================================================
 
     function Start() {
-        barn.obj.trfmBase.SetPosByAxes(10.0, 0.0, -10.0);
+        barn.obj.trfmBase.SetPosByAxes(15.0, 0.0, -5.0);
         barn.obj.trfmBase.SetUpdatedRot(VEC3_UP, 30);
         barn.obj.collider.SetSphereCall(BarnCollCallback);
         GameUtils.RaiseToGroundLevel(barn.obj);
@@ -107,6 +107,10 @@ function BuildLvl03(scene, player, barn, cows, haybales, ufo, hud) {
     }
 
     function Update() {
+        player.Update();
+        ufo.Update();
+        barn.Update();
+
         GameUtils.ContainInLevelBoundsUpdate(player.obj);
 
         if(activeCows.length > 0) {
@@ -165,6 +169,7 @@ function BuildLvl03(scene, player, barn, cows, haybales, ufo, hud) {
         activeCows.splice(0, activeCows.length);
         player.ClearAmmo();
         GameUtils.CowsSavedZero();
+        GameUtils.CowsAbductedZero();
         hud.guiTextObjs["rescueInfo"].UpdateMsg("0");
         hud.guiTextObjs["abductionInfo"].UpdateMsg('0');
         hud.guiTextObjs["caughtCowInfo"].UpdateMsg('0');

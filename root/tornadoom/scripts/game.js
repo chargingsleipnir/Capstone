@@ -22,6 +22,7 @@ function BuildGame() {
     var gameKeyCtrlName = "SceneAndMenuNav";
     Input.RegisterControlScheme(gameKeyCtrlName, true, InputTypes.keyboard);
     var menuBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Esc);
+    var nextBtn = Input.CreateInputController(gameKeyCtrlName, KeyMap.Enter);
 
     /********************************** HUD **********************************/
 
@@ -165,6 +166,7 @@ function BuildGame() {
     function ResetGame() {
         GameUtils.Reset();
         player.ResetAll();
+        Time.counter = 0.0;
 
         hud.guiTextObjs["caughtCowInfo"].UpdateMsg('0');
         hud.guiTextObjs["caughtBaleInfo"].UpdateMsg('0');
@@ -186,7 +188,7 @@ function BuildGame() {
 
     // Title screen just has gui elements
     var title = new Scene("Title Screen", SceneTypes.menu);
-    BuildScene1(title);
+    BuildScene1(title, nextBtn);
     SceneMngr.AddScene(title, true);
 
     // Teach player how to pick up a cow and shoot it into the barn
@@ -196,7 +198,7 @@ function BuildGame() {
     lvl01.Add(barn.obj);
     lvl01.Add(skyBox);
     lvl01.Add(ground);
-    BuildLvl01(lvl01, player, barn, cows.slice(0, 3), hud);
+    BuildLvl01(lvl01, player, barn, cows.slice(0, 3), hud, nextBtn);
     SceneMngr.AddScene(lvl01, false);
 
     // Teach player how to shoot a hay bale vertically
@@ -206,7 +208,7 @@ function BuildGame() {
     lvl02.Add(barn.obj);
     lvl02.Add(skyBox);
     lvl02.Add(ground);
-    BuildLvl02(lvl02, player, barn, cows.slice(0, 6), haybales.slice(0, 4), hud);
+    BuildLvl02(lvl02, player, barn, cows.slice(0, 6), haybales.slice(0, 4), hud, nextBtn);
     SceneMngr.AddScene(lvl02, false);
 
     // Enter alien
@@ -217,7 +219,7 @@ function BuildGame() {
     lvl03.Add(skyBox);
     lvl03.Add(ground);
     lvl03.Add(ufo.obj);
-    BuildLvl03(lvl03, player, barn, cows.slice(), haybales.slice(), ufo, hud);
+    BuildLvl03(lvl03, player, barn, cows.slice(), haybales.slice(), ufo, hud, nextBtn);
     SceneMngr.AddScene(lvl03, false);
 
 
@@ -235,10 +237,6 @@ function BuildGame() {
             }
 
             if (!GameMngr.paused) {
-                player.Update();
-                ufo.Update();
-                barn.Update();
-
                 angle += 0.01;
                 skyBox.trfmBase.SetUpdatedRot(VEC3_FWD, angle);
             }

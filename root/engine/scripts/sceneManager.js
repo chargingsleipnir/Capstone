@@ -158,6 +158,9 @@ Scene.prototype = {
         this.LoopCall = LoopCallback;
         this.ExitCall = ExitCallback;
     },
+    SetLoopCallback: function(LoopCallback) {
+        this.LoopCall = LoopCallback;
+    },
     Update: function() {
         this.LoopCall();
         this.rootObj.Update();
@@ -202,6 +205,7 @@ var SceneMngr = (function() {
                 activeScene.ExitCall();
                 activeScene = scenes[sceneName];
                 console.log("Switched scene to: " + sceneName);
+                activeScene.debug.UpdateActiveDispObjs();
                 activeScene.InitCall();
             }
             else
