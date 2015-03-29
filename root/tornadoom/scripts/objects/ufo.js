@@ -7,10 +7,11 @@ function UFO() {
     var that = this;
 
     var hoverHeight = 8.0;
+    var defaultPos = new Vector3(-30.0, hoverHeight, -30.0);
     var TractoringCallback = function(){};
 
     this.obj = new GameObject('ufo', Labels.none);
-    this.obj.trfmBase.SetPosByAxes(-20.0, hoverHeight, -20.0);
+    this.obj.trfmBase.SetPosByVec(defaultPos);
 
     var coreObj = new GameObject("ufo core", Labels.none);
     coreObj.SetModel(GameMngr.assets.models['ufoCore']);
@@ -183,6 +184,7 @@ function UFO() {
         TractoringCallback = Callback;
     };
 
+
     this.Abduct = function(abductee, distSqr2D, dirVec) {
         switch(currState) {
             case ufoStates.abducting:
@@ -226,8 +228,10 @@ function UFO() {
     this.SetActive = function(isActive) {
         if(isActive)
             currState = ufoStates.abducting;
-        else
+        else {
             currState = ufoStates.dormant;
+            this.obj.trfmBase.SetPosByVec(defaultPos);
+        }
     };
 
     // Update -------------------------------------------------

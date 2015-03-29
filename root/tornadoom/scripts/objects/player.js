@@ -255,7 +255,7 @@ function Player(mouse) {
     };
     this.ClearAmmo = function() {
         for(var i = 0; i < ammoCont.length; i++)
-            ammoCont[i] = [];
+            ammoCont[i].splice(0, ammoCont[i].length);
     };
     this.Twister = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
         // Have objs keep relative velocity with tornado.
@@ -275,6 +275,7 @@ function Player(mouse) {
         ammoCont = [];
         ammoIdx = 0;
         ammoTypeCount = 0;
+        AmmoSelectionCallback(ammoIdx);
         this.ResetMotion();
     };
     this.Update = function() {

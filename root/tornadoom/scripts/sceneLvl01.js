@@ -2,7 +2,7 @@
  * Created by Devin on 2015-03-27.
  */
 
-function BuildLvl01(scene, player, barn, hud) {
+function BuildLvl01(scene, player, barn, cows, hud) {
 
     scene.light.amb.bright = 0.5;
     scene.light.dir.bright = 0.25;
@@ -15,14 +15,13 @@ function BuildLvl01(scene, player, barn, hud) {
     fence.mdlHdlr.SetTexture(GameMngr.assets.textures['fenceTex'], TextureFilters.mipmap);
     GameUtils.RaiseToGroundLevel(fence);
 
+    var initCowPos = new Vector3(3.0, 0.0, -12.0);
     var cowPos = [
-        [3.0, 0.0, -12.0],
-        [-4.0, 0.0, -10.0],
+        [-7.0, 0.0, -7.0],
         [0.0, 0.0, -10.0],
-        [4.0, 0.0, -10.0]
+        [7.0, 0.0, -7.0]
     ];
-    var cows = [];
-    var MAX_COWS = 4;
+    var activeCows = [];
 
     var phase1Complete = false;
 
@@ -30,10 +29,10 @@ function BuildLvl01(scene, player, barn, hud) {
     function BarnCollCallback(collider) {
         if(collider.gameObj.name == "cow") {
             // Loop needed to compare GameObjects before using cow's GameObject wrapper
-            for (var i = 0; i < cows.length; i++)
-                if (cows[i].obj == collider.gameObj) {
-                    cows[i].SetVisible(false);
-                    cows.splice(cows.indexOf(cows[i]), 1);
+            for (var i = 0; i < activeCows.length; i++)
+                if (activeCows[i].obj == collider.gameObj) {
+                    activeCows[i].SetVisible(false);
+                    activeCows.splice(activeCows.indexOf(activeCows[i]), 1);
                     GameUtils.CowsSavedIncr();
                     hud.guiTextObjs["rescueInfo"].UpdateMsg("" + GameUtils.GetCowsSaved());
                 }
@@ -44,30 +43,14 @@ function BuildLvl01(scene, player, barn, hud) {
             }
         }
     }
-    function PlayerCollCallback(collider) {
-        if(collider.gameObj.label == Labels.ammo) {
-            var objToEyeVec = new Vector2(player.obj.trfmGlobal.pos.x - collider.trfm.pos.x, player.obj.trfmGlobal.pos.z - collider.trfm.pos.z);
-            var objToEyeDistSqr = objToEyeVec.GetMagSqr();
-
-            // This format allows not only for objects to only be captured if they are within the given radius,
-            // but ensures that their velocities don't explode at heights above the tornado:
-            // No force is applied if they're directly above the funnel.
-            if (collider.trfm.pos.y < player.height) {
-                if (objToEyeDistSqr < player.captureRadius * player.captureRadius) {
-                    if (collider.gameObj.name == "cow")
-                        player.Capture(GameUtils.ammoTypes.cow, collider.gameObj);
-                }
-                else {
-                    player.Twister(collider.rigidBody, objToEyeVec, objToEyeDistSqr);
-                }
-            }
-        }
-    }
 
     function InitPhase2() {
         phase1Complete = true;
         for(var i = 0; i < cows.length; i++ ) {
             cows[i].SetVisible(true);
+            cows[i].obj.trfmBase.SetPosByAxes(cowPos[i][0], cowPos[i][1], cowPos[i][2]);
+            GameUtils.RaiseToGroundLevel(cows[i].obj);
+            activeCows.push(cows[i]);
         }
     }
 
@@ -83,17 +66,14 @@ function BuildLvl01(scene, player, barn, hud) {
         GameUtils.CowsSavedZero();
 
         player.ResetMotion();
-        player.obj.collider.SetSphereCall(PlayerCollCallback);
         player.AddAmmoContainer(GameUtils.ammoTypes.cow);
 
-        for(var i = 0; i < MAX_COWS; i++ ) {
-            cows[i] = new Cow();
+        for(var i = 0; i < cows.length; i++ ) {
             cows[i].SetVisible(false);
-            cows[i].obj.trfmBase.SetPosByAxes(cowPos[i][0], cowPos[i][1], cowPos[i][2]);
-            GameUtils.RaiseToGroundLevel(cows[i].obj);
-            scene.Add(cows[i].obj);
         }
         cows[0].SetVisible(true);
+        cows[0].obj.trfmBase.SetPosByVec(initCowPos);
+        activeCows.push(cows[0]);
 
         hud.guiTextObjs["caughtCowInfo"].SetActive(true);
         hud.guiTextObjs["rescueInfo"].SetActive(true);
@@ -104,9 +84,9 @@ function BuildLvl01(scene, player, barn, hud) {
     function Update() {
         GameUtils.ContainInLevelBoundsUpdate(player.obj);
 
-        for (var i = 0; i < cows.length; i++) {
-            cows[i].Update();
-            GameUtils.ContainInLevelBoundsUpdate(cows[i].obj);
+        for (var i = 0; i < activeCows.length; i++) {
+            activeCows[i].Update();
+            GameUtils.ContainInLevelBoundsUpdate(activeCows[i].obj);
         }
 
         if(!phase1Complete) {
@@ -114,14 +94,13 @@ function BuildLvl01(scene, player, barn, hud) {
                 InitPhase2();
         }
         else {
-            if(GameUtils.GetCowsSaved() >= MAX_COWS)
+            if(activeCows.length <= 0)
                 SceneMngr.SetActive("Level 02");
         }
-
     }
 
     function End() {
-        cows = [];
+        activeCows.splice(0, activeCows.length);
         player.ClearAmmo();
         GameUtils.CowsSavedZero();
         hud.guiTextObjs["rescueInfo"].UpdateMsg("0");
@@ -129,6 +108,8 @@ function BuildLvl01(scene, player, barn, hud) {
         hud.guiTextObjs["caughtBaleInfo"].UpdateMsg('0');
     }
 
+    for(var i = 0; i < cows.length; i++ )
+        scene.Add(cows[i].obj);
     scene.Add(fence);
     scene.SetCallbacks(Start, Update, End);
 }
