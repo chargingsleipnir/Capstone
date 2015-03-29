@@ -2,7 +2,7 @@
  * Created by Devin on 2015-03-27.
  */
 
-function BuildLvl02(scene, player, barn, cows, haybales, hud) {
+function BuildLvl02(scene, player, barn, hud) {
 
     scene.light.amb.bright = 0.5;
     scene.light.dir.bright = 0.25;
@@ -29,6 +29,10 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud) {
         [0.0, 0.0, -6.0],
         [4.0, 0.0, -6.0]
     ];
+    var cows = [];
+    var MAX_COWS = 6;
+    var haybales = [];
+    var MAX_BALES = 4;
 
     // Barn collisions
     function BarnCollCallback(collider) {
@@ -37,6 +41,7 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud) {
             for (var i = 0; i < cows.length; i++)
                 if (cows[i].obj == collider.gameObj) {
                     cows[i].SetVisible(false);
+                    cows.splice(cows.indexOf(cows[i]), 1);
                     GameUtils.CowsSavedIncr();
                     hud.guiTextObjs["rescueInfo"].UpdateMsg("" + GameUtils.GetCowsSaved());
                 }
@@ -83,15 +88,17 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud) {
         player.obj.collider.SetSphereCall(PlayerCollCallback);
         player.AddAmmoContainer(GameUtils.ammoTypes.hayBale);
 
-        for(var i = 0; i < cows.length; i++ ) {
-            cows[i].SetVisible(true);
+        for(var i = 0; i < MAX_COWS; i++ ) {
+            cows[i] = new Cow();
             cows[i].obj.trfmBase.SetPosByAxes(cowPos[i][0], cowPos[i][1], cowPos[i][2]);
             GameUtils.RaiseToGroundLevel(cows[i].obj);
+            scene.Add(cows[i].obj);
         }
-        for(var i = 0; i < haybales.length; i++ ) {
-            haybales[i].SetVisible(true);
+        for(var i = 0; i < MAX_BALES; i++ ) {
+            haybales[i] = new HayBale();
             haybales[i].obj.trfmBase.SetPosByAxes(balePos[i][0], balePos[i][1], balePos[i][2]);
             GameUtils.RaiseToGroundLevel(haybales[i].obj);
+            scene.Add(haybales[i].obj);
         }
 
         hud.guiTextObjs["caughtBaleInfo"].SetActive(true);
@@ -118,16 +125,18 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud) {
             hud.guiTextObjs["launchPowerMsg"].SetActive(false);
         }
 
-        if(GameUtils.GetCowsSaved() >= cows.length)
+        if(GameUtils.GetCowsSaved() >= MAX_COWS)
             SceneMngr.SetActive("Level 03");
     }
 
     function End() {
-        for(var i = 0; i < cows; i++ )
-            cows[i].SetVisible(true);
-
+        cows = [];
+        haybales = [];
+        player.ClearAmmo();
         GameUtils.CowsSavedZero();
         hud.guiTextObjs["rescueInfo"].UpdateMsg("0");
+        hud.guiTextObjs["caughtCowInfo"].UpdateMsg('0');
+        hud.guiTextObjs["caughtBaleInfo"].UpdateMsg('0');
     }
 
     scene.Add(fence);

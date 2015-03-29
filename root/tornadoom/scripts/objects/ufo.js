@@ -10,7 +10,7 @@ function UFO() {
     var TractoringCallback = function(){};
 
     this.obj = new GameObject('ufo', Labels.none);
-    this.obj.trfmBase.SetPosByAxes(-2.0, hoverHeight, 20.0);
+    this.obj.trfmBase.SetPosByAxes(-20.0, hoverHeight, -20.0);
 
     var coreObj = new GameObject("ufo core", Labels.none);
     coreObj.SetModel(GameMngr.assets.models['ufoCore']);

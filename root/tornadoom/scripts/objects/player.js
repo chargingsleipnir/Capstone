@@ -253,6 +253,10 @@ function Player(mouse) {
             PrepAmmo(gameObj, true);
         }
     };
+    this.ClearAmmo = function() {
+        for(var i = 0; i < ammoCont.length; i++)
+            ammoCont[i] = [];
+    };
     this.Twister = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
         // Have objs keep relative velocity with tornado.
         //rigidBody.AddForce(this.obj.rigidBody.GetForceFromVelocity().SetScaleByNum(0.5));

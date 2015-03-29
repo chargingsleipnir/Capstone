@@ -54,11 +54,6 @@ function Scene(name, sceneType) {
 var testOnce = true;
 Scene.prototype = {
     Add: function(gameObject) {
-        /// <signature>
-        ///  <summary>Add model handle to render model as part of this scene</summary>
-        ///  <param name="gameObject" type="GameObject"></param>
-        /// </signature>
-
         //this.allObjs.push(gameObject);
         //this.hier.Insert(gameObject.sphere, this.allObjs.indexOf(gameObject));
 

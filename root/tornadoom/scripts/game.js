@@ -125,25 +125,6 @@ function BuildGame() {
     skyBox.mdlHdlr.SetTexture(GameMngr.assets.textures['skyTex'], TextureFilters.nearest);
     skyBox.trfmBase.SetScaleAxes(150.0, 150.0, 150.0);
 
-    var cows = [];
-    var MAX_COWS = 10;
-    for(var i = 0; i < MAX_COWS; i++ ) {
-        cows[i] = new Cow();
-        cows[i].SetVisible(false);
-    }
-    var cowsLvl01 = cows.slice(0, 4),
-        cowsLvl02 = cows.slice(0, 6),
-        cowsLvl03 = cows;
-
-    var haybales = [];
-    var MAX_BALES = 10;
-    for(var i = 0; i < MAX_BALES; i++ ) {
-        haybales[i] = new HayBale();
-        haybales[i].SetVisible(false);
-    }
-    var haybalesLvl02 = haybales.slice(0, 4),
-        haybalesLvl03 = haybales;
-
     /********************************** In-Game Menu **********************************/
 
     function ResetGame() {
@@ -180,9 +161,7 @@ function BuildGame() {
     lvl01.Add(barn.obj);
     lvl01.Add(skyBox);
     lvl01.Add(ground);
-    for(var i = 0; i < cowsLvl01.length; i++)
-        lvl01.Add(cowsLvl01[i].obj);
-    BuildLvl01(lvl01, player, barn, cowsLvl01, hud);
+    BuildLvl01(lvl01, player, barn, hud);
     SceneMngr.AddScene(lvl01, false);
 
     // Teach player how to shoot a hay bale vertically
@@ -192,11 +171,7 @@ function BuildGame() {
     lvl02.Add(barn.obj);
     lvl02.Add(skyBox);
     lvl02.Add(ground);
-    for(var i = 0; i < cowsLvl02.length; i++)
-        lvl02.Add(cowsLvl02[i].obj);
-    for(var i = 0; i < haybalesLvl02.length; i++)
-        lvl02.Add(haybalesLvl02[i].obj);
-    BuildLvl02(lvl02, player, barn, cowsLvl02, haybalesLvl02, hud);
+    BuildLvl02(lvl02, player, barn, hud);
     SceneMngr.AddScene(lvl02, false);
 
     // Enter alien
@@ -206,11 +181,8 @@ function BuildGame() {
     lvl03.Add(barn.obj);
     lvl03.Add(skyBox);
     lvl03.Add(ground);
-    for(var i = 0; i < cowsLvl03.length; i++)
-        lvl03.Add(cowsLvl03[i].obj);
-    for(var i = 0; i < haybalesLvl03.length; i++)
-        lvl03.Add(haybalesLvl03[i].obj);
-    BuildLvl03(lvl03, player, barn, cowsLvl03, haybalesLvl03, hud);
+    lvl03.Add(ufo.obj);
+    BuildLvl03(lvl03, player, barn, ufo, hud);
     SceneMngr.AddScene(lvl03, false);
 
 

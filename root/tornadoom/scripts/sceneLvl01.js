@@ -2,7 +2,7 @@
  * Created by Devin on 2015-03-27.
  */
 
-function BuildLvl01(scene, player, barn, cows, hud) {
+function BuildLvl01(scene, player, barn, hud) {
 
     scene.light.amb.bright = 0.5;
     scene.light.dir.bright = 0.25;
@@ -21,6 +21,8 @@ function BuildLvl01(scene, player, barn, cows, hud) {
         [0.0, 0.0, -10.0],
         [4.0, 0.0, -10.0]
     ];
+    var cows = [];
+    var MAX_COWS = 4;
 
     var phase1Complete = false;
 
@@ -31,6 +33,7 @@ function BuildLvl01(scene, player, barn, cows, hud) {
             for (var i = 0; i < cows.length; i++)
                 if (cows[i].obj == collider.gameObj) {
                     cows[i].SetVisible(false);
+                    cows.splice(cows.indexOf(cows[i]), 1);
                     GameUtils.CowsSavedIncr();
                     hud.guiTextObjs["rescueInfo"].UpdateMsg("" + GameUtils.GetCowsSaved());
                 }
@@ -63,7 +66,7 @@ function BuildLvl01(scene, player, barn, cows, hud) {
 
     function InitPhase2() {
         phase1Complete = true;
-        for(var i = 1; i < cows.length; i++ ) {
+        for(var i = 0; i < cows.length; i++ ) {
             cows[i].SetVisible(true);
         }
     }
@@ -83,10 +86,12 @@ function BuildLvl01(scene, player, barn, cows, hud) {
         player.obj.collider.SetSphereCall(PlayerCollCallback);
         player.AddAmmoContainer(GameUtils.ammoTypes.cow);
 
-        for(var i = 0; i < cows.length; i++ ) {
+        for(var i = 0; i < MAX_COWS; i++ ) {
+            cows[i] = new Cow();
             cows[i].SetVisible(false);
             cows[i].obj.trfmBase.SetPosByAxes(cowPos[i][0], cowPos[i][1], cowPos[i][2]);
             GameUtils.RaiseToGroundLevel(cows[i].obj);
+            scene.Add(cows[i].obj);
         }
         cows[0].SetVisible(true);
 
@@ -109,18 +114,19 @@ function BuildLvl01(scene, player, barn, cows, hud) {
                 InitPhase2();
         }
         else {
-            if(GameUtils.GetCowsSaved() >= cows.length)
+            if(GameUtils.GetCowsSaved() >= MAX_COWS)
                 SceneMngr.SetActive("Level 02");
         }
 
     }
 
     function End() {
-        for(var i = 0; i < cows; i++ )
-            cows[i].SetVisible(true);
-
+        cows = [];
+        player.ClearAmmo();
         GameUtils.CowsSavedZero();
         hud.guiTextObjs["rescueInfo"].UpdateMsg("0");
+        hud.guiTextObjs["caughtCowInfo"].UpdateMsg('0');
+        hud.guiTextObjs["caughtBaleInfo"].UpdateMsg('0');
     }
 
     scene.Add(fence);
