@@ -161,8 +161,9 @@ function BuildGame() {
     for (var i = 0; i < MAX_BALES; i++)
         haybales[i] = new HayBale();
 
-    /********************************** In-Game Menu **********************************/
+    /********************************** In-Game GUI Systems **********************************/
 
+    // Menu ------------------------------------------------------------------
     function ResetGame() {
         GameUtils.Reset();
         player.ResetAll();
@@ -183,6 +184,9 @@ function BuildGame() {
     }
 
     var inGameMenu = new InGameMenu(gameMouse, player, ResetGame);
+
+    // Messenger ------------------------------------------------------------------
+    InGameMsgr.Initialize();
 
     /********************************** Scenes **********************************/
 
