@@ -1,4 +1,4 @@
-function BuildScene1(scene, nextBtn) {
+function BuildSceneTitle(scene, nextBtn) {
     var titleScreen = new GUISystem(new WndRect(0, 0, ViewMngr.wndWidth, ViewMngr.wndHeight), "Title screen");
 
     var style = new MsgBoxStyle();

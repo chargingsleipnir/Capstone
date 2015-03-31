@@ -8,6 +8,7 @@ var InGameMsgr = (function() {
     var iterator = 0;
     var msgFadeStart = 0.25;
     var msgFadeRate = 0.025;
+    var iterate = false;
 
     var msgBoard = null;
     var style = new MsgBoxStyle();
@@ -24,13 +25,19 @@ var InGameMsgr = (function() {
 
     return {
         Initialize: function() {
-            msgBoard = new GUISystem(new WndRect(ViewMngr.wndWidth/2 - 200, ViewMngr.wndHeight/2 - 100, 400, 200), "Message Board");
+            msgBoard = new GUISystem(new WndRect(ViewMngr.wndWidth/2 - 200, ViewMngr.wndHeight/2 - 200, 400, 200), "Message Board");
             GUINetwork.AddSystem(msgBoard, false);
 
             style.bgTextures = [GameMngr.assets.textures['cowBorderEnter']];
         },
         SetActive: function(beActive) {
             GUINetwork.SetActive(msgBoard.name, beActive);
+            if(!beActive) {
+                // Should return the first key name
+                currSqncName = Object.keys(msgSequences)[0];
+                iterator = 0;
+                iterate = false;
+            }
         },
         AddMsgSequence: function(name, msgArray) {
             currSqncName = name;
@@ -44,25 +51,25 @@ var InGameMsgr = (function() {
         ChangeMsgSequence: function(name) {
             currSqncName = name;
             iterator = 0;
+            iterate = false;
         },
         NextMsg: function() {
-            msgSequences[currSqncName][iterator].SetObjectFade(msgFadeStart);
-            msgSequences[currSqncName][iterator].SetActive(false);
-            iterator++;
-            return iterator;
-        },
-        DispMsg: function() {
-            msgSequences[currSqncName][iterator].SetActive(true);
-            msgSequences[currSqncName][iterator].SetObjectFade(1.0);
-            return iterator;
+            iterate = true;
         },
         FadeMsgsWithinLimit: function(idxLimit) {
-            if(iterator >= idxLimit)
-                return false;
-
-            msgSequences[currSqncName][iterator].SetActive(true);
-            msgSequences[currSqncName][iterator].FadeBackground(msgFadeRate);
-            msgSequences[currSqncName][iterator].FadeMsg(msgFadeRate);
+            if(iterate) {
+                if(msgSequences[currSqncName][iterator].FadeObj(-msgFadeRate) <= msgFadeStart) {
+                    msgSequences[currSqncName][iterator].SetActive(false);
+                    iterate = false;
+                    iterator++;
+                    if (iterator >= idxLimit)
+                        return false;
+                }
+            }
+            else {
+                msgSequences[currSqncName][iterator].SetActive(true);
+                msgSequences[currSqncName][iterator].FadeObj(msgFadeRate);
+            }
             return true;
         }
     };

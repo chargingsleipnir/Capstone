@@ -159,13 +159,20 @@ GUITextObject.prototype = {
     },
     FadeBackground: function(incr) {
         if(this.active) {
-            this.boxHdl.tint.w += incr;
+            this.boxHdl.tint.w = MathUtils.Clamp(this.boxHdl.tint.w + incr, 0.0, 1.0);
             return this.boxHdl.tint.w;
         }
     },
     FadeMsg: function(incr) {
         if(this.active) {
-            this.strHdl.tint.w += incr;
+            this.strHdl.tint.w = MathUtils.Clamp(this.strHdl.tint.w + incr, 0.0, 1.0);
+            return this.strHdl.tint.w;
+        }
+    },
+    FadeObj: function(incr) {
+        if(this.active) {
+            this.boxHdl.tint.w = MathUtils.Clamp(this.boxHdl.tint.w + incr, 0.0, 1.0);
+            this.strHdl.tint.w = MathUtils.Clamp(this.strHdl.tint.w + incr, 0.0, 1.0);
             return this.strHdl.tint.w;
         }
     },

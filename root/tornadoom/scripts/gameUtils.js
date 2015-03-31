@@ -36,6 +36,9 @@ var GameUtils = (function() {
         GetCowsSaved: function() {
             return cowsSavedByLevel;
         },
+        GetCowsSavedTotal: function() {
+            return cowsSavedTotal;
+        },
         CowsSavedIncr: function() {
             cowsSavedByLevel++;
             cowsSavedTotal++;
