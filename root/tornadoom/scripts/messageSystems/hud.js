@@ -57,7 +57,7 @@ function CreateHUD() {
     hudSys.AddTextObject("launchPowerMsg", new GUITextObject(new WndRect(barRect.x + 110, barRect.y - 35, barRect.w - 220, 30), "Extra Power", style));
 
     // CountDownTimer
-    barRect = new WndRect( 0, 100, 50, -100);
+    barRect = new WndRect( 0, 200, 50, -200);
     powerBarStyle.bgColour.SetValues(1.0, 1.0, 1.0);
     powerBarStyle.bgAlpha = 0.25;
     hudSys.AddProgressObject("countdownBar", new GUIProgressBar(barRect, Axes.y, powerBarStyle));

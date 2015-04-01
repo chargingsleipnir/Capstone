@@ -9,7 +9,8 @@ var GameUtils = (function() {
         backWall,
         frontWall;
 
-    var cowsSavedByLevel = 0,
+    var cowsEncountered = 0,
+        cowsSavedByLevel = 0,
         cowsSavedTotal = 0,
         cowsAbductedByLevel = 0,
         cowsAbductedTotal = 0;
@@ -33,6 +34,12 @@ var GameUtils = (function() {
             (gameObj.trfmGlobal.pos.z > backWall - gameObj.shapeData.radii.z && gameObj.rigidBody.velF.z > 0))
             gameObj.rigidBody.velF.z = -gameObj.rigidBody.velF.z;
         },
+        GetCowsEncountered: function() {
+            return cowsEncountered;
+        },
+        CowsEncounteredAdd: function(numCows) {
+            cowsEncountered += numCows;
+        },
         GetCowsSaved: function() {
             return cowsSavedByLevel;
         },
@@ -49,9 +56,16 @@ var GameUtils = (function() {
         GetCowsAbducted: function() {
             return cowsAbductedByLevel;
         },
+        GetCowsAbductedTotal: function() {
+            return cowsAbductedTotal;
+        },
         CowsAbductedIncr: function() {
             cowsAbductedByLevel++;
             cowsAbductedTotal++;
+        },
+        CowsAbductedAdd: function(numCows) {
+            cowsAbductedByLevel += numCows;
+            cowsAbductedTotal += numCows;
         },
         CowsAbductedZero: function() {
             cowsAbductedByLevel = 0;
@@ -61,6 +75,7 @@ var GameUtils = (function() {
             hayBale: 1
         },
         Reset: function() {
+            cowsEncountered =
             cowsSavedByLevel =
             cowsSavedTotal =
             cowsAbductedByLevel =

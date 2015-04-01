@@ -98,6 +98,7 @@ function BuildLvl03(scene, player, barn, cows, haybales, ufo, hud) {
             GameUtils.RaiseToGroundLevel(cows[i].obj);
         }
         activeCows = cows.slice();
+        GameUtils.CowsEncounteredAdd(activeCows.length);
         for(var i = 0; i < haybales.length; i++ ) {
             haybales[i].obj.trfmBase.SetPosByAxes(balePos[i][0], balePos[i][1], balePos[i][2]);
             GameUtils.RaiseToGroundLevel(haybales[i].obj);

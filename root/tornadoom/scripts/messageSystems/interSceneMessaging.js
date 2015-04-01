@@ -5,9 +5,9 @@
 function LevelCompleteMessage() {
 
     var msgSysName = "Level complete message";
-    var msgSys = new GUISystem(new WndRect(ViewMngr.wndWidth/2 - 200, ViewMngr.wndHeight/2 - 300, 400, 600), msgSysName );
+    var msgSys = new GUISystem(new WndRect(ViewMngr.wndWidth/2 - 200, ViewMngr.wndHeight/2 - 130, 400, 260), msgSysName );
     var contW = msgSys.sysRect.w;
-    var labelH = 40
+    var contH = msgSys.sysRect.h;
     GUINetwork.AddSystem(msgSys, false);
 
     var style = new MsgBoxStyle();
@@ -25,6 +25,12 @@ function LevelCompleteMessage() {
     style.bold = true;
     msgSys.AddTextObject("header", new GUITextObject(new WndRect(20, 20, contW - 40, 50), "LEVEL CLEAR!", style));
 
+    style.fontSize = 20;
+    style.bold = false;
+    style.textAlignWidth = Alignment.right;
+    style.textAlignHeight = Alignment.bottom;
+    msgSys.AddTextObject("nextScene", new GUITextObject(msgSys.sysRect, "Next Scene: Enter", style));
+
     style.fontSize = 24;
     style.fontColour.SetValues(0.0, 0.0, 0.0);
     style.bgColour.SetValues(1.0, 1.0, 1.0);
@@ -33,22 +39,24 @@ function LevelCompleteMessage() {
     style.textAlignHeight = Alignment.centre;
     style.bgAlpha = 1.0;
     style.bold = false;
-    msgSys.AddTextObject("Cows saved", new GUITextObject(new WndRect(20, 90, contW - 40, 34), "Total Cows Saved: 00", style));
+    msgSys.AddTextObject("Cows total", new GUITextObject(new WndRect(20, 90, contW - 40, 35), "Cows Total: 00", style));
+    msgSys.AddTextObject("Cows saved", new GUITextObject(new WndRect(20, 130, contW - 40, 35), "Cows Saved: 00", style));
+    msgSys.AddTextObject("Cows lost", new GUITextObject(new WndRect(20, 170, contW - 40, 35), "Cows Lost: 00", style));
 
     this.UpdateInfo = function() {
-        msgSys.guiTextObjs["Cows saved"].UpdateMsg("Total Cows Saved: " + GameUtils.GetCowsSavedTotal());
+        msgSys.guiTextObjs["Cows total"].UpdateMsg("Cows Total: " + GameUtils.GetCowsEncountered());
+        msgSys.guiTextObjs["Cows saved"].UpdateMsg("Cows Saved: " + GameUtils.GetCowsSavedTotal());
+        msgSys.guiTextObjs["Cows lost"].UpdateMsg("Cows Lost: " + GameUtils.GetCowsAbductedTotal());
     };
     this.SetActive = function(beActive) {
         if(beActive) {
             if(!GUINetwork.CheckActive(msgSysName)) {
-                // Activate
                 GUINetwork.SetActive(msgSysName, beActive);
             }
             this.UpdateInfo();
         }
         else {
             if(GUINetwork.CheckActive(msgSysName)) {
-                // Deactivate
                 GUINetwork.SetActive(msgSysName, beActive);
             }
         }
