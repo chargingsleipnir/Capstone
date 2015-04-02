@@ -18,14 +18,18 @@ function BuildSceneTitle(scene, nextBtn) {
         style
     );
 
+    style.fontSize = 30;
+    style.bold = true;
+    var catchPhraseRect = new WndRect(title.rectGlobal.x - 45, title.rectLocal.y + title.rectLocal.h + 20, title.rectGlobal.w + 90, 60);
+    var catchPhraseMsg = new GUITextObject(catchPhraseRect, "Suck'm & Chuck'm!", style);
+
     style.fontAlpha = 0.0;
     style.bgAlpha = 0.0;
     style.bgColour = new Vector3(0.0, 0.0, 0.0);
     style.fontColour = new Vector3(1.0, 1.0, 1.0);
-    style.fontSize = 30;
     style.bold = false;
     var nextSceneMsg = new GUITextObject(
-        new WndRect(title.rectGlobal.x - 90, title.rectLocal.y + title.rectLocal.h + 20, title.rectGlobal.w + 180, 60),
+        new WndRect(catchPhraseRect.x - 45, catchPhraseRect.y + catchPhraseRect.h + 20, catchPhraseRect.w + 90, 60),
         "Press enter to start!",
         style
     );
@@ -40,6 +44,7 @@ function BuildSceneTitle(scene, nextBtn) {
 
     titleScreen.AddTextObject("background", background);
     titleScreen.AddTextObject("title", title);
+    titleScreen.AddTextObject("catchPhrase", catchPhraseMsg);
     titleScreen.AddTextObject("nextSceneMsg", nextSceneMsg);
 
     GUINetwork.AddSystem(titleScreen, false);
