@@ -98,12 +98,7 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud, nextBtn, lvlCompMs
     // Level Repeat functions ==========================================================================================
 
     function Start() {
-
-        //barn.obj.trfmBase.SetPosByAxes(-10.0, 0.0, 10.0);
-        //barn.obj.trfmBase.SetUpdatedRot(VEC3_UP, 225);
         barn.obj.collider.SetSphereCall(BarnCollCallback);
-        barn.obj.trfmBase.SetPosByAxes(0.0, 0.0, -20.0);
-        GameUtils.RaiseToGroundLevel(barn.obj);
         GameUtils.CowsSavedZero();
         GameUtils.SetLevelBounds(fence);
 
@@ -141,6 +136,12 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud, nextBtn, lvlCompMs
         lvlPhases = 0;
 
         hud.guiTextObjs["caughtBaleInfo"].SetActive(true);
+
+
+        /////////////// TEMP
+        //player.SetControlActive(true);
+        //SceneMngr.SetActive("Level 03");
+        /////////////// TEMP
     }
 
     function CommonUpdate() {
@@ -217,6 +218,7 @@ function BuildLvl02(scene, player, barn, cows, haybales, hud, nextBtn, lvlCompMs
 
     function End() {
         activeCows.splice(0, activeCows.length);
+        activeProbes.splice(0, activeProbes.length);
         player.ClearAmmo();
         GameUtils.CowsSavedZero();
         hud.guiTextObjs["rescueInfo"].UpdateMsg("0");

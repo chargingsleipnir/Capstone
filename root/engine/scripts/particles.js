@@ -363,7 +363,7 @@ ParticleFieldAutomated.prototype = {
 
 /************************** Field for Point and line Particles with controlled motion ***********************************/
 
-function ParticleFieldControled(ptclCount, effects) {
+function ParticleFieldControlled(ptclCount, effects) {
     this.ptclCount = ptclCount || 10;
 
     this.active = false;
@@ -410,7 +410,7 @@ function ParticleFieldControled(ptclCount, effects) {
 
     this.Callback = function() {};
 }
-ParticleFieldControled.prototype = {
+ParticleFieldControlled.prototype = {
     ApplyEvenLine: function(firstPtclPt, lastPtclPt) {
         // Ordering done by user
         // Set first vet into place

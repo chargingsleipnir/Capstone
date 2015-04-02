@@ -33,14 +33,24 @@ function BuildSceneEndBoth(sceneWin, sceneLose, nextBtn, GameResetCallback) {
     endScreen.AddTextObject("loseHeading", new GUITextObject(headingRect, "DAGNABBIT!", style));
     var rectGbl = endScreen.guiTextObjs["loseHeading"].rectGlobal;
 
+    style.fontSize = 24;
     style.fontAlpha = 0.0;
     style.bgAlpha = 0.0;
     style.bgColour.SetValues(0.0, 0.0, 0.0);
     style.fontColour.SetValues(1.0, 1.0, 1.0);
-    style.fontSize = 24;
     style.bold = false;
-    var resetMsgRect = new WndRect(rectGbl.x - 25, rectGbl.y + rectGbl.h + 20, rectGbl.w + 50, 50);
+    var resetMsgRect = new WndRect(rectGbl.x - 25, endScreen.sysRect.h - 70, rectGbl.w + 50, 50);
     endScreen.AddTextObject("resetGameMsg", new GUITextObject(resetMsgRect, "Press enter to play again", style));
+
+    style.fontAlpha = 1.0;
+    style.bgAlpha = 1.0;
+    style.bgColour.SetValues(1.0, 1.0, 1.0);
+    style.fontColour.SetValues(0.0, 0.0, 0.0);
+    style.bold = true;
+    resetMsgRect.y -= 70;
+    endScreen.AddTextObject("winFinalRemark", new GUITextObject(resetMsgRect, "You didn't lose too many cows", style));
+    endScreen.AddTextObject("loseFinalRemark", new GUITextObject(resetMsgRect, "You lost way too many cows!", style));
+
 
     GUINetwork.AddSystem(endScreen, false);
     for(var i in endScreen.guiTextObjs) {
@@ -52,17 +62,20 @@ function BuildSceneEndBoth(sceneWin, sceneLose, nextBtn, GameResetCallback) {
         endScreen.guiTextObjs["resetGameMsg"].boxHdl.SetTintAlpha(0.0);
         endScreen.guiTextObjs["resetGameMsg"].strHdl.SetTintAlpha(0.0);
         fadingIn = true;
+        endCountUpdated = false;
         GUINetwork.SetActive(endScreen.name, true);
     }
     function StartWin() {
         endScreen.guiTextObjs["winBackground"].SetActive(true);
         endScreen.guiTextObjs["winHeading"].SetActive(true);
+        endScreen.guiTextObjs["winFinalRemark"].SetActive(true);
         endScreen.guiTextObjs["resetGameMsg"].SetActive(true);
         SharedStart();
     }
     function StartLose() {
         endScreen.guiTextObjs["loseBackground"].SetActive(true);
         endScreen.guiTextObjs["loseHeading"].SetActive(true);
+        endScreen.guiTextObjs["loseFinalRemark"].SetActive(true);
         endScreen.guiTextObjs["resetGameMsg"].SetActive(true);
         SharedStart();
     }

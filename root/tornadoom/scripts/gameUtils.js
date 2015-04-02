@@ -80,6 +80,9 @@ var GameUtils = (function() {
             cowsSavedTotal =
             cowsAbductedByLevel =
             cowsAbductedTotal = 0;
+        },
+        CheckWin: function() {
+            return cowsSavedTotal >= Math.ceil(cowsEncountered / 2);
         }
     };
 })();

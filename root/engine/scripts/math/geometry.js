@@ -519,6 +519,21 @@ WndRect.prototype = {
         this.h = h;
         return this;
     },
+    AddValues: function(x, y, w, h) {
+        /// <signature>
+        ///  <summary>Add to existing x, y, positions and w, h, dimensions</summary>
+        ///  <param name="x" type="decimal"></param>
+        ///  <param name="y" type="decimal"></param>
+        ///  <param name="w" type="decimal"></param>
+        ///  <param name="h" type="decimal"></param>
+        ///  <returns type="WndRect" />
+        /// </signature>
+        this.x += x;
+        this.y += y;
+        this.w += w;
+        this.h += h;
+        return this;
+    },
     Scale: function(scaleW, scaleH) {
         /// <signature>
         ///  <summary>Modify width and height values</summary>

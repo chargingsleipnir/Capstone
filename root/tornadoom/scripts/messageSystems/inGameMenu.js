@@ -135,12 +135,12 @@ function InGameMenu(gameMouse, player, ResetCallback) {
         // CONTROL SHIFTED TO SEPARATE CAMERA
         camToggle = !camToggle;
         if(camToggle) {
-            player.ctrl.SetActive(true);
+            player.SetControlActive(true);
             ViewMngr.SetActiveCamera(player.obj.camera);
             devPageDiodes['freeCam'].UseTexture(0);
         }
         else {
-            player.ctrl.SetActive(false);
+            player.SetControlActive(false);
             ViewMngr.SetActiveCamera();
             devPageDiodes['freeCam'].UseTexture(1);
         }

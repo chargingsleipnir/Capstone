@@ -40,6 +40,7 @@ var GameMngr = {
     BeginLoop: function() {
         var time_LastFrame;
         var that = this;
+
         function LoopGame() {
             requestAnimationFrame(LoopGame);
             var time_ThisFrame = new Date().getTime();
@@ -47,6 +48,10 @@ var GameMngr = {
             time_LastFrame = time_ThisFrame;
             Time.deltaMilli = time_Delta / 1000;
             Time.fps = 1000 / time_Delta;
+
+            // The time increment goes crazy when the window is out of focus.
+            if(Time.deltaMilli > 0.018)
+                Time.deltaMilli = 0.018;
 
             if(!that.paused) {
                 Time.counter += Time.deltaMilli;
@@ -60,5 +65,6 @@ var GameMngr = {
             GL.RenderGUI();
         }
         LoopGame();
+        //window.setInterval(function() {LoopGame()}, 16);
     }
 };

@@ -130,7 +130,7 @@ function Player() {
     effects.size = 30.0;
     effects.texture = GameMngr.assets.textures['crosshair'];
     effects.alphaStart = 1.0;
-    var aimDirVisual = new ParticleFieldControled(10, effects);
+    var aimDirVisual = new ParticleFieldControlled(10, effects);
     this.obj.ptclSys.AddCtrlField(aimDirVisual);
 
 
@@ -141,8 +141,8 @@ function Player() {
     this.obj.camera.trfmAxes.RotateLocalViewX(-15);
     ViewMngr.SetActiveCamera(this.obj.camera);
 
-    this.ctrl = new TopDownController(this.obj, "Top-down player controls");
-    this.ctrl.SetActive(true);
+    var ctrl = new TopDownController(this.obj, "Top-down player controls");
+    ctrl.SetActive(true);
     var controlActive = true;
 
     var playerCtrlName = "PlayerCtrl";
@@ -269,7 +269,7 @@ function Player() {
     };
     this.SetControlActive = function(isActive) {
         controlActive = isActive;
-        this.ctrl.SetActive(isActive);
+        ctrl.SetActive(isActive);
         Input.SetActive(playerMouseCtrlName, isActive);
     };
     this.Twister = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
@@ -284,7 +284,7 @@ function Player() {
         this.obj.trfmBase.SetDefault();
         GameUtils.RaiseToGroundLevel(this.obj);
         this.obj.rigidBody.Reset();
-        this.ctrl.Reset();
+        ctrl.Reset();
     };
     this.ResetAll = function() {
         ammoCont = [];
@@ -302,7 +302,7 @@ function Player() {
         this.obj.trfmBase.SetPosY(this.height * 0.5);
 
         if(controlActive) {
-            this.ctrl.Update();
+            ctrl.Update();
 
             // Shooting mechanics
             if (btnShoot.pressed) {

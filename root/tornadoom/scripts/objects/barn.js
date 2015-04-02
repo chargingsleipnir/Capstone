@@ -4,8 +4,6 @@
 
 function Barn() {
 
-    var that = this;
-
     this.obj = new GameObject('barn', Labels.none);
     this.obj.SetModel(GameMngr.assets.models['barn']);
     this.obj.mdlHdlr.SetTexture(GameMngr.assets.textures['barnTex'], TextureFilters.linear);
