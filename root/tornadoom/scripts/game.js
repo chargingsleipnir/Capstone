@@ -39,7 +39,7 @@ function BuildGame() {
     /********************************** Global Objects **********************************/
 
     // Player ------------------------------------------------------------------
-    var player = new Player(gameMouse);
+    var player = new Player();
     GameUtils.RaiseToGroundLevel(player.obj);
     function PlayerCollCallback(collider) {
         if (collider.gameObj.label == Labels.ammo) {
@@ -122,9 +122,11 @@ function BuildGame() {
         hud.guiProgObjs["countdownBar"].UpdateValue(0.0);
 
         for (var i in hud.guiTextObjs)
-            hud.guiTextObjs[i].SetActive(false);
+            if(hud.guiTextObjs[i].active)
+                hud.guiTextObjs[i].SetActive(false);
         for (var i in hud.guiProgObjs)
-            hud.guiProgObjs[i].SetActive(false);
+            if(hud.guiProgObjs[i].active)
+                hud.guiProgObjs[i].SetActive(false);
 
         lvlCompMsg.SetActive(false);
         InGameMsgr.SetActive(false);
@@ -154,7 +156,7 @@ function BuildGame() {
     SceneMngr.AddScene(lvl01, false);
 
     // Teach player how to shoot a hay bale vertically
-    // Once they launch one, knock out the force field generator with 3 shots to access the barn!
+    // Once they launch one cow, knock out the force field generator with 3 shots to access the barn!
     var lvl02 = new Scene("Level 02", SceneTypes.gameplay);
     lvl02.Add(player.obj);
     lvl02.Add(barn.obj);

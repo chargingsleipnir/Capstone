@@ -56,6 +56,7 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
         "Use W, S, A, D to move around the field",
         "Use the left and right arrow keys to rotate yourself around.",
         "Alright, you got one! Be a pal, and bring it into the barn for me?",
+        "Objects you've captured are shown in the bottom-left corner.",
         "Press SHIFT to shoot directly ahead!",
         "Thanks so much! It looks like a few more got out, can you grab'em up?",
         "...Somethin' ain't sittin' right with me. Grab as many as you can, quick!"
@@ -69,7 +70,6 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
     // Level Repeat functions ==========================================================================================
 
     function Start() {
-        barn.obj.trfmBase.SetPosByAxes(0.0, 0.0, 20.0);
         barn.obj.trfmBase.SetUpdatedRot(VEC3_UP, 115);
         barn.obj.collider.SetSphereCall(BarnCollCallback);
         GameUtils.RaiseToGroundLevel(barn.obj);
@@ -94,12 +94,19 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
         InGameMsgr.SetActive(true);
         InGameMsgr.ChangeMsgSequence("level01");
         scene.SetLoopCallback(MsgUpdate);
-        player.ctrl.SetActive(false);
+        player.SetControlActive(false);
         msgLimit = 5;
         lvlPhases = 0;
         counter = MAX_TIME;
 
         hud.guiProgObjs["countdownBar"].UpdateValue(0.5);
+
+        /////////////// TEMP
+        hud.guiTextObjs["caughtCowInfo"].SetActive(true);
+        hud.guiTextObjs["rescueInfo"].SetActive(true);
+        player.SetControlActive(true);
+        SceneMngr.SetActive("Level 02");
+        /////////////// TEMP
     }
 
     function CommonUpdate() {
@@ -113,7 +120,6 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
     }
     function MsgUpdate() {
         CommonUpdate();
-
         if(InGameMsgr.FadeMsgsWithinLimit(msgLimit)) {
             if (nextBtn.pressed) {
                 InGameMsgr.NextMsg();
@@ -122,7 +128,7 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
         }
         else {
             scene.SetLoopCallback(GameplayUpdate);
-            player.ctrl.SetActive(true);
+            player.SetControlActive(true);
         }
     }
     function GameplayUpdate() {
@@ -133,20 +139,20 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
                 if(player.GetAmmoCount(GameUtils.ammoTypes.cow) == 1) {
                     hud.guiTextObjs["caughtCowInfo"].SetActive(true);
                     hud.guiTextObjs["caughtCowInfo"].UpdateMsg("" + player.GetAmmoCount(GameUtils.ammoTypes.cow));
-                    msgLimit = 7;
+                    msgLimit = 8;
                     lvlPhases++;
                     scene.SetLoopCallback(MsgUpdate);
-                    player.ctrl.SetActive(false);
+                    player.SetControlActive(false);
                 }
                 break;
             case 1:
                 if (GameUtils.GetCowsSaved() == 2) {
                     hud.guiTextObjs["rescueInfo"].SetActive(true);
                     hud.guiTextObjs["rescueInfo"].UpdateMsg("" + GameUtils.GetCowsSaved());
-                    msgLimit = 9;
+                    msgLimit = 10;
                     lvlPhases++;
                     scene.SetLoopCallback(MsgUpdate);
-                    player.ctrl.SetActive(false);
+                    player.SetControlActive(false);
                     for(var i = 0; i < cows.length; i++ ) {
                         cows[i].SetVisible(true);
                         cows[i].obj.trfmBase.SetPosByAxes(phase2CowPos[i][0], phase2CowPos[i][1], phase2CowPos[i][2]);
@@ -162,6 +168,7 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
                 counter -= Time.deltaMilli;
                 if(activeCows.length <= 0) {
                     lvlCompMsg.SetActive(true);
+                    player.SetControlActive(false);
                     lvlPhases++;
                 }
                 else if(counter <= 0.0) {
@@ -170,6 +177,7 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
                     if(activeCows.length <= Math.floor(cows.length)) {
                         GameUtils.CowsAbductedAdd(activeCows.length);
                         lvlCompMsg.SetActive(true);
+                        player.SetControlActive(false);
                         lvlPhases++;
                     }
                     else
@@ -179,6 +187,7 @@ function BuildLvl01(scene, player, barn, cows, hud, nextBtn, lvlCompMsg) {
             case 3:
                 if (nextBtn.pressed) {
                     lvlCompMsg.SetActive(false);
+                    player.SetControlActive(true);
                     SceneMngr.SetActive("Level 02");
                     nextBtn.Release();
                 }

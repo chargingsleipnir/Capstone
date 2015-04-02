@@ -7,7 +7,7 @@ function UFO() {
     var that = this;
 
     var hoverHeight = 8.0;
-    var defaultPos = new Vector3(-20.0, hoverHeight, -50.0);
+    var defaultPos = new Vector3(-20.0, hoverHeight, -100.0);
     var TractoringCallback = function(){};
 
     this.obj = new GameObject('ufo', Labels.none);

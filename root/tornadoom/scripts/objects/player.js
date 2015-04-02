@@ -2,7 +2,7 @@
  * Created by Devin on 2015-01-16.
  */
 
-function Player(mouse) {
+function Player() {
 
     // Player characteristics -------------------------------------------------
 
@@ -44,8 +44,8 @@ function Player(mouse) {
 
     // Basic player obj visual -------------------------------------------------
 
-    this.obj = new GameObject('Player01', Labels.player);
-    var modelObj = new GameObject("Player01 model", Labels.none);
+    this.obj = new GameObject('Player', Labels.player);
+    var modelObj = new GameObject("Player model", Labels.none);
     modelObj.SetModel(GameMngr.assets.models['playerTornado']);
     modelObj.mdlHdlr.SetTexture(GameMngr.assets.textures['funnelTex'], TextureFilters.linear);
 
@@ -143,6 +143,7 @@ function Player(mouse) {
 
     this.ctrl = new TopDownController(this.obj, "Top-down player controls");
     this.ctrl.SetActive(true);
+    var controlActive = true;
 
     var playerCtrlName = "PlayerCtrl";
     Input.RegisterControlScheme(playerCtrlName, true, InputTypes.keyboard);
@@ -151,19 +152,25 @@ function Player(mouse) {
     var btnAmmoScrollLeft = Input.CreateInputController(playerCtrlName, KeyMap.BracketOpen);
     var btnAmmoScrollRight = Input.CreateInputController(playerCtrlName, KeyMap.BracketClose);
 
+    // Mouse controls
+    var playerMouseCtrlName = "PlayerMouse";
+    Input.RegisterControlScheme(playerMouseCtrlName, true, InputTypes.mouse);
+    var playerMouse = Input.CreateInputController(playerMouseCtrlName);
+    playerMouse.SetCursor(CursorTypes.none);
+
     // Allow player to hold space bar to go into a view where they use the mouse to aim within a given window
     // around the direction they are facing.
     var aimToggle = Input.CreateInputController(playerCtrlName, KeyMap.SpaceBar);
     function AimTogglePressed() {
         that.obj.camera.trfmAxes.SetPosAxes(1.0, -0.25, 2.25);
         that.obj.camera.trfmAxes.RotateLocalViewX(25);
-        mouse.SetLeftBtnCalls(null, ChargeShotReleased);
+        playerMouse.SetLeftBtnCalls(null, ChargeShotReleased);
         aimDirVisual.Run();
     }
     function AimToggleReleased() {
         that.obj.camera.trfmAxes.SetPosAxes(0.0, 4.0, 8.0);
         that.obj.camera.trfmAxes.RotateLocalViewX(-25);
-        mouse.SetLeftBtnCalls(null, function(){});
+        playerMouse.SetLeftBtnCalls(null, function(){});
         aimDirVisual.Stop();
         DropLaunchPower();
     }
@@ -235,7 +242,10 @@ function Player(mouse) {
         PowerChangeCallback = Callback;
     };
     this.GetAimToggleHeld = function() {
-        return aimToggle.pressed;
+        if(controlActive)
+            return aimToggle.pressed;
+
+        return false;
     };
     this.Capture = function(index, gameObj) {
         // Small particle visual
@@ -256,6 +266,11 @@ function Player(mouse) {
     this.ClearAmmo = function() {
         for(var i = 0; i < ammoCont.length; i++)
             ammoCont[i].splice(0, ammoCont[i].length);
+    };
+    this.SetControlActive = function(isActive) {
+        controlActive = isActive;
+        this.ctrl.SetActive(isActive);
+        Input.SetActive(playerMouseCtrlName, isActive);
     };
     this.Twister = function(rigidBody, objToEyeVec, objToEyeDistSqr) {
         // Have objs keep relative velocity with tornado.
@@ -283,50 +298,51 @@ function Player(mouse) {
         if(angle > 360.0)
             angle = 0.0;
 
-        this.ctrl.Update();
-
         modelObj.trfmBase.SetUpdatedRot(VEC3_UP, angle * 7.5);
         this.obj.trfmBase.SetPosY(this.height * 0.5);
 
-        // Shooting mechanics
-        if(btnShoot.pressed) {
-            Shoot(this.obj.trfmBase.GetFwd());
-            btnShoot.Release();
-        }
-        // Trade-off here, more difficult control, but power can be built
+        if(controlActive) {
+            this.ctrl.Update();
 
-        if(aimToggle.pressed) {
-            mouseAimX = mouse.pos.x - ViewMngr.wndWidth/2.0;
-            mouseAimY = (mouse.pos.y - ViewMngr.wndHeight/2.0) * -1;
+            // Shooting mechanics
+            if (btnShoot.pressed) {
+                Shoot(this.obj.trfmBase.GetFwd());
+                btnShoot.Release();
+            }
+            // Trade-off here, more difficult control, but power can be built
+            if (aimToggle.pressed) {
+                mouseAimX = playerMouse.pos.x - ViewMngr.wndWidth / 2.0;
+                mouseAimY = (playerMouse.pos.y - ViewMngr.wndHeight / 2.0) * -1;
 
-            aimDir.SetValues(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
-            aimDir.SetNormalized();
-            // Send these positions, as obj's model matrix is used to achieve pos and rot
-            aimDirVisual.ApplyEvenLine(aimDir.GetScaleByNum(crosshairLength), VEC3_ZERO);
-            // Finish aim adjustment for local force application
-            aimDir = that.obj.trfmGlobal.rot.GetMultiplyVec3(aimDir);
+                aimDir.SetValues(mouseAimX * mouseAimScalar, mouseAimY * mouseAimScalar, mouseAimZ);
+                aimDir.SetNormalized();
+                // Send these positions, as obj's model matrix is used to achieve pos and rot
+                aimDirVisual.ApplyEvenLine(aimDir.GetScaleByNum(crosshairLength), VEC3_ZERO);
+                // Finish aim adjustment for local force application
+                aimDir = that.obj.trfmGlobal.rot.GetMultiplyVec3(aimDir);
 
-            if(mouse.leftPressed)
-                RaiseLaunchPower();
+                if (playerMouse.leftPressed)
+                    RaiseLaunchPower();
+            }
+            // Change ammo type
+            if (btnAmmoScrollLeft.pressed) {
+                ammoIdx = (ammoIdx > 0) ? ammoIdx - 1 : ammoTypeCount - 1;
+                AmmoSelectionCallback(ammoIdx);
+                btnAmmoScrollLeft.Release();
+            }
+            if (btnAmmoScrollRight.pressed) {
+                ammoIdx = (ammoIdx + 1) % ammoTypeCount;
+                AmmoSelectionCallback(ammoIdx);
+                btnAmmoScrollRight.Release();
+            }
         }
 
         // Keep all ammo positioned on player
-        for(var i = 0; i < ammoCont.length; i++) {
-            for(var j = 0; j < ammoCont[i].length; j++) {
+        for (var i = 0; i < ammoCont.length; i++) {
+            for (var j = 0; j < ammoCont[i].length; j++) {
                 ammoCont[i][j].trfmBase.SetPosByAxes(playerPos.x, playerPos.y, playerPos.z);
             }
         }
 
-        // Change ammo type
-        if(btnAmmoScrollLeft.pressed) {
-            ammoIdx = (ammoIdx > 0) ? ammoIdx - 1 : ammoTypeCount - 1;
-            AmmoSelectionCallback(ammoIdx);
-            btnAmmoScrollLeft.Release();
-        }
-        if(btnAmmoScrollRight.pressed) {
-            ammoIdx = (ammoIdx + 1) % ammoTypeCount;
-            AmmoSelectionCallback(ammoIdx);
-            btnAmmoScrollRight.Release();
-        }
     }
 }
