@@ -4,11 +4,10 @@ TODO
 2. Toggle controls for per-fragment lighting, shadow casting, etc.
 3. Shadow casting
 4. Get some tasks on alternate threads - Look up Web Workers (one page bookmarked in JS reference folder)
-5. Get this thing online, and test all browsers
+5. Test all browsers
 6. Fix ParticleForceGenerator Buoancy to take actual submerged volume into account.
 7. 3D local rotations
 8. Spatial partitioning.
-9. MAke level template to inherit from
 
 BUGS
 
