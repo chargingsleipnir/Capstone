@@ -13,4 +13,4 @@ BUGS
 
 1. Multiple light sources of the same type - Build this in. This might be finite, as individual lights may require hard-coding.
 2. Objects with many textures - Test how to ensure the right textures end up in the right place.
-3. Particle re-ordering no longer seems to be working. It once was... what the hell happened?
+3. Particle re-ordering no longer seems to be working. Doesn't work on object camera because it doesn't consider the model matrix.
